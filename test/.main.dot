@@ -1,0 +1,21 @@
+digraph "CFG for 'main' function" {
+	label="CFG for 'main' function";
+
+	Node0xa85bf0 [shape=record,label="{%0:\l  %1 = alloca i32, align 4\l  %2 = alloca i32, align 4\l  %3 = alloca i32, align 4\l  store i32 0, i32* %1, align 4\l  store i32 0, i32* %2, align 4\l  store i32 0, i32* %3, align 4\l  br label %4\l}"];
+	Node0xa85bf0 -> Node0xa865e0;
+	Node0xa865e0 [shape=record,label="{%4:\l4:                                                \l  %5 = load i32, i32* %3, align 4\l  %6 = icmp slt i32 %5, 100\l  br i1 %6, label %7, label %23\l|{<s0>T|<s1>F}}"];
+	Node0xa865e0:s0 -> Node0xa867b0;
+	Node0xa865e0:s1 -> Node0xa86800;
+	Node0xa867b0 [shape=record,label="{%7:\l7:                                                \l  %8 = load i32, i32* %3, align 4\l  %9 = srem i32 %8, 2\l  %10 = icmp eq i32 %9, 0\l  br i1 %10, label %11, label %15\l|{<s0>T|<s1>F}}"];
+	Node0xa867b0:s0 -> Node0xa86690;
+	Node0xa867b0:s1 -> Node0xa86a00;
+	Node0xa86690 [shape=record,label="{%11:\l11:                                               \l  %12 = load i32, i32* %3, align 4\l  %13 = load i32, i32* %2, align 4\l  %14 = add nsw i32 %13, %12\l  store i32 %14, i32* %2, align 4\l  br label %19\l}"];
+	Node0xa86690 -> Node0xa86c40;
+	Node0xa86a00 [shape=record,label="{%15:\l15:                                               \l  %16 = load i32, i32* %3, align 4\l  %17 = load i32, i32* %2, align 4\l  %18 = sub nsw i32 %17, %16\l  store i32 %18, i32* %2, align 4\l  br label %19\l}"];
+	Node0xa86a00 -> Node0xa86c40;
+	Node0xa86c40 [shape=record,label="{%19:\l19:                                               \l  br label %20\l}"];
+	Node0xa86c40 -> Node0xa86f00;
+	Node0xa86f00 [shape=record,label="{%20:\l20:                                               \l  %21 = load i32, i32* %3, align 4\l  %22 = add nsw i32 %21, 1\l  store i32 %22, i32* %3, align 4\l  br label %4\l}"];
+	Node0xa86f00 -> Node0xa865e0;
+	Node0xa86800 [shape=record,label="{%23:\l23:                                               \l  %24 = load i32, i32* %1, align 4\l  ret i32 %24\l}"];
+}

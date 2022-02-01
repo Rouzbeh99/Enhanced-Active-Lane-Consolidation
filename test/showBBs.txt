@@ -1,0 +1,2 @@
+opt --disable-output -dot-cfg --cfg-dot-filename-prefix=cfg sample.ll
+dot -Tpdf cfg.dot -o cfg.pdf

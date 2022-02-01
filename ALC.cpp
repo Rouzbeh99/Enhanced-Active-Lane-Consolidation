@@ -1,52 +1,57 @@
 #include "llvm/IR/Function.h"
-#include "llvm/IR/Module.h"
-#include "llvm/Pass.h"
 #include "llvm/Support/raw_ostream.h"
+#include "llvm/Analysis/LoopPass.h"
 #include "llvm/Analysis/LoopInfo.h"
 #include <map>
 using namespace llvm;
 
-using namespace llvm;
 
-//#define DEBUG_TYPE "myfunctionpass"
-#define DEBUG_TYPE "opcodeCounter"
+#define DEBUG_TYPE "findDivergenceInLoop"
 
 
 namespace {
-    struct CountOpcode : public FunctionPass {
-        std::map<std::string, int> opcodeCounter;
+    struct FindDivergenceInLoop : public LoopPass {
+
         static char ID;
 
-        CountOpcode() : FunctionPass(ID) {}
+        FindDivergenceInLoop() : LoopPass(ID) {}
 
         //counting number of opcodes used in a function
-        virtual bool runOnFunction(Function &F) {
-            llvm::outs() << "Function " << F.getName() << '\n';
-            for (Function::iterator bb = F.begin(), e = F.end(); bb != e; ++bb) { // iterates over BBs of the function
-                for (BasicBlock::iterator i = bb->begin(), e = bb->end(); i != e; ++i) { // iterates over lines inside a BB
+        virtual bool runOnLoop(Loop *L, LPPassManager &LPM) override{
 
-                    if (opcodeCounter.find(i->getOpcodeName()) == opcodeCounter.end()) { // opcode didn't exit and now is added to the end of the map
-                        opcodeCounter[i->getOpcodeName()] = 1;
+            llvm::outs() << "Loop " << L->getName() << '\n';
+            const ArrayRef<BasicBlock *> &allBlocks = L->getBlocks();
+            llvm::outs() << "Number of basic allBlocks: " << allBlocks.size() << '\n';
 
-                    } else {
-                        opcodeCounter[i->getOpcodeName()] += 1;
+            BasicBlock *const &firstNode = L->getHeader();
+            BasicBlock *const &loopLatch = L->getLoopLatch();  //supposing to have only one exiting node
+            
+            int numberOfPaths = 0;
+            std::map<BasicBlock *const , bool> visited;
+
+            countNumberOfPaths(firstNode, loopLatch , numberOfPaths, visited);
+            llvm::outs() << "Number of paths: " <<numberOfPaths << '\n';
+
+            return false;
+        }
+
+        void countNumberOfPaths(BasicBlock *const &src, BasicBlock *const &dest, int& path_count, std::map<BasicBlock *const , bool>& visited){
+            visited[src] = true;
+            llvm::outs()<<src<< " "<<dest<<'\n';
+            if (src == dest) {
+                path_count++;
+            }else {
+                for (BasicBlock *succ : successors(src)) {
+                    if(!visited[succ]){
+                        countNumberOfPaths(succ, dest, path_count, visited);
                     }
                 }
             }
-
-            std::map<std::string, int>::iterator i = opcodeCounter.begin();
-            std::map<std::string, int>::iterator e = opcodeCounter.end();
-            while (i != e) {
-                llvm::outs() << i->first << ": " << i->second << "\n";
-                i++;
-            }
-            llvm::outs() << "\n";
-            opcodeCounter.clear();
-            return false;
+            visited[src] = false;
         }
     };
 }
 
-char CountOpcode::ID = 0;
-static RegisterPass<CountOpcode> X("opcodeCounter", "Count number of opcode in a functions");
+char FindDivergenceInLoop::ID = 0;
+static RegisterPass<FindDivergenceInLoop> X("findDivergenceInLoop", "Count number of opcode in a functions");
 

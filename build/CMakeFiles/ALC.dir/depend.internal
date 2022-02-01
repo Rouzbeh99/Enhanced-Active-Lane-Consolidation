@@ -40,6 +40,7 @@ CMakeFiles/ALC.dir/ALC.cpp.o
  /usr/lib/llvm-10/include/llvm/ADT/iterator_range.h
  /usr/lib/llvm-10/include/llvm/ADT/simple_ilist.h
  /usr/lib/llvm-10/include/llvm/Analysis/LoopInfo.h
+ /usr/lib/llvm-10/include/llvm/Analysis/LoopPass.h
  /usr/lib/llvm-10/include/llvm/Config/abi-breaking.h
  /usr/lib/llvm-10/include/llvm/Config/llvm-config.h
  /usr/lib/llvm-10/include/llvm/IR/Argument.h
@@ -68,6 +69,7 @@ CMakeFiles/ALC.dir/ALC.cpp.o
  /usr/lib/llvm-10/include/llvm/IR/Instruction.h
  /usr/lib/llvm-10/include/llvm/IR/Instructions.h
  /usr/lib/llvm-10/include/llvm/IR/LLVMContext.h
+ /usr/lib/llvm-10/include/llvm/IR/LegacyPassManagers.h
  /usr/lib/llvm-10/include/llvm/IR/Metadata.def
  /usr/lib/llvm-10/include/llvm/IR/Metadata.h
  /usr/lib/llvm-10/include/llvm/IR/Module.h
@@ -106,6 +108,7 @@ CMakeFiles/ALC.dir/ALC.cpp.o
  /usr/lib/llvm-10/include/llvm/Support/MathExtras.h
  /usr/lib/llvm-10/include/llvm/Support/MemAlloc.h
  /usr/lib/llvm-10/include/llvm/Support/PointerLikeTypeTraits.h
+ /usr/lib/llvm-10/include/llvm/Support/PrettyStackTrace.h
  /usr/lib/llvm-10/include/llvm/Support/RWMutex.h
  /usr/lib/llvm-10/include/llvm/Support/ReverseIteration.h
  /usr/lib/llvm-10/include/llvm/Support/SwapByteOrder.h

@@ -9,12 +9,10 @@
 /home/rouzbeh/Graduate/Research/LLVM/ALC/ALC.cpp
 llvm/IR/Function.h
 /home/rouzbeh/Graduate/Research/LLVM/ALC/llvm/IR/Function.h
-llvm/IR/Module.h
-/home/rouzbeh/Graduate/Research/LLVM/ALC/llvm/IR/Module.h
-llvm/Pass.h
-/home/rouzbeh/Graduate/Research/LLVM/ALC/llvm/Pass.h
 llvm/Support/raw_ostream.h
 /home/rouzbeh/Graduate/Research/LLVM/ALC/llvm/Support/raw_ostream.h
+llvm/Analysis/LoopPass.h
+/home/rouzbeh/Graduate/Research/LLVM/ALC/llvm/Analysis/LoopPass.h
 llvm/Analysis/LoopInfo.h
 /home/rouzbeh/Graduate/Research/LLVM/ALC/llvm/Analysis/LoopInfo.h
 map
@@ -602,6 +600,16 @@ algorithm
 utility
 -
 
+/usr/lib/llvm-10/include/llvm/Analysis/LoopPass.h
+llvm/Analysis/LoopInfo.h
+/usr/lib/llvm-10/include/llvm/Analysis/llvm/Analysis/LoopInfo.h
+llvm/IR/LegacyPassManagers.h
+/usr/lib/llvm-10/include/llvm/Analysis/llvm/IR/LegacyPassManagers.h
+llvm/Pass.h
+/usr/lib/llvm-10/include/llvm/Analysis/llvm/Pass.h
+deque
+-
+
 /usr/lib/llvm-10/include/llvm/Config/abi-breaking.h
 
 /usr/lib/llvm-10/include/llvm/Config/llvm-config.h
@@ -1150,6 +1158,22 @@ string
 llvm/IR/FixedMetadataKinds.def
 /usr/lib/llvm-10/include/llvm/IR/llvm/IR/FixedMetadataKinds.def
 
+/usr/lib/llvm-10/include/llvm/IR/LegacyPassManagers.h
+llvm/ADT/DenseMap.h
+/usr/lib/llvm-10/include/llvm/IR/llvm/ADT/DenseMap.h
+llvm/ADT/FoldingSet.h
+/usr/lib/llvm-10/include/llvm/IR/llvm/ADT/FoldingSet.h
+llvm/ADT/SmallPtrSet.h
+/usr/lib/llvm-10/include/llvm/IR/llvm/ADT/SmallPtrSet.h
+llvm/ADT/SmallVector.h
+/usr/lib/llvm-10/include/llvm/IR/llvm/ADT/SmallVector.h
+llvm/Pass.h
+/usr/lib/llvm-10/include/llvm/IR/llvm/Pass.h
+vector
+-
+llvm/Support/PrettyStackTrace.h
+/usr/lib/llvm-10/include/llvm/IR/llvm/Support/PrettyStackTrace.h
+
 /usr/lib/llvm-10/include/llvm/IR/Metadata.def
 
 /usr/lib/llvm-10/include/llvm/IR/Metadata.h
@@ -1685,6 +1709,12 @@ assert.h
 -
 type_traits
 -
+
+/usr/lib/llvm-10/include/llvm/Support/PrettyStackTrace.h
+llvm/ADT/SmallVector.h
+/usr/lib/llvm-10/include/llvm/Support/llvm/ADT/SmallVector.h
+llvm/Support/Compiler.h
+/usr/lib/llvm-10/include/llvm/Support/llvm/Support/Compiler.h
 
 /usr/lib/llvm-10/include/llvm/Support/RWMutex.h
 llvm/Config/llvm-config.h

@@ -4,63 +4,52 @@ target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 target triple = "x86_64-pc-linux-gnu"
 
 ; Function Attrs: noinline nounwind optnone uwtable
-define dso_local i32 @func(i32 %0, i32 %1) #0 {
+define dso_local i32 @main() #0 {
+  %1 = alloca i32, align 4
+  %2 = alloca i32, align 4
   %3 = alloca i32, align 4
-  %4 = alloca i32, align 4
-  %5 = alloca i32, align 4
-  %6 = alloca i32, align 4
-  %7 = alloca i32, align 4
-  store i32 %0, i32* %3, align 4
-  store i32 %1, i32* %4, align 4
-  store i32 0, i32* %5, align 4
-  store i32 0, i32* %6, align 4
-  br label %8
+  store i32 0, i32* %1, align 4
+  store i32 0, i32* %2, align 4
+  store i32 0, i32* %3, align 4
+  br label %4
 
-8:                                                ; preds = %29, %2
-  %9 = load i32, i32* %6, align 4
-  %10 = load i32, i32* %3, align 4
-  %11 = icmp slt i32 %9, %10
-  br i1 %11, label %12, label %32
+4:                                                ; preds = %20, %0
+  %5 = load i32, i32* %3, align 4
+  %6 = icmp slt i32 %5, 100
+  br i1 %6, label %7, label %23
 
-12:                                               ; preds = %8
-  store i32 0, i32* %7, align 4
-  br label %13
+7:                                                ; preds = %4
+  %8 = load i32, i32* %3, align 4
+  %9 = srem i32 %8, 2
+  %10 = icmp eq i32 %9, 0
+  br i1 %10, label %11, label %15
 
-13:                                               ; preds = %25, %12
-  %14 = load i32, i32* %7, align 4
-  %15 = load i32, i32* %4, align 4
-  %16 = icmp slt i32 %14, %15
-  br i1 %16, label %17, label %28
+11:                                               ; preds = %7
+  %12 = load i32, i32* %3, align 4
+  %13 = load i32, i32* %2, align 4
+  %14 = add nsw i32 %13, %12
+  store i32 %14, i32* %2, align 4
+  br label %19
 
-17:                                               ; preds = %13
-  %18 = load i32, i32* %6, align 4
-  %19 = load i32, i32* %7, align 4
-  %20 = icmp sgt i32 %18, %19
-  %21 = zext i1 %20 to i64
-  %22 = select i1 %20, i32 1, i32 0
-  %23 = load i32, i32* %5, align 4
-  %24 = add nsw i32 %23, %22
-  store i32 %24, i32* %5, align 4
-  br label %25
+15:                                               ; preds = %7
+  %16 = load i32, i32* %3, align 4
+  %17 = load i32, i32* %2, align 4
+  %18 = sub nsw i32 %17, %16
+  store i32 %18, i32* %2, align 4
+  br label %19
 
-25:                                               ; preds = %17
-  %26 = load i32, i32* %7, align 4
-  %27 = add nsw i32 %26, 1
-  store i32 %27, i32* %7, align 4
-  br label %13
+19:                                               ; preds = %15, %11
+  br label %20
 
-28:                                               ; preds = %13
-  br label %29
+20:                                               ; preds = %19
+  %21 = load i32, i32* %3, align 4
+  %22 = add nsw i32 %21, 1
+  store i32 %22, i32* %3, align 4
+  br label %4
 
-29:                                               ; preds = %28
-  %30 = load i32, i32* %6, align 4
-  %31 = add nsw i32 %30, 1
-  store i32 %31, i32* %6, align 4
-  br label %8
-
-32:                                               ; preds = %8
-  %33 = load i32, i32* %5, align 4
-  ret i32 %33
+23:                                               ; preds = %4
+  %24 = load i32, i32* %1, align 4
+  ret i32 %24
 }
 
 attributes #0 = { noinline nounwind optnone uwtable "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "frame-pointer"="all" "less-precise-fpmad"="false" "min-legal-vector-width"="0" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }

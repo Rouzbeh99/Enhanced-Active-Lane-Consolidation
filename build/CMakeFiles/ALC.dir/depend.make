@@ -39,6 +39,7 @@ CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/ADT/iterator.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/ADT/iterator_range.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/ADT/simple_ilist.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Analysis/LoopInfo.h
+CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Analysis/LoopPass.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Config/abi-breaking.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Config/llvm-config.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/IR/Argument.h
@@ -67,6 +68,7 @@ CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/IR/Instruction.def
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/IR/Instruction.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/IR/Instructions.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/IR/LLVMContext.h
+CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/IR/LegacyPassManagers.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/IR/Metadata.def
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/IR/Metadata.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/IR/Module.h
@@ -105,6 +107,7 @@ CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Support/MD5.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Support/MathExtras.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Support/MemAlloc.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Support/PointerLikeTypeTraits.h
+CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Support/PrettyStackTrace.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Support/RWMutex.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Support/ReverseIteration.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Support/SwapByteOrder.h

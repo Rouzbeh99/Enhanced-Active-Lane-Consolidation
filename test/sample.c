@@ -1,11 +1,11 @@
-int func(int a, int b){
+int main(){
     int sum = 0;
-    int iter;
-    for (iter = 0; iter < a; iter++) {
-        int iter1;
-        for (iter1 = 0; iter1 < b; iter1++) {
-            sum += iter > iter1 ? 1 : 0;
+    for (int i = 0; i < 100; ++i) {
+        if(i%2 == 0){
+            sum += i;
+        }else{
+            sum -= i;
         }
     }
-    return sum;
+    
 }
