@@ -1,0 +1,9 @@
+
+// show BBs
+opt --disable-output -dot-cfg --cfg-dot-filename-prefix=cfg sample.ll
+dot -Tpdf cfg.dot -o cfg.pdf
+
+// loop pre-processings
+clang -O3 -Xclang -disable-llvm-passes fun.c -S -emit-llvm
+opt -passes="mem2reg,function(loop(indvars),loop-simplify,loop(rotate))" fun.ll -S -o loops_norm.ll
+
