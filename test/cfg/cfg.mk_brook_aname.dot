@@ -1,0 +1,47 @@
+digraph "CFG for 'mk_brook_aname' function" {
+	label="CFG for 'mk_brook_aname' function";
+
+	Node0x1531400 [shape=record,label="{%3:\l  %4 = getelementptr inbounds i8, i8* %0, i64 0\l  store i8 32, i8* %4, align 1\l  %5 = call i64 @strlen(i8* %1) #7\l  %6 = icmp uge i64 %5, 4\l  br i1 %6, label %7, label %16\l|{<s0>T|<s1>F}}"];
+	Node0x1531400:s0 -> Node0x15316e0;
+	Node0x1531400:s1 -> Node0x1531730;
+	Node0x15316e0 [shape=record,label="{%7:\l7:                                                \l  %8 = getelementptr inbounds i8, i8* %1, i64 3\l  %9 = load i8, i8* %8, align 1\l  %10 = sext i8 %9 to i32\l  %11 = icmp ne i32 %10, 32\l  br i1 %11, label %12, label %16\l|{<s0>T|<s1>F}}"];
+	Node0x15316e0:s0 -> Node0x15314d0;
+	Node0x15316e0:s1 -> Node0x1531730;
+	Node0x15314d0 [shape=record,label="{%12:\l12:                                               \l  %13 = getelementptr inbounds i8, i8* %1, i64 3\l  %14 = load i8, i8* %13, align 1\l  %15 = getelementptr inbounds i8, i8* %0, i64 0\l  store i8 %14, i8* %15, align 1\l  br label %16\l}"];
+	Node0x15314d0 -> Node0x1531730;
+	Node0x1531730 [shape=record,label="{%16:\l16:                                               \l  %17 = getelementptr inbounds i8, i8* %1, i64 0\l  %18 = load i8, i8* %17, align 1\l  %19 = getelementptr inbounds i8, i8* %0, i64 1\l  store i8 %18, i8* %19, align 1\l  %20 = getelementptr inbounds i8, i8* %1, i64 1\l  %21 = load i8, i8* %20, align 1\l  %22 = getelementptr inbounds i8, i8* %0, i64 2\l  store i8 %21, i8* %22, align 1\l  %23 = getelementptr inbounds i8, i8* %1, i64 2\l  %24 = load i8, i8* %23, align 1\l  %25 = getelementptr inbounds i8, i8* %0, i64 3\l  store i8 %24, i8* %25, align 1\l  %26 = getelementptr inbounds i8, i8* %0, i64 3\l  %27 = load i8, i8* %26, align 1\l  %28 = sext i8 %27 to i32\l  %29 = icmp eq i32 %28, 39\l  br i1 %29, label %30, label %32\l|{<s0>T|<s1>F}}"];
+	Node0x1531730:s0 -> Node0x1534ee0;
+	Node0x1531730:s1 -> Node0x1534f30;
+	Node0x1534ee0 [shape=record,label="{%30:\l30:                                               \l  %31 = getelementptr inbounds i8, i8* %0, i64 3\l  store i8 42, i8* %31, align 1\l  br label %32\l}"];
+	Node0x1534ee0 -> Node0x1534f30;
+	Node0x1534f30 [shape=record,label="{%32:\l32:                                               \l  %33 = getelementptr inbounds i8, i8* %0, i64 4\l  store i8 0, i8* %33, align 1\l  %34 = call i32 @strncmp(i8* %0, i8* getelementptr inbounds ([3 x i8], [3 x\l... i8]* @.str.121, i64 0, i64 0), i64 2) #7\l  %35 = icmp ne i32 %34, 0\l  br i1 %35, label %68, label %36\l|{<s0>T|<s1>F}}"];
+	Node0x1534f30:s0 -> Node0x1535420;
+	Node0x1534f30:s1 -> Node0x1535470;
+	Node0x1535470 [shape=record,label="{%36:\l36:                                               \l  %37 = getelementptr inbounds i8, i8* %0, i64 3\l  %38 = load i8, i8* %37, align 1\l  %39 = sext i8 %38 to i32\l  %40 = icmp eq i32 %39, 49\l  br i1 %40, label %51, label %41\l|{<s0>T|<s1>F}}"];
+	Node0x1535470:s0 -> Node0x1535700;
+	Node0x1535470:s1 -> Node0x1535750;
+	Node0x1535750 [shape=record,label="{%41:\l41:                                               \l  %42 = getelementptr inbounds i8, i8* %0, i64 3\l  %43 = load i8, i8* %42, align 1\l  %44 = sext i8 %43 to i32\l  %45 = icmp eq i32 %44, 50\l  br i1 %45, label %51, label %46\l|{<s0>T|<s1>F}}"];
+	Node0x1535750:s0 -> Node0x1535700;
+	Node0x1535750:s1 -> Node0x15359e0;
+	Node0x15359e0 [shape=record,label="{%46:\l46:                                               \l  %47 = getelementptr inbounds i8, i8* %0, i64 3\l  %48 = load i8, i8* %47, align 1\l  %49 = sext i8 %48 to i32\l  %50 = icmp eq i32 %49, 51\l  br i1 %50, label %51, label %68\l|{<s0>T|<s1>F}}"];
+	Node0x15359e0:s0 -> Node0x1535700;
+	Node0x15359e0:s1 -> Node0x1535420;
+	Node0x1535700 [shape=record,label="{%51:\l51:                                               \l  %52 = call i32 @strncmp(i8* %0, i8* getelementptr inbounds ([4 x i8], [4 x\l... i8]* @.str.122, i64 0, i64 0), i64 3) #7\l  %53 = icmp ne i32 %52, 0\l  br i1 %53, label %54, label %63\l|{<s0>T|<s1>F}}"];
+	Node0x1535700:s0 -> Node0x1535f10;
+	Node0x1535700:s1 -> Node0x1535f60;
+	Node0x1535f10 [shape=record,label="{%54:\l54:                                               \l  %55 = icmp ne i8* %2, getelementptr inbounds ([4 x i8], [4 x i8]* @.str.123,\l... i64 0, i64 0)\l  br i1 %55, label %56, label %68\l|{<s0>T|<s1>F}}"];
+	Node0x1535f10:s0 -> Node0x1536130;
+	Node0x1535f10:s1 -> Node0x1535420;
+	Node0x1536130 [shape=record,label="{%56:\l56:                                               \l  %57 = icmp ne i8* %2, getelementptr inbounds ([4 x i8], [4 x i8]* @.str.124,\l... i64 0, i64 0)\l  br i1 %57, label %58, label %68\l|{<s0>T|<s1>F}}"];
+	Node0x1536130:s0 -> Node0x1536300;
+	Node0x1536130:s1 -> Node0x1535420;
+	Node0x1536300 [shape=record,label="{%58:\l58:                                               \l  %59 = icmp ne i8* %2, getelementptr inbounds ([4 x i8], [4 x i8]* @.str.125,\l... i64 0, i64 0)\l  br i1 %59, label %60, label %68\l|{<s0>T|<s1>F}}"];
+	Node0x1536300:s0 -> Node0x15364d0;
+	Node0x1536300:s1 -> Node0x1535420;
+	Node0x15364d0 [shape=record,label="{%60:\l60:                                               \l  %61 = call i32 @strncmp(i8* %2, i8* getelementptr inbounds ([3 x i8], [3 x\l... i8]* @.str.126, i64 0, i64 0), i64 2) #7\l  %62 = icmp ne i32 %61, 0\l  br i1 %62, label %63, label %68\l|{<s0>T|<s1>F}}"];
+	Node0x15364d0:s0 -> Node0x1535f60;
+	Node0x15364d0:s1 -> Node0x1535420;
+	Node0x1535f60 [shape=record,label="{%63:\l63:                                               \l  %64 = getelementptr inbounds i8, i8* %0, i64 3\l  %65 = load i8, i8* %64, align 1\l  %66 = getelementptr inbounds i8, i8* %0, i64 0\l  store i8 %65, i8* %66, align 1\l  %67 = getelementptr inbounds i8, i8* %0, i64 3\l  store i8 32, i8* %67, align 1\l  br label %68\l}"];
+	Node0x1535f60 -> Node0x1535420;
+	Node0x1535420 [shape=record,label="{%68:\l68:                                               \l  ret void\l}"];
+}

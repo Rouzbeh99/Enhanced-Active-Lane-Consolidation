@@ -25,7 +25,7 @@ namespace {
                 return false;
             }
 
-            llvm::outs() << "Loop " << L->getLoopID() << '\n';
+            llvm::outs() << "\nFunction:  " << L->getHeader()->getParent()->getName() << '\n';
             llvm::outs() << "depth " << L->getLoopDepth() << '\n';
             const ArrayRef<BasicBlock *> &allBlocks = L->getBlocks();
             llvm::outs() << "Number of basic allBlocks: " << allBlocks.size() << '\n';

@@ -7,3 +7,6 @@ dot -Tpdf cfg.dot -o cfg.pdf
 clang -O3 -Xclang -disable-llvm-passes fun.c -S -emit-llvm
 opt -passes="mem2reg,function(loop(indvars),loop-simplify,loop(rotate))" fun.ll -S -o loops_norm.ll
 
+
+//running the pass
+opt -load ../build/ALC.so -findDivergenceInLoop loop_norm.ll --disable-output

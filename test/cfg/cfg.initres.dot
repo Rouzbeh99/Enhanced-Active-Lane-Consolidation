@@ -1,0 +1,23 @@
+digraph "CFG for 'initres' function" {
+	label="CFG for 'initres' function";
+
+	Node0x150bf10 [shape=record,label="{%0:\l  call void @NAB_initres(%struct.residue_t* @res, i32 0)\l  %1 = load i8*, i8** getelementptr inbounds (%struct.residue_t,\l... %struct.residue_t* @res, i32 0, i32 4), align 8\l  %2 = icmp eq i8* %1, null\l  br i1 %2, label %3, label %11\l|{<s0>T|<s1>F}}"];
+	Node0x150bf10:s0 -> Node0x150c220;
+	Node0x150bf10:s1 -> Node0x150c270;
+	Node0x150c220 [shape=record,label="{%3:\l3:                                                \l  %4 = call noalias i8* @malloc(i64 8) #7\l  store i8* %4, i8** getelementptr inbounds (%struct.residue_t,\l... %struct.residue_t* @res, i32 0, i32 4), align 8\l  %5 = load i8*, i8** getelementptr inbounds (%struct.residue_t,\l... %struct.residue_t* @res, i32 0, i32 4), align 8\l  %6 = icmp eq i8* %5, null\l  br i1 %6, label %7, label %10\l|{<s0>T|<s1>F}}"];
+	Node0x150c220:s0 -> Node0x150c5c0;
+	Node0x150c220:s1 -> Node0x150c610;
+	Node0x150c5c0 [shape=record,label="{%7:\l7:                                                \l  %8 = load %struct._IO_FILE*, %struct._IO_FILE** @stderr, align 8\l  %9 = call i32 (%struct._IO_FILE*, i8*, ...) @fprintf(%struct._IO_FILE* %8,\l... i8* getelementptr inbounds ([41 x i8], [41 x i8]* @.str.51, i64 0, i64 0))\l  call void @exit(i32 1) #8\l  unreachable\l}"];
+	Node0x150c610 [shape=record,label="{%10:\l10:                                               \l  br label %11\l}"];
+	Node0x150c610 -> Node0x150c270;
+	Node0x150c270 [shape=record,label="{%11:\l11:                                               \l  %12 = load i8*, i8** getelementptr inbounds (%struct.residue_t,\l... %struct.residue_t* @res, i32 0, i32 5), align 8\l  %13 = icmp eq i8* %12, null\l  br i1 %13, label %14, label %22\l|{<s0>T|<s1>F}}"];
+	Node0x150c270:s0 -> Node0x150cb00;
+	Node0x150c270:s1 -> Node0x150cb50;
+	Node0x150cb00 [shape=record,label="{%14:\l14:                                               \l  %15 = call noalias i8* @malloc(i64 8) #7\l  store i8* %15, i8** getelementptr inbounds (%struct.residue_t,\l... %struct.residue_t* @res, i32 0, i32 5), align 8\l  %16 = load i8*, i8** getelementptr inbounds (%struct.residue_t,\l... %struct.residue_t* @res, i32 0, i32 5), align 8\l  %17 = icmp eq i8* %16, null\l  br i1 %17, label %18, label %21\l|{<s0>T|<s1>F}}"];
+	Node0x150cb00:s0 -> Node0x150ce70;
+	Node0x150cb00:s1 -> Node0x150cec0;
+	Node0x150ce70 [shape=record,label="{%18:\l18:                                               \l  %19 = load %struct._IO_FILE*, %struct._IO_FILE** @stderr, align 8\l  %20 = call i32 (%struct._IO_FILE*, i8*, ...) @fprintf(%struct._IO_FILE* %19,\l... i8* getelementptr inbounds ([39 x i8], [39 x i8]* @.str.52, i64 0, i64 0))\l  call void @exit(i32 1) #8\l  unreachable\l}"];
+	Node0x150cec0 [shape=record,label="{%21:\l21:                                               \l  br label %22\l}"];
+	Node0x150cec0 -> Node0x150cb50;
+	Node0x150cb50 [shape=record,label="{%22:\l22:                                               \l  %23 = load i32, i32* @n_atab, align 4\l  store i32 %23, i32* getelementptr inbounds (%struct.residue_t,\l... %struct.residue_t* @res, i32 0, i32 15), align 8\l  store %struct.atom_t* getelementptr inbounds ([1000 x %struct.atom_t], [1000\l... x %struct.atom_t]* @atab, i64 0, i64 0), %struct.atom_t** getelementptr\l... inbounds (%struct.residue_t, %struct.residue_t* @res, i32 0, i32 17), align 8\l  ret void\l}"];
+}
