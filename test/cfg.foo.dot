@@ -1,0 +1,47 @@
+digraph "CFG for 'foo' function" {
+	label="CFG for 'foo' function";
+
+	Node0x19073a0 [shape=record,label="{%4:\l  %5 = sext i32 %3 to i64\l  %6 = icmp slt i64 0, %5\l  br i1 %6, label %.lr.ph11, label %7\l|{<s0>T|<s1>F}}"];
+	Node0x19073a0:s0 -> Node0x1907b60;
+	Node0x19073a0:s1 -> Node0x1907d20;
+	Node0x1907b60 [shape=record,label="{.lr.ph11:                                         \l  br label %8\l}"];
+	Node0x1907b60 -> Node0x1907d70;
+	Node0x1907e00 [shape=record,label="{._crit_edge12:                                    \l  br label %7\l}"];
+	Node0x1907e00 -> Node0x1907d20;
+	Node0x1907d20 [shape=record,label="{%7:\l7:                                                \l  br label %30\l}"];
+	Node0x1907d20 -> Node0x1907ee0;
+	Node0x1907d70 [shape=record,label="{%8:\l8:                                                \l  %indvars.iv28 = phi i64 [ 0, %.lr.ph11 ], [ %indvars.iv.next3, %28 ]\l  %wide.trip.count = zext i32 %3 to i64\l  %exitcond4 = icmp ne i64 0, %wide.trip.count\l  br i1 %exitcond4, label %.lr.ph, label %9\l|{<s0>T|<s1>F}}"];
+	Node0x1907d70:s0 -> Node0x1908250;
+	Node0x1907d70:s1 -> Node0x1908300;
+	Node0x1908250 [shape=record,label="{.lr.ph:                                           \l  br label %10\l}"];
+	Node0x1908250 -> Node0x1908390;
+	Node0x1908420 [shape=record,label="{._crit_edge:                                      \l  br label %9\l}"];
+	Node0x1908420 -> Node0x1908300;
+	Node0x1908300 [shape=record,label="{%9:\l9:                                                \l  %indvars.iv29 = phi i64 [ %indvars.iv28, %._crit_edge ], [ %indvars.iv28, %8\l... ]\l  br label %27\l}"];
+	Node0x1908300 -> Node0x19085d0;
+	Node0x1908390 [shape=record,label="{%10:\l10:                                               \l  %indvars.iv5 = phi i64 [ 0, %.lr.ph ], [ %indvars.iv.next, %26 ]\l  %11 = getelementptr inbounds float, float* %0, i64 %indvars.iv28\l  %12 = load float, float* %11, align 4, !tbaa !2\l  %13 = fcmp une float %12, 0.000000e+00\l  br i1 %13, label %14, label %16\l|{<s0>T|<s1>F}}"];
+	Node0x1908390:s0 -> Node0x190a330;
+	Node0x1908390:s1 -> Node0x190a3c0;
+	Node0x190a330 [shape=record,label="{%14:\l14:                                               \l  %15 = getelementptr inbounds float, float* %0, i64 %indvars.iv28\l  store float 1.000000e+00, float* %15, align 4, !tbaa !2\l  br label %25\l}"];
+	Node0x190a330 -> Node0x190ab80;
+	Node0x190a3c0 [shape=record,label="{%16:\l16:                                               \l  %17 = getelementptr inbounds float, float* %1, i64 %indvars.iv5\l  %18 = load float, float* %17, align 4, !tbaa !2\l  %19 = fcmp une float %18, 0.000000e+00\l  br i1 %19, label %20, label %22\l|{<s0>T|<s1>F}}"];
+	Node0x190a3c0:s0 -> Node0x190adc0;
+	Node0x190a3c0:s1 -> Node0x190ae10;
+	Node0x190adc0 [shape=record,label="{%20:\l20:                                               \l  %21 = getelementptr inbounds float, float* %1, i64 %indvars.iv5\l  store float 1.000000e+00, float* %21, align 4, !tbaa !2\l  br label %24\l}"];
+	Node0x190adc0 -> Node0x190afa0;
+	Node0x190ae10 [shape=record,label="{%22:\l22:                                               \l  %23 = getelementptr inbounds float, float* %2, i64 %indvars.iv28\l  store float 1.000000e+00, float* %23, align 4, !tbaa !2\l  br label %24\l}"];
+	Node0x190ae10 -> Node0x190afa0;
+	Node0x190afa0 [shape=record,label="{%24:\l24:                                               \l  %indvars.iv7 = phi i64 [ %indvars.iv5, %22 ], [ %indvars.iv5, %20 ]\l  br label %25\l}"];
+	Node0x190afa0 -> Node0x190ab80;
+	Node0x190ab80 [shape=record,label="{%25:\l25:                                               \l  %indvars.iv6 = phi i64 [ %indvars.iv7, %24 ], [ %indvars.iv5, %14 ]\l  br label %26\l}"];
+	Node0x190ab80 -> Node0x1908740;
+	Node0x1908740 [shape=record,label="{%26:\l26:                                               \l  %indvars.iv.next = add nuw nsw i64 %indvars.iv6, 1\l  %exitcond = icmp ne i64 %indvars.iv.next, %wide.trip.count\l  br i1 %exitcond, label %10, label %._crit_edge\l|{<s0>T|<s1>F}}"];
+	Node0x1908740:s0 -> Node0x1908390;
+	Node0x1908740:s1 -> Node0x1908420;
+	Node0x19085d0 [shape=record,label="{%27:\l27:                                               \l  br label %28\l}"];
+	Node0x19085d0 -> Node0x1907430;
+	Node0x1907430 [shape=record,label="{%28:\l28:                                               \l  %indvars.iv.next3 = add nuw nsw i64 %indvars.iv29, 1\l  %29 = icmp slt i64 %indvars.iv.next3, %5\l  br i1 %29, label %8, label %._crit_edge12\l|{<s0>T|<s1>F}}"];
+	Node0x1907430:s0 -> Node0x1907d70;
+	Node0x1907430:s1 -> Node0x1907e00;
+	Node0x1907ee0 [shape=record,label="{%30:\l30:                                               \l  ret i32 0\l}"];
+}

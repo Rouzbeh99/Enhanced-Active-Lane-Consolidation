@@ -15,7 +15,17 @@ int foo(float* a, float* b, float* c, int n) {
 
 int bar(float* a, float* b, float* c, int n) {
     for (int i = 0; i < n; ++i) {
-      a[i] += c[i] * b[i];
+      a[i] = c[i] * b[i];
+    }
+    return 0;
+}
+
+
+int bar2(float* a, float* b, int n) {
+    
+    for (int i = 0; i < n; ++i) {
+      a[i] = a[i-1] + 1;
+      bar(a, b, a, n);
     }
     return 0;
 }

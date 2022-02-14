@@ -1,5 +1,5 @@
-; ModuleID = 'fun.ll'
-source_filename = "fun.c"
+; ModuleID = 'loops.ll'
+source_filename = "loops.c"
 target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-pc-linux-gnu"
 
@@ -102,31 +102,64 @@ define dso_local i32 @bar(float* %0, float* %1, float* %2, i32 %3) #0 {
 .lr.ph:                                           ; preds = %4
   br label %8
 
-._crit_edge:                                      ; preds = %17
+._crit_edge:                                      ; preds = %15
   br label %7
 
 7:                                                ; preds = %._crit_edge, %4
-  br label %19
+  br label %17
 
-8:                                                ; preds = %.lr.ph, %17
-  %indvars.iv1 = phi i64 [ 0, %.lr.ph ], [ %indvars.iv.next, %17 ]
+8:                                                ; preds = %.lr.ph, %15
+  %indvars.iv1 = phi i64 [ 0, %.lr.ph ], [ %indvars.iv.next, %15 ]
   %9 = getelementptr inbounds float, float* %2, i64 %indvars.iv1
   %10 = load float, float* %9, align 4, !tbaa !2
   %11 = getelementptr inbounds float, float* %1, i64 %indvars.iv1
   %12 = load float, float* %11, align 4, !tbaa !2
   %13 = fmul float %10, %12
   %14 = getelementptr inbounds float, float* %0, i64 %indvars.iv1
-  %15 = load float, float* %14, align 4, !tbaa !2
-  %16 = fadd float %15, %13
-  store float %16, float* %14, align 4, !tbaa !2
-  br label %17
+  store float %13, float* %14, align 4, !tbaa !2
+  br label %15
 
-17:                                               ; preds = %8
+15:                                               ; preds = %8
   %indvars.iv.next = add nuw nsw i64 %indvars.iv1, 1
-  %18 = icmp slt i64 %indvars.iv.next, %5
-  br i1 %18, label %8, label %._crit_edge
+  %16 = icmp slt i64 %indvars.iv.next, %5
+  br i1 %16, label %8, label %._crit_edge
 
-19:                                               ; preds = %7
+17:                                               ; preds = %7
+  ret i32 0
+}
+
+; Function Attrs: nounwind uwtable
+define dso_local i32 @bar2(float* %0, float* %1, i32 %2) #0 {
+  %4 = sext i32 %2 to i64
+  %5 = icmp slt i64 0, %4
+  br i1 %5, label %.lr.ph, label %6
+
+.lr.ph:                                           ; preds = %3
+  br label %7
+
+._crit_edge:                                      ; preds = %14
+  br label %6
+
+6:                                                ; preds = %._crit_edge, %3
+  br label %16
+
+7:                                                ; preds = %.lr.ph, %14
+  %indvars.iv1 = phi i64 [ 0, %.lr.ph ], [ %indvars.iv.next, %14 ]
+  %8 = sub nsw i64 %indvars.iv1, 1
+  %9 = getelementptr inbounds float, float* %0, i64 %8
+  %10 = load float, float* %9, align 4, !tbaa !2
+  %11 = fadd float %10, 1.000000e+00
+  %12 = getelementptr inbounds float, float* %0, i64 %indvars.iv1
+  store float %11, float* %12, align 4, !tbaa !2
+  %13 = call i32 @bar(float* %0, float* %1, float* %0, i32 %2)
+  br label %14
+
+14:                                               ; preds = %7
+  %indvars.iv.next = add nuw nsw i64 %indvars.iv1, 1
+  %15 = icmp slt i64 %indvars.iv.next, %4
+  br i1 %15, label %7, label %._crit_edge
+
+16:                                               ; preds = %6
   ret i32 0
 }
 

@@ -1,0 +1,5 @@
+digraph "CFG for 'bar2' function" {
+	label="CFG for 'bar2' function";
+
+	Node0x190cd50 [shape=record,label="{%3:\l  %4 = call i32 @bar(float* %0, float* %1, float* %0, i32 %2)\l  ret i32 0\l}"];
+}

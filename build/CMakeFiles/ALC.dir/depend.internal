@@ -10,6 +10,7 @@ CMakeFiles/ALC.dir/ALC.cpp.o
  /usr/lib/llvm-10/include/llvm/ADT/APInt.h
  /usr/lib/llvm-10/include/llvm/ADT/Any.h
  /usr/lib/llvm-10/include/llvm/ADT/ArrayRef.h
+ /usr/lib/llvm-10/include/llvm/ADT/BitVector.h
  /usr/lib/llvm-10/include/llvm/ADT/DenseMap.h
  /usr/lib/llvm-10/include/llvm/ADT/DenseMapInfo.h
  /usr/lib/llvm-10/include/llvm/ADT/DenseSet.h
@@ -20,16 +21,21 @@ CMakeFiles/ALC.dir/ALC.cpp.o
  /usr/lib/llvm-10/include/llvm/ADT/Hashing.h
  /usr/lib/llvm-10/include/llvm/ADT/None.h
  /usr/lib/llvm-10/include/llvm/ADT/Optional.h
+ /usr/lib/llvm-10/include/llvm/ADT/PointerEmbeddedInt.h
  /usr/lib/llvm-10/include/llvm/ADT/PointerIntPair.h
+ /usr/lib/llvm-10/include/llvm/ADT/PointerSumType.h
  /usr/lib/llvm-10/include/llvm/ADT/PointerUnion.h
  /usr/lib/llvm-10/include/llvm/ADT/STLExtras.h
+ /usr/lib/llvm-10/include/llvm/ADT/SmallBitVector.h
  /usr/lib/llvm-10/include/llvm/ADT/SmallPtrSet.h
  /usr/lib/llvm-10/include/llvm/ADT/SmallString.h
  /usr/lib/llvm-10/include/llvm/ADT/SmallVector.h
  /usr/lib/llvm-10/include/llvm/ADT/StringMap.h
  /usr/lib/llvm-10/include/llvm/ADT/StringRef.h
  /usr/lib/llvm-10/include/llvm/ADT/TinyPtrVector.h
+ /usr/lib/llvm-10/include/llvm/ADT/Triple.h
  /usr/lib/llvm-10/include/llvm/ADT/Twine.h
+ /usr/lib/llvm-10/include/llvm/ADT/bit.h
  /usr/lib/llvm-10/include/llvm/ADT/ilist.h
  /usr/lib/llvm-10/include/llvm/ADT/ilist_base.h
  /usr/lib/llvm-10/include/llvm/ADT/ilist_iterator.h
@@ -39,8 +45,14 @@ CMakeFiles/ALC.dir/ALC.cpp.o
  /usr/lib/llvm-10/include/llvm/ADT/iterator.h
  /usr/lib/llvm-10/include/llvm/ADT/iterator_range.h
  /usr/lib/llvm-10/include/llvm/ADT/simple_ilist.h
+ /usr/lib/llvm-10/include/llvm/Analysis/AliasAnalysis.h
+ /usr/lib/llvm-10/include/llvm/Analysis/DependenceAnalysis.h
  /usr/lib/llvm-10/include/llvm/Analysis/LoopInfo.h
  /usr/lib/llvm-10/include/llvm/Analysis/LoopPass.h
+ /usr/lib/llvm-10/include/llvm/Analysis/MemoryDependenceAnalysis.h
+ /usr/lib/llvm-10/include/llvm/Analysis/MemoryLocation.h
+ /usr/lib/llvm-10/include/llvm/Analysis/TargetLibraryInfo.def
+ /usr/lib/llvm-10/include/llvm/Analysis/TargetLibraryInfo.h
  /usr/lib/llvm-10/include/llvm/Config/abi-breaking.h
  /usr/lib/llvm-10/include/llvm/Config/llvm-config.h
  /usr/lib/llvm-10/include/llvm/IR/Argument.h
@@ -48,6 +60,7 @@ CMakeFiles/ALC.dir/ALC.cpp.o
  /usr/lib/llvm-10/include/llvm/IR/Attributes.inc
  /usr/lib/llvm-10/include/llvm/IR/BasicBlock.h
  /usr/lib/llvm-10/include/llvm/IR/CFG.h
+ /usr/lib/llvm-10/include/llvm/IR/CallSite.h
  /usr/lib/llvm-10/include/llvm/IR/CallingConv.h
  /usr/lib/llvm-10/include/llvm/IR/Comdat.h
  /usr/lib/llvm-10/include/llvm/IR/Constant.h
@@ -77,6 +90,7 @@ CMakeFiles/ALC.dir/ALC.cpp.o
  /usr/lib/llvm-10/include/llvm/IR/PassInstrumentation.h
  /usr/lib/llvm-10/include/llvm/IR/PassManager.h
  /usr/lib/llvm-10/include/llvm/IR/PassManagerInternal.h
+ /usr/lib/llvm-10/include/llvm/IR/PredIteratorCache.h
  /usr/lib/llvm-10/include/llvm/IR/ProfileSummary.h
  /usr/lib/llvm-10/include/llvm/IR/SymbolTableListTraits.h
  /usr/lib/llvm-10/include/llvm/IR/TrackingMDRef.h
@@ -85,6 +99,7 @@ CMakeFiles/ALC.dir/ALC.cpp.o
  /usr/lib/llvm-10/include/llvm/IR/User.h
  /usr/lib/llvm-10/include/llvm/IR/Value.def
  /usr/lib/llvm-10/include/llvm/IR/Value.h
+ /usr/lib/llvm-10/include/llvm/IR/ValueHandle.h
  /usr/lib/llvm-10/include/llvm/Pass.h
  /usr/lib/llvm-10/include/llvm/PassAnalysisSupport.h
  /usr/lib/llvm-10/include/llvm/PassInfo.h
