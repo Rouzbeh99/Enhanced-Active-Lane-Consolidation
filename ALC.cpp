@@ -29,13 +29,15 @@ namespace {
 
 
             llvm::outs() << "\nFunction:  " << L->getHeader()->getParent()->getName() << '\n';
-            llvm::outs() << "depth " << L->getLoopDepth() << '\n';
+            llvm::outs() << "depth: " << L->getLoopDepth() << '\n';
             const ArrayRef<BasicBlock *> &allBlocks = L->getBlocks();
             llvm::outs() << "Number of basic Blocks: " << allBlocks.size() << '\n';
 
             //checking loop carried dependency
-            MemoryDependenceResults &MDA = getAnalysis<MemoryDependenceWrapperPass>().getMemDep();
-            if (containsLoopCarriedDependency(&MDA, L)) {
+            DependenceInfo &dependenceInfo = getAnalysis<DependenceAnalysisWrapperPass>().getDI();
+
+
+            if (containsLoopCarriedDependency(dependenceInfo, L)) {
                 llvm::outs() << "Loop contains loop carried dependency" << '\n';
             } else {
                 llvm::outs() << "Loop doesn't contain loop carried dependency" << '\n';
@@ -61,7 +63,7 @@ namespace {
         }
 
         virtual void getAnalysisUsage(AnalysisUsage &AU) const {
-            AU.addRequired<MemoryDependenceWrapperPass>();
+            AU.addRequired<DependenceAnalysisWrapperPass>();
         }
 
         void countNumberOfPaths(BasicBlock *const &src, BasicBlock *const &dest, int &path_count,
@@ -84,44 +86,54 @@ namespace {
             visited[src] = false;
         }
 
-        bool containsLoopCarriedDependency(MemoryDependenceResults *MDA, Loop *L) {
+
+
+        static bool containsLoopCarriedDependency(DependenceInfo dependenceInfo, Loop *L) {
+
+            const int BR_OPCODE = 2;
+
+            const int STORE_OPCODE = 33;
+
             for (const auto &block: L->getBlocks()) {
-                for (const auto &I: block->getInstList()) {
 
-                    auto *instr = const_cast<Instruction *>(&I);
+                Instruction *instr = block->getFirstNonPHI();
+                while (instr->getOpcode() != BR_OPCODE) {
 
-                    if (!instr->mayWriteToMemory())
+                    if (!instr->mayReadOrWriteMemory()) {
+                        instr = instr->getNextNonDebugInstruction();
                         continue;
+                    }
 
-                    llvm::outs() << L->isLoopInvariant(instr) << '\n';
+                    for (const auto &innerBlock: L->getBlocks()) {
 
-//                    auto* storeAddress = dyn_cast<ConstantInt>(instr->getOperand(1));
-//                    int64_t storeAddressValue = 0;
-//                    if (storeAddress) {
-//                        if (storeAddress->getBitWidth() <= 64) {
-//                            storeAddressValue = storeAddress->getSExtValue();
-//                        }
-//                       llvm::outs()<< storeAddress <<'\n';
-//                    }
-//                    llvm::outs()<<"store address is: "<<storeAddress <<'\n';
+                        Instruction *innerInstr = innerBlock->getFirstNonPHI();
 
+                        while (innerInstr->getOpcode() != BR_OPCODE) {
 
-//                    MemDepResult Res = MDA->getDependency(instr);
-//                    Instruction *loadInstr = Res.getInst();
-//                    if (loadInstr == nullptr) {
-//                        continue;
-//                    }
-//
-//                    auto *loadAddress = dyn_cast<ConstantInt>(loadInstr->getOperand(0));
-//                    int64_t loadAddressValue = 0;
-//                    if (loadAddress) {
-//                        if (loadAddress->getBitWidth() <= 64) {
-//                            loadAddressValue = loadAddress->getSExtValue();
-//                        }
-//                    }
-//                    llvm::outs() << "load address is: " << loadAddressValue << '\n';
+                            if (innerInstr == instr) {
+                                innerInstr = innerInstr->getNextNonDebugInstruction();
+                                continue;
+                            }
 
+                            const std::unique_ptr<Dependence> &dependency = dependenceInfo.depends(instr, innerInstr,
+                                                                                                   false);
+                            if (dependency && !dependency->isConfused()) {
 
+                                bool thereIsAStore = instr->getOpcode() == STORE_OPCODE || innerInstr->getOpcode() == STORE_OPCODE;
+
+                                if (!dependency->isLoopIndependent() && thereIsAStore) {
+                                    llvm::outs() << "There is a dependency between " << instr->getOpcodeName()
+                                                 << " and " << innerInstr->getOpcodeName() << "\n";
+
+                                    return true;
+                                }
+
+                            }
+                            innerInstr = innerInstr->getNextNonDebugInstruction();
+                        }
+
+                    }
+                    instr = instr->getNextNonDebugInstruction();
                 }
             }
 
@@ -129,8 +141,52 @@ namespace {
         }
 
 
+
+
+//        static bool containsLoopCarriedDependency(DependenceInfo dependenceInfo, Loop *L) {
+//
+//            const int BR_OPCODE = 2;
+//
+//
+//                Instruction *instr = L->getHeader()->getFirstNonPHI();
+//                while (instr->getOpcode() != BR_OPCODE) {
+//
+//                    if (!instr->mayReadOrWriteMemory()) {
+//                        instr = instr->getNextNonDebugInstruction();
+//                        continue;
+//                    }
+//
+//                        Instruction *innerInstr = instr->getNextNonDebugInstruction();
+//
+//                        while (innerInstr->getOpcode() != BR_OPCODE) {
+//
+//                            if (innerInstr == instr) {
+//                                innerInstr = innerInstr->getNextNonDebugInstruction();
+//                                continue;
+//                            }
+//
+//                            const std::unique_ptr<Dependence> &dependency = dependenceInfo.depends(instr, innerInstr,
+//                                                                                                   true);
+//                            if (dependency && !dependency->isConfused()) {
+//
+//                                if (!dependency->isLoopIndependent()) {
+//                                    llvm::outs() << "There is a dependency between " << instr->getOpcodeName()
+//                                                 << " and " << innerInstr->getOpcodeName() << "\n";
+//                                    return true;
+//                                }
+//
+//                            }
+//                            innerInstr = innerInstr->getNextNonDebugInstruction();
+//                        }
+//
+//                    instr = instr->getNextNonDebugInstruction();
+//                }
+//
+//            return false;
+//        }
+
         //Assumption: all blocks end with branch instruction
-        bool containsFunctionCall(Loop *L) {
+        static bool containsFunctionCall(Loop *L) {
             const int CALL_OPCODE = 56;
             const int BR_OPCODE = 2;
 

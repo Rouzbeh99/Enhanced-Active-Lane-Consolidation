@@ -1,13 +1,15 @@
 int foo(float* a, float* b, float* c, int n) {
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < n; ++j) {
-            if(a[i]){
-                a[i] = 1;
-            }else if(b[j]){
-                b[j] = 1;
-            }else{
-                c[i] = 1;
+            if(n == 1){
+                a[i] = c[i];
             }
+            if (n > 5){
+                c[i] = a[i];
+            if(n)
+                b [i] = a[i];
+            }
+
         }
     }
     return 0;
@@ -15,17 +17,37 @@ int foo(float* a, float* b, float* c, int n) {
 
 int bar(float* a, float* b, float* c, int n) {
     for (int i = 0; i < n; ++i) {
-      a[i] = c[i] * b[i];
+      a[i] = a[i] * b[i];
+    }
+    for (int i = 0; i < n; ++i) {
+      a[i] = 0;
+      int d = b[i] + c[i];
+
     }
     return 0;
 }
 
 
-int bar2(float* a, float* b, int n) {
-    
-    for (int i = 0; i < n; ++i) {
-      a[i] = a[i-1] + 1;
-      bar(a, b, a, n);
+int bar2(float* a, float* b, float* c, int n) {
+
+     for (int i = 0; i < n; ++i) {
+      a[i] = b[i] * c[i];
+
+      if(n){
+        c[i] = a[i-1];
+      }
     }
+
+    return 0;
+}
+
+int test(int* number){
+   for (int i = 0; i < 10; ++i){
+    if(*number){
+        *number= 1;
+    }else{
+        *number = 0;
+    }
+   }
     return 0;
 }
