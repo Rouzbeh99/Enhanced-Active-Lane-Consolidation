@@ -139,51 +139,7 @@ namespace {
 
             return false;
         }
-
-
-
-
-//        static bool containsLoopCarriedDependency(DependenceInfo dependenceInfo, Loop *L) {
-//
-//            const int BR_OPCODE = 2;
-//
-//
-//                Instruction *instr = L->getHeader()->getFirstNonPHI();
-//                while (instr->getOpcode() != BR_OPCODE) {
-//
-//                    if (!instr->mayReadOrWriteMemory()) {
-//                        instr = instr->getNextNonDebugInstruction();
-//                        continue;
-//                    }
-//
-//                        Instruction *innerInstr = instr->getNextNonDebugInstruction();
-//
-//                        while (innerInstr->getOpcode() != BR_OPCODE) {
-//
-//                            if (innerInstr == instr) {
-//                                innerInstr = innerInstr->getNextNonDebugInstruction();
-//                                continue;
-//                            }
-//
-//                            const std::unique_ptr<Dependence> &dependency = dependenceInfo.depends(instr, innerInstr,
-//                                                                                                   true);
-//                            if (dependency && !dependency->isConfused()) {
-//
-//                                if (!dependency->isLoopIndependent()) {
-//                                    llvm::outs() << "There is a dependency between " << instr->getOpcodeName()
-//                                                 << " and " << innerInstr->getOpcodeName() << "\n";
-//                                    return true;
-//                                }
-//
-//                            }
-//                            innerInstr = innerInstr->getNextNonDebugInstruction();
-//                        }
-//
-//                    instr = instr->getNextNonDebugInstruction();
-//                }
-//
-//            return false;
-//        }
+        
 
         //Assumption: all blocks end with branch instruction
         static bool containsFunctionCall(Loop *L) {
