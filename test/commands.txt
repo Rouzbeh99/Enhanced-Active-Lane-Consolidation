@@ -4,7 +4,7 @@ opt --disable-output -dot-cfg --cfg-dot-filename-prefix=cfg loops_norm.ll
 dot -Tpdf cfg.dot -o cfg.pdf
 
 // loop pre-processings
-clang -O3 -Xclang -disable-llvm-passes loops.c -S -emit-llvm
+clang -g -O3 -Xclang -disable-llvm-passes loops.c -S -emit-llvm
 opt -passes="mem2reg,function(loop(indvars),loop-simplify,loop(rotate))" loops.ll -S -o loops_norm.ll
 
 

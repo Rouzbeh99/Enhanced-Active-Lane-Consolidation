@@ -4,6 +4,7 @@
 #include "llvm/Analysis/LoopInfo.h"
 #include "llvm/Analysis/DependenceAnalysis.h"
 #include "llvm/Analysis/MemoryDependenceAnalysis.h"
+#include "llvm/Analysis/LoopAccessAnalysis.h"
 #include <map>
 
 using namespace llvm;
@@ -29,8 +30,9 @@ namespace {
 
 
             llvm::outs() << "\nFunction:  " << L->getHeader()->getParent()->getName() << '\n';
-            llvm::outs() << "depth: " << L->getLoopDepth() << '\n';
             const ArrayRef<BasicBlock *> &allBlocks = L->getBlocks();
+            const DebugLoc &location = allBlocks.front()->getFirstNonPHIOrDbg()->getDebugLoc();
+            llvm::outs() << "Loop at line number: " << location.getLine() - 1 << "\n";
             llvm::outs() << "Number of basic Blocks: " << allBlocks.size() << '\n';
 
             //checking loop carried dependency
@@ -66,6 +68,7 @@ namespace {
             AU.addRequired<DependenceAnalysisWrapperPass>();
         }
 
+
         void countNumberOfPaths(BasicBlock *const &src, BasicBlock *const &dest, int &path_count,
                                 std::map<BasicBlock *const, bool> &visited, ArrayRef<BasicBlock *> allBlocks) {
             visited[src] = true;
@@ -85,7 +88,6 @@ namespace {
             }
             visited[src] = false;
         }
-
 
 
         static bool containsLoopCarriedDependency(DependenceInfo dependenceInfo, Loop *L) {
@@ -119,7 +121,8 @@ namespace {
                                                                                                    false);
                             if (dependency && !dependency->isConfused()) {
 
-                                bool thereIsAStore = instr->getOpcode() == STORE_OPCODE || innerInstr->getOpcode() == STORE_OPCODE;
+                                bool thereIsAStore =
+                                        instr->getOpcode() == STORE_OPCODE || innerInstr->getOpcode() == STORE_OPCODE;
 
                                 if (!dependency->isLoopIndependent() && thereIsAStore) {
                                     llvm::outs() << "There is a dependency between " << instr->getOpcodeName()
@@ -139,7 +142,7 @@ namespace {
 
             return false;
         }
-        
+
 
         //Assumption: all blocks end with branch instruction
         static bool containsFunctionCall(Loop *L) {
