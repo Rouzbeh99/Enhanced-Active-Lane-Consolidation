@@ -2,12 +2,13 @@ int foo(float* a, float* b, float* c, int n) {
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < n; ++j) {
             if(n == 1){
-                a[i] = c[i];
+                a[i] = b[j] + c[j];
             }
             if (n > 5){
-                c[i] = a[i];
-            if(n)
-                b [i] = a[i];
+                a[i] = b[j] - c[j];
+            }
+            if(n){
+                a[i] = b[j] * c[j];
             }
 
         }

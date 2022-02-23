@@ -27,6 +27,8 @@ llvm/Passes/PassPlugin.h
 /home/rouzbeh/Graduate/Research/LLVM/ALC/llvm/Passes/PassPlugin.h
 llvm/IR/PassManager.h
 /home/rouzbeh/Graduate/Research/LLVM/ALC/llvm/IR/PassManager.h
+llvm/Analysis/OptimizationRemarkEmitter.h
+/home/rouzbeh/Graduate/Research/LLVM/ALC/llvm/Analysis/OptimizationRemarkEmitter.h
 map
 -
 
@@ -918,6 +920,20 @@ memory
 utility
 -
 
+/usr/lib/llvm-10/include/llvm/Analysis/BlockFrequencyInfo.h
+llvm/ADT/Optional.h
+/usr/lib/llvm-10/include/llvm/Analysis/llvm/ADT/Optional.h
+llvm/IR/PassManager.h
+/usr/lib/llvm-10/include/llvm/Analysis/llvm/IR/PassManager.h
+llvm/Pass.h
+/usr/lib/llvm-10/include/llvm/Analysis/llvm/Pass.h
+llvm/Support/BlockFrequency.h
+/usr/lib/llvm-10/include/llvm/Analysis/llvm/Support/BlockFrequency.h
+cstdint
+-
+memory
+-
+
 /usr/lib/llvm-10/include/llvm/Analysis/CGSCCPassManager.h
 llvm/ADT/DenseMap.h
 /usr/lib/llvm-10/include/llvm/Analysis/llvm/ADT/DenseMap.h
@@ -1261,6 +1277,20 @@ memory
 -
 utility
 -
+
+/usr/lib/llvm-10/include/llvm/Analysis/OptimizationRemarkEmitter.h
+llvm/ADT/Optional.h
+/usr/lib/llvm-10/include/llvm/Analysis/llvm/ADT/Optional.h
+llvm/Analysis/BlockFrequencyInfo.h
+/usr/lib/llvm-10/include/llvm/Analysis/llvm/Analysis/BlockFrequencyInfo.h
+llvm/IR/DiagnosticInfo.h
+/usr/lib/llvm-10/include/llvm/Analysis/llvm/IR/DiagnosticInfo.h
+llvm/IR/Function.h
+/usr/lib/llvm-10/include/llvm/Analysis/llvm/IR/Function.h
+llvm/IR/PassManager.h
+/usr/lib/llvm-10/include/llvm/Analysis/llvm/IR/PassManager.h
+llvm/Pass.h
+/usr/lib/llvm-10/include/llvm/Analysis/llvm/Pass.h
 
 /usr/lib/llvm-10/include/llvm/Analysis/PHITransAddr.h
 llvm/ADT/SmallVector.h
@@ -2624,6 +2654,24 @@ llvm/Support/DataTypes.h
 
 /usr/lib/llvm-10/include/llvm/Support/AtomicOrdering.h
 cstddef
+-
+
+/usr/lib/llvm-10/include/llvm/Support/BlockFrequency.h
+llvm/Support/BranchProbability.h
+/usr/lib/llvm-10/include/llvm/Support/llvm/Support/BranchProbability.h
+llvm/Support/DataTypes.h
+/usr/lib/llvm-10/include/llvm/Support/llvm/Support/DataTypes.h
+
+/usr/lib/llvm-10/include/llvm/Support/BranchProbability.h
+llvm/Support/DataTypes.h
+/usr/lib/llvm-10/include/llvm/Support/llvm/Support/DataTypes.h
+algorithm
+-
+cassert
+-
+climits
+-
+numeric
 -
 
 /usr/lib/llvm-10/include/llvm/Support/CBindingWrapping.h

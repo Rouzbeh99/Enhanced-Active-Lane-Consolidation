@@ -57,6 +57,7 @@ CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Analysis/AliasAnalys
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Analysis/AliasSetTracker.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Analysis/AssumptionCache.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Analysis/BasicAliasAnalysis.h
+CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Analysis/BlockFrequencyInfo.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Analysis/CGSCCPassManager.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Analysis/CallGraph.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Analysis/DependenceAnalysis.h
@@ -69,6 +70,7 @@ CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Analysis/LoopPass.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Analysis/MemoryDependenceAnalysis.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Analysis/MemoryLocation.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Analysis/MemorySSA.h
+CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Analysis/OptimizationRemarkEmitter.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Analysis/PHITransAddr.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Analysis/ScalarEvolution.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Analysis/ScalarEvolutionAliasAnalysis.h
@@ -144,6 +146,8 @@ CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Support/Alignment.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Support/Allocator.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Support/Atomic.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Support/AtomicOrdering.h
+CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Support/BlockFrequency.h
+CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Support/BranchProbability.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Support/CBindingWrapping.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Support/CFGUpdate.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Support/Casting.h

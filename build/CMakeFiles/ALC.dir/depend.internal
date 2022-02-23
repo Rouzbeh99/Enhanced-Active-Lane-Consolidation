@@ -58,6 +58,7 @@ CMakeFiles/ALC.dir/ALC.cpp.o
  /usr/lib/llvm-10/include/llvm/Analysis/AliasSetTracker.h
  /usr/lib/llvm-10/include/llvm/Analysis/AssumptionCache.h
  /usr/lib/llvm-10/include/llvm/Analysis/BasicAliasAnalysis.h
+ /usr/lib/llvm-10/include/llvm/Analysis/BlockFrequencyInfo.h
  /usr/lib/llvm-10/include/llvm/Analysis/CGSCCPassManager.h
  /usr/lib/llvm-10/include/llvm/Analysis/CallGraph.h
  /usr/lib/llvm-10/include/llvm/Analysis/DependenceAnalysis.h
@@ -70,6 +71,7 @@ CMakeFiles/ALC.dir/ALC.cpp.o
  /usr/lib/llvm-10/include/llvm/Analysis/MemoryDependenceAnalysis.h
  /usr/lib/llvm-10/include/llvm/Analysis/MemoryLocation.h
  /usr/lib/llvm-10/include/llvm/Analysis/MemorySSA.h
+ /usr/lib/llvm-10/include/llvm/Analysis/OptimizationRemarkEmitter.h
  /usr/lib/llvm-10/include/llvm/Analysis/PHITransAddr.h
  /usr/lib/llvm-10/include/llvm/Analysis/ScalarEvolution.h
  /usr/lib/llvm-10/include/llvm/Analysis/ScalarEvolutionAliasAnalysis.h
@@ -145,6 +147,8 @@ CMakeFiles/ALC.dir/ALC.cpp.o
  /usr/lib/llvm-10/include/llvm/Support/Allocator.h
  /usr/lib/llvm-10/include/llvm/Support/Atomic.h
  /usr/lib/llvm-10/include/llvm/Support/AtomicOrdering.h
+ /usr/lib/llvm-10/include/llvm/Support/BlockFrequency.h
+ /usr/lib/llvm-10/include/llvm/Support/BranchProbability.h
  /usr/lib/llvm-10/include/llvm/Support/CBindingWrapping.h
  /usr/lib/llvm-10/include/llvm/Support/CFGUpdate.h
  /usr/lib/llvm-10/include/llvm/Support/Casting.h

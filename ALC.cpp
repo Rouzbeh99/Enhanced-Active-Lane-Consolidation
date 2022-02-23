@@ -8,6 +8,7 @@
 #include "llvm/Passes/PassBuilder.h"
 #include "llvm/Passes/PassPlugin.h"
 #include "llvm/IR/PassManager.h"
+#include "llvm/Analysis/OptimizationRemarkEmitter.h"
 #include <map>
 
 using namespace llvm;
@@ -39,6 +40,12 @@ namespace {
                 llvm::outs() << "Loop contains function call" << '\n';
             } else {
                 llvm::outs() << "Loop doesn't contain function call" << '\n';
+            }
+
+            if (containsMemoryDependency(loop, AM, AR)) {
+                llvm::outs() << "Loop contains memory dependency" << '\n';
+            } else {
+                llvm::outs() << "Loop doesn't contain memory dependency" << '\n';
             }
 
 
@@ -97,6 +104,24 @@ namespace {
 
             }
             return false;
+        }
+
+        bool containsMemoryDependency(Loop &L, LoopAnalysisManager &AM,
+                                      LoopStandardAnalysisResults &LAR) {
+
+            AliasAnalysis *AA = &LAR.AA;
+            ScalarEvolution *SE = &LAR.SE;
+            DominatorTree *DT = &LAR.DT;
+            LoopInfo *LI = &LAR.LI;
+            const Function *F = L.getHeader()->getParent();
+            OptimizationRemarkEmitter ORE(F);
+
+
+            LoopAccessAnalysis::Result &info = AM.getResult<LoopAccessAnalysis>(L, LAR);
+
+
+            return !info.canVectorizeMemory();
+
         }
 
 
