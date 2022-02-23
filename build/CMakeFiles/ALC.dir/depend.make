@@ -57,9 +57,11 @@ CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Analysis/AliasAnalys
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Analysis/AliasSetTracker.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Analysis/AssumptionCache.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Analysis/BasicAliasAnalysis.h
+CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Analysis/CGSCCPassManager.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Analysis/CallGraph.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Analysis/DependenceAnalysis.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Analysis/GlobalsModRef.h
+CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Analysis/LazyCallGraph.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Analysis/LoopAccessAnalysis.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Analysis/LoopAnalysisManager.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Analysis/LoopInfo.h
@@ -102,6 +104,7 @@ CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/IR/GlobalIndirectSym
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/IR/GlobalObject.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/IR/GlobalValue.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/IR/GlobalVariable.h
+CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/IR/InstIterator.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/IR/InstrTypes.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/IR/Instruction.def
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/IR/Instruction.h
@@ -134,6 +137,8 @@ CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/PassAnalysisSupport.
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/PassInfo.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/PassRegistry.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/PassSupport.h
+CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Passes/PassBuilder.h
+CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Passes/PassPlugin.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Support/AlignOf.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Support/Alignment.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Support/Allocator.h
@@ -148,6 +153,7 @@ CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Support/CommandLine.
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Support/Compiler.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Support/DataTypes.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Support/Debug.h
+CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Support/DynamicLibrary.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Support/Endian.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Support/Error.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Support/ErrorHandling.h
@@ -182,4 +188,8 @@ CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Support/YAMLParser.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Support/YAMLTraits.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Support/raw_ostream.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Support/type_traits.h
+CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Transforms/Instrumentation.h
+CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Transforms/Scalar/LoopPassManager.h
+CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Transforms/Utils/LCSSA.h
+CMakeFiles/ALC.dir/ALC.cpp.o: /usr/lib/llvm-10/include/llvm/Transforms/Utils/LoopSimplify.h
 

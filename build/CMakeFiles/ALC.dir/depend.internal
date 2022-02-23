@@ -58,9 +58,11 @@ CMakeFiles/ALC.dir/ALC.cpp.o
  /usr/lib/llvm-10/include/llvm/Analysis/AliasSetTracker.h
  /usr/lib/llvm-10/include/llvm/Analysis/AssumptionCache.h
  /usr/lib/llvm-10/include/llvm/Analysis/BasicAliasAnalysis.h
+ /usr/lib/llvm-10/include/llvm/Analysis/CGSCCPassManager.h
  /usr/lib/llvm-10/include/llvm/Analysis/CallGraph.h
  /usr/lib/llvm-10/include/llvm/Analysis/DependenceAnalysis.h
  /usr/lib/llvm-10/include/llvm/Analysis/GlobalsModRef.h
+ /usr/lib/llvm-10/include/llvm/Analysis/LazyCallGraph.h
  /usr/lib/llvm-10/include/llvm/Analysis/LoopAccessAnalysis.h
  /usr/lib/llvm-10/include/llvm/Analysis/LoopAnalysisManager.h
  /usr/lib/llvm-10/include/llvm/Analysis/LoopInfo.h
@@ -103,6 +105,7 @@ CMakeFiles/ALC.dir/ALC.cpp.o
  /usr/lib/llvm-10/include/llvm/IR/GlobalObject.h
  /usr/lib/llvm-10/include/llvm/IR/GlobalValue.h
  /usr/lib/llvm-10/include/llvm/IR/GlobalVariable.h
+ /usr/lib/llvm-10/include/llvm/IR/InstIterator.h
  /usr/lib/llvm-10/include/llvm/IR/InstrTypes.h
  /usr/lib/llvm-10/include/llvm/IR/Instruction.def
  /usr/lib/llvm-10/include/llvm/IR/Instruction.h
@@ -135,6 +138,8 @@ CMakeFiles/ALC.dir/ALC.cpp.o
  /usr/lib/llvm-10/include/llvm/PassInfo.h
  /usr/lib/llvm-10/include/llvm/PassRegistry.h
  /usr/lib/llvm-10/include/llvm/PassSupport.h
+ /usr/lib/llvm-10/include/llvm/Passes/PassBuilder.h
+ /usr/lib/llvm-10/include/llvm/Passes/PassPlugin.h
  /usr/lib/llvm-10/include/llvm/Support/AlignOf.h
  /usr/lib/llvm-10/include/llvm/Support/Alignment.h
  /usr/lib/llvm-10/include/llvm/Support/Allocator.h
@@ -149,6 +154,7 @@ CMakeFiles/ALC.dir/ALC.cpp.o
  /usr/lib/llvm-10/include/llvm/Support/Compiler.h
  /usr/lib/llvm-10/include/llvm/Support/DataTypes.h
  /usr/lib/llvm-10/include/llvm/Support/Debug.h
+ /usr/lib/llvm-10/include/llvm/Support/DynamicLibrary.h
  /usr/lib/llvm-10/include/llvm/Support/Endian.h
  /usr/lib/llvm-10/include/llvm/Support/Error.h
  /usr/lib/llvm-10/include/llvm/Support/ErrorHandling.h
@@ -183,3 +189,7 @@ CMakeFiles/ALC.dir/ALC.cpp.o
  /usr/lib/llvm-10/include/llvm/Support/YAMLTraits.h
  /usr/lib/llvm-10/include/llvm/Support/raw_ostream.h
  /usr/lib/llvm-10/include/llvm/Support/type_traits.h
+ /usr/lib/llvm-10/include/llvm/Transforms/Instrumentation.h
+ /usr/lib/llvm-10/include/llvm/Transforms/Scalar/LoopPassManager.h
+ /usr/lib/llvm-10/include/llvm/Transforms/Utils/LCSSA.h
+ /usr/lib/llvm-10/include/llvm/Transforms/Utils/LoopSimplify.h

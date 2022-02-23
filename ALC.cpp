@@ -5,6 +5,9 @@
 #include "llvm/Analysis/DependenceAnalysis.h"
 #include "llvm/Analysis/MemoryDependenceAnalysis.h"
 #include "llvm/Analysis/LoopAccessAnalysis.h"
+#include "llvm/Passes/PassBuilder.h"
+#include "llvm/Passes/PassPlugin.h"
+#include "llvm/IR/PassManager.h"
 #include <map>
 
 using namespace llvm;
@@ -14,59 +17,62 @@ using namespace llvm;
 
 
 namespace {
-    struct FindDivergenceInLoop : public LoopPass {
-
-        static char ID;
-
-        FindDivergenceInLoop() : LoopPass(ID) {}
+    struct FindDivergenceInLoop : public PassInfoMixin<FindDivergenceInLoop> {
 
 
-        virtual bool runOnLoop(Loop *L, LPPassManager &LPM) override {
+
+        PreservedAnalyses run(Function &F, FunctionAnalysisManager &FAM) {
+
+
+            llvm::outs() << F.getName() << "\n";
+            
+
 
             //only apply the pass on innermost loop
-            if (!L->getSubLoops().empty()) {
-                return false;
-            }
+//            if (!L->getSubLoops().empty()) {
+//                return PreservedAnalyses::all();
+//            }
+//
+//            llvm::outs() << "\nFunction:  " << L->getHeader()->getParent()->getName() << '\n';
+//            const ArrayRef<BasicBlock *> &allBlocks = L->getBlocks();
+//            const DebugLoc &location = allBlocks.front()->getFirstNonPHIOrDbg()->getDebugLoc();
+//            llvm::outs() << "Loop at line number: " << location.getLine() - 1 << "\n";
+//            llvm::outs() << "Number of basic Blocks: " << allBlocks.size() << '\n';
 
+//            //checking loop carried dependency
+//            DependenceInfo &dependenceInfo = getAnalysis<DependenceAnalysisWrapperPass>().getDI();
+//
+//
+//            if (containsLoopCarriedDependency(dependenceInfo, L)) {
+//                llvm::outs() << "Loop contains loop carried dependency" << '\n';
+//            } else {
+//                llvm::outs() << "Loop doesn't contain loop carried dependency" << '\n';
+//            }
 
-            llvm::outs() << "\nFunction:  " << L->getHeader()->getParent()->getName() << '\n';
-            const ArrayRef<BasicBlock *> &allBlocks = L->getBlocks();
-            const DebugLoc &location = allBlocks.front()->getFirstNonPHIOrDbg()->getDebugLoc();
-            llvm::outs() << "Loop at line number: " << location.getLine() - 1 << "\n";
-            llvm::outs() << "Number of basic Blocks: " << allBlocks.size() << '\n';
+//            if (containsFunctionCall(L)) {
+//                llvm::outs() << "Loop contains function call" << '\n';
+//            } else {
+//                llvm::outs() << "Loop doesn't contain function call" << '\n';
+//            }
+//
+//
+//            BasicBlock *const &firstNode = L->getHeader();
+//            BasicBlock *const &loopLatch = L->getLoopLatch();  //supposing to have only one exiting node
+//
+//            int numberOfPaths = 0;
+//            std::map<BasicBlock *const, bool> visited;
+//
+//            countNumberOfPaths(firstNode, loopLatch, numberOfPaths, visited, allBlocks);
+//            llvm::outs() << "Number of paths: " << numberOfPaths << '\n';
 
-            //checking loop carried dependency
-            DependenceInfo &dependenceInfo = getAnalysis<DependenceAnalysisWrapperPass>().getDI();
-
-
-            if (containsLoopCarriedDependency(dependenceInfo, L)) {
-                llvm::outs() << "Loop contains loop carried dependency" << '\n';
-            } else {
-                llvm::outs() << "Loop doesn't contain loop carried dependency" << '\n';
-            }
-
-            if (containsFunctionCall(L)) {
-                llvm::outs() << "Loop contains function call" << '\n';
-            } else {
-                llvm::outs() << "Loop doesn't contain function call" << '\n';
-            }
-
-
-            BasicBlock *const &firstNode = L->getHeader();
-            BasicBlock *const &loopLatch = L->getLoopLatch();  //supposing to have only one exiting node
-
-            int numberOfPaths = 0;
-            std::map<BasicBlock *const, bool> visited;
-
-            countNumberOfPaths(firstNode, loopLatch, numberOfPaths, visited, allBlocks);
-            llvm::outs() << "Number of paths: " << numberOfPaths << '\n';
-
-            return false;
+            return PreservedAnalyses::all();
         }
 
-        virtual void getAnalysisUsage(AnalysisUsage &AU) const {
-            AU.addRequired<DependenceAnalysisWrapperPass>();
-        }
+
+//        virtual void getAnalysisUsage(AnalysisUsage &AU) const override {
+//            AU.addRequired<DependenceAnalysisWrapperPass>();
+//            AU.addRequired<LoopInfoWrapperPass>();
+//        }
 
 
         void countNumberOfPaths(BasicBlock *const &src, BasicBlock *const &dest, int &path_count,
@@ -160,16 +166,37 @@ namespace {
                     }
 
                     instr = instr->getNextNonDebugInstruction();
-
                 }
 
             }
             return false;
         }
+
+
     };
 }
 
 
-char FindDivergenceInLoop::ID = 0;
-static RegisterPass<FindDivergenceInLoop> X("findDivergenceInLoop", "Count number of opcode in a functions");
+
+// registering the pass to new PM
+extern "C" ::llvm::PassPluginLibraryInfo LLVM_ATTRIBUTE_WEAK
+llvmGetPassPluginInfo() {
+    return {
+            LLVM_PLUGIN_API_VERSION, "find-divergence-in-loop", "v0.1",
+            [](PassBuilder &PB) {
+                PB.registerPipelineParsingCallback(
+                        [](StringRef Name, FunctionPassManager &FPM,
+                           ArrayRef<PassBuilder::PipelineElement>) {
+                            if (Name == "find-divergence-in-loop") {
+                                FPM.addPass(FindDivergenceInLoop());
+                                return true;
+                            }
+                            return false;
+                        }
+                );
+            }
+    };
+}
+
+
 
