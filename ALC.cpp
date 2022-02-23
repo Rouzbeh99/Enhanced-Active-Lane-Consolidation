@@ -20,13 +20,83 @@ namespace {
     struct FindDivergenceInLoop : public PassInfoMixin<FindDivergenceInLoop> {
 
 
-        PreservedAnalyses run(Loop &L, LoopAnalysisManager &AM,
-                              LoopStandardAnalysisResults &AR, LPMUpdater &U){
+        PreservedAnalyses run(Loop &loop, LoopAnalysisManager &AM,
+                              LoopStandardAnalysisResults &AR, LPMUpdater &U) {
+
+            Loop *L = &loop;
+
+            //only apply the pass on innermost loop
+            if (!L->getSubLoops().empty()) {
+                return PreservedAnalyses::all();
+            }
+
+            llvm::outs() << "\nFunction:  " << L->getHeader()->getParent()->getName() << '\n';
+            const ArrayRef<BasicBlock *> &allBlocks = L->getBlocks();
+            const DebugLoc &location = allBlocks.front()->getFirstNonPHIOrDbg()->getDebugLoc();
+            llvm::outs() << "Loop at line number: " << location.getLine() - 1 << "\n";
+
+            if (containsFunctionCall(L)) {
+                llvm::outs() << "Loop contains function call" << '\n';
+            } else {
+                llvm::outs() << "Loop doesn't contain function call" << '\n';
+            }
 
 
-            llvm::outs() << L.getBlocks().front()->getFirstNonPHIOrDbg()->getDebugLoc().getLine() << "\n";
-            
+            BasicBlock *const &firstNode = L->getHeader();
+            BasicBlock *const &loopLatch = L->getLoopLatch();  //supposing to have only one exiting node
+
+            int numberOfPaths = 0;
+            std::map<BasicBlock *const, bool> visited;
+
+            countNumberOfPaths(firstNode, loopLatch, numberOfPaths, visited, allBlocks);
+            llvm::outs() << "Number of paths: " << numberOfPaths << '\n';
+
+
             return PreservedAnalyses::all();
+        }
+
+
+        void countNumberOfPaths(BasicBlock *const &src, BasicBlock *const &dest, int &path_count,
+                                std::map<BasicBlock *const, bool> &visited, ArrayRef<BasicBlock *> allBlocks) {
+            visited[src] = true;
+            if (src == dest) {
+                path_count++;
+            } else {
+                for (BasicBlock *succ: successors(src)) {
+                    if (!visited[succ]) {
+                        bool belongsToLoop = std::any_of(allBlocks.begin(), allBlocks.end(),
+                                                         [&succ](BasicBlock *item) {
+                                                             return item == succ;
+                                                         });
+                        if (belongsToLoop)
+                            countNumberOfPaths(succ, dest, path_count, visited, allBlocks);
+                    }
+                }
+            }
+            visited[src] = false;
+        }
+
+        //Assumption: all blocks end with branch instruction
+        static bool containsFunctionCall(Loop *L) {
+            const int CALL_OPCODE = 56;
+            const int BR_OPCODE = 2;
+
+            for (const auto &block: L->getBlocks()) {
+
+                Instruction *instr = block->getFirstNonPHIOrDbg();
+
+                while (instr->getOpcode() != BR_OPCODE) {
+
+                    if (instr->getOpcode() == CALL_OPCODE) {
+                        return true;
+                    }
+
+                    instr = instr->getNextNonDebugInstruction();
+
+                }
+
+            }
+            return false;
         }
 
 
