@@ -1,0 +1,950 @@
+	.text
+	.file	"loops.c"
+	.globl	foo                     # -- Begin function foo
+	.p2align	4, 0x90
+	.type	foo,@function
+foo:                                    # @foo
+.Lfunc_begin0:
+	.file	1 "/home/rouzbeh/Graduate/Research/LLVM/ALC/test/loops.c"
+	.loc	1 1 0                   # loops.c:1:0
+	.cfi_startproc
+# %bb.0:
+	#DEBUG_VALUE: foo:a <- $rdi
+	#DEBUG_VALUE: foo:a <- $rdi
+	#DEBUG_VALUE: foo:b <- $rsi
+	#DEBUG_VALUE: foo:b <- $rsi
+	#DEBUG_VALUE: foo:c <- $rdx
+	#DEBUG_VALUE: foo:c <- $rdx
+	#DEBUG_VALUE: foo:n <- $ecx
+	#DEBUG_VALUE: foo:n <- $ecx
+	#DEBUG_VALUE: i <- 0
+	.loc	1 2 10 prologue_end     # loops.c:2:10
+	movslq	%ecx, %r8
+.Ltmp0:
+	.loc	1 2 23 is_stmt 0        # loops.c:2:23
+	testq	%r8, %r8
+.Ltmp1:
+	.loc	1 2 5                   # loops.c:2:5
+	jle	.LBB0_4
+.Ltmp2:
+# %bb.1:                                # %.lr.ph7
+	#DEBUG_VALUE: i <- 0
+	#DEBUG_VALUE: foo:n <- $ecx
+	#DEBUG_VALUE: foo:c <- $rdx
+	#DEBUG_VALUE: foo:b <- $rsi
+	#DEBUG_VALUE: foo:a <- $rdi
+	.loc	1 0 5                   # loops.c:0:5
+	xorl	%r9d, %r9d
+	jmp	.LBB0_2
+.Ltmp3:
+	.p2align	4, 0x90
+.LBB0_3:                                #   in Loop: Header=BB0_2 Depth=1
+	#DEBUG_VALUE: i <- $r9
+	#DEBUG_VALUE: foo:n <- $ecx
+	#DEBUG_VALUE: foo:c <- $rdx
+	#DEBUG_VALUE: foo:b <- $rsi
+	#DEBUG_VALUE: foo:a <- $rdi
+	.loc	1 2 28                  # loops.c:2:28
+	addq	$1, %r9
+.Ltmp4:
+	#DEBUG_VALUE: i <- $r9
+	.loc	1 2 23                  # loops.c:2:23
+	cmpq	%r8, %r9
+.Ltmp5:
+	.loc	1 2 5                   # loops.c:2:5
+	jge	.LBB0_4
+.Ltmp6:
+.LBB0_2:                                # =>This Loop Header: Depth=1
+                                        #     Child Loop BB0_5 Depth 2
+	#DEBUG_VALUE: foo:n <- $ecx
+	#DEBUG_VALUE: foo:c <- $rdx
+	#DEBUG_VALUE: foo:b <- $rsi
+	#DEBUG_VALUE: foo:a <- $rdi
+	.loc	1 0 5                   # loops.c:0:5
+	movl	%ecx, %eax
+.Ltmp7:
+	#DEBUG_VALUE: j <- 0
+	#DEBUG_VALUE: i <- $r9
+	.loc	1 3 27 is_stmt 1        # loops.c:3:27
+	testl	%ecx, %ecx
+.Ltmp8:
+	.loc	1 3 9 is_stmt 0         # loops.c:3:9
+	jne	.LBB0_5
+	jmp	.LBB0_3
+.Ltmp9:
+	.p2align	4, 0x90
+.LBB0_10:                               #   in Loop: Header=BB0_5 Depth=2
+	#DEBUG_VALUE: i <- $r9
+	#DEBUG_VALUE: j <- 0
+	#DEBUG_VALUE: foo:n <- $ecx
+	#DEBUG_VALUE: foo:c <- $rdx
+	#DEBUG_VALUE: foo:b <- $rsi
+	#DEBUG_VALUE: foo:a <- $rdi
+	#DEBUG_VALUE: j <- [DW_OP_plus_uconst 1, DW_OP_stack_value] undef
+	.loc	1 3 27                  # loops.c:3:27
+	addl	$-1, %eax
+.Ltmp10:
+	.loc	1 3 9                   # loops.c:3:9
+	je	.LBB0_3
+.Ltmp11:
+.LBB0_5:                                #   Parent Loop BB0_2 Depth=1
+                                        # =>  This Inner Loop Header: Depth=2
+	#DEBUG_VALUE: i <- $r9
+	#DEBUG_VALUE: j <- 0
+	#DEBUG_VALUE: foo:n <- $ecx
+	#DEBUG_VALUE: foo:c <- $rdx
+	#DEBUG_VALUE: foo:b <- $rsi
+	#DEBUG_VALUE: foo:a <- $rdi
+	#DEBUG_VALUE: j <- undef
+	.loc	1 4 18 is_stmt 1        # loops.c:4:18
+	cmpl	$1, %ecx
+.Ltmp12:
+	.loc	1 4 16 is_stmt 0        # loops.c:4:16
+	jne	.LBB0_7
+.Ltmp13:
+# %bb.6:                                #   in Loop: Header=BB0_5 Depth=2
+	#DEBUG_VALUE: i <- $r9
+	#DEBUG_VALUE: j <- 0
+	#DEBUG_VALUE: foo:n <- $ecx
+	#DEBUG_VALUE: foo:c <- $rdx
+	#DEBUG_VALUE: foo:b <- $rsi
+	#DEBUG_VALUE: foo:a <- $rdi
+	.loc	1 5 24 is_stmt 1        # loops.c:5:24
+	movss	(%rdx,%r9,4), %xmm0     # xmm0 = mem[0],zero,zero,zero
+	.loc	1 5 22 is_stmt 0        # loops.c:5:22
+	movss	%xmm0, (%rdi,%r9,4)
+.Ltmp14:
+.LBB0_7:                                #   in Loop: Header=BB0_5 Depth=2
+	#DEBUG_VALUE: i <- $r9
+	#DEBUG_VALUE: j <- 0
+	#DEBUG_VALUE: foo:n <- $ecx
+	#DEBUG_VALUE: foo:c <- $rdx
+	#DEBUG_VALUE: foo:b <- $rsi
+	#DEBUG_VALUE: foo:a <- $rdi
+	.loc	1 7 19 is_stmt 1        # loops.c:7:19
+	cmpl	$6, %ecx
+.Ltmp15:
+	.loc	1 7 17 is_stmt 0        # loops.c:7:17
+	jl	.LBB0_10
+.Ltmp16:
+# %bb.8:                                #   in Loop: Header=BB0_5 Depth=2
+	#DEBUG_VALUE: i <- $r9
+	#DEBUG_VALUE: j <- 0
+	#DEBUG_VALUE: foo:n <- $ecx
+	#DEBUG_VALUE: foo:c <- $rdx
+	#DEBUG_VALUE: foo:b <- $rsi
+	#DEBUG_VALUE: foo:a <- $rdi
+	.loc	1 8 24 is_stmt 1        # loops.c:8:24
+	movss	(%rdi,%r9,4), %xmm0     # xmm0 = mem[0],zero,zero,zero
+	.loc	1 8 22 is_stmt 0        # loops.c:8:22
+	movss	%xmm0, (%rdx,%r9,4)
+.Ltmp17:
+	.loc	1 9 16 is_stmt 1        # loops.c:9:16
+	testl	%ecx, %ecx
+.Ltmp18:
+	.loc	1 9 16 is_stmt 0        # loops.c:9:16
+	je	.LBB0_10
+.Ltmp19:
+# %bb.9:                                #   in Loop: Header=BB0_5 Depth=2
+	#DEBUG_VALUE: i <- $r9
+	#DEBUG_VALUE: j <- 0
+	#DEBUG_VALUE: foo:n <- $ecx
+	#DEBUG_VALUE: foo:c <- $rdx
+	#DEBUG_VALUE: foo:b <- $rsi
+	#DEBUG_VALUE: foo:a <- $rdi
+	.loc	1 10 25 is_stmt 1       # loops.c:10:25
+	movss	(%rdi,%r9,4), %xmm0     # xmm0 = mem[0],zero,zero,zero
+	.loc	1 10 23 is_stmt 0       # loops.c:10:23
+	movss	%xmm0, (%rsi,%r9,4)
+	jmp	.LBB0_10
+.Ltmp20:
+.LBB0_4:
+	#DEBUG_VALUE: foo:n <- $ecx
+	#DEBUG_VALUE: foo:c <- $rdx
+	#DEBUG_VALUE: foo:b <- $rsi
+	#DEBUG_VALUE: foo:a <- $rdi
+	.loc	1 15 5 is_stmt 1        # loops.c:15:5
+	xorl	%eax, %eax
+	retq
+.Ltmp21:
+.Lfunc_end0:
+	.size	foo, .Lfunc_end0-foo
+	.cfi_endproc
+                                        # -- End function
+	.globl	bar                     # -- Begin function bar
+	.p2align	4, 0x90
+	.type	bar,@function
+bar:                                    # @bar
+.Lfunc_begin1:
+	.loc	1 18 0                  # loops.c:18:0
+	.cfi_startproc
+# %bb.0:
+	#DEBUG_VALUE: bar:a <- $rdi
+	#DEBUG_VALUE: bar:a <- $rdi
+	#DEBUG_VALUE: bar:b <- $rsi
+	#DEBUG_VALUE: bar:b <- $rsi
+	#DEBUG_VALUE: bar:c <- $rdx
+	#DEBUG_VALUE: bar:n <- $ecx
+	#DEBUG_VALUE: bar:n <- $ecx
+	#DEBUG_VALUE: i <- 0
+	.loc	1 19 10 prologue_end    # loops.c:19:10
+	movslq	%ecx, %rax
+.Ltmp22:
+	.loc	1 19 23 is_stmt 0       # loops.c:19:23
+	testq	%rax, %rax
+.Ltmp23:
+	.loc	1 19 5                  # loops.c:19:5
+	jle	.LBB1_3
+.Ltmp24:
+# %bb.1:                                # %.lr.ph
+	#DEBUG_VALUE: i <- 0
+	#DEBUG_VALUE: bar:n <- $ecx
+	#DEBUG_VALUE: bar:c <- $rdx
+	#DEBUG_VALUE: bar:b <- $rsi
+	#DEBUG_VALUE: bar:a <- $rdi
+	.loc	1 0 5                   # loops.c:0:5
+	xorl	%ecx, %ecx
+.Ltmp25:
+	.p2align	4, 0x90
+.LBB1_2:                                # =>This Inner Loop Header: Depth=1
+	#DEBUG_VALUE: bar:c <- $rdx
+	#DEBUG_VALUE: bar:b <- $rsi
+	#DEBUG_VALUE: bar:a <- $rdi
+	#DEBUG_VALUE: i <- $rcx
+	.loc	1 20 14 is_stmt 1       # loops.c:20:14
+	movss	(%rdi,%rcx,4), %xmm0    # xmm0 = mem[0],zero,zero,zero
+	.loc	1 20 19 is_stmt 0       # loops.c:20:19
+	mulss	(%rsi,%rcx,4), %xmm0
+	.loc	1 20 12                 # loops.c:20:12
+	movss	%xmm0, (%rdi,%rcx,4)
+.Ltmp26:
+	.loc	1 19 28 is_stmt 1       # loops.c:19:28
+	addq	$1, %rcx
+.Ltmp27:
+	#DEBUG_VALUE: i <- $rcx
+	.loc	1 19 23 is_stmt 0       # loops.c:19:23
+	cmpq	%rax, %rcx
+.Ltmp28:
+	.loc	1 19 5                  # loops.c:19:5
+	jl	.LBB1_2
+.Ltmp29:
+.LBB1_3:
+	#DEBUG_VALUE: bar:c <- $rdx
+	#DEBUG_VALUE: bar:b <- $rsi
+	#DEBUG_VALUE: bar:a <- $rdi
+	#DEBUG_VALUE: i <- 0
+	.loc	1 22 23 is_stmt 1       # loops.c:22:23
+	testq	%rax, %rax
+.Ltmp30:
+	.loc	1 22 5 is_stmt 0        # loops.c:22:5
+	jle	.LBB1_6
+.Ltmp31:
+# %bb.4:                                # %.lr.ph7
+	#DEBUG_VALUE: i <- 0
+	#DEBUG_VALUE: bar:c <- $rdx
+	#DEBUG_VALUE: bar:b <- $rsi
+	#DEBUG_VALUE: bar:a <- $rdi
+	.loc	1 0 5                   # loops.c:0:5
+	xorl	%ecx, %ecx
+.Ltmp32:
+	.p2align	4, 0x90
+.LBB1_5:                                # =>This Inner Loop Header: Depth=1
+	#DEBUG_VALUE: bar:c <- $rdx
+	#DEBUG_VALUE: bar:b <- $rsi
+	#DEBUG_VALUE: bar:a <- $rdi
+	#DEBUG_VALUE: i <- $rcx
+	.loc	1 23 12 is_stmt 1       # loops.c:23:12
+	movl	$0, (%rdi,%rcx,4)
+.Ltmp33:
+	#DEBUG_VALUE: d <- undef
+	.loc	1 22 28                 # loops.c:22:28
+	addq	$1, %rcx
+.Ltmp34:
+	#DEBUG_VALUE: i <- $rcx
+	.loc	1 22 23 is_stmt 0       # loops.c:22:23
+	cmpq	%rax, %rcx
+.Ltmp35:
+	.loc	1 22 5                  # loops.c:22:5
+	jl	.LBB1_5
+.Ltmp36:
+.LBB1_6:
+	#DEBUG_VALUE: bar:c <- $rdx
+	#DEBUG_VALUE: bar:b <- $rsi
+	#DEBUG_VALUE: bar:a <- $rdi
+	.loc	1 27 5 is_stmt 1        # loops.c:27:5
+	xorl	%eax, %eax
+	retq
+.Ltmp37:
+.Lfunc_end1:
+	.size	bar, .Lfunc_end1-bar
+	.cfi_endproc
+                                        # -- End function
+	.globl	bar2                    # -- Begin function bar2
+	.p2align	4, 0x90
+	.type	bar2,@function
+bar2:                                   # @bar2
+.Lfunc_begin2:
+	.loc	1 31 0                  # loops.c:31:0
+	.cfi_startproc
+# %bb.0:
+	#DEBUG_VALUE: bar2:a <- $rdi
+	#DEBUG_VALUE: bar2:a <- $rdi
+	#DEBUG_VALUE: bar2:b <- $rsi
+	#DEBUG_VALUE: bar2:b <- $rsi
+	#DEBUG_VALUE: bar2:c <- $rdx
+	#DEBUG_VALUE: bar2:c <- $rdx
+	#DEBUG_VALUE: bar2:n <- $ecx
+	#DEBUG_VALUE: bar2:n <- $ecx
+	#DEBUG_VALUE: i <- 0
+	.loc	1 33 11 prologue_end    # loops.c:33:11
+	movslq	%ecx, %r8
+.Ltmp38:
+	.loc	1 33 24 is_stmt 0       # loops.c:33:24
+	testq	%r8, %r8
+.Ltmp39:
+	.loc	1 33 6                  # loops.c:33:6
+	jle	.LBB2_5
+.Ltmp40:
+# %bb.1:                                # %.lr.ph
+	#DEBUG_VALUE: i <- 0
+	#DEBUG_VALUE: bar2:n <- $ecx
+	#DEBUG_VALUE: bar2:c <- $rdx
+	#DEBUG_VALUE: bar2:b <- $rsi
+	#DEBUG_VALUE: bar2:a <- $rdi
+	.loc	1 0 6                   # loops.c:0:6
+	xorl	%eax, %eax
+	jmp	.LBB2_2
+.Ltmp41:
+	.p2align	4, 0x90
+.LBB2_4:                                #   in Loop: Header=BB2_2 Depth=1
+	#DEBUG_VALUE: i <- $rax
+	#DEBUG_VALUE: bar2:n <- $ecx
+	#DEBUG_VALUE: bar2:c <- $rdx
+	#DEBUG_VALUE: bar2:b <- $rsi
+	#DEBUG_VALUE: bar2:a <- $rdi
+	.loc	1 33 29                 # loops.c:33:29
+	addq	$1, %rax
+.Ltmp42:
+	#DEBUG_VALUE: i <- $rax
+	.loc	1 33 24                 # loops.c:33:24
+	cmpq	%r8, %rax
+.Ltmp43:
+	.loc	1 33 6                  # loops.c:33:6
+	jge	.LBB2_5
+.Ltmp44:
+.LBB2_2:                                # =>This Inner Loop Header: Depth=1
+	#DEBUG_VALUE: bar2:n <- $ecx
+	#DEBUG_VALUE: bar2:c <- $rdx
+	#DEBUG_VALUE: bar2:b <- $rsi
+	#DEBUG_VALUE: bar2:a <- $rdi
+	#DEBUG_VALUE: i <- $rax
+	.loc	1 34 14 is_stmt 1       # loops.c:34:14
+	movss	(%rsi,%rax,4), %xmm0    # xmm0 = mem[0],zero,zero,zero
+	.loc	1 34 19 is_stmt 0       # loops.c:34:19
+	mulss	(%rdx,%rax,4), %xmm0
+	.loc	1 34 12                 # loops.c:34:12
+	movss	%xmm0, (%rdi,%rax,4)
+.Ltmp45:
+	.loc	1 36 10 is_stmt 1       # loops.c:36:10
+	testl	%ecx, %ecx
+.Ltmp46:
+	.loc	1 36 10 is_stmt 0       # loops.c:36:10
+	je	.LBB2_4
+.Ltmp47:
+# %bb.3:                                #   in Loop: Header=BB2_2 Depth=1
+	#DEBUG_VALUE: i <- $rax
+	#DEBUG_VALUE: bar2:n <- $ecx
+	#DEBUG_VALUE: bar2:c <- $rdx
+	#DEBUG_VALUE: bar2:b <- $rsi
+	#DEBUG_VALUE: bar2:a <- $rdi
+	.loc	1 37 16 is_stmt 1       # loops.c:37:16
+	movss	-4(%rdi,%rax,4), %xmm0  # xmm0 = mem[0],zero,zero,zero
+	.loc	1 37 14 is_stmt 0       # loops.c:37:14
+	movss	%xmm0, (%rdx,%rax,4)
+	jmp	.LBB2_4
+.Ltmp48:
+.LBB2_5:
+	#DEBUG_VALUE: bar2:n <- $ecx
+	#DEBUG_VALUE: bar2:c <- $rdx
+	#DEBUG_VALUE: bar2:b <- $rsi
+	#DEBUG_VALUE: bar2:a <- $rdi
+	.loc	1 41 5 is_stmt 1        # loops.c:41:5
+	xorl	%eax, %eax
+	retq
+.Ltmp49:
+.Lfunc_end2:
+	.size	bar2, .Lfunc_end2-bar2
+	.cfi_endproc
+                                        # -- End function
+	.globl	test                    # -- Begin function test
+	.p2align	4, 0x90
+	.type	test,@function
+test:                                   # @test
+.Lfunc_begin3:
+	.loc	1 44 0                  # loops.c:44:0
+	.cfi_startproc
+# %bb.0:
+	#DEBUG_VALUE: test:number <- $rdi
+	movl	$10, %eax
+.Ltmp50:
+	#DEBUG_VALUE: i <- 0
+	#DEBUG_VALUE: test:number <- $rdi
+	jmp	.LBB3_1
+.Ltmp51:
+	.p2align	4, 0x90
+.LBB3_3:                                #   in Loop: Header=BB3_1 Depth=1
+	#DEBUG_VALUE: i <- 0
+	#DEBUG_VALUE: test:number <- $rdi
+	.loc	1 49 17 prologue_end    # loops.c:49:17
+	movl	$0, (%rdi)
+.Ltmp52:
+	#DEBUG_VALUE: i <- [DW_OP_plus_uconst 1, DW_OP_stack_value] undef
+	.loc	1 45 22                 # loops.c:45:22
+	addl	$-1, %eax
+.Ltmp53:
+	.loc	1 45 4 is_stmt 0        # loops.c:45:4
+	je	.LBB3_5
+.Ltmp54:
+.LBB3_1:                                # =>This Inner Loop Header: Depth=1
+	#DEBUG_VALUE: i <- 0
+	#DEBUG_VALUE: test:number <- $rdi
+	#DEBUG_VALUE: i <- undef
+	.loc	1 46 8 is_stmt 1        # loops.c:46:8
+	cmpl	$0, (%rdi)
+.Ltmp55:
+	.loc	1 46 8 is_stmt 0        # loops.c:46:8
+	je	.LBB3_3
+.Ltmp56:
+# %bb.2:                                #   in Loop: Header=BB3_1 Depth=1
+	#DEBUG_VALUE: i <- 0
+	#DEBUG_VALUE: test:number <- $rdi
+	.loc	1 47 16 is_stmt 1       # loops.c:47:16
+	movl	$1, (%rdi)
+.Ltmp57:
+	#DEBUG_VALUE: i <- [DW_OP_plus_uconst 1, DW_OP_stack_value] undef
+	.loc	1 45 22                 # loops.c:45:22
+	addl	$-1, %eax
+.Ltmp58:
+	.loc	1 45 4 is_stmt 0        # loops.c:45:4
+	jne	.LBB3_1
+.Ltmp59:
+.LBB3_5:
+	#DEBUG_VALUE: test:number <- $rdi
+	.loc	1 52 5 is_stmt 1        # loops.c:52:5
+	xorl	%eax, %eax
+	retq
+.Ltmp60:
+.Lfunc_end3:
+	.size	test, .Lfunc_end3-test
+	.cfi_endproc
+                                        # -- End function
+	.section	.debug_str,"MS",@progbits,1
+.Linfo_string0:
+	.asciz	"clang version 10.0.0-4ubuntu1 " # string offset=0
+.Linfo_string1:
+	.asciz	"loops.c"               # string offset=31
+.Linfo_string2:
+	.asciz	"/home/rouzbeh/Graduate/Research/LLVM/ALC/test" # string offset=39
+.Linfo_string3:
+	.asciz	"foo"                   # string offset=85
+.Linfo_string4:
+	.asciz	"int"                   # string offset=89
+.Linfo_string5:
+	.asciz	"bar"                   # string offset=93
+.Linfo_string6:
+	.asciz	"bar2"                  # string offset=97
+.Linfo_string7:
+	.asciz	"test"                  # string offset=102
+.Linfo_string8:
+	.asciz	"a"                     # string offset=107
+.Linfo_string9:
+	.asciz	"float"                 # string offset=109
+.Linfo_string10:
+	.asciz	"b"                     # string offset=115
+.Linfo_string11:
+	.asciz	"c"                     # string offset=117
+.Linfo_string12:
+	.asciz	"n"                     # string offset=119
+.Linfo_string13:
+	.asciz	"i"                     # string offset=121
+.Linfo_string14:
+	.asciz	"j"                     # string offset=123
+.Linfo_string15:
+	.asciz	"d"                     # string offset=125
+.Linfo_string16:
+	.asciz	"number"                # string offset=127
+	.section	.debug_loc,"",@progbits
+.Ldebug_loc0:
+	.quad	.Lfunc_begin0-.Lfunc_begin0
+	.quad	.Ltmp3-.Lfunc_begin0
+	.short	3                       # Loc expr size
+	.byte	17                      # DW_OP_consts
+	.byte	0                       # 0
+	.byte	159                     # DW_OP_stack_value
+	.quad	.Ltmp3-.Lfunc_begin0
+	.quad	.Ltmp6-.Lfunc_begin0
+	.short	1                       # Loc expr size
+	.byte	89                      # DW_OP_reg9
+	.quad	.Ltmp7-.Lfunc_begin0
+	.quad	.Ltmp20-.Lfunc_begin0
+	.short	1                       # Loc expr size
+	.byte	89                      # DW_OP_reg9
+	.quad	0
+	.quad	0
+.Ldebug_loc1:
+	.quad	.Ltmp7-.Lfunc_begin0
+	.quad	.Ltmp9-.Lfunc_begin0
+	.short	3                       # Loc expr size
+	.byte	17                      # DW_OP_consts
+	.byte	0                       # 0
+	.byte	159                     # DW_OP_stack_value
+	.quad	.Ltmp13-.Lfunc_begin0
+	.quad	.Ltmp20-.Lfunc_begin0
+	.short	3                       # Loc expr size
+	.byte	17                      # DW_OP_consts
+	.byte	0                       # 0
+	.byte	159                     # DW_OP_stack_value
+	.quad	0
+	.quad	0
+.Ldebug_loc2:
+	.quad	.Lfunc_begin1-.Lfunc_begin0
+	.quad	.Ltmp25-.Lfunc_begin0
+	.short	1                       # Loc expr size
+	.byte	82                      # super-register DW_OP_reg2
+	.quad	0
+	.quad	0
+.Ldebug_loc3:
+	.quad	.Lfunc_begin1-.Lfunc_begin0
+	.quad	.Ltmp25-.Lfunc_begin0
+	.short	3                       # Loc expr size
+	.byte	17                      # DW_OP_consts
+	.byte	0                       # 0
+	.byte	159                     # DW_OP_stack_value
+	.quad	.Ltmp25-.Lfunc_begin0
+	.quad	.Ltmp29-.Lfunc_begin0
+	.short	1                       # Loc expr size
+	.byte	82                      # DW_OP_reg2
+	.quad	0
+	.quad	0
+.Ldebug_loc4:
+	.quad	.Ltmp29-.Lfunc_begin0
+	.quad	.Ltmp32-.Lfunc_begin0
+	.short	3                       # Loc expr size
+	.byte	17                      # DW_OP_consts
+	.byte	0                       # 0
+	.byte	159                     # DW_OP_stack_value
+	.quad	.Ltmp32-.Lfunc_begin0
+	.quad	.Ltmp36-.Lfunc_begin0
+	.short	1                       # Loc expr size
+	.byte	82                      # DW_OP_reg2
+	.quad	0
+	.quad	0
+.Ldebug_loc5:
+	.quad	.Lfunc_begin2-.Lfunc_begin0
+	.quad	.Ltmp41-.Lfunc_begin0
+	.short	3                       # Loc expr size
+	.byte	17                      # DW_OP_consts
+	.byte	0                       # 0
+	.byte	159                     # DW_OP_stack_value
+	.quad	.Ltmp41-.Lfunc_begin0
+	.quad	.Ltmp48-.Lfunc_begin0
+	.short	1                       # Loc expr size
+	.byte	80                      # DW_OP_reg0
+	.quad	0
+	.quad	0
+.Ldebug_loc6:
+	.quad	.Lfunc_begin3-.Lfunc_begin0
+	.quad	.Lfunc_end3-.Lfunc_begin0
+	.short	1                       # Loc expr size
+	.byte	85                      # DW_OP_reg5
+	.quad	0
+	.quad	0
+.Ldebug_loc7:
+	.quad	.Ltmp50-.Lfunc_begin0
+	.quad	.Ltmp52-.Lfunc_begin0
+	.short	3                       # Loc expr size
+	.byte	17                      # DW_OP_consts
+	.byte	0                       # 0
+	.byte	159                     # DW_OP_stack_value
+	.quad	.Ltmp56-.Lfunc_begin0
+	.quad	.Ltmp57-.Lfunc_begin0
+	.short	3                       # Loc expr size
+	.byte	17                      # DW_OP_consts
+	.byte	0                       # 0
+	.byte	159                     # DW_OP_stack_value
+	.quad	0
+	.quad	0
+	.section	.debug_abbrev,"",@progbits
+	.byte	1                       # Abbreviation Code
+	.byte	17                      # DW_TAG_compile_unit
+	.byte	1                       # DW_CHILDREN_yes
+	.byte	37                      # DW_AT_producer
+	.byte	14                      # DW_FORM_strp
+	.byte	19                      # DW_AT_language
+	.byte	5                       # DW_FORM_data2
+	.byte	3                       # DW_AT_name
+	.byte	14                      # DW_FORM_strp
+	.byte	16                      # DW_AT_stmt_list
+	.byte	23                      # DW_FORM_sec_offset
+	.byte	27                      # DW_AT_comp_dir
+	.byte	14                      # DW_FORM_strp
+	.byte	17                      # DW_AT_low_pc
+	.byte	1                       # DW_FORM_addr
+	.byte	18                      # DW_AT_high_pc
+	.byte	6                       # DW_FORM_data4
+	.byte	0                       # EOM(1)
+	.byte	0                       # EOM(2)
+	.byte	2                       # Abbreviation Code
+	.byte	46                      # DW_TAG_subprogram
+	.byte	1                       # DW_CHILDREN_yes
+	.byte	17                      # DW_AT_low_pc
+	.byte	1                       # DW_FORM_addr
+	.byte	18                      # DW_AT_high_pc
+	.byte	6                       # DW_FORM_data4
+	.byte	64                      # DW_AT_frame_base
+	.byte	24                      # DW_FORM_exprloc
+	.ascii	"\227B"                 # DW_AT_GNU_all_call_sites
+	.byte	25                      # DW_FORM_flag_present
+	.byte	3                       # DW_AT_name
+	.byte	14                      # DW_FORM_strp
+	.byte	58                      # DW_AT_decl_file
+	.byte	11                      # DW_FORM_data1
+	.byte	59                      # DW_AT_decl_line
+	.byte	11                      # DW_FORM_data1
+	.byte	39                      # DW_AT_prototyped
+	.byte	25                      # DW_FORM_flag_present
+	.byte	73                      # DW_AT_type
+	.byte	19                      # DW_FORM_ref4
+	.byte	63                      # DW_AT_external
+	.byte	25                      # DW_FORM_flag_present
+	.byte	0                       # EOM(1)
+	.byte	0                       # EOM(2)
+	.byte	3                       # Abbreviation Code
+	.byte	5                       # DW_TAG_formal_parameter
+	.byte	0                       # DW_CHILDREN_no
+	.byte	2                       # DW_AT_location
+	.byte	24                      # DW_FORM_exprloc
+	.byte	3                       # DW_AT_name
+	.byte	14                      # DW_FORM_strp
+	.byte	58                      # DW_AT_decl_file
+	.byte	11                      # DW_FORM_data1
+	.byte	59                      # DW_AT_decl_line
+	.byte	11                      # DW_FORM_data1
+	.byte	73                      # DW_AT_type
+	.byte	19                      # DW_FORM_ref4
+	.byte	0                       # EOM(1)
+	.byte	0                       # EOM(2)
+	.byte	4                       # Abbreviation Code
+	.byte	11                      # DW_TAG_lexical_block
+	.byte	1                       # DW_CHILDREN_yes
+	.byte	17                      # DW_AT_low_pc
+	.byte	1                       # DW_FORM_addr
+	.byte	18                      # DW_AT_high_pc
+	.byte	6                       # DW_FORM_data4
+	.byte	0                       # EOM(1)
+	.byte	0                       # EOM(2)
+	.byte	5                       # Abbreviation Code
+	.byte	52                      # DW_TAG_variable
+	.byte	0                       # DW_CHILDREN_no
+	.byte	2                       # DW_AT_location
+	.byte	23                      # DW_FORM_sec_offset
+	.byte	3                       # DW_AT_name
+	.byte	14                      # DW_FORM_strp
+	.byte	58                      # DW_AT_decl_file
+	.byte	11                      # DW_FORM_data1
+	.byte	59                      # DW_AT_decl_line
+	.byte	11                      # DW_FORM_data1
+	.byte	73                      # DW_AT_type
+	.byte	19                      # DW_FORM_ref4
+	.byte	0                       # EOM(1)
+	.byte	0                       # EOM(2)
+	.byte	6                       # Abbreviation Code
+	.byte	5                       # DW_TAG_formal_parameter
+	.byte	0                       # DW_CHILDREN_no
+	.byte	2                       # DW_AT_location
+	.byte	23                      # DW_FORM_sec_offset
+	.byte	3                       # DW_AT_name
+	.byte	14                      # DW_FORM_strp
+	.byte	58                      # DW_AT_decl_file
+	.byte	11                      # DW_FORM_data1
+	.byte	59                      # DW_AT_decl_line
+	.byte	11                      # DW_FORM_data1
+	.byte	73                      # DW_AT_type
+	.byte	19                      # DW_FORM_ref4
+	.byte	0                       # EOM(1)
+	.byte	0                       # EOM(2)
+	.byte	7                       # Abbreviation Code
+	.byte	52                      # DW_TAG_variable
+	.byte	0                       # DW_CHILDREN_no
+	.byte	3                       # DW_AT_name
+	.byte	14                      # DW_FORM_strp
+	.byte	58                      # DW_AT_decl_file
+	.byte	11                      # DW_FORM_data1
+	.byte	59                      # DW_AT_decl_line
+	.byte	11                      # DW_FORM_data1
+	.byte	73                      # DW_AT_type
+	.byte	19                      # DW_FORM_ref4
+	.byte	0                       # EOM(1)
+	.byte	0                       # EOM(2)
+	.byte	8                       # Abbreviation Code
+	.byte	36                      # DW_TAG_base_type
+	.byte	0                       # DW_CHILDREN_no
+	.byte	3                       # DW_AT_name
+	.byte	14                      # DW_FORM_strp
+	.byte	62                      # DW_AT_encoding
+	.byte	11                      # DW_FORM_data1
+	.byte	11                      # DW_AT_byte_size
+	.byte	11                      # DW_FORM_data1
+	.byte	0                       # EOM(1)
+	.byte	0                       # EOM(2)
+	.byte	9                       # Abbreviation Code
+	.byte	15                      # DW_TAG_pointer_type
+	.byte	0                       # DW_CHILDREN_no
+	.byte	73                      # DW_AT_type
+	.byte	19                      # DW_FORM_ref4
+	.byte	0                       # EOM(1)
+	.byte	0                       # EOM(2)
+	.byte	0                       # EOM(3)
+	.section	.debug_info,"",@progbits
+.Lcu_begin0:
+	.long	.Ldebug_info_end0-.Ldebug_info_start0 # Length of Unit
+.Ldebug_info_start0:
+	.short	4                       # DWARF version number
+	.long	.debug_abbrev           # Offset Into Abbrev. Section
+	.byte	8                       # Address Size (in bytes)
+	.byte	1                       # Abbrev [1] 0xb:0x214 DW_TAG_compile_unit
+	.long	.Linfo_string0          # DW_AT_producer
+	.short	12                      # DW_AT_language
+	.long	.Linfo_string1          # DW_AT_name
+	.long	.Lline_table_start0     # DW_AT_stmt_list
+	.long	.Linfo_string2          # DW_AT_comp_dir
+	.quad	.Lfunc_begin0           # DW_AT_low_pc
+	.long	.Lfunc_end3-.Lfunc_begin0 # DW_AT_high_pc
+	.byte	2                       # Abbrev [2] 0x2a:0x88 DW_TAG_subprogram
+	.quad	.Lfunc_begin0           # DW_AT_low_pc
+	.long	.Lfunc_end0-.Lfunc_begin0 # DW_AT_high_pc
+	.byte	1                       # DW_AT_frame_base
+	.byte	87
+                                        # DW_AT_GNU_all_call_sites
+	.long	.Linfo_string3          # DW_AT_name
+	.byte	1                       # DW_AT_decl_file
+	.byte	1                       # DW_AT_decl_line
+                                        # DW_AT_prototyped
+	.long	518                     # DW_AT_type
+                                        # DW_AT_external
+	.byte	3                       # Abbrev [3] 0x43:0xd DW_TAG_formal_parameter
+	.byte	1                       # DW_AT_location
+	.byte	85
+	.long	.Linfo_string8          # DW_AT_name
+	.byte	1                       # DW_AT_decl_file
+	.byte	1                       # DW_AT_decl_line
+	.long	525                     # DW_AT_type
+	.byte	3                       # Abbrev [3] 0x50:0xd DW_TAG_formal_parameter
+	.byte	1                       # DW_AT_location
+	.byte	84
+	.long	.Linfo_string10         # DW_AT_name
+	.byte	1                       # DW_AT_decl_file
+	.byte	1                       # DW_AT_decl_line
+	.long	525                     # DW_AT_type
+	.byte	3                       # Abbrev [3] 0x5d:0xd DW_TAG_formal_parameter
+	.byte	1                       # DW_AT_location
+	.byte	81
+	.long	.Linfo_string11         # DW_AT_name
+	.byte	1                       # DW_AT_decl_file
+	.byte	1                       # DW_AT_decl_line
+	.long	525                     # DW_AT_type
+	.byte	3                       # Abbrev [3] 0x6a:0xd DW_TAG_formal_parameter
+	.byte	1                       # DW_AT_location
+	.byte	82
+	.long	.Linfo_string12         # DW_AT_name
+	.byte	1                       # DW_AT_decl_file
+	.byte	1                       # DW_AT_decl_line
+	.long	518                     # DW_AT_type
+	.byte	4                       # Abbrev [4] 0x77:0x3a DW_TAG_lexical_block
+	.quad	.Lfunc_begin0           # DW_AT_low_pc
+	.long	.Ltmp20-.Lfunc_begin0   # DW_AT_high_pc
+	.byte	5                       # Abbrev [5] 0x84:0xf DW_TAG_variable
+	.long	.Ldebug_loc0            # DW_AT_location
+	.long	.Linfo_string13         # DW_AT_name
+	.byte	1                       # DW_AT_decl_file
+	.byte	2                       # DW_AT_decl_line
+	.long	518                     # DW_AT_type
+	.byte	4                       # Abbrev [4] 0x93:0x1d DW_TAG_lexical_block
+	.quad	.Ltmp7                  # DW_AT_low_pc
+	.long	.Ltmp20-.Ltmp7          # DW_AT_high_pc
+	.byte	5                       # Abbrev [5] 0xa0:0xf DW_TAG_variable
+	.long	.Ldebug_loc1            # DW_AT_location
+	.long	.Linfo_string14         # DW_AT_name
+	.byte	1                       # DW_AT_decl_file
+	.byte	3                       # DW_AT_decl_line
+	.long	518                     # DW_AT_type
+	.byte	0                       # End Of Children Mark
+	.byte	0                       # End Of Children Mark
+	.byte	0                       # End Of Children Mark
+	.byte	2                       # Abbrev [2] 0xb2:0xa3 DW_TAG_subprogram
+	.quad	.Lfunc_begin1           # DW_AT_low_pc
+	.long	.Lfunc_end1-.Lfunc_begin1 # DW_AT_high_pc
+	.byte	1                       # DW_AT_frame_base
+	.byte	87
+                                        # DW_AT_GNU_all_call_sites
+	.long	.Linfo_string5          # DW_AT_name
+	.byte	1                       # DW_AT_decl_file
+	.byte	18                      # DW_AT_decl_line
+                                        # DW_AT_prototyped
+	.long	518                     # DW_AT_type
+                                        # DW_AT_external
+	.byte	3                       # Abbrev [3] 0xcb:0xd DW_TAG_formal_parameter
+	.byte	1                       # DW_AT_location
+	.byte	85
+	.long	.Linfo_string8          # DW_AT_name
+	.byte	1                       # DW_AT_decl_file
+	.byte	18                      # DW_AT_decl_line
+	.long	525                     # DW_AT_type
+	.byte	3                       # Abbrev [3] 0xd8:0xd DW_TAG_formal_parameter
+	.byte	1                       # DW_AT_location
+	.byte	84
+	.long	.Linfo_string10         # DW_AT_name
+	.byte	1                       # DW_AT_decl_file
+	.byte	18                      # DW_AT_decl_line
+	.long	525                     # DW_AT_type
+	.byte	3                       # Abbrev [3] 0xe5:0xd DW_TAG_formal_parameter
+	.byte	1                       # DW_AT_location
+	.byte	81
+	.long	.Linfo_string11         # DW_AT_name
+	.byte	1                       # DW_AT_decl_file
+	.byte	18                      # DW_AT_decl_line
+	.long	525                     # DW_AT_type
+	.byte	6                       # Abbrev [6] 0xf2:0xf DW_TAG_formal_parameter
+	.long	.Ldebug_loc2            # DW_AT_location
+	.long	.Linfo_string12         # DW_AT_name
+	.byte	1                       # DW_AT_decl_file
+	.byte	18                      # DW_AT_decl_line
+	.long	518                     # DW_AT_type
+	.byte	4                       # Abbrev [4] 0x101:0x1d DW_TAG_lexical_block
+	.quad	.Lfunc_begin1           # DW_AT_low_pc
+	.long	.Ltmp29-.Lfunc_begin1   # DW_AT_high_pc
+	.byte	5                       # Abbrev [5] 0x10e:0xf DW_TAG_variable
+	.long	.Ldebug_loc3            # DW_AT_location
+	.long	.Linfo_string13         # DW_AT_name
+	.byte	1                       # DW_AT_decl_file
+	.byte	19                      # DW_AT_decl_line
+	.long	518                     # DW_AT_type
+	.byte	0                       # End Of Children Mark
+	.byte	4                       # Abbrev [4] 0x11e:0x36 DW_TAG_lexical_block
+	.quad	.Ltmp29                 # DW_AT_low_pc
+	.long	.Ltmp36-.Ltmp29         # DW_AT_high_pc
+	.byte	5                       # Abbrev [5] 0x12b:0xf DW_TAG_variable
+	.long	.Ldebug_loc4            # DW_AT_location
+	.long	.Linfo_string13         # DW_AT_name
+	.byte	1                       # DW_AT_decl_file
+	.byte	22                      # DW_AT_decl_line
+	.long	518                     # DW_AT_type
+	.byte	4                       # Abbrev [4] 0x13a:0x19 DW_TAG_lexical_block
+	.quad	.Ltmp32                 # DW_AT_low_pc
+	.long	.Ltmp33-.Ltmp32         # DW_AT_high_pc
+	.byte	7                       # Abbrev [7] 0x147:0xb DW_TAG_variable
+	.long	.Linfo_string15         # DW_AT_name
+	.byte	1                       # DW_AT_decl_file
+	.byte	24                      # DW_AT_decl_line
+	.long	518                     # DW_AT_type
+	.byte	0                       # End Of Children Mark
+	.byte	0                       # End Of Children Mark
+	.byte	0                       # End Of Children Mark
+	.byte	2                       # Abbrev [2] 0x155:0x6b DW_TAG_subprogram
+	.quad	.Lfunc_begin2           # DW_AT_low_pc
+	.long	.Lfunc_end2-.Lfunc_begin2 # DW_AT_high_pc
+	.byte	1                       # DW_AT_frame_base
+	.byte	87
+                                        # DW_AT_GNU_all_call_sites
+	.long	.Linfo_string6          # DW_AT_name
+	.byte	1                       # DW_AT_decl_file
+	.byte	31                      # DW_AT_decl_line
+                                        # DW_AT_prototyped
+	.long	518                     # DW_AT_type
+                                        # DW_AT_external
+	.byte	3                       # Abbrev [3] 0x16e:0xd DW_TAG_formal_parameter
+	.byte	1                       # DW_AT_location
+	.byte	85
+	.long	.Linfo_string8          # DW_AT_name
+	.byte	1                       # DW_AT_decl_file
+	.byte	31                      # DW_AT_decl_line
+	.long	525                     # DW_AT_type
+	.byte	3                       # Abbrev [3] 0x17b:0xd DW_TAG_formal_parameter
+	.byte	1                       # DW_AT_location
+	.byte	84
+	.long	.Linfo_string10         # DW_AT_name
+	.byte	1                       # DW_AT_decl_file
+	.byte	31                      # DW_AT_decl_line
+	.long	525                     # DW_AT_type
+	.byte	3                       # Abbrev [3] 0x188:0xd DW_TAG_formal_parameter
+	.byte	1                       # DW_AT_location
+	.byte	81
+	.long	.Linfo_string11         # DW_AT_name
+	.byte	1                       # DW_AT_decl_file
+	.byte	31                      # DW_AT_decl_line
+	.long	525                     # DW_AT_type
+	.byte	3                       # Abbrev [3] 0x195:0xd DW_TAG_formal_parameter
+	.byte	1                       # DW_AT_location
+	.byte	82
+	.long	.Linfo_string12         # DW_AT_name
+	.byte	1                       # DW_AT_decl_file
+	.byte	31                      # DW_AT_decl_line
+	.long	518                     # DW_AT_type
+	.byte	4                       # Abbrev [4] 0x1a2:0x1d DW_TAG_lexical_block
+	.quad	.Lfunc_begin2           # DW_AT_low_pc
+	.long	.Ltmp48-.Lfunc_begin2   # DW_AT_high_pc
+	.byte	5                       # Abbrev [5] 0x1af:0xf DW_TAG_variable
+	.long	.Ldebug_loc5            # DW_AT_location
+	.long	.Linfo_string13         # DW_AT_name
+	.byte	1                       # DW_AT_decl_file
+	.byte	33                      # DW_AT_decl_line
+	.long	518                     # DW_AT_type
+	.byte	0                       # End Of Children Mark
+	.byte	0                       # End Of Children Mark
+	.byte	2                       # Abbrev [2] 0x1c0:0x46 DW_TAG_subprogram
+	.quad	.Lfunc_begin3           # DW_AT_low_pc
+	.long	.Lfunc_end3-.Lfunc_begin3 # DW_AT_high_pc
+	.byte	1                       # DW_AT_frame_base
+	.byte	87
+                                        # DW_AT_GNU_all_call_sites
+	.long	.Linfo_string7          # DW_AT_name
+	.byte	1                       # DW_AT_decl_file
+	.byte	44                      # DW_AT_decl_line
+                                        # DW_AT_prototyped
+	.long	518                     # DW_AT_type
+                                        # DW_AT_external
+	.byte	6                       # Abbrev [6] 0x1d9:0xf DW_TAG_formal_parameter
+	.long	.Ldebug_loc6            # DW_AT_location
+	.long	.Linfo_string16         # DW_AT_name
+	.byte	1                       # DW_AT_decl_file
+	.byte	44                      # DW_AT_decl_line
+	.long	537                     # DW_AT_type
+	.byte	4                       # Abbrev [4] 0x1e8:0x1d DW_TAG_lexical_block
+	.quad	.Ltmp51                 # DW_AT_low_pc
+	.long	.Ltmp59-.Ltmp51         # DW_AT_high_pc
+	.byte	5                       # Abbrev [5] 0x1f5:0xf DW_TAG_variable
+	.long	.Ldebug_loc7            # DW_AT_location
+	.long	.Linfo_string13         # DW_AT_name
+	.byte	1                       # DW_AT_decl_file
+	.byte	45                      # DW_AT_decl_line
+	.long	518                     # DW_AT_type
+	.byte	0                       # End Of Children Mark
+	.byte	0                       # End Of Children Mark
+	.byte	8                       # Abbrev [8] 0x206:0x7 DW_TAG_base_type
+	.long	.Linfo_string4          # DW_AT_name
+	.byte	5                       # DW_AT_encoding
+	.byte	4                       # DW_AT_byte_size
+	.byte	9                       # Abbrev [9] 0x20d:0x5 DW_TAG_pointer_type
+	.long	530                     # DW_AT_type
+	.byte	8                       # Abbrev [8] 0x212:0x7 DW_TAG_base_type
+	.long	.Linfo_string9          # DW_AT_name
+	.byte	4                       # DW_AT_encoding
+	.byte	4                       # DW_AT_byte_size
+	.byte	9                       # Abbrev [9] 0x219:0x5 DW_TAG_pointer_type
+	.long	518                     # DW_AT_type
+	.byte	0                       # End Of Children Mark
+.Ldebug_info_end0:
+	.ident	"clang version 10.0.0-4ubuntu1 "
+	.section	".note.GNU-stack","",@progbits
+	.section	.debug_line,"",@progbits
+.Lline_table_start0:

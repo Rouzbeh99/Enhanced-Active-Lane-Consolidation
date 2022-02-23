@@ -41,8 +41,10 @@ int bar2(float* a, float* b, float* c, int n) {
     return 0;
 }
 
-int test(int* number){
+int test(int* number, float* a, float* b, float* c, int n){
    for (int i = 0; i < 10; ++i){
+    bar2(a, b, c, n);
+
     if(*number){
         *number= 1;
     }else{

@@ -1,4 +1,4 @@
-; ModuleID = 'loops.ll'
+; ModuleID = 'loops_norm.ll'
 source_filename = "loops.c"
 target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-pc-linux-gnu"
@@ -24,7 +24,7 @@ define dso_local i32 @foo(float* %0, float* %1, float* %2, i32 %3) #0 !dbg !7 {
 7:                                                ; preds = %._crit_edge8, %4
   br label %34
 
-8:                                                ; preds = %.lr.ph7, %32
+8:                                                ; preds = %32, %.lr.ph7
   %indvars.iv4 = phi i64 [ 0, %.lr.ph7 ], [ %indvars.iv.next, %32 ]
   call void @llvm.dbg.value(metadata i64 %indvars.iv4, metadata !18, metadata !DIExpression()), !dbg !25
   call void @llvm.dbg.value(metadata i32 0, metadata !20, metadata !DIExpression()), !dbg !29
@@ -41,7 +41,7 @@ define dso_local i32 @foo(float* %0, float* %1, float* %2, i32 %3) #0 !dbg !7 {
   %indvars.iv5 = phi i64 [ %indvars.iv4, %._crit_edge ], [ %indvars.iv4, %8 ]
   br label %31
 
-10:                                               ; preds = %.lr.ph, %29
+10:                                               ; preds = %29, %.lr.ph
   %.03 = phi i32 [ 0, %.lr.ph ], [ %30, %29 ]
   call void @llvm.dbg.value(metadata i32 %.03, metadata !20, metadata !DIExpression()), !dbg !29
   %11 = icmp eq i32 %3, 1, !dbg !33
@@ -126,9 +126,9 @@ define dso_local i32 @bar(float* %0, float* %1, float* %2, i32 %3) #0 !dbg !69 {
   br label %7, !dbg !87
 
 7:                                                ; preds = %._crit_edge, %4
-  br label %17
+  br label %16
 
-8:                                                ; preds = %.lr.ph, %15
+8:                                                ; preds = %15, %.lr.ph
   %indvars.iv4 = phi i64 [ 0, %.lr.ph ], [ %indvars.iv.next, %15 ]
   call void @llvm.dbg.value(metadata i64 %indvars.iv4, metadata !75, metadata !DIExpression()), !dbg !83
   %9 = getelementptr inbounds float, float* %0, i64 %indvars.iv4, !dbg !88
@@ -143,46 +143,46 @@ define dso_local i32 @bar(float* %0, float* %1, float* %2, i32 %3) #0 !dbg !69 {
 15:                                               ; preds = %8
   %indvars.iv.next = add nuw nsw i64 %indvars.iv4, 1, !dbg !95
   call void @llvm.dbg.value(metadata i64 %indvars.iv.next, metadata !75, metadata !DIExpression()), !dbg !83
-  %16 = icmp slt i64 %indvars.iv.next, %5, !dbg !85
-  br i1 %16, label %8, label %._crit_edge, !dbg !87, !llvm.loop !96
+  %exitcond = icmp ne i64 %indvars.iv.next, %5, !dbg !85
+  br i1 %exitcond, label %8, label %._crit_edge, !dbg !87, !llvm.loop !96
 
-17:                                               ; preds = %7
+16:                                               ; preds = %7
   call void @llvm.dbg.value(metadata i32 0, metadata !77, metadata !DIExpression()), !dbg !98
-  %18 = sext i32 %3 to i64, !dbg !99
+  %17 = sext i32 %3 to i64, !dbg !99
   call void @llvm.dbg.value(metadata i64 0, metadata !77, metadata !DIExpression()), !dbg !98
-  %19 = icmp slt i64 0, %18, !dbg !100
-  br i1 %19, label %.lr.ph7, label %20, !dbg !101
+  %18 = icmp slt i64 0, %17, !dbg !100
+  br i1 %18, label %.lr.ph7, label %19, !dbg !101
 
-.lr.ph7:                                          ; preds = %17
-  br label %21, !dbg !101
-
-._crit_edge8:                                     ; preds = %29
+.lr.ph7:                                          ; preds = %16
   br label %20, !dbg !101
 
-20:                                               ; preds = %._crit_edge8, %17
-  br label %31
+._crit_edge8:                                     ; preds = %28
+  br label %19, !dbg !101
 
-21:                                               ; preds = %.lr.ph7, %29
-  %indvars.iv25 = phi i64 [ 0, %.lr.ph7 ], [ %indvars.iv.next3, %29 ]
+19:                                               ; preds = %._crit_edge8, %16
+  br label %29
+
+20:                                               ; preds = %28, %.lr.ph7
+  %indvars.iv25 = phi i64 [ 0, %.lr.ph7 ], [ %indvars.iv.next3, %28 ]
   call void @llvm.dbg.value(metadata i64 %indvars.iv25, metadata !77, metadata !DIExpression()), !dbg !98
-  %22 = getelementptr inbounds float, float* %0, i64 %indvars.iv25, !dbg !102
-  store float 0.000000e+00, float* %22, align 4, !dbg !103, !tbaa !39
-  %23 = getelementptr inbounds float, float* %1, i64 %indvars.iv25, !dbg !104
-  %24 = load float, float* %23, align 4, !dbg !104, !tbaa !39
-  %25 = getelementptr inbounds float, float* %2, i64 %indvars.iv25, !dbg !105
-  %26 = load float, float* %25, align 4, !dbg !105, !tbaa !39
-  %27 = fadd float %24, %26, !dbg !106
-  %28 = fptosi float %27 to i32, !dbg !104
-  call void @llvm.dbg.value(metadata i32 %28, metadata !79, metadata !DIExpression()), !dbg !107
-  br label %29, !dbg !108
+  %21 = getelementptr inbounds float, float* %0, i64 %indvars.iv25, !dbg !102
+  store float 0.000000e+00, float* %21, align 4, !dbg !103, !tbaa !39
+  %22 = getelementptr inbounds float, float* %1, i64 %indvars.iv25, !dbg !104
+  %23 = load float, float* %22, align 4, !dbg !104, !tbaa !39
+  %24 = getelementptr inbounds float, float* %2, i64 %indvars.iv25, !dbg !105
+  %25 = load float, float* %24, align 4, !dbg !105, !tbaa !39
+  %26 = fadd float %23, %25, !dbg !106
+  %27 = fptosi float %26 to i32, !dbg !104
+  call void @llvm.dbg.value(metadata i32 %27, metadata !79, metadata !DIExpression()), !dbg !107
+  br label %28, !dbg !108
 
-29:                                               ; preds = %21
+28:                                               ; preds = %20
   %indvars.iv.next3 = add nuw nsw i64 %indvars.iv25, 1, !dbg !109
   call void @llvm.dbg.value(metadata i64 %indvars.iv.next3, metadata !77, metadata !DIExpression()), !dbg !98
-  %30 = icmp slt i64 %indvars.iv.next3, %18, !dbg !100
-  br i1 %30, label %21, label %._crit_edge8, !dbg !101, !llvm.loop !110
+  %exitcond1 = icmp ne i64 %indvars.iv.next3, %5, !dbg !100
+  br i1 %exitcond1, label %20, label %._crit_edge8, !dbg !101, !llvm.loop !110
 
-31:                                               ; preds = %20
+29:                                               ; preds = %19
   ret i32 0, !dbg !112
 }
 
@@ -207,7 +207,7 @@ define dso_local i32 @bar2(float* %0, float* %1, float* %2, i32 %3) #0 !dbg !113
 7:                                                ; preds = %._crit_edge, %4
   br label %24
 
-8:                                                ; preds = %.lr.ph, %22
+8:                                                ; preds = %22, %.lr.ph
   %indvars.iv1 = phi i64 [ 0, %.lr.ph ], [ %indvars.iv.next, %22 ]
   call void @llvm.dbg.value(metadata i64 %indvars.iv1, metadata !119, metadata !DIExpression()), !dbg !122
   %9 = getelementptr inbounds float, float* %1, i64 %indvars.iv1, !dbg !127
@@ -243,45 +243,40 @@ define dso_local i32 @bar2(float* %0, float* %1, float* %2, i32 %3) #0 !dbg !113
 }
 
 ; Function Attrs: nounwind uwtable
-define dso_local i32 @test(i32* %0, float* %1, float* %2, float* %3, i32 %4) #0 !dbg !147 {
-  call void @llvm.dbg.value(metadata i32* %0, metadata !152, metadata !DIExpression()), !dbg !159
-  call void @llvm.dbg.value(metadata float* %1, metadata !153, metadata !DIExpression()), !dbg !159
-  call void @llvm.dbg.value(metadata float* %2, metadata !154, metadata !DIExpression()), !dbg !159
-  call void @llvm.dbg.value(metadata float* %3, metadata !155, metadata !DIExpression()), !dbg !159
-  call void @llvm.dbg.value(metadata i32 %4, metadata !156, metadata !DIExpression()), !dbg !159
-  call void @llvm.dbg.value(metadata i32 0, metadata !157, metadata !DIExpression()), !dbg !160
-  br label %7, !dbg !161
+define dso_local i32 @test(i32* %0) #0 !dbg !147 {
+  call void @llvm.dbg.value(metadata i32* %0, metadata !152, metadata !DIExpression()), !dbg !155
+  call void @llvm.dbg.value(metadata i32 0, metadata !153, metadata !DIExpression()), !dbg !156
+  br label %3, !dbg !157
 
-6:                                                ; preds = %14
-  br label %16
+2:                                                ; preds = %9
+  br label %11
 
-7:                                                ; preds = %5, %14
-  %.01 = phi i32 [ 0, %5 ], [ %15, %14 ]
-  call void @llvm.dbg.value(metadata i32 %.01, metadata !157, metadata !DIExpression()), !dbg !160
-  %8 = call i32 @bar2(float* %1, float* %2, float* %3, i32 %4), !dbg !162
-  %9 = load i32, i32* %0, align 4, !dbg !165, !tbaa !167
-  %10 = icmp ne i32 %9, 0, !dbg !165
-  br i1 %10, label %11, label %12, !dbg !169
+3:                                                ; preds = %9, %1
+  %.01 = phi i32 [ 0, %1 ], [ %10, %9 ]
+  call void @llvm.dbg.value(metadata i32 %.01, metadata !153, metadata !DIExpression()), !dbg !156
+  %4 = load i32, i32* %0, align 4, !dbg !158, !tbaa !162
+  %5 = icmp ne i32 %4, 0, !dbg !158
+  br i1 %5, label %6, label %7, !dbg !164
 
-11:                                               ; preds = %7
-  store i32 1, i32* %0, align 4, !dbg !170, !tbaa !167
-  br label %13, !dbg !172
+6:                                                ; preds = %3
+  store i32 1, i32* %0, align 4, !dbg !165, !tbaa !162
+  br label %8, !dbg !167
 
-12:                                               ; preds = %7
-  store i32 0, i32* %0, align 4, !dbg !173, !tbaa !167
-  br label %13
+7:                                                ; preds = %3
+  store i32 0, i32* %0, align 4, !dbg !168, !tbaa !162
+  br label %8
 
-13:                                               ; preds = %12, %11
-  br label %14, !dbg !175
+8:                                                ; preds = %7, %6
+  br label %9, !dbg !170
 
-14:                                               ; preds = %13
-  %15 = add nuw nsw i32 %.01, 1, !dbg !176
-  call void @llvm.dbg.value(metadata i32 %15, metadata !157, metadata !DIExpression()), !dbg !160
-  %exitcond = icmp ne i32 %15, 10, !dbg !177
-  br i1 %exitcond, label %7, label %6, !dbg !161, !llvm.loop !178
+9:                                                ; preds = %8
+  %10 = add nuw nsw i32 %.01, 1, !dbg !171
+  call void @llvm.dbg.value(metadata i32 %10, metadata !153, metadata !DIExpression()), !dbg !156
+  %exitcond = icmp ne i32 %10, 10, !dbg !172
+  br i1 %exitcond, label %3, label %2, !dbg !157, !llvm.loop !173
 
-16:                                               ; preds = %6
-  ret i32 0, !dbg !180
+11:                                               ; preds = %2
+  ret i32 0, !dbg !175
 }
 
 ; Function Attrs: nounwind readnone speculatable willreturn
@@ -444,35 +439,30 @@ attributes #2 = { argmemonly nounwind willreturn }
 !146 = !DILocation(line: 41, column: 5, scope: !113)
 !147 = distinct !DISubprogram(name: "test", scope: !1, file: !1, line: 44, type: !148, scopeLine: 44, flags: DIFlagPrototyped | DIFlagAllCallsDescribed, spFlags: DISPFlagDefinition | DISPFlagOptimized, unit: !0, retainedNodes: !151)
 !148 = !DISubroutineType(types: !149)
-!149 = !{!10, !150, !11, !11, !11, !10}
+!149 = !{!10, !150}
 !150 = !DIDerivedType(tag: DW_TAG_pointer_type, baseType: !10, size: 64)
-!151 = !{!152, !153, !154, !155, !156, !157}
+!151 = !{!152, !153}
 !152 = !DILocalVariable(name: "number", arg: 1, scope: !147, file: !1, line: 44, type: !150)
-!153 = !DILocalVariable(name: "a", arg: 2, scope: !147, file: !1, line: 44, type: !11)
-!154 = !DILocalVariable(name: "b", arg: 3, scope: !147, file: !1, line: 44, type: !11)
-!155 = !DILocalVariable(name: "c", arg: 4, scope: !147, file: !1, line: 44, type: !11)
-!156 = !DILocalVariable(name: "n", arg: 5, scope: !147, file: !1, line: 44, type: !10)
-!157 = !DILocalVariable(name: "i", scope: !158, file: !1, line: 45, type: !10)
-!158 = distinct !DILexicalBlock(scope: !147, file: !1, line: 45, column: 4)
-!159 = !DILocation(line: 0, scope: !147)
-!160 = !DILocation(line: 0, scope: !158)
-!161 = !DILocation(line: 45, column: 4, scope: !158)
-!162 = !DILocation(line: 46, column: 5, scope: !163)
-!163 = distinct !DILexicalBlock(scope: !164, file: !1, line: 45, column: 32)
-!164 = distinct !DILexicalBlock(scope: !158, file: !1, line: 45, column: 4)
-!165 = !DILocation(line: 48, column: 8, scope: !166)
-!166 = distinct !DILexicalBlock(scope: !163, file: !1, line: 48, column: 8)
-!167 = !{!168, !168, i64 0}
-!168 = !{!"int", !41, i64 0}
-!169 = !DILocation(line: 48, column: 8, scope: !163)
-!170 = !DILocation(line: 49, column: 16, scope: !171)
-!171 = distinct !DILexicalBlock(scope: !166, file: !1, line: 48, column: 16)
-!172 = !DILocation(line: 50, column: 5, scope: !171)
-!173 = !DILocation(line: 51, column: 17, scope: !174)
-!174 = distinct !DILexicalBlock(scope: !166, file: !1, line: 50, column: 10)
-!175 = !DILocation(line: 53, column: 4, scope: !163)
-!176 = !DILocation(line: 45, column: 28, scope: !164)
-!177 = !DILocation(line: 45, column: 22, scope: !164)
-!178 = distinct !{!178, !161, !179}
-!179 = !DILocation(line: 53, column: 4, scope: !158)
-!180 = !DILocation(line: 54, column: 5, scope: !147)
+!153 = !DILocalVariable(name: "i", scope: !154, file: !1, line: 45, type: !10)
+!154 = distinct !DILexicalBlock(scope: !147, file: !1, line: 45, column: 4)
+!155 = !DILocation(line: 0, scope: !147)
+!156 = !DILocation(line: 0, scope: !154)
+!157 = !DILocation(line: 45, column: 4, scope: !154)
+!158 = !DILocation(line: 46, column: 8, scope: !159)
+!159 = distinct !DILexicalBlock(scope: !160, file: !1, line: 46, column: 8)
+!160 = distinct !DILexicalBlock(scope: !161, file: !1, line: 45, column: 32)
+!161 = distinct !DILexicalBlock(scope: !154, file: !1, line: 45, column: 4)
+!162 = !{!163, !163, i64 0}
+!163 = !{!"int", !41, i64 0}
+!164 = !DILocation(line: 46, column: 8, scope: !160)
+!165 = !DILocation(line: 47, column: 16, scope: !166)
+!166 = distinct !DILexicalBlock(scope: !159, file: !1, line: 46, column: 16)
+!167 = !DILocation(line: 48, column: 5, scope: !166)
+!168 = !DILocation(line: 49, column: 17, scope: !169)
+!169 = distinct !DILexicalBlock(scope: !159, file: !1, line: 48, column: 10)
+!170 = !DILocation(line: 51, column: 4, scope: !160)
+!171 = !DILocation(line: 45, column: 28, scope: !161)
+!172 = !DILocation(line: 45, column: 22, scope: !161)
+!173 = distinct !{!173, !157, !174}
+!174 = !DILocation(line: 51, column: 4, scope: !154)
+!175 = !DILocation(line: 52, column: 5, scope: !147)

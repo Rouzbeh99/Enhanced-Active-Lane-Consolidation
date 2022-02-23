@@ -150,14 +150,16 @@ namespace {
             const int BR_OPCODE = 2;
 
             for (const auto &block: L->getBlocks()) {
-                for (const auto &instr: block->getInstList()) {
 
-                    if (instr.getOpcode() == BR_OPCODE) {
-                        break;
-                    }
-                    if (instr.getOpcode() == CALL_OPCODE) {
+                Instruction *instr = block->getFirstNonPHIOrDbg();
+
+                while (instr->getOpcode() != BR_OPCODE) {
+
+                    if (instr->getOpcode() == CALL_OPCODE) {
                         return true;
                     }
+
+                    instr = instr->getNextNonDebugInstruction();
 
                 }
 
