@@ -3,7 +3,6 @@
 #include "llvm/Analysis/LoopPass.h"
 #include "llvm/Analysis/LoopInfo.h"
 #include "llvm/Analysis/DependenceAnalysis.h"
-#include "llvm/Analysis/MemoryDependenceAnalysis.h"
 #include "llvm/Analysis/LoopAccessAnalysis.h"
 #include "llvm/Passes/PassBuilder.h"
 #include "llvm/Passes/PassPlugin.h"
@@ -14,11 +13,11 @@
 using namespace llvm;
 
 
-#define DEBUG_TYPE "findDivergenceInLoop"
+#define DEBUG_TYPE "check-alc-conditions"
 
 
 namespace {
-    struct FindDivergenceInLoop : public PassInfoMixin<FindDivergenceInLoop> {
+    struct ALC_Conditions_Checker : public PassInfoMixin<ALC_Conditions_Checker> {
 
 
         PreservedAnalyses run(Loop &loop, LoopAnalysisManager &AM,
@@ -42,7 +41,7 @@ namespace {
                 llvm::outs() << "Loop doesn't contain function call" << '\n';
             }
 
-            if (containsMemoryDependency(loop, AM, AR)) {
+            if (isVectorizable(loop, AM, AR)) {
                 llvm::outs() << "Loop contains memory dependency" << '\n';
             } else {
                 llvm::outs() << "Loop doesn't contain memory dependency" << '\n';
@@ -106,21 +105,15 @@ namespace {
             return false;
         }
 
-        bool containsMemoryDependency(Loop &L, LoopAnalysisManager &AM,
-                                      LoopStandardAnalysisResults &LAR) {
-
-            AliasAnalysis *AA = &LAR.AA;
-            ScalarEvolution *SE = &LAR.SE;
-            DominatorTree *DT = &LAR.DT;
-            LoopInfo *LI = &LAR.LI;
-            const Function *F = L.getHeader()->getParent();
-            OptimizationRemarkEmitter ORE(F);
-
+        static bool isVectorizable(Loop &L, LoopAnalysisManager &AM,
+                            LoopStandardAnalysisResults &LAR) {
+            
 
             LoopAccessAnalysis::Result &info = AM.getResult<LoopAccessAnalysis>(L, LAR);
 
+            llvm::outs()<<"number of loads: " << info.getNumLoads() <<" and number of stores: "<< info.getNumStores()<<"\n";
 
-            return !info.canVectorizeMemory();
+            return info.canVectorizeMemory();
 
         }
 
@@ -135,13 +128,13 @@ namespace {
 extern "C" ::llvm::PassPluginLibraryInfo LLVM_ATTRIBUTE_WEAK
 llvmGetPassPluginInfo() {
     return {
-            LLVM_PLUGIN_API_VERSION, "find-divergence-in-loop", "v0.1",
+            LLVM_PLUGIN_API_VERSION, "check-alc-conditions", "v0.1",
             [](PassBuilder &PB) {
                 PB.registerPipelineParsingCallback(
                         [](StringRef Name, LoopPassManager &LPM,
                            ArrayRef<PassBuilder::PipelineElement>) {
-                            if (Name == "find-divergence-in-loop") {
-                                LPM.addPass(FindDivergenceInLoop());
+                            if (Name == "check-alc-conditions") {
+                                LPM.addPass(ALC_Conditions_Checker());
                                 return true;
                             }
                             return false;

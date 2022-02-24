@@ -32,11 +32,11 @@ int bar(float* a, float* b, float* c, int n) {
 int bar2(float* a, float* b, float* c, int n) {
 
      for (int i = 0; i < n; ++i) {
-      a[i] = b[i] * c[i];
+      a[i] = a[i - 1] * c[i];
 
-      if(n){
-        c[i] = a[i-1];
-      }
+//      if(n){
+//        c[i] = a[i-1];
+//      }
     }
 
     return 0;

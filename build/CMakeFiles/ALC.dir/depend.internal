@@ -25,9 +25,7 @@ CMakeFiles/ALC.dir/ALC.cpp.o
  /usr/lib/llvm-10/include/llvm/ADT/IntrusiveRefCntPtr.h
  /usr/lib/llvm-10/include/llvm/ADT/None.h
  /usr/lib/llvm-10/include/llvm/ADT/Optional.h
- /usr/lib/llvm-10/include/llvm/ADT/PointerEmbeddedInt.h
  /usr/lib/llvm-10/include/llvm/ADT/PointerIntPair.h
- /usr/lib/llvm-10/include/llvm/ADT/PointerSumType.h
  /usr/lib/llvm-10/include/llvm/ADT/PointerUnion.h
  /usr/lib/llvm-10/include/llvm/ADT/PostOrderIterator.h
  /usr/lib/llvm-10/include/llvm/ADT/PriorityWorklist.h
@@ -44,7 +42,6 @@ CMakeFiles/ALC.dir/ALC.cpp.o
  /usr/lib/llvm-10/include/llvm/ADT/TinyPtrVector.h
  /usr/lib/llvm-10/include/llvm/ADT/Triple.h
  /usr/lib/llvm-10/include/llvm/ADT/Twine.h
- /usr/lib/llvm-10/include/llvm/ADT/bit.h
  /usr/lib/llvm-10/include/llvm/ADT/ilist.h
  /usr/lib/llvm-10/include/llvm/ADT/ilist_base.h
  /usr/lib/llvm-10/include/llvm/ADT/ilist_iterator.h
@@ -68,7 +65,6 @@ CMakeFiles/ALC.dir/ALC.cpp.o
  /usr/lib/llvm-10/include/llvm/Analysis/LoopAnalysisManager.h
  /usr/lib/llvm-10/include/llvm/Analysis/LoopInfo.h
  /usr/lib/llvm-10/include/llvm/Analysis/LoopPass.h
- /usr/lib/llvm-10/include/llvm/Analysis/MemoryDependenceAnalysis.h
  /usr/lib/llvm-10/include/llvm/Analysis/MemoryLocation.h
  /usr/lib/llvm-10/include/llvm/Analysis/MemorySSA.h
  /usr/lib/llvm-10/include/llvm/Analysis/OptimizationRemarkEmitter.h
@@ -124,7 +120,6 @@ CMakeFiles/ALC.dir/ALC.cpp.o
  /usr/lib/llvm-10/include/llvm/IR/PassInstrumentation.h
  /usr/lib/llvm-10/include/llvm/IR/PassManager.h
  /usr/lib/llvm-10/include/llvm/IR/PassManagerInternal.h
- /usr/lib/llvm-10/include/llvm/IR/PredIteratorCache.h
  /usr/lib/llvm-10/include/llvm/IR/ProfileSummary.h
  /usr/lib/llvm-10/include/llvm/IR/SymbolTableListTraits.h
  /usr/lib/llvm-10/include/llvm/IR/TrackingMDRef.h
