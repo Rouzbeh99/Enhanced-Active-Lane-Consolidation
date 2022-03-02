@@ -22,6 +22,7 @@ namespace {
 
         PreservedAnalyses run(Loop &loop, LoopAnalysisManager &AM,
                               LoopStandardAnalysisResults &AR, LPMUpdater &U) {
+            llvm::outs()<<"hello \n";
 
             Loop *L = &loop;
 
@@ -42,9 +43,9 @@ namespace {
             }
 
             if (isVectorizable(loop, AM, AR)) {
-                llvm::outs() << "Loop contains memory dependency" << '\n';
-            } else {
                 llvm::outs() << "Loop doesn't contain memory dependency" << '\n';
+            } else {
+                llvm::outs() << "Loop contains memory dependency" << '\n';
             }
 
 
@@ -98,7 +99,6 @@ namespace {
                     }
 
                     instr = instr->getNextNonDebugInstruction();
-
                 }
 
             }
@@ -106,12 +106,15 @@ namespace {
         }
 
         static bool isVectorizable(Loop &L, LoopAnalysisManager &AM,
-                            LoopStandardAnalysisResults &LAR) {
-            
+                                   LoopStandardAnalysisResults &LAR) {
+
 
             LoopAccessAnalysis::Result &info = AM.getResult<LoopAccessAnalysis>(L, LAR);
 
-            llvm::outs()<<"number of loads: " << info.getNumLoads() <<" and number of stores: "<< info.getNumStores()<<"\n";
+            L.getHeader()->getFirstNonPHIOrDbg()->print(llvm::outs());
+
+            llvm::outs() << "number of loads: " << info.getNumLoads() << " and number of stores: "
+                         << info.getNumStores() << "\n";
 
             return info.canVectorizeMemory();
 

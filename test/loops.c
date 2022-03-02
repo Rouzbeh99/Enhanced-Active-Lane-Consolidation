@@ -1,14 +1,14 @@
-int foo(float* a, float* b, float* c, int n) {
+int foo(float* __restrict__ a, float* __restrict__ b, float* __restrict__ c, int n) {
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < n; ++j) {
             if(n == 1){
-                a[i] = b[j] + c[j];
+                a[i] += b[j] + c[j];
             }
             if (n > 5){
-                a[i] = b[j] - c[j];
+                a[i] += b[j] - c[j];
             }
             if(n){
-                a[i] = b[j] * c[j];
+                a[i] += b[j] * c[j];
             }
 
         }
@@ -41,16 +41,16 @@ int bar2(float* a, float* b, float* c, int n) {
 
     return 0;
 }
-
-int test(int* number, float* a, float* b, float* c, int n){
-   for (int i = 0; i < 10; ++i){
-    bar2(a, b, c, n);
-
-    if(*number){
-        *number= 1;
-    }else{
-        *number = 0;
-    }
-   }
-    return 0;
-}
+//
+//int test(int* number, float* a, float* b, float* c, int n){
+//   for (int i = 0; i < 10; ++i){
+//    bar2(a, b, c, n);
+//
+//    if(*number){
+//        *number= 1;
+//    }else{
+//        *number = 0;
+//    }
+//   }
+//    return 0;
+//}
