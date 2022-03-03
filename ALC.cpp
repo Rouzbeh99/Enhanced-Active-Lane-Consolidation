@@ -22,7 +22,6 @@ namespace {
 
         PreservedAnalyses run(Loop &loop, LoopAnalysisManager &AM,
                               LoopStandardAnalysisResults &AR, LPMUpdater &U) {
-            llvm::outs()<<"hello \n";
 
             Loop *L = &loop;
 
@@ -113,7 +112,7 @@ namespace {
 
             L.getHeader()->getFirstNonPHIOrDbg()->print(llvm::outs());
 
-            llvm::outs() << "number of loads: " << info.getNumLoads() << " and number of stores: "
+            llvm::outs() << "\nnumber of loads: " << info.getNumLoads() << " and number of stores: "
                          << info.getNumStores() << "\n";
 
             return info.canVectorizeMemory();
