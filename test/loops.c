@@ -2,16 +2,15 @@
 //     for (int i = 0; i < n; ++i) {
 //         for (int j = 0; j < n; ++j) {
 
-//             if(a[i] > 0){
-//                 a[i] += b[j] + c[j];
+//             if(a[j] > 0){
+//                 a[j] += b[j] + c[j];
 //             }
-//             if (a[i] > 5){
-//                 a[i] += b[j] - c[j];
+//             if (a[j] > 5){
+//                 a[j] += b[j] - c[j];
 //             }
-//             if( a[i] > 7){
-//                 a[i] += b[j] * c[j];
+//             if( a[j] > 7){
+//                 a[j] += b[j] * c[j];
 //             }
-
 //         }
 //     }
 //     return 0;
@@ -19,40 +18,41 @@
 
 int bar(float* a, float* b, float* c, int n) {
     
-    // for (int i = 0; i < n; ++i) {
-    //   a[i] = a[i] * b[i];
-    // }
-
     int d = 0;
 
+
     for (int i = 0; i < n; ++i) {
-      
+      a[i] = a[i - 1] * b[i];
+    }
+
+
+    for (int i = 0; i < n; ++i) {
        d += b[i] + c[i];
 
     }
-
     return d;
+
 }
 
 
 // int bar2(float* a, float* b, float* c, int n) {
 
 //      for (int i = 0; i < n; ++i) {
-//       a[i] = a[i - 1] * c[i];
+//       a[i] = a[i] * c[i];
 
-//      // if(n){
-//      //   c[i] = a[i-1];
-//      // }
+//      if(a[i] > 5){
+//        c[i] = a[i-1];
+//      }
 //     }
 
 //     return 0;
 // }
 
 
-//int test(int* number, float* a, float* b, float* c, int n){
+// int test(int* number, float* a, float* b, float* c, int n){
 //   for (int i = 0; i < 10; ++i){
 //    bar2(a, b, c, n);
-//
+
 //    if(*number){
 //        *number= 1;
 //    }else{
@@ -60,4 +60,4 @@ int bar(float* a, float* b, float* c, int n) {
 //    }
 //   }
 //    return 0;
-//}
+// }

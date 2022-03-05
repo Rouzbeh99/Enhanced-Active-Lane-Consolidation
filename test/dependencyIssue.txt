@@ -1,0 +1,45 @@
+function foo:
+
+   1-  "LAA: Found an unsafe dependency between a uniform load and uniform store to the same address"
+        source:
+
+         // See if there is an unsafe dependency between a load to a uniform address and
+         // store to the same uniform address.
+         if (UniformStores.count(Ptr)) {
+           LLVM_DEBUG(dbgs() << "LAA: Found an unsafe dependency between a uniform "
+                                "load and uniform store to the same address!\n");
+           HasDependenceInvolvingLoopInvariantAddress = true;
+         }
+
+   2- "Pointer access with non-constant stride"
+        source:
+
+         // Need accesses with constant stride. We don't want to vectorize
+         // "A[B[i]] += ..." and similar code or pointer arithmetic that could wrap in
+         // the address space.
+         if (!StrideAPtr || !StrideBPtr || StrideAPtr != StrideBPtr){
+           LLVM_DEBUG(dbgs() << "Pointer access with non-constant stride\n");
+           return Dependence::Unknown;      --------------------> happens for all dependencies
+         }
+
+    3- "LAA: unsafe dependent memory operations in loop"
+                    ------------> type of the dependency is NOT VectorizationSafetyStatus::Safe
+
+
+
+    ***Changing A[i] to A[j] ---------------> "AA: No unsafe dependent memory operations in loop." --> no unvectorizable dependency
+
+
+function bar:
+
+    second loop, under custome pipeline  -------> No dependency found!!!
+        -"Found a read-only loop!"   ----> // Check if we see any stores. If there are no stores, then we don't
+                                              // care if the pointers are *restrict*.
+
+
+
+function bar2:
+    No problem
+
+function test:
+    No Problem

@@ -112,6 +112,8 @@ namespace {
 
             L.getHeader()->getFirstNonPHIOrDbg()->print(llvm::outs());
 
+//            info.print(llvm::outs(), 0);
+
             llvm::outs() << "\nnumber of loads: " << info.getNumLoads() << " and number of stores: "
                          << info.getNumStores() << "\n";
 
