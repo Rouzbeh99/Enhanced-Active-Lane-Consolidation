@@ -32,7 +32,7 @@ function foo:
 
 function bar:
 
-    second loop, under custome pipeline  -------> No dependency found!!!
+    second loop lone 29, under custome pipeline  -------> No dependency found!!!
         -"Found a read-only loop!"   ----> // Check if we see any stores. If there are no stores, then we don't
                                               // care if the pointers are *restrict*.
 
@@ -43,3 +43,103 @@ function bar2:
 
 function test:
     No Problem
+
+/************************************************************************************************************
+* binpos.c
+************************************************************************************************************/
+
+Function:  readbinposfrm
+    "LAA: SCEV could not compute the loop exit count."  ----> results in returning false in canAnalyzeLoop function
+    --> no further analysis
+
+    Why is it unable to compute?  -----------> getPredicatedBackedgeTakenInfo() ----> getBackedgeTakenInfo() -----> computeBackedgeTakenCount()
+                                -------->    .......    ------------> computeExitCountExhaustively()
+
+
+
+Function:  writebinposfrm
+    same reason
+
+/************************************************************************************************************
+* chirvol.c
+************************************************************************************************************/
+
+No Problem
+
+/************************************************************************************************************
+* memutil.c
+************************************************************************************************************/
+
+NO Problem
+
+/************************************************************************************************************
+* molio.c
+************************************************************************************************************/
+Function:  fgetpdb
+    line 524
+        "LAA: SCEV could not compute the loop exit count."
+
+Function:  fputpdb
+    line 930
+        "LAA: SCEV could not compute the loop exit count."
+
+Function:  fputcif
+    line 1411
+        "LAA: SCEV could not compute the loop exit count."
+
+Function:  putbnd
+    line: 309
+        "LAA: SCEV could not compute the loop exit count."
+
+all others the same
+
+/************************************************************************************************************
+* molutil.c
+************************************************************************************************************/
+    many LAA: "SCEV could not compute the loop exit count."   -----> struct variables
+
+Function:  mergestr
+    line 523
+    "LAA: We can't vectorize because we can't find the array bounds."
+
+Function:  concat_mat
+    line 1581
+    "LAA: unsafe dependent memory operations in loop" ---> looks logical but can't we really vectorize Matrix opertation?
+
+
+/************************************************************************************************************
+* nblist.c
+************************************************************************************************************/
+    same issue
+
+Function:  buildkdtree
+    line 416
+    "We can't vectorize because we can't find the array bounds."
+
+
+Function:  buildkdtree
+    line 451
+    "We can't vectorize because we can't find the array bounds."
+
+    2 more the same
+
+
+
+/************************************************************************************************************
+* prm.c
+************************************************************************************************************/
+    All have the same problem
+
+
+/************************************************************************************************************
+* rand2.c
+************************************************************************************************************/
+Function:  rand2a
+    line 110
+    "LAA: unsafe dependent memory operations in loop"   ---> pointer variable
+
+
+/************************************************************************************************************
+* reslib.c
+************************************************************************************************************/
+ same two problems

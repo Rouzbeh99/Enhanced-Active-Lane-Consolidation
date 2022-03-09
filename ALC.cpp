@@ -23,6 +23,7 @@ namespace {
         PreservedAnalyses run(Loop &loop, LoopAnalysisManager &AM,
                               LoopStandardAnalysisResults &AR, LPMUpdater &U) {
 
+
             Loop *L = &loop;
 
             //only apply the pass on innermost loop
@@ -111,8 +112,6 @@ namespace {
             LoopAccessAnalysis::Result &info = AM.getResult<LoopAccessAnalysis>(L, LAR);
 
             L.getHeader()->getFirstNonPHIOrDbg()->print(llvm::outs());
-
-//            info.print(llvm::outs(), 0);
 
             llvm::outs() << "\nnumber of loads: " << info.getNumLoads() << " and number of stores: "
                          << info.getNumStores() << "\n";
