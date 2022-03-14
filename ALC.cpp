@@ -24,8 +24,8 @@ namespace {
                               LoopStandardAnalysisResults &AR, LPMUpdater &U) {
 
 
-            Loop *L = &loop;
 
+            Loop *L = &loop;
             //only apply the pass on innermost loop
             if (!L->getSubLoops().empty()) {
                 return PreservedAnalyses::all();
@@ -85,20 +85,11 @@ namespace {
 
         //Assumption: all blocks end with branch instruction
         static bool containsFunctionCall(Loop *L) {
-            const int CALL_OPCODE = 56;
-            const int BR_OPCODE = 2;
-
             for (const auto &block: L->getBlocks()) {
-
-                Instruction *instr = block->getFirstNonPHIOrDbg();
-
-                while (instr->getOpcode() != BR_OPCODE) {
-
-                    if (instr->getOpcode() == CALL_OPCODE) {
+                for(const auto &instr: block->getInstList()){
+                    if(isa<CallInst>(instr)){
                         return true;
                     }
-
-                    instr = instr->getNextNonDebugInstruction();
                 }
 
             }

@@ -1,63 +1,88 @@
-int foo(float* __restrict__ a, float* __restrict__ b, float* __restrict__ c, int n) {
-    for (int i = 0; i < n; ++i) {
-        for (int j = 0; j < n; ++j) {
+//int foo(float* __restrict__ a, float* __restrict__ b, float* __restrict__ c, int n) {
+//    for (int i = 0; i < n; ++i) {
+//        for (int j = 0; j < n; ++j) {
+//
+//            if(a[j] > 0){
+//                a[j] += b[j] + c[j];
+//            }
+//            if (a[j] > 5){
+//                a[j] += b[j] - c[j];
+//            }
+//            if( a[j] > 7){
+//                a[j] += b[j] * c[j];
+//            }
+//
+//        }
+//    }
+//    return 0;
+//}
+//
+//void foo2(int* __restrict__ a, int n){
+//   for (int i = 0; i < n; ++i){
+//      if(a[i] > 5){
+//          a[i] *= 2;
+//      }else if(a[i] < 2){
+//          a[i] += 2;
+//      }
+//
+//   }
+//}
 
-            if(a[j] > 0){
-                a[j] += b[j] + c[j];
-            }
-            if (a[j] > 5){
-                a[j] += b[j] - c[j];
-            }
-            if( a[j] > 7){
-                a[j] += b[j] * c[j];
-            }
-        }
+
+struct City{
+    int population;
+    int people[];
+};
+
+void foo3(struct City* city){
+
+    for (int i = 0; i < city->population; ++i) {
+        int* peoplePonter = &city->people[i];
+        *peoplePonter = i;
     }
-    return 0;
 }
 
-int bar(float* a, float* b, float* c, int n) {
+// int bar(float* a, float* b, float* c, int n) {
     
-    int d = 0;
+//     // for (int i = 0; i < n; ++i) {
+//     //   a[i] = a[i] * b[i];
+//     // }
+
+//     int d = 0;
+
+//     for (int i = 0; i < n; ++i) {
+      
+//        d += b[i] + c[i];
+
+//     }
+
+//     return d;
+// }
 
 
-    for (int i = 0; i < n; ++i) {
-      a[i] = a[i - 1] * b[i];
-    }
+// int bar2(float* a, float* b, float* c, int n) {
+
+//      for (int i = 0; i < n; ++i) {
+//       a[i] = a[i - 1] * c[i];
+
+//      // if(n){
+//      //   c[i] = a[i-1];
+//      // }
+//     }
+
+//     return 0;
+// }
 
 
-    for (int i = 0; i < n; ++i) {
-       d += b[i] + c[i];
-
-    }
-    return d;
-
-}
-
-
-int bar2(float* a, float* b, float* c, int n) {
-
-     for (int i = 0; i < n; ++i) {
-      a[i] = a[i] * c[i];
-
-     if(a[i] > 5){
-       c[i] = a[i-1];
-     }
-    }
-
-    return 0;
-}
-
-
-int test(int* number, float* a, float* b, float* c, int n){
-  for (int i = 0; i < 10; ++i){
-   bar2(a, b, c, n);
-
-   if(*number){
-       *number= 1;
-   }else{
-       *number = 0;
-   }
-  }
-   return 0;
-}
+//int test(int* number, float* a, float* b, float* c, int n){
+//   for (int i = 0; i < 10; ++i){
+//    bar2(a, b, c, n);
+//
+//    if(*number){
+//        *number= 1;
+//    }else{
+//        *number = 0;
+//    }
+//   }
+//    return 0;
+//}
