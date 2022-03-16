@@ -3,35 +3,38 @@ source_filename = "loops.c"
 target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-pc-linux-gnu"
 
-%struct.City = type { i32, [0 x i32] }
+%struct.Country = type { i32, %struct.City* }
+%struct.City = type { i32, i32* }
 
 ; Function Attrs: nofree norecurse nounwind uwtable
-define dso_local void @foo3(%struct.City* nocapture %0) local_unnamed_addr #0 !dbg !7 {
-  call void @llvm.dbg.value(metadata %struct.City* %0, metadata !20, metadata !DIExpression()), !dbg !27
-  call void @llvm.dbg.value(metadata i32 0, metadata !21, metadata !DIExpression()), !dbg !28
-  %2 = getelementptr inbounds %struct.City, %struct.City* %0, i64 0, i32 0, !dbg !29
-  %3 = load i32, i32* %2, align 4, !dbg !29, !tbaa !30
-  %4 = icmp sgt i32 %3, 0, !dbg !34
-  br i1 %4, label %5, label %7, !dbg !35
+define dso_local void @foo3(%struct.Country* nocapture readonly %0) local_unnamed_addr #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata %struct.Country* %0, metadata !23, metadata !DIExpression()), !dbg !30
+  call void @llvm.dbg.value(metadata i32 0, metadata !25, metadata !DIExpression()), !dbg !31
+  %2 = getelementptr inbounds %struct.Country, %struct.Country* %0, i64 0, i32 0, !dbg !32
+  %3 = load i32, i32* %2, align 8, !dbg !32, !tbaa !33
+  %4 = icmp sgt i32 %3, 0, !dbg !39
+  br i1 %4, label %5, label %9, !dbg !40
 
 5:                                                ; preds = %1
-  %6 = zext i32 %3 to i64, !dbg !35
-  br label %8, !dbg !35
+  %6 = getelementptr inbounds %struct.Country, %struct.Country* %0, i64 0, i32 1, !dbg !41
+  %7 = load %struct.City*, %struct.City** %6, align 8, !dbg !41, !tbaa !42
+  %8 = zext i32 %3 to i64, !dbg !40
+  br label %10, !dbg !40
 
-7:                                                ; preds = %8, %1
-  ret void, !dbg !36
+9:                                                ; preds = %10, %1
+  ret void, !dbg !43
 
-8:                                                ; preds = %8, %5
-  %9 = phi i64 [ 0, %5 ], [ %12, %8 ]
-  call void @llvm.dbg.value(metadata i64 %9, metadata !21, metadata !DIExpression()), !dbg !28
-  %10 = getelementptr inbounds %struct.City, %struct.City* %0, i64 0, i32 1, i64 %9, !dbg !37
-  call void @llvm.dbg.value(metadata i32* %10, metadata !23, metadata !DIExpression()), !dbg !38
-  %11 = trunc i64 %9 to i32, !dbg !39
-  store i32 %11, i32* %10, align 4, !dbg !39, !tbaa !30
-  %12 = add nuw nsw i64 %9, 1, !dbg !40
-  call void @llvm.dbg.value(metadata i64 %12, metadata !21, metadata !DIExpression()), !dbg !28
-  %13 = icmp ult i64 %12, %6, !dbg !34
-  br i1 %13, label %8, label %7, !dbg !35, !llvm.loop !41
+10:                                               ; preds = %10, %5
+  %11 = phi i64 [ 0, %5 ], [ %14, %10 ]
+  call void @llvm.dbg.value(metadata i64 %11, metadata !25, metadata !DIExpression()), !dbg !31
+  call void @llvm.dbg.value(metadata %struct.City* undef, metadata !27, metadata !DIExpression()), !dbg !41
+  %12 = getelementptr inbounds %struct.City, %struct.City* %7, i64 %11, i32 0, !dbg !44
+  %13 = trunc i64 %11 to i32, !dbg !45
+  store i32 %13, i32* %12, align 8, !dbg !45, !tbaa !46
+  %14 = add nuw nsw i64 %11, 1, !dbg !48
+  call void @llvm.dbg.value(metadata i64 %14, metadata !25, metadata !DIExpression()), !dbg !31
+  %15 = icmp ult i64 %14, %8, !dbg !39
+  br i1 %15, label %10, label %9, !dbg !40, !llvm.loop !49
 }
 
 ; Function Attrs: nofree nosync nounwind readnone speculatable willreturn
@@ -51,39 +54,47 @@ attributes #1 = { nofree nosync nounwind readnone speculatable willreturn }
 !4 = !{i32 2, !"Debug Info Version", i32 3}
 !5 = !{i32 1, !"wchar_size", i32 4}
 !6 = !{!"clang version 10.0.0-4ubuntu1 "}
-!7 = distinct !DISubprogram(name: "foo3", scope: !1, file: !1, line: 37, type: !8, scopeLine: 37, flags: DIFlagPrototyped | DIFlagAllCallsDescribed, spFlags: DISPFlagDefinition | DISPFlagOptimized, unit: !0, retainedNodes: !19)
+!7 = distinct !DISubprogram(name: "foo3", scope: !1, file: !1, line: 43, type: !8, scopeLine: 43, flags: DIFlagPrototyped | DIFlagAllCallsDescribed, spFlags: DISPFlagDefinition | DISPFlagOptimized, unit: !0, retainedNodes: !22)
 !8 = !DISubroutineType(types: !9)
 !9 = !{null, !10}
 !10 = !DIDerivedType(tag: DW_TAG_pointer_type, baseType: !11, size: 64)
-!11 = distinct !DICompositeType(tag: DW_TAG_structure_type, name: "City", file: !1, line: 32, size: 32, elements: !12)
+!11 = distinct !DICompositeType(tag: DW_TAG_structure_type, name: "Country", file: !1, line: 37, size: 128, elements: !12)
 !12 = !{!13, !15}
-!13 = !DIDerivedType(tag: DW_TAG_member, name: "population", scope: !11, file: !1, line: 33, baseType: !14, size: 32)
+!13 = !DIDerivedType(tag: DW_TAG_member, name: "numberOfCities", scope: !11, file: !1, line: 38, baseType: !14, size: 32)
 !14 = !DIBasicType(name: "int", size: 32, encoding: DW_ATE_signed)
-!15 = !DIDerivedType(tag: DW_TAG_member, name: "people", scope: !11, file: !1, line: 34, baseType: !16, offset: 32)
-!16 = !DICompositeType(tag: DW_TAG_array_type, baseType: !14, elements: !17)
-!17 = !{!18}
-!18 = !DISubrange(count: -1)
-!19 = !{!20, !21, !23}
-!20 = !DILocalVariable(name: "city", arg: 1, scope: !7, file: !1, line: 37, type: !10)
-!21 = !DILocalVariable(name: "i", scope: !22, file: !1, line: 39, type: !14)
-!22 = distinct !DILexicalBlock(scope: !7, file: !1, line: 39, column: 5)
-!23 = !DILocalVariable(name: "peoplePonter", scope: !24, file: !1, line: 40, type: !26)
-!24 = distinct !DILexicalBlock(scope: !25, file: !1, line: 39, column: 48)
-!25 = distinct !DILexicalBlock(scope: !22, file: !1, line: 39, column: 5)
-!26 = !DIDerivedType(tag: DW_TAG_pointer_type, baseType: !14, size: 64)
-!27 = !DILocation(line: 0, scope: !7)
-!28 = !DILocation(line: 0, scope: !22)
-!29 = !DILocation(line: 39, column: 31, scope: !25)
-!30 = !{!31, !31, i64 0}
-!31 = !{!"int", !32, i64 0}
-!32 = !{!"omnipotent char", !33, i64 0}
-!33 = !{!"Simple C/C++ TBAA"}
-!34 = !DILocation(line: 39, column: 23, scope: !25)
-!35 = !DILocation(line: 39, column: 5, scope: !22)
-!36 = !DILocation(line: 43, column: 1, scope: !7)
-!37 = !DILocation(line: 40, column: 30, scope: !24)
-!38 = !DILocation(line: 0, scope: !24)
-!39 = !DILocation(line: 41, column: 23, scope: !24)
-!40 = !DILocation(line: 39, column: 43, scope: !25)
-!41 = distinct !{!41, !35, !42}
-!42 = !DILocation(line: 42, column: 5, scope: !22)
+!15 = !DIDerivedType(tag: DW_TAG_member, name: "cities", scope: !11, file: !1, line: 39, baseType: !16, size: 64, offset: 64)
+!16 = !DIDerivedType(tag: DW_TAG_pointer_type, baseType: !17, size: 64)
+!17 = distinct !DICompositeType(tag: DW_TAG_structure_type, name: "City", file: !1, line: 32, size: 128, elements: !18)
+!18 = !{!19, !20}
+!19 = !DIDerivedType(tag: DW_TAG_member, name: "population", scope: !17, file: !1, line: 33, baseType: !14, size: 32)
+!20 = !DIDerivedType(tag: DW_TAG_member, name: "people", scope: !17, file: !1, line: 34, baseType: !21, size: 64, offset: 64)
+!21 = !DIDerivedType(tag: DW_TAG_pointer_type, baseType: !14, size: 64)
+!22 = !{!23, !24, !25, !27}
+!23 = !DILocalVariable(name: "country", arg: 1, scope: !7, file: !1, line: 43, type: !10)
+!24 = !DILocalVariable(name: "newPeople", scope: !7, file: !1, line: 44, type: !21)
+!25 = !DILocalVariable(name: "i", scope: !26, file: !1, line: 45, type: !14)
+!26 = distinct !DILexicalBlock(scope: !7, file: !1, line: 45, column: 5)
+!27 = !DILocalVariable(name: "cityPointer", scope: !28, file: !1, line: 46, type: !16)
+!28 = distinct !DILexicalBlock(scope: !29, file: !1, line: 45, column: 55)
+!29 = distinct !DILexicalBlock(scope: !26, file: !1, line: 45, column: 5)
+!30 = !DILocation(line: 0, scope: !7)
+!31 = !DILocation(line: 0, scope: !26)
+!32 = !DILocation(line: 45, column: 34, scope: !29)
+!33 = !{!34, !35, i64 0}
+!34 = !{!"Country", !35, i64 0, !38, i64 8}
+!35 = !{!"int", !36, i64 0}
+!36 = !{!"omnipotent char", !37, i64 0}
+!37 = !{!"Simple C/C++ TBAA"}
+!38 = !{!"any pointer", !36, i64 0}
+!39 = !DILocation(line: 45, column: 23, scope: !29)
+!40 = !DILocation(line: 45, column: 5, scope: !26)
+!41 = !DILocation(line: 0, scope: !28)
+!42 = !{!34, !38, i64 8}
+!43 = !DILocation(line: 50, column: 1, scope: !7)
+!44 = !DILocation(line: 48, column: 22, scope: !28)
+!45 = !DILocation(line: 48, column: 33, scope: !28)
+!46 = !{!47, !35, i64 0}
+!47 = !{!"City", !35, i64 0, !38, i64 8}
+!48 = !DILocation(line: 45, column: 50, scope: !29)
+!49 = distinct !{!49, !40, !50}
+!50 = !DILocation(line: 49, column: 5, scope: !26)

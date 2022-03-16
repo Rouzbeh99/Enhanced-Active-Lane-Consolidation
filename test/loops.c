@@ -29,21 +29,27 @@
 //}
 
 
-struct City{
+struct City {
     int population;
-    int people[];
+    int* people;
 };
 
-void foo3(struct City* city){
+struct Country {
+    int numberOfCities;
+    struct City *cities;
+};
 
-    for (int i = 0; i < city->population; ++i) {
-        int* peoplePonter = &city->people[i];
-        *peoplePonter = i;
+
+void foo3(struct Country *country) {
+    for (int i = 0; i < country->numberOfCities; ++i) {
+        struct City *cityPointer = &country->cities[i];
+        *cityPointer->people = i;
+        cityPointer->population = i;
     }
 }
 
 // int bar(float* a, float* b, float* c, int n) {
-    
+
 //     // for (int i = 0; i < n; ++i) {
 //     //   a[i] = a[i] * b[i];
 //     // }
@@ -51,7 +57,7 @@ void foo3(struct City* city){
 //     int d = 0;
 
 //     for (int i = 0; i < n; ++i) {
-      
+
 //        d += b[i] + c[i];
 
 //     }

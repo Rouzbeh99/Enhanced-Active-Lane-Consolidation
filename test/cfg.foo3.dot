@@ -1,0 +1,21 @@
+digraph "CFG for 'foo3' function" {
+	label="CFG for 'foo3' function";
+
+	Node0x821350 [shape=record,color="#3d50c3ff", style=filled, fillcolor="#cedaeb70",label="{%2:\l  call void @llvm.dbg.value(metadata %struct.City* %0, metadata !25, metadata\l... !DIExpression()), !dbg !38\l  call void @llvm.dbg.value(metadata %struct.Country* %1, metadata !26,\l... metadata !DIExpression()), !dbg !38\l  call void @llvm.dbg.value(metadata i32 0, metadata !27, metadata\l... !DIExpression()), !dbg !39\l  %3 = getelementptr inbounds %struct.City, %struct.City* %0, i64 0, i32 0,\l... !dbg !40\l  %4 = load i32, i32* %3, align 4, !dbg !40, !tbaa !41\l  %5 = icmp sgt i32 %4, 0, !dbg !45\l  br i1 %5, label %6, label %8, !dbg !46\l|{<s0>T|<s1>F}}"];
+	Node0x821350:s0 -> Node0x824240;
+	Node0x821350:s1 -> Node0x8242d0;
+	Node0x824240 [shape=record,color="#3d50c3ff", style=filled, fillcolor="#b9d0f970",label="{%6:\l6:                                                \l  %7 = zext i32 %4 to i64, !dbg !46\l  br label %15, !dbg !46\l}"];
+	Node0x824240 -> Node0x824bc0;
+	Node0x8242d0 [shape=record,color="#3d50c3ff", style=filled, fillcolor="#cedaeb70",label="{%8:\l8:                                                \l  call void @llvm.dbg.value(metadata i32 0, metadata !33, metadata\l... !DIExpression()), !dbg !47\l  %9 = getelementptr inbounds %struct.Country, %struct.Country* %1, i64 0, i32\l... 0, !dbg !48\l  %10 = load i32, i32* %9, align 8, !dbg !48, !tbaa !49\l  %11 = icmp sgt i32 %10, 0, !dbg !52\l  br i1 %11, label %12, label %21, !dbg !53\l|{<s0>T|<s1>F}}"];
+	Node0x8242d0:s0 -> Node0x825ba0;
+	Node0x8242d0:s1 -> Node0x825c30;
+	Node0x825ba0 [shape=record,color="#3d50c3ff", style=filled, fillcolor="#b9d0f970",label="{%12:\l12:                                               \l  %13 = getelementptr inbounds %struct.Country, %struct.Country* %1, i64 0,\l... i32 1, !dbg !54\l  %14 = load %struct.City*, %struct.City** %13, align 8, !dbg !54, !tbaa !55\l  br label %22, !dbg !53\l}"];
+	Node0x825ba0 -> Node0x826800;
+	Node0x824bc0 [shape=record,color="#b70d28ff", style=filled, fillcolor="#b70d2870",label="{%15:\l15:                                               \l  %16 = phi i64 [ 0, %6 ], [ %19, %15 ]\l  call void @llvm.dbg.value(metadata i64 %16, metadata !27, metadata\l... !DIExpression()), !dbg !39\l  %17 = getelementptr inbounds %struct.City, %struct.City* %0, i64 0, i32 1,\l... i64 %16, !dbg !56\l  call void @llvm.dbg.value(metadata i32* %17, metadata !29, metadata\l... !DIExpression()), !dbg !57\l  %18 = trunc i64 %16 to i32, !dbg !58\l  store i32 %18, i32* %17, align 4, !dbg !58, !tbaa !41\l  %19 = add nuw nsw i64 %16, 1, !dbg !59\l  call void @llvm.dbg.value(metadata i64 %19, metadata !27, metadata\l... !DIExpression()), !dbg !39\l  %20 = icmp ult i64 %19, %7, !dbg !45\l  br i1 %20, label %15, label %8, !dbg !46, !llvm.loop !60\l|{<s0>T|<s1>F}}"];
+	Node0x824bc0:s0 -> Node0x824bc0;
+	Node0x824bc0:s1 -> Node0x8242d0;
+	Node0x825c30 [shape=record,color="#3d50c3ff", style=filled, fillcolor="#cedaeb70",label="{%21:\l21:                                               \l  ret void, !dbg !62\l}"];
+	Node0x826800 [shape=record,color="#b70d28ff", style=filled, fillcolor="#b70d2870",label="{%22:\l22:                                               \l  %23 = phi i64 [ 0, %12 ], [ %26, %22 ]\l  call void @llvm.dbg.value(metadata i64 %23, metadata !33, metadata\l... !DIExpression()), !dbg !47\l  call void @llvm.dbg.value(metadata %struct.City* undef, metadata !35,\l... metadata !DIExpression()), !dbg !54\l  %24 = getelementptr inbounds %struct.City, %struct.City* %14, i64 %23, i32\l... 1, i64 0, !dbg !63\l  %25 = trunc i64 %23 to i32, !dbg !64\l  store i32 %25, i32* %24, align 4, !dbg !64, !tbaa !41\l  %26 = add nuw nsw i64 %23, 1, !dbg !65\l  call void @llvm.dbg.value(metadata i64 %26, metadata !33, metadata\l... !DIExpression()), !dbg !47\l  %27 = load i32, i32* %9, align 8, !dbg !48, !tbaa !49\l  %28 = sext i32 %27 to i64, !dbg !52\l  %29 = icmp slt i64 %26, %28, !dbg !52\l  br i1 %29, label %22, label %21, !dbg !53, !llvm.loop !66\l|{<s0>T|<s1>F}}"];
+	Node0x826800:s0 -> Node0x826800;
+	Node0x826800:s1 -> Node0x825c30;
+}

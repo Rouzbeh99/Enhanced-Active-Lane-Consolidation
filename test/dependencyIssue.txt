@@ -33,7 +33,8 @@ NO Problem
 Most cases make sense except for :
 
     Function makebonds
-    Line 812
+    Line 812                 ---------------> Update when using * operator on one of the struct fields -->
+                                              loads bonds again.
 
 /************************************************************************************************************
 * molutil.c
@@ -41,7 +42,8 @@ Most cases make sense except for :
     Loop bound problem: Function freeresidue line 182
 
     Function setreskind
-     Line 810  --------> "We can't vectorize because we can't find the array bounds."
+     Line 810  --------> "We can't vectorize because we can't find the array bounds." ---> array of non primitive types
+               -------->  sp->s_residues is pointer to pointer (**)
 
     Most cases make sense
 
@@ -53,7 +55,7 @@ Most cases make sense except for :
 
 Function:  buildkdtree
     line 416
-    "We can't vectorize because we can't find the array bounds."   ---------> follow the debug info
+    "We can't vectorize because we can't find the array bounds."
 
     many same issues
 
