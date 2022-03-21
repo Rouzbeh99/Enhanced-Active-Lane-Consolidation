@@ -8,5 +8,4 @@ cmake -DCMAKE_VERBOSE_MAKEFILE=ON \
   ../
 make 
 cd ../test/Compiled_files
-opt -load-pass-plugin=../../build/ALC.so -passes="check-alc-conditions"  $1 --disable-output
-#-debug-only=loop-accesses
+opt -load-pass-plugin=../../build/ALC.so -passes="check-alc-conditions"  $1 -debug-only=loop-accesse --disable-output

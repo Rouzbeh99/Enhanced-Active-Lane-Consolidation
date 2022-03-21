@@ -124,15 +124,18 @@ namespace {
         }
 
         static bool containsOutputDependency(Loop *L) {
-            int counter = 0;
+
             for (const auto &block: L->getBlocks()) {
+                int counter = 0;
                 for (const auto &instr: block->getInstList()) {
                     if (isa<PHINode>(instr)) {
                         counter++;
                     }
                 }
+                if (counter > 1)
+                    return true;
             }
-            return counter > 1;
+            return false;
         }
 
 
