@@ -23,13 +23,12 @@ namespace {
         PreservedAnalyses run(Loop &loop, LoopAnalysisManager &AM,
                               LoopStandardAnalysisResults &AR, LPMUpdater &U) {
 
-
-
             Loop *L = &loop;
             //only apply the pass on innermost loop
             if (!L->getSubLoops().empty()) {
                 return PreservedAnalyses::all();
             }
+
 
             llvm::outs() << "\nFunction:  " << L->getHeader()->getParent()->getName() << '\n';
             const ArrayRef<BasicBlock *> &allBlocks = L->getBlocks();
@@ -46,6 +45,12 @@ namespace {
                 llvm::outs() << "Loop doesn't contain memory dependency" << '\n';
             } else {
                 llvm::outs() << "Loop contains memory dependency" << '\n';
+            }
+
+            if (containsOutputDependency(L)) {
+                llvm::outs() << "Loop contains output dependency" << '\n';
+            } else {
+                llvm::outs() << "Loop doesn't contain output dependency" << '\n';
             }
 
 
@@ -85,11 +90,25 @@ namespace {
 
         //Assumption: all blocks end with branch instruction
         static bool containsFunctionCall(Loop *L) {
+
             for (const auto &block: L->getBlocks()) {
-                for(const auto &instr: block->getInstList()){
-                    if(isa<CallInst>(instr)){
+                const Instruction *I = block->getFirstNonPHIOrDbg();
+                for (const auto &instr: block->getInstList()) {
+                    if (I == nullptr) {
+                        break;
+                    }
+                    // to avoid debug instructions
+                    if (I != &instr) {
+                        I = I->getNextNonDebugInstruction();
+                        continue;
+                    }
+
+                    if (isa<CallInst>(instr)) {
+                        instr.print(llvm::outs());
+                        llvm::outs() << "\n";
                         return true;
                     }
+                    I = I->getNextNonDebugInstruction();
                 }
 
             }
@@ -99,16 +118,21 @@ namespace {
         static bool isVectorizable(Loop &L, LoopAnalysisManager &AM,
                                    LoopStandardAnalysisResults &LAR) {
 
-
             LoopAccessAnalysis::Result &info = AM.getResult<LoopAccessAnalysis>(L, LAR);
-
-            L.getHeader()->getFirstNonPHIOrDbg()->print(llvm::outs());
-
-            llvm::outs() << "\nnumber of loads: " << info.getNumLoads() << " and number of stores: "
-                         << info.getNumStores() << "\n";
-
             return info.canVectorizeMemory();
 
+        }
+
+        static bool containsOutputDependency(Loop *L) {
+            int counter = 0;
+            for (const auto &block: L->getBlocks()) {
+                for (const auto &instr: block->getInstList()) {
+                    if (isa<PHINode>(instr)) {
+                        counter++;
+                    }
+                }
+            }
+            return counter > 1;
         }
 
 

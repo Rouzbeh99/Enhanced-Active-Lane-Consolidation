@@ -1,5 +1,5 @@
 #!/bin/bash
-cd ../build
+cd ../../build
 LLVM_BUILD_DIR=/home/rouzbeh/Graduate/Research/LLVM/llvm-project/build
 cmake -DCMAKE_VERBOSE_MAKEFILE=ON \
   -DLLVM_DIR=$LLVM_BUILD_DIR/lib/cmake/llvm          \
@@ -7,5 +7,6 @@ cmake -DCMAKE_VERBOSE_MAKEFILE=ON \
   -DCMAKE_CXX_COMPILER=$LLVM_BUILD_DIR/bin/clang++   \
   ../
 make 
-cd ../test
-opt -load-pass-plugin=../../build/ALC.so -passes="check-alc-conditions" -debug-only=loop-accesses $1 --disable-output
+cd ../test/Compiled_files
+opt -load-pass-plugin=../../build/ALC.so -passes="check-alc-conditions"  $1 --disable-output
+#-debug-only=loop-accesses
