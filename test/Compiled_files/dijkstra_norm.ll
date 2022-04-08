@@ -1,4 +1,4 @@
-; ModuleID = 'dijkstra.c'
+; ModuleID = 'dijkstra.ll'
 source_filename = "dijkstra.c"
 target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-unknown-linux-gnu"
@@ -19,15 +19,15 @@ entry:
   call void @llvm.dbg.value(metadata i32 %t, metadata !28, metadata !DIExpression()), !dbg !43
   call void @llvm.dbg.value(metadata [2048 x i32]* %e, metadata !29, metadata !DIExpression()), !dbg !43
   %0 = bitcast [2048 x i32]* %vis to i8*, !dbg !44
-  call void @llvm.lifetime.start.p0i8(i64 8192, i8* nonnull %0) #9, !dbg !44
+  call void @llvm.lifetime.start.p0i8(i64 8192, i8* nonnull %0) #8, !dbg !44
   call void @llvm.dbg.declare(metadata [2048 x i32]* %vis, metadata !30, metadata !DIExpression()), !dbg !45
   call void @llvm.memset.p0i8.i64(i8* noundef nonnull align 16 dereferenceable(8192) %0, i8 0, i64 8192, i1 false), !dbg !45
   %1 = bitcast [2048 x i32]* %dis to i8*, !dbg !46
-  call void @llvm.lifetime.start.p0i8(i64 8192, i8* nonnull %1) #9, !dbg !46
+  call void @llvm.lifetime.start.p0i8(i64 8192, i8* nonnull %1) #8, !dbg !46
   call void @llvm.dbg.declare(metadata [2048 x i32]* %dis, metadata !31, metadata !DIExpression()), !dbg !47
   call void @llvm.memset.p0i8.i64(i8* noundef nonnull align 16 dereferenceable(8192) %1, i8 0, i64 8192, i1 false), !dbg !47
   %2 = bitcast i32* %bestj to i8*, !dbg !48
-  call void @llvm.lifetime.start.p0i8(i64 4, i8* nonnull %2) #9, !dbg !48
+  call void @llvm.lifetime.start.p0i8(i64 4, i8* nonnull %2) #8, !dbg !48
   call void @llvm.dbg.value(metadata i32* %bestj, metadata !32, metadata !DIExpression(DW_OP_deref)), !dbg !43
   call void @llvm.var.annotation(i8* nonnull %2, i8* getelementptr inbounds ([7 x i8], [7 x i8]* @.str, i64 0, i64 0), i8* getelementptr inbounds ([11 x i8], [11 x i8]* @.str.1, i64 0, i64 0), i32 12, i8* null), !dbg !48
   call void @llvm.dbg.value(metadata i32 -1, metadata !32, metadata !DIExpression()), !dbg !43
@@ -52,7 +52,7 @@ for.cond20.preheader.us.us.preheader:             ; preds = %for.cond16.preheade
   %wide.trip.count150 = zext i32 %n to i64
   br label %for.cond20.preheader.us.us, !dbg !60
 
-for.cond20.preheader.us.us:                       ; preds = %for.cond20.preheader.us.us.preheader, %for.cond40.for.cond.cleanup42_crit_edge.us.us
+for.cond20.preheader.us.us:                       ; preds = %for.cond40.for.cond.cleanup42_crit_edge.us.us, %for.cond20.preheader.us.us.preheader
   %i15.0123.us.us = phi i32 [ %inc73.us.us, %for.cond40.for.cond.cleanup42_crit_edge.us.us ], [ 0, %for.cond20.preheader.us.us.preheader ]
   %bestj.promoted120122.us.us = phi i32 [ %bestj.promoted118.us.us, %for.cond40.for.cond.cleanup42_crit_edge.us.us ], [ -1, %for.cond20.preheader.us.us.preheader ]
   call void @llvm.dbg.value(metadata i32 %i15.0123.us.us, metadata !35, metadata !DIExpression()), !dbg !59
@@ -141,7 +141,7 @@ for.cond40.for.cond.cleanup42_crit_edge.us.us:    ; preds = %for.inc69.us.us
   %exitcond157.not = icmp eq i32 %inc73.us.us, %n, !dbg !107
   br i1 %exitcond157.not, label %for.cond.cleanup18, label %for.cond20.preheader.us.us, !dbg !60, !llvm.loop !108
 
-for.body:                                         ; preds = %for.body.preheader, %for.body
+for.body:                                         ; preds = %for.body, %for.body.preheader
   %indvars.iv = phi i64 [ 0, %for.body.preheader ], [ %indvars.iv.next, %for.body ]
   call void @llvm.dbg.value(metadata i64 %indvars.iv, metadata !33, metadata !DIExpression()), !dbg !55
   %arrayidx5 = getelementptr inbounds [2048 x i32], [2048 x i32]* %e, i64 %idxprom, i64 %indvars.iv, !dbg !110
@@ -155,29 +155,29 @@ for.body:                                         ; preds = %for.body.preheader,
   %exitcond.not = icmp eq i64 %indvars.iv.next, %wide.trip.count, !dbg !56
   br i1 %exitcond.not, label %for.cond16.preheader, label %for.body, !dbg !58, !llvm.loop !119
 
-for.cond.cleanup18:                               ; preds = %for.cond40.for.cond.cleanup42_crit_edge.us.us, %entry, %for.cond16.preheader
+for.cond.cleanup18:                               ; preds = %for.cond40.for.cond.cleanup42_crit_edge.us.us, %for.cond16.preheader, %entry
   %idxprom75 = sext i32 %t to i64, !dbg !121
   %arrayidx76 = getelementptr inbounds [2048 x i32], [2048 x i32]* %dis, i64 0, i64 %idxprom75, !dbg !121
   %16 = load i32, i32* %arrayidx76, align 4, !dbg !121, !tbaa !51
-  call void @llvm.lifetime.end.p0i8(i64 4, i8* nonnull %2) #9, !dbg !122
-  call void @llvm.lifetime.end.p0i8(i64 8192, i8* nonnull %1) #9, !dbg !122
-  call void @llvm.lifetime.end.p0i8(i64 8192, i8* nonnull %0) #9, !dbg !122
+  call void @llvm.lifetime.end.p0i8(i64 4, i8* nonnull %2) #8, !dbg !122
+  call void @llvm.lifetime.end.p0i8(i64 8192, i8* nonnull %1) #8, !dbg !122
+  call void @llvm.lifetime.end.p0i8(i64 8192, i8* nonnull %0) #8, !dbg !122
   ret i32 %16, !dbg !123
 }
 
-; Function Attrs: mustprogress nofree nosync nounwind readnone speculatable willreturn
+; Function Attrs: nofree nosync nounwind readnone speculatable willreturn
 declare void @llvm.dbg.declare(metadata, metadata, metadata) #1
 
-; Function Attrs: argmemonly mustprogress nofree nosync nounwind willreturn
+; Function Attrs: argmemonly nofree nosync nounwind willreturn
 declare void @llvm.lifetime.start.p0i8(i64 immarg, i8* nocapture) #2
 
-; Function Attrs: argmemonly mustprogress nofree nounwind willreturn writeonly
+; Function Attrs: argmemonly nofree nounwind willreturn writeonly
 declare void @llvm.memset.p0i8.i64(i8* nocapture writeonly, i8, i64, i1 immarg) #3
 
-; Function Attrs: inaccessiblememonly mustprogress nofree nosync nounwind willreturn
+; Function Attrs: inaccessiblememonly nofree nosync nounwind willreturn
 declare void @llvm.var.annotation(i8*, i8*, i8*, i32, i8*) #4
 
-; Function Attrs: argmemonly mustprogress nofree nosync nounwind willreturn
+; Function Attrs: argmemonly nofree nosync nounwind willreturn
 declare void @llvm.lifetime.end.p0i8(i64 immarg, i8* nocapture) #2
 
 ; Function Attrs: nounwind uwtable
@@ -188,44 +188,44 @@ entry:
   %bestj.i = alloca i32, align 4
   call void @llvm.dbg.value(metadata i32 %argc, metadata !131, metadata !DIExpression()), !dbg !140
   call void @llvm.dbg.value(metadata i8** %argv, metadata !132, metadata !DIExpression()), !dbg !140
-  %call = tail call i32 (i8*, ...) bitcast (i32 (...)* @time to i32 (i8*, ...)*)(i8* noundef null) #9, !dbg !141
-  tail call void @srand(i32 noundef %call) #9, !dbg !142
+  %call = tail call i32 (i8*, ...) bitcast (i32 (...)* @time to i32 (i8*, ...)*)(i8* noundef null) #8, !dbg !141
+  tail call void @srand(i32 noundef %call) #8, !dbg !142
   %0 = load i32, i32* @secret, align 4, !dbg !143, !tbaa !51
   %sub = and i32 %0, -256, !dbg !144
   store i32 %sub, i32* @secret, align 4, !dbg !144, !tbaa !51
   call void @llvm.dbg.value(metadata i32 0, metadata !133, metadata !DIExpression()), !dbg !145
   br label %for.cond3.preheader, !dbg !146
 
-for.cond3.preheader:                              ; preds = %entry, %for.cond.cleanup6
+for.cond3.preheader:                              ; preds = %for.cond.cleanup6, %entry
   %indvars.iv25 = phi i64 [ 0, %entry ], [ %indvars.iv.next26, %for.cond.cleanup6 ]
   call void @llvm.dbg.value(metadata i64 %indvars.iv25, metadata !133, metadata !DIExpression()), !dbg !145
   call void @llvm.dbg.value(metadata i32 0, metadata !135, metadata !DIExpression()), !dbg !147
   br label %for.body7, !dbg !148
 
 for.cond.cleanup:                                 ; preds = %for.cond.cleanup6
-  call void @llvm.dbg.value(metadata i32 2048, metadata !26, metadata !DIExpression()) #9, !dbg !149
-  call void @llvm.dbg.value(metadata i32 0, metadata !27, metadata !DIExpression()) #9, !dbg !149
-  call void @llvm.dbg.value(metadata i32 2047, metadata !28, metadata !DIExpression()) #9, !dbg !149
+  call void @llvm.dbg.value(metadata i32 2048, metadata !26, metadata !DIExpression()) #8, !dbg !149
+  call void @llvm.dbg.value(metadata i32 0, metadata !27, metadata !DIExpression()) #8, !dbg !149
+  call void @llvm.dbg.value(metadata i32 2047, metadata !28, metadata !DIExpression()) #8, !dbg !149
   %1 = bitcast [2048 x i32]* %vis.i to i8*, !dbg !151
-  call void @llvm.lifetime.start.p0i8(i64 8192, i8* nonnull %1) #9, !dbg !151
-  call void @llvm.dbg.declare(metadata [2048 x i32]* %vis.i, metadata !30, metadata !DIExpression()) #9, !dbg !152
-  call void @llvm.memset.p0i8.i64(i8* noundef nonnull align 16 dereferenceable(8192) %1, i8 0, i64 8192, i1 false) #9, !dbg !152
+  call void @llvm.lifetime.start.p0i8(i64 8192, i8* nonnull %1) #8, !dbg !151
+  call void @llvm.dbg.declare(metadata [2048 x i32]* %vis.i, metadata !30, metadata !DIExpression()) #8, !dbg !152
+  call void @llvm.memset.p0i8.i64(i8* noundef nonnull align 16 dereferenceable(8192) %1, i8 0, i64 8192, i1 false) #8, !dbg !152
   %2 = bitcast [2048 x i32]* %dis.i to i8*, !dbg !153
-  call void @llvm.lifetime.start.p0i8(i64 8192, i8* nonnull %2) #9, !dbg !153
-  call void @llvm.dbg.declare(metadata [2048 x i32]* %dis.i, metadata !31, metadata !DIExpression()) #9, !dbg !154
-  call void @llvm.memset.p0i8.i64(i8* noundef nonnull align 16 dereferenceable(8192) %2, i8 0, i64 8192, i1 false) #9, !dbg !154
+  call void @llvm.lifetime.start.p0i8(i64 8192, i8* nonnull %2) #8, !dbg !153
+  call void @llvm.dbg.declare(metadata [2048 x i32]* %dis.i, metadata !31, metadata !DIExpression()) #8, !dbg !154
+  call void @llvm.memset.p0i8.i64(i8* noundef nonnull align 16 dereferenceable(8192) %2, i8 0, i64 8192, i1 false) #8, !dbg !154
   %3 = bitcast i32* %bestj.i to i8*, !dbg !155
-  call void @llvm.lifetime.start.p0i8(i64 4, i8* nonnull %3) #9, !dbg !155
-  call void @llvm.dbg.value(metadata i32* %bestj.i, metadata !32, metadata !DIExpression(DW_OP_deref)) #9, !dbg !149
-  call void @llvm.var.annotation(i8* nonnull %3, i8* getelementptr inbounds ([7 x i8], [7 x i8]* @.str, i64 0, i64 0), i8* getelementptr inbounds ([11 x i8], [11 x i8]* @.str.1, i64 0, i64 0), i32 12, i8* null) #9, !dbg !155
-  call void @llvm.dbg.value(metadata i32 -1, metadata !32, metadata !DIExpression()) #9, !dbg !149
+  call void @llvm.lifetime.start.p0i8(i64 4, i8* nonnull %3) #8, !dbg !155
+  call void @llvm.dbg.value(metadata i32* %bestj.i, metadata !32, metadata !DIExpression(DW_OP_deref)) #8, !dbg !149
+  call void @llvm.var.annotation(i8* nonnull %3, i8* getelementptr inbounds ([7 x i8], [7 x i8]* @.str, i64 0, i64 0), i8* getelementptr inbounds ([11 x i8], [11 x i8]* @.str.1, i64 0, i64 0), i32 12, i8* null) #8, !dbg !155
+  call void @llvm.dbg.value(metadata i32 -1, metadata !32, metadata !DIExpression()) #8, !dbg !149
   %arrayidx.i = getelementptr inbounds [2048 x i32], [2048 x i32]* %vis.i, i64 0, i64 0, !dbg !156
   store i32 1, i32* %arrayidx.i, align 16, !dbg !157, !tbaa !51
-  call void @llvm.dbg.value(metadata i32 0, metadata !33, metadata !DIExpression()) #9, !dbg !158
+  call void @llvm.dbg.value(metadata i32 0, metadata !33, metadata !DIExpression()) #8, !dbg !158
   br label %for.body.i, !dbg !159
 
 for.cond16.preheader.i:                           ; preds = %for.body.i
-  call void @llvm.dbg.value(metadata i32 0, metadata !35, metadata !DIExpression()) #9, !dbg !160
+  call void @llvm.dbg.value(metadata i32 0, metadata !35, metadata !DIExpression()) #8, !dbg !160
   %4 = load i32, i32* @secret, align 4
   %5 = sext i32 %4 to i64, !dbg !161
   br label %for.cond20.preheader.us.us.i, !dbg !161
@@ -233,20 +233,20 @@ for.cond16.preheader.i:                           ; preds = %for.body.i
 for.cond20.preheader.us.us.i:                     ; preds = %for.cond40.for.cond.cleanup42_crit_edge.us.us.i, %for.cond16.preheader.i
   %i15.0123.us.us.i = phi i32 [ %inc73.us.us.i, %for.cond40.for.cond.cleanup42_crit_edge.us.us.i ], [ 0, %for.cond16.preheader.i ]
   %bestj.promoted120122.us.us.i = phi i32 [ %bestj.promoted118.us.us.i, %for.cond40.for.cond.cleanup42_crit_edge.us.us.i ], [ -1, %for.cond16.preheader.i ]
-  call void @llvm.dbg.value(metadata i32 %i15.0123.us.us.i, metadata !35, metadata !DIExpression()) #9, !dbg !160
-  call void @llvm.dbg.value(metadata i32 0, metadata !37, metadata !DIExpression()) #9, !dbg !162
+  call void @llvm.dbg.value(metadata i32 %i15.0123.us.us.i, metadata !35, metadata !DIExpression()) #8, !dbg !160
+  call void @llvm.dbg.value(metadata i32 0, metadata !37, metadata !DIExpression()) #8, !dbg !162
   br label %for.body23.us.us.i, !dbg !163
 
 for.body43.us.us.i:                               ; preds = %for.cond20.for.cond40.preheader_crit_edge.us.us.i, %for.inc69.us.us.i
   %indvars.iv152.i = phi i64 [ 0, %for.cond20.for.cond40.preheader_crit_edge.us.us.i ], [ %indvars.iv.next153.i, %for.inc69.us.us.i ]
-  call void @llvm.dbg.value(metadata i64 %indvars.iv152.i, metadata !41, metadata !DIExpression()) #9, !dbg !164
+  call void @llvm.dbg.value(metadata i64 %indvars.iv152.i, metadata !41, metadata !DIExpression()) #8, !dbg !164
   %arrayidx45.us.us.i = getelementptr inbounds [2048 x i32], [2048 x i32]* %vis.i, i64 0, i64 %indvars.iv152.i, !dbg !165
   %6 = load i32, i32* %arrayidx45.us.us.i, align 4, !dbg !165, !tbaa !51
   %tobool46.not.us.us.i = icmp eq i32 %6, 0, !dbg !165
   br i1 %tobool46.not.us.us.i, label %land.lhs.true47.us.us.i, label %for.inc69.us.us.i, !dbg !166
 
 land.lhs.true47.us.us.i:                          ; preds = %for.body43.us.us.i
-  call void @llvm.dbg.value(metadata i32 undef, metadata !32, metadata !DIExpression()) #9, !dbg !149
+  call void @llvm.dbg.value(metadata i32 undef, metadata !32, metadata !DIExpression()) #8, !dbg !149
   %7 = load i32, i32* %arrayidx49.us.us.i, align 4, !dbg !167, !tbaa !51
   %arrayidx53.us.us.i = getelementptr inbounds [2048 x [2048 x i32]], [2048 x [2048 x i32]]* @in, i64 0, i64 %idxprom48.us.us.i, i64 %indvars.iv152.i, !dbg !168
   %8 = load i32, i32* %arrayidx53.us.us.i, align 4, !dbg !168, !tbaa !51
@@ -262,7 +262,7 @@ if.then58.us.us.i:                                ; preds = %land.lhs.true47.us.
 
 for.inc69.us.us.i:                                ; preds = %if.then58.us.us.i, %land.lhs.true47.us.us.i, %for.body43.us.us.i
   %indvars.iv.next153.i = add nuw nsw i64 %indvars.iv152.i, 1, !dbg !175
-  call void @llvm.dbg.value(metadata i64 %indvars.iv.next153.i, metadata !41, metadata !DIExpression()) #9, !dbg !164
+  call void @llvm.dbg.value(metadata i64 %indvars.iv.next153.i, metadata !41, metadata !DIExpression()) #8, !dbg !164
   %exitcond156.not.i = icmp eq i64 %indvars.iv.next153.i, 2048, !dbg !176
   br i1 %exitcond156.not.i, label %for.cond40.for.cond.cleanup42_crit_edge.us.us.i, label %for.body43.us.us.i, !dbg !177, !llvm.loop !178
 
@@ -270,14 +270,14 @@ for.body23.us.us.i:                               ; preds = %for.inc36.us.us.i, 
   %indvars.iv146.i = phi i64 [ %indvars.iv.next147.i, %for.inc36.us.us.i ], [ 0, %for.cond20.preheader.us.us.i ]
   %bestj.promoted119.us.us.i = phi i32 [ %bestj.promoted118.us.us.i, %for.inc36.us.us.i ], [ %bestj.promoted120122.us.us.i, %for.cond20.preheader.us.us.i ]
   %add110112.us.us.i = phi i32 [ %add109.us.us.i, %for.inc36.us.us.i ], [ %bestj.promoted120122.us.us.i, %for.cond20.preheader.us.us.i ]
-  call void @llvm.dbg.value(metadata i64 %indvars.iv146.i, metadata !37, metadata !DIExpression()) #9, !dbg !162
+  call void @llvm.dbg.value(metadata i64 %indvars.iv146.i, metadata !37, metadata !DIExpression()) #8, !dbg !162
   %arrayidx25.us.us.i = getelementptr inbounds [2048 x i32], [2048 x i32]* %vis.i, i64 0, i64 %indvars.iv146.i, !dbg !180
   %10 = load i32, i32* %arrayidx25.us.us.i, align 4, !dbg !180, !tbaa !51
   %tobool.not.us.us.i = icmp eq i32 %10, 0, !dbg !180
   br i1 %tobool.not.us.us.i, label %land.lhs.true.us.us.i, label %for.inc36.us.us.i, !dbg !181
 
 land.lhs.true.us.us.i:                            ; preds = %for.body23.us.us.i
-  call void @llvm.dbg.value(metadata i32 %add110112.us.us.i, metadata !32, metadata !DIExpression()) #9, !dbg !149
+  call void @llvm.dbg.value(metadata i32 %add110112.us.us.i, metadata !32, metadata !DIExpression()) #8, !dbg !149
   %cmp26.us.us.i = icmp slt i32 %add110112.us.us.i, 0, !dbg !182
   br i1 %cmp26.us.us.i, label %if.then32.us.us.i, label %lor.lhs.false.us.us.i, !dbg !183
 
@@ -292,7 +292,7 @@ lor.lhs.false.us.us.i:                            ; preds = %land.lhs.true.us.us
 
 if.then32.us.us.i:                                ; preds = %lor.lhs.false.us.us.i, %land.lhs.true.us.us.i
   %13 = add nsw i64 %indvars.iv146.i, %5, !dbg !188
-  call void @llvm.dbg.value(metadata i64 %13, metadata !32, metadata !DIExpression()) #9, !dbg !149
+  call void @llvm.dbg.value(metadata i64 %13, metadata !32, metadata !DIExpression()) #8, !dbg !149
   %14 = trunc i64 %13 to i32, !dbg !189
   %arrayidx34.us.us.i = getelementptr inbounds [2048 x i32], [2048 x i32]* %vis.i, i64 0, i64 %13, !dbg !190
   store i32 1, i32* %arrayidx34.us.us.i, align 4, !dbg !191, !tbaa !51
@@ -302,25 +302,25 @@ for.inc36.us.us.i:                                ; preds = %if.then32.us.us.i, 
   %bestj.promoted118.us.us.i = phi i32 [ %bestj.promoted119.us.us.i, %for.body23.us.us.i ], [ %bestj.promoted119.us.us.i, %lor.lhs.false.us.us.i ], [ %14, %if.then32.us.us.i ]
   %add109.us.us.i = phi i32 [ %add110112.us.us.i, %for.body23.us.us.i ], [ %add110112.us.us.i, %lor.lhs.false.us.us.i ], [ %14, %if.then32.us.us.i ]
   %indvars.iv.next147.i = add nuw nsw i64 %indvars.iv146.i, 1, !dbg !193
-  call void @llvm.dbg.value(metadata i64 %indvars.iv.next147.i, metadata !37, metadata !DIExpression()) #9, !dbg !162
+  call void @llvm.dbg.value(metadata i64 %indvars.iv.next147.i, metadata !37, metadata !DIExpression()) #8, !dbg !162
   %exitcond151.not.i = icmp eq i64 %indvars.iv.next147.i, 2048, !dbg !194
   br i1 %exitcond151.not.i, label %for.cond20.for.cond40.preheader_crit_edge.us.us.i, label %for.body23.us.us.i, !dbg !163, !llvm.loop !195
 
 for.cond20.for.cond40.preheader_crit_edge.us.us.i: ; preds = %for.inc36.us.us.i
   %idxprom48.us.us.i = sext i32 %bestj.promoted118.us.us.i to i64
   %arrayidx49.us.us.i = getelementptr inbounds [2048 x i32], [2048 x i32]* %dis.i, i64 0, i64 %idxprom48.us.us.i
-  call void @llvm.dbg.value(metadata i32 0, metadata !41, metadata !DIExpression()) #9, !dbg !164
+  call void @llvm.dbg.value(metadata i32 0, metadata !41, metadata !DIExpression()) #8, !dbg !164
   br label %for.body43.us.us.i, !dbg !177
 
 for.cond40.for.cond.cleanup42_crit_edge.us.us.i:  ; preds = %for.inc69.us.us.i
   %inc73.us.us.i = add nuw nsw i32 %i15.0123.us.us.i, 1, !dbg !197
-  call void @llvm.dbg.value(metadata i32 %inc73.us.us.i, metadata !35, metadata !DIExpression()) #9, !dbg !160
+  call void @llvm.dbg.value(metadata i32 %inc73.us.us.i, metadata !35, metadata !DIExpression()) #8, !dbg !160
   %exitcond157.not.i = icmp eq i32 %inc73.us.us.i, 2048, !dbg !198
   br i1 %exitcond157.not.i, label %dijkstra.exit, label %for.cond20.preheader.us.us.i, !dbg !161, !llvm.loop !199
 
 for.body.i:                                       ; preds = %for.body.i, %for.cond.cleanup
   %indvars.iv.i = phi i64 [ 0, %for.cond.cleanup ], [ %indvars.iv.next.i, %for.body.i ]
-  call void @llvm.dbg.value(metadata i64 %indvars.iv.i, metadata !33, metadata !DIExpression()) #9, !dbg !158
+  call void @llvm.dbg.value(metadata i64 %indvars.iv.i, metadata !33, metadata !DIExpression()) #8, !dbg !158
   %arrayidx5.i = getelementptr inbounds [2048 x [2048 x i32]], [2048 x [2048 x i32]]* @in, i64 0, i64 0, i64 %indvars.iv.i, !dbg !201
   %15 = load i32, i32* %arrayidx5.i, align 4, !dbg !201, !tbaa !51
   %cmp6.i = icmp eq i32 %15, 0, !dbg !202
@@ -328,14 +328,14 @@ for.body.i:                                       ; preds = %for.body.i, %for.co
   %16 = getelementptr inbounds [2048 x i32], [2048 x i32]* %dis.i, i64 0, i64 %indvars.iv.i, !dbg !204
   store i32 %.sink.i, i32* %16, align 4, !dbg !205
   %indvars.iv.next.i = add nuw nsw i64 %indvars.iv.i, 1, !dbg !206
-  call void @llvm.dbg.value(metadata i64 %indvars.iv.next.i, metadata !33, metadata !DIExpression()) #9, !dbg !158
+  call void @llvm.dbg.value(metadata i64 %indvars.iv.next.i, metadata !33, metadata !DIExpression()) #8, !dbg !158
   %exitcond.not.i = icmp eq i64 %indvars.iv.next.i, 2048, !dbg !207
   br i1 %exitcond.not.i, label %for.cond16.preheader.i, label %for.body.i, !dbg !159, !llvm.loop !208
 
 dijkstra.exit:                                    ; preds = %for.cond40.for.cond.cleanup42_crit_edge.us.us.i
-  call void @llvm.lifetime.end.p0i8(i64 4, i8* nonnull %3) #9, !dbg !210
-  call void @llvm.lifetime.end.p0i8(i64 8192, i8* nonnull %2) #9, !dbg !210
-  call void @llvm.lifetime.end.p0i8(i64 8192, i8* nonnull %1) #9, !dbg !210
+  call void @llvm.lifetime.end.p0i8(i64 4, i8* nonnull %3) #8, !dbg !210
+  call void @llvm.lifetime.end.p0i8(i64 8192, i8* nonnull %2) #8, !dbg !210
+  call void @llvm.lifetime.end.p0i8(i64 8192, i8* nonnull %1) #8, !dbg !210
   call void @llvm.dbg.value(metadata i32 undef, metadata !139, metadata !DIExpression()), !dbg !140
   ret i32 0, !dbg !211
 
@@ -345,10 +345,10 @@ for.cond.cleanup6:                                ; preds = %for.body7
   %exitcond28.not = icmp eq i64 %indvars.iv.next26, 2048, !dbg !213
   br i1 %exitcond28.not, label %for.cond.cleanup, label %for.cond3.preheader, !dbg !146, !llvm.loop !214
 
-for.body7:                                        ; preds = %for.cond3.preheader, %for.body7
+for.body7:                                        ; preds = %for.body7, %for.cond3.preheader
   %indvars.iv = phi i64 [ 0, %for.cond3.preheader ], [ %indvars.iv.next, %for.body7 ]
   call void @llvm.dbg.value(metadata i64 %indvars.iv, metadata !135, metadata !DIExpression()), !dbg !147
-  %call8 = tail call i32 @rand() #9, !dbg !216
+  %call8 = tail call i32 @rand() #8, !dbg !216
   %rem = srem i32 %call8, 10, !dbg !219
   %arrayidx10 = getelementptr inbounds [2048 x [2048 x i32]], [2048 x [2048 x i32]]* @in, i64 0, i64 %indvars.iv25, i64 %indvars.iv, !dbg !220
   store i32 %rem, i32* %arrayidx10, align 4, !dbg !221, !tbaa !51
@@ -367,18 +367,17 @@ declare dso_local i32 @time(...) local_unnamed_addr #7
 declare !dbg !232 dso_local i32 @rand() local_unnamed_addr #6
 
 ; Function Attrs: nofree nosync nounwind readnone speculatable willreturn
-declare void @llvm.dbg.value(metadata, metadata, metadata) #8
+declare void @llvm.dbg.value(metadata, metadata, metadata) #1
 
 attributes #0 = { nofree nosync nounwind uwtable "frame-pointer"="none" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "tune-cpu"="generic" }
-attributes #1 = { mustprogress nofree nosync nounwind readnone speculatable willreturn }
-attributes #2 = { argmemonly mustprogress nofree nosync nounwind willreturn }
-attributes #3 = { argmemonly mustprogress nofree nounwind willreturn writeonly }
-attributes #4 = { inaccessiblememonly mustprogress nofree nosync nounwind willreturn }
+attributes #1 = { nofree nosync nounwind readnone speculatable willreturn }
+attributes #2 = { argmemonly nofree nosync nounwind willreturn }
+attributes #3 = { argmemonly nofree nounwind willreturn writeonly }
+attributes #4 = { inaccessiblememonly nofree nosync nounwind willreturn }
 attributes #5 = { nounwind uwtable "frame-pointer"="none" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "tune-cpu"="generic" }
 attributes #6 = { nounwind "frame-pointer"="none" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "tune-cpu"="generic" }
 attributes #7 = { "frame-pointer"="none" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "tune-cpu"="generic" }
-attributes #8 = { nofree nosync nounwind readnone speculatable willreturn }
-attributes #9 = { nounwind }
+attributes #8 = { nounwind }
 
 !llvm.dbg.cu = !{!2}
 !llvm.module.flags = !{!14, !15, !16, !17}
