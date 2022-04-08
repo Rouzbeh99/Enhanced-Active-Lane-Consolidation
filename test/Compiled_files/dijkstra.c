@@ -3,7 +3,7 @@
 #include <assert.h>
 #include <unistd.h>
 #include <limits.h>
-#define INPUT_SIZE 512
+#define INPUT_SIZE 2048
 
 int secret = 0;
 int dijkstra(int n, int s, int t, int e[][INPUT_SIZE]) {
@@ -45,7 +45,7 @@ int main(int argc, char** argv)
     for (int i = 0; i < INPUT_SIZE; i++) {
         for (int j = 0; j < INPUT_SIZE; j++) {
 
-            in[i][j] = rand() %5;
+            in[i][j] = rand() %10;
         }
     }
     int res = dijkstra(INPUT_SIZE, 0, INPUT_SIZE-1, in);
