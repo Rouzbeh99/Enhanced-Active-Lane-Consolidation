@@ -23,29 +23,37 @@ namespace {
         PreservedAnalyses run(Loop &loop, LoopAnalysisManager &AM,
                               LoopStandardAnalysisResults &AR, LPMUpdater &U) {
 
-
-
             Loop *L = &loop;
             //only apply the pass on innermost loop
             if (!L->getSubLoops().empty()) {
                 return PreservedAnalyses::all();
             }
 
+            bool functionCall = containsFunctionCall(L);
+            bool vectorizable = isVectorizable(loop, AM, AR);
+            bool outPutDependency = containsOutputDependency(L);
+
             llvm::outs() << "\nFunction:  " << L->getHeader()->getParent()->getName() << '\n';
             const ArrayRef<BasicBlock *> &allBlocks = L->getBlocks();
             const DebugLoc &location = allBlocks.front()->getFirstNonPHIOrDbg()->getDebugLoc();
             llvm::outs() << "Loop at line number: " << location.getLine() - 1 << "\n";
 
-            if (containsFunctionCall(L)) {
+            if (functionCall) {
                 llvm::outs() << "Loop contains function call" << '\n';
             } else {
                 llvm::outs() << "Loop doesn't contain function call" << '\n';
             }
 
-            if (isVectorizable(loop, AM, AR)) {
+            if (vectorizable) {
                 llvm::outs() << "Loop doesn't contain memory dependency" << '\n';
             } else {
                 llvm::outs() << "Loop contains memory dependency" << '\n';
+            }
+
+            if (outPutDependency) {
+                llvm::outs() << "Loop contains output dependency" << '\n';
+            } else {
+                llvm::outs() << "Loop doesn't contain output dependency" << '\n';
             }
 
 
@@ -57,6 +65,18 @@ namespace {
 
             countNumberOfPaths(firstNode, loopLatch, numberOfPaths, visited, allBlocks);
             llvm::outs() << "Number of paths: " << numberOfPaths << '\n';
+
+            if(numberOfPaths > 1){
+                llvm::outs()<<"If Conversion can be applied \n";
+            }else{
+                llvm::outs()<<"If Conversion can NOT be applied \n";
+            }
+
+            if(!functionCall && !outPutDependency && vectorizable && numberOfPaths > 1){
+                llvm::outs()<<"ALC can be applied \n";
+            }else{
+                llvm::outs()<<"ALC can NOT be applied \n";
+            }
 
 
             return PreservedAnalyses::all();
@@ -85,11 +105,23 @@ namespace {
 
         //Assumption: all blocks end with branch instruction
         static bool containsFunctionCall(Loop *L) {
+
             for (const auto &block: L->getBlocks()) {
-                for(const auto &instr: block->getInstList()){
-                    if(isa<CallInst>(instr)){
+                const Instruction *I = block->getFirstNonPHIOrDbg();
+                for (const auto &instr: block->getInstList()) {
+                    if (I == nullptr) {
+                        break;
+                    }
+                    // to avoid debug instructions
+                    if (I != &instr) {
+                        I = I->getNextNonDebugInstruction();
+                        continue;
+                    }
+
+                    if (isa<CallInst>(instr)) {
                         return true;
                     }
+                    I = I->getNextNonDebugInstruction();
                 }
 
             }
@@ -99,18 +131,24 @@ namespace {
         static bool isVectorizable(Loop &L, LoopAnalysisManager &AM,
                                    LoopStandardAnalysisResults &LAR) {
 
-
             LoopAccessAnalysis::Result &info = AM.getResult<LoopAccessAnalysis>(L, LAR);
-
-            L.getHeader()->getFirstNonPHIOrDbg()->print(llvm::outs());
-
-            llvm::outs() << "\nnumber of loads: " << info.getNumLoads() << " and number of stores: "
-                         << info.getNumStores() << "\n";
-
             return info.canVectorizeMemory();
 
         }
 
+        static bool containsOutputDependency(Loop *L) {
+
+            // If this PHINode is not in the header block, then we know that we
+            // can convert it to select during if-conversion.
+            int counter = 0;
+            for (const auto &instr: L->getHeader()->getInstList()) {
+                if (isa<PHINode>(instr)) {
+                    counter++;
+                }
+            }
+            return counter > 1;
+
+        }
 
     };
 }
