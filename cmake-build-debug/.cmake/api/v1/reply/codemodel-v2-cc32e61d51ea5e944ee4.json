@@ -41,7 +41,7 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "ALC::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-ALC-Debug-407065bb17d5bd7345c2.json",
+					"jsonFile" : "target-ALC-Debug-9ad296cbcd8cfb85864e.json",
 					"name" : "ALC",
 					"projectIndex" : 0
 				},
@@ -58,8 +58,8 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "/home/rouzbeh/Graduate/Research/LLVM/ALC/cmake-build-debug",
-		"source" : "/home/rouzbeh/Graduate/Research/LLVM/ALC"
+		"build" : "/home/rouzbeh/Graduate/Research/LLVM/Active-Lane-Conslidation/cmake-build-debug",
+		"source" : "/home/rouzbeh/Graduate/Research/LLVM/Active-Lane-Conslidation"
 	},
 	"version" : 
 	{

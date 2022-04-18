@@ -1,4 +1,4 @@
-# Install script for directory: /home/rouzbeh/Graduate/Research/LLVM/ALC
+# Install script for directory: /home/rouzbeh/Graduate/Research/LLVM/Active-Lane-Conslidation
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -50,5 +50,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/rouzbeh/Graduate/Research/LLVM/ALC/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/rouzbeh/Graduate/Research/LLVM/Active-Lane-Conslidation/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
