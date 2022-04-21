@@ -1,6 +1,5 @@
 #!/bin/bash
 
-#!/bin/bash
 cd ../build
 LLVM_BUILD_DIR=/home/rouzbeh/Graduate/Research/LLVM/llvm-project/build
 cmake -DCMAKE_VERBOSE_MAKEFILE=ON \
