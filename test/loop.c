@@ -26,7 +26,7 @@ int dijkstra(int n, int s, int e[][INPUT_SIZE]) {
     vis[s] = 1;
     for (int i = 0; i < n; ++i) {
         if (e[s][i] == 0) {
-            dis[i] = 1000000;
+            dis[i] = max;
         } else {
             dis[i] = e[s][i];
         }

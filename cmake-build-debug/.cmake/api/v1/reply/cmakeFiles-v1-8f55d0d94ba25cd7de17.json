@@ -774,8 +774,8 @@
 	"kind" : "cmakeFiles",
 	"paths" : 
 	{
-		"build" : "/home/rouzbeh/Graduate/Research/LLVM/Active-Lane-Conslidation/cmake-build-debug",
-		"source" : "/home/rouzbeh/Graduate/Research/LLVM/Active-Lane-Conslidation"
+		"build" : "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/cmake-build-debug",
+		"source" : "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation"
 	},
 	"version" : 
 	{

@@ -11,7 +11,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/home/rouzbeh/Graduate/Research/LLVM/Active-Lane-Conslidation/cmake-build-debug"
+			"value" : "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/cmake-build-debug"
 		},
 		{
 			"name" : "ALC_IS_TOP_LEVEL",
@@ -47,7 +47,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/home/rouzbeh/Graduate/Research/LLVM/Active-Lane-Conslidation"
+			"value" : "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation"
 		},
 		{
 			"name" : "CMAKE_ADDR2LINE",
@@ -103,7 +103,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/home/rouzbeh/Graduate/Research/LLVM/Active-Lane-Conslidation/cmake-build-debug"
+			"value" : "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/cmake-build-debug"
 		},
 		{
 			"name" : "CMAKE_CACHE_MAJOR_VERSION",
@@ -727,7 +727,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/home/rouzbeh/Graduate/Research/LLVM/Active-Lane-Conslidation"
+			"value" : "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation"
 		},
 		{
 			"name" : "CMAKE_INSTALL_PREFIX",
