@@ -54,9 +54,9 @@ declare void @llvm.memset.p0.i32(ptr nocapture writeonly, i8, i32, i1 immarg) #3
 declare void @llvm.lifetime.end.p0(i64 immarg, ptr nocapture) #2
 
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind readnone willreturn
-define dso_local i32 @main() local_unnamed_addr #4 !dbg !58 {
+define dso_local i32 @main() local_unnamed_addr #4 !dbg !57 {
 entry:
-  ret i32 0, !dbg !62
+  ret i32 0, !dbg !61
 }
 
 ; Function Attrs: nocallback nofree nosync nounwind readnone speculatable willreturn
@@ -75,7 +75,7 @@ attributes #6 = { nounwind }
 !llvm.ident = !{!12}
 
 !0 = distinct !DICompileUnit(language: DW_LANG_C99, file: !1, producer: "clang version 15.0.0 (https://www.github.com/llvm/llvm-project.git 61baf2ffa7071944c00a0642fdb9ff77d9cff0da)", isOptimized: true, runtimeVersion: 0, emissionKind: FullDebug, splitDebugInlining: false, nameTableKind: None)
-!1 = !DIFile(filename: "loop.c", directory: "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/test", checksumkind: CSK_MD5, checksum: "2dc758b34530a7da2189a085b7920e62")
+!1 = !DIFile(filename: "loop.c", directory: "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/test", checksumkind: CSK_MD5, checksum: "af3fcd32aac6a83366ba5cfdb83941b7")
 !2 = !{i32 7, !"Dwarf Version", i32 5}
 !3 = !{i32 2, !"Debug Info Version", i32 3}
 !4 = !{i32 1, !"wchar_size", i32 4}
@@ -128,12 +128,11 @@ attributes #6 = { nounwind }
 !51 = distinct !DILexicalBlock(scope: !46, file: !1, line: 28, column: 27)
 !52 = !DILocation(line: 29, column: 20, scope: !51)
 !53 = !DILocation(line: 27, column: 28, scope: !35)
-!54 = distinct !{!54, !36, !55, !56, !57}
+!54 = distinct !{!54, !36, !55, !56}
 !55 = !DILocation(line: 33, column: 5, scope: !29)
 !56 = !{!"llvm.loop.mustprogress"}
-!57 = !{!"llvm.loop.unroll.disable"}
-!58 = distinct !DISubprogram(name: "main", scope: !1, file: !1, line: 37, type: !59, scopeLine: 37, flags: DIFlagAllCallsDescribed, spFlags: DISPFlagDefinition | DISPFlagOptimized, unit: !0, retainedNodes: !61)
-!59 = !DISubroutineType(types: !60)
-!60 = !{!16}
-!61 = !{}
-!62 = !DILocation(line: 43, column: 1, scope: !58)
+!57 = distinct !DISubprogram(name: "main", scope: !1, file: !1, line: 37, type: !58, scopeLine: 37, flags: DIFlagAllCallsDescribed, spFlags: DISPFlagDefinition | DISPFlagOptimized, unit: !0, retainedNodes: !60)
+!58 = !DISubroutineType(types: !59)
+!59 = !{!16}
+!60 = !{}
+!61 = !DILocation(line: 43, column: 1, scope: !57)
