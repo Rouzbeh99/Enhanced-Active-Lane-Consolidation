@@ -49,8 +49,8 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/SVE Permutation/cmake-build-debug",
-		"source" : "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/SVE Permutation"
+		"build" : "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/ALC Examples/SVE Permutation/cmake-build-debug",
+		"source" : "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/ALC Examples/SVE Permutation"
 	},
 	"version" : 
 	{

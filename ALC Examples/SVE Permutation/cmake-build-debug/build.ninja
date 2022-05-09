@@ -39,7 +39,7 @@ include CMakeFiles/rules.ninja
 #############################################
 # Logical path to working directory; prefix for absolute paths.
 
-cmake_ninja_workdir = /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/SVE$ Permutation/cmake-build-debug/
+cmake_ninja_workdir = /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/ALC$ Examples/SVE$ Permutation/cmake-build-debug/
 # =============================================================================
 # Object build statements for EXECUTABLE target SVE_Permutation
 
@@ -49,7 +49,7 @@ cmake_ninja_workdir = /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/SVE$ 
 
 build cmake_object_order_depends_target_SVE_Permutation: phony || CMakeFiles/SVE_Permutation.dir
 
-build CMakeFiles/SVE_Permutation.dir/main.cpp.o: CXX_COMPILER__SVE_Permutation_Debug /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/SVE$ Permutation/main.cpp || cmake_object_order_depends_target_SVE_Permutation
+build CMakeFiles/SVE_Permutation.dir/main.cpp.o: CXX_COMPILER__SVE_Permutation_Debug /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/ALC$ Examples/SVE$ Permutation/main.cpp || cmake_object_order_depends_target_SVE_Permutation
   DEP_FILE = CMakeFiles/SVE_Permutation.dir/main.cpp.o.d
   FLAGS = -g
   OBJECT_DIR = CMakeFiles/SVE_Permutation.dir
@@ -79,7 +79,7 @@ build SVE_Permutation: CXX_EXECUTABLE_LINKER__SVE_Permutation_Debug CMakeFiles/S
 # Utility command for edit_cache
 
 build CMakeFiles/edit_cache.util: CUSTOM_COMMAND
-  COMMAND = cd "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/SVE Permutation/cmake-build-debug" && /snap/clion/189/bin/cmake/linux/bin/ccmake -S"/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/SVE Permutation" -B"/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/SVE Permutation/cmake-build-debug"
+  COMMAND = cd "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/ALC Examples/SVE Permutation/cmake-build-debug" && /snap/clion/189/bin/cmake/linux/bin/ccmake -S"/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/ALC Examples/SVE Permutation" -B"/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/ALC Examples/SVE Permutation/cmake-build-debug"
   DESC = Running CMake cache editor...
   pool = console
   restat = 1
@@ -91,7 +91,7 @@ build edit_cache: phony CMakeFiles/edit_cache.util
 # Utility command for rebuild_cache
 
 build CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
-  COMMAND = cd "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/SVE Permutation/cmake-build-debug" && /snap/clion/189/bin/cmake/linux/bin/cmake --regenerate-during-build -S"/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/SVE Permutation" -B"/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/SVE Permutation/cmake-build-debug"
+  COMMAND = cd "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/ALC Examples/SVE Permutation/cmake-build-debug" && /snap/clion/189/bin/cmake/linux/bin/cmake --regenerate-during-build -S"/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/ALC Examples/SVE Permutation" -B"/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/ALC Examples/SVE Permutation/cmake-build-debug"
   DESC = Running CMake to regenerate build system...
   pool = console
   restat = 1
@@ -107,7 +107,7 @@ build rebuild_cache: phony CMakeFiles/rebuild_cache.util
 # =============================================================================
 
 #############################################
-# Folder: /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/SVE Permutation/cmake-build-debug
+# Folder: /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/ALC Examples/SVE Permutation/cmake-build-debug
 
 build all: phony SVE_Permutation
 

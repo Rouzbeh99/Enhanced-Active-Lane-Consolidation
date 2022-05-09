@@ -1,4 +1,4 @@
-# Install script for directory: /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/SVE Permutation
+# Install script for directory: /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/ALC Examples/SVE Permutation
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -50,5 +50,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/SVE Permutation/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/ALC Examples/SVE Permutation/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

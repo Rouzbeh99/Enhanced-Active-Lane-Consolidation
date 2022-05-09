@@ -18,7 +18,7 @@ void permutation_c_sve_intrinsics(svint32_t z0, svint32_t z1, svint32_t *result0
                                  svbool_t *resultPredicate, svbool_t p0,
                                  svbool_t p1);
 
-oid ACLEVersion(int *a, int *b, int *c, bool *cond, int n) {
+void ACLEVersion(int *a, int *b, int *c, bool *cond, int n) {
     for (int i = 0; i < n; i += 2 * VLength) {
 
         svbool_t allActive = svptrue_b32();
@@ -41,7 +41,7 @@ oid ACLEVersion(int *a, int *b, int *c, bool *cond, int n) {
             svint32_t secondOp = svld1_gather_s32index_s32(allActive, b, idxM);
             svint32_t multResult = svmul_s32_z(allActive, firstOp, secondOp);
 
-            // store multResult in z0 indices of c array
+            // store multResult in idxM indices of c array
             svst1_scatter_s32index_s32(allActive, c, idxM, multResult);
 
             // default path
