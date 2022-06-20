@@ -111,7 +111,7 @@ int main() {
 
 //////////////////////////////////////////////////////helper functions/////////////////////////////////////////////////
 
-    oid printVector(svint32_t z) {
+    void printVector(svint32_t z) {
 
         svbool_t allActive = svptrue_b32();
         int32_t a[] = {-1, -1, -1, -1};
