@@ -24,6 +24,7 @@ namespace {
                               LoopStandardAnalysisResults &AR, LPMUpdater &U) {
 
             Loop *L = &loop;
+
             //only apply the pass on innermost loop
             if (!L->getSubLoops().empty()) {
                 return PreservedAnalyses::all();

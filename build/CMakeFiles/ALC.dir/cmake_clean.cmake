@@ -2,7 +2,6 @@ file(REMOVE_RECURSE
   "ALC.pdb"
   "ALC.so"
   "CMakeFiles/ALC.dir/ALC.cpp.o"
-  "CMakeFiles/ALC.dir/ALC.cpp.o.d"
 )
 
 # Per-language clean rules from dependency scanning.
