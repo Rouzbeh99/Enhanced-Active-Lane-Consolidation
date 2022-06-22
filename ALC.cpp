@@ -67,11 +67,6 @@ namespace {
             countNumberOfPaths(firstNode, loopLatch, numberOfPaths, visited, allBlocks);
             llvm::outs() << "Number of paths: " << numberOfPaths << '\n';
 
-            if(numberOfPaths > 1){
-                llvm::outs()<<"If Conversion can be applied \n";
-            }else{
-                llvm::outs()<<"If Conversion can NOT be applied \n";
-            }
 
             if(!functionCall && !outPutDependency && vectorizable && numberOfPaths > 1){
                 llvm::outs()<<"ALC can be applied \n";
@@ -104,7 +99,7 @@ namespace {
             visited[src] = false;
         }
 
-        //Assumption: all blocks end with branch instruction
+
         static bool containsFunctionCall(Loop *L) {
 
             for (const auto &block: L->getBlocks()) {
@@ -120,6 +115,10 @@ namespace {
                     }
 
                     if (isa<CallInst>(instr)) {
+                        if(cast<CallInst>(instr).getCalledFunction()->isIntrinsic()){ // it's an LLVM function
+                            I = I->getNextNonDebugInstruction();
+                            continue;
+                        }
                         return true;
                     }
                     I = I->getNextNonDebugInstruction();

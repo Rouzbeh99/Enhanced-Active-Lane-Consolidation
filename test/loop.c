@@ -4,13 +4,13 @@
      for (int i = 0; i < n; ++i) {
          for (int j = 0; j < n; ++j) {
 
-             if (a[j] > 0) {
+             if (a[j] > 10) {
                  a[j] += b[j] + c[j];
              }
-             if (a[j] > 5) {
+             if (a[j] < - 10) {
                  a[j] += b[j] - c[j];
              }
-             if (a[j] > 7) {
+             if (a[j] < 10 && a[j] > -10) {  // calling llvm mul-add function
                  a[j] += b[j] * c[j];
              }
          }
@@ -19,20 +19,6 @@
  }
 
 
-int dijkstra(int n, int s, int e[][INPUT_SIZE]) {
-    int vis[INPUT_SIZE] = {0};
-    int dis[INPUT_SIZE] = {0};
-    int max = 1000000;
-    vis[s] = 1;
-    for (int i = 0; i < n; ++i) {
-        if (e[s][i] == 0) {
-            dis[i] = max;
-        } else {
-            dis[i] = e[s][i];
-        }
-    }
-    return dis[n-1];
-}
 
 int main(){
  
