@@ -10,7 +10,7 @@
              if (a[j] < - 10) {
                  a[j] += b[j] - c[j];
              }
-             if (a[j] < 10 && a[j] > -10) {  // calling llvm mul-add function
+             if (a[j] < 10 && a[j] > -10) {  // calling llvm f-mul-add function
                  a[j] += b[j] * c[j];
              }
          }

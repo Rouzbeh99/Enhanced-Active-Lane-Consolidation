@@ -27,6 +27,8 @@ llvm/IR/PassManager.h
 /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/llvm/IR/PassManager.h
 llvm/Analysis/OptimizationRemarkEmitter.h
 /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/llvm/Analysis/OptimizationRemarkEmitter.h
+llvm/Transforms/Vectorize/LoopVectorizationLegality.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/llvm/Transforms/Vectorize/LoopVectorizationLegality.h
 map
 -
 
@@ -2785,4 +2787,14 @@ llvm/IR/ValueHandle.h
 /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Utils/llvm/IR/ValueHandle.h
 llvm/IR/ValueMap.h
 /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Utils/llvm/IR/ValueMap.h
+
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Vectorize/LoopVectorizationLegality.h
+llvm/ADT/MapVector.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Vectorize/llvm/ADT/MapVector.h
+llvm/Analysis/LoopAccessAnalysis.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Vectorize/llvm/Analysis/LoopAccessAnalysis.h
+llvm/Support/TypeSize.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Vectorize/llvm/Support/TypeSize.h
+llvm/Transforms/Utils/LoopUtils.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Vectorize/llvm/Transforms/Utils/LoopUtils.h
 

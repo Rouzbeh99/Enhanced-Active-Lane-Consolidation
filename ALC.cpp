@@ -8,6 +8,7 @@
 #include "llvm/Passes/PassPlugin.h"
 #include "llvm/IR/PassManager.h"
 #include "llvm/Analysis/OptimizationRemarkEmitter.h"
+#include "llvm/Transforms/Vectorize/LoopVectorizationLegality.h"
 #include <map>
 
 using namespace llvm;
@@ -25,6 +26,10 @@ namespace {
 
             Loop *L = &loop;
 
+            if (L->getHeader()->getParent()->getName() == "main") {
+                return PreservedAnalyses::all();
+            }
+
             //only apply the pass on innermost loop
             if (!L->getSubLoops().empty()) {
                 return PreservedAnalyses::all();
@@ -32,7 +37,8 @@ namespace {
 
             bool functionCall = containsFunctionCall(L);
             bool vectorizable = isVectorizable(loop, AM, AR);
-            bool outPutDependency = containsOutputDependency(L);
+            bool outputDependency = containsOutputDependency(L);
+            bool hasSelectInst = containsSelectInst(L);
 
             llvm::outs() << "\nFunction:  " << L->getHeader()->getParent()->getName() << '\n';
             const ArrayRef<BasicBlock *> &allBlocks = L->getBlocks();
@@ -51,7 +57,7 @@ namespace {
                 llvm::outs() << "Loop contains memory dependency" << '\n';
             }
 
-            if (outPutDependency) {
+            if (outputDependency) {
                 llvm::outs() << "Loop contains output dependency" << '\n';
             } else {
                 llvm::outs() << "Loop doesn't contain output dependency" << '\n';
@@ -62,16 +68,22 @@ namespace {
             BasicBlock *const &loopLatch = L->getLoopLatch();  //supposing to have only one exiting node
 
             int numberOfPaths = 0;
-            std::map<BasicBlock *const, bool> visited;
+            std::map < BasicBlock *const, bool > visited;
 
             countNumberOfPaths(firstNode, loopLatch, numberOfPaths, visited, allBlocks);
             llvm::outs() << "Number of paths: " << numberOfPaths << '\n';
 
+            if (hasSelectInst) {
+                llvm::outs() << "Loop body has select instruction" << "\n";
+            } else {
+                llvm::outs() << "Loop body does NOT have select instruction" << "\n";
+            }
 
-            if(!functionCall && !outPutDependency && vectorizable && numberOfPaths > 1){
-                llvm::outs()<<"ALC can be applied \n";
-            }else{
-                llvm::outs()<<"ALC can NOT be applied \n";
+
+            if (!functionCall && !outputDependency && vectorizable && (numberOfPaths > 1 || hasSelectInst)) {
+                llvm::outs() << "ALC can be applied \n";
+            } else {
+                llvm::outs() << "ALC can NOT be applied \n";
             }
 
 
@@ -99,6 +111,28 @@ namespace {
             visited[src] = false;
         }
 
+        bool containsSelectInst(Loop *L) {
+            for (const auto &block: L->getBlocks()) {
+                const Instruction *I = block->getFirstNonPHIOrDbg();
+                for (const auto &instr: block->getInstList()) {
+                    if (I == nullptr) {
+                        break;
+                    }
+                    // to avoid debug instructions
+                    if (I != &instr) {
+                        continue;
+                    }
+
+                    if (isa<SelectInst>(instr)) {
+                        return true;
+                    }
+                    I = I->getNextNonDebugInstruction();
+                }
+
+            }
+            return false;
+        }
+
 
         static bool containsFunctionCall(Loop *L) {
 
@@ -110,12 +144,11 @@ namespace {
                     }
                     // to avoid debug instructions
                     if (I != &instr) {
-                        I = I->getNextNonDebugInstruction();
                         continue;
                     }
 
                     if (isa<CallInst>(instr)) {
-                        if(cast<CallInst>(instr).getCalledFunction()->isIntrinsic()){ // it's an LLVM function
+                        if (cast<CallInst>(instr).getCalledFunction()->isIntrinsic()) { // it's an LLVM function
                             I = I->getNextNonDebugInstruction();
                             continue;
                         }
@@ -158,13 +191,14 @@ namespace {
 
 // registering the pass to new PM
 extern "C" ::llvm::PassPluginLibraryInfo LLVM_ATTRIBUTE_WEAK
+
 llvmGetPassPluginInfo() {
     return {
             LLVM_PLUGIN_API_VERSION, "check-alc-conditions", "v0.1",
             [](PassBuilder &PB) {
                 PB.registerPipelineParsingCallback(
                         [](StringRef Name, LoopPassManager &LPM,
-                           ArrayRef<PassBuilder::PipelineElement>) {
+                           ArrayRef <PassBuilder::PipelineElement>) {
                             if (Name == "check-alc-conditions") {
                                 LPM.addPass(ALC_Conditions_Checker());
                                 return true;

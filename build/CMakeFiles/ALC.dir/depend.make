@@ -190,4 +190,5 @@ CMakeFiles/ALC.dir/ALC.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/incl
 CMakeFiles/ALC.dir/ALC.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Utils/LoopSimplify.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Utils/LoopUtils.h
 CMakeFiles/ALC.dir/ALC.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Utils/ValueMapper.h
+CMakeFiles/ALC.dir/ALC.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Vectorize/LoopVectorizationLegality.h
 
