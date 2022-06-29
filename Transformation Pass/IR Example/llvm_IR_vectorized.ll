@@ -29,7 +29,7 @@ declare void @_ZNSt8ios_base4InitD1Ev(ptr noundef nonnull align 1 dereferenceabl
 ; Function Attrs: nounwind
 declare i32 @__cxa_atexit(ptr, ptr, ptr) #3
 
-;declare <4 x float> @llvm.vp.load.v4f32.p0v4f32(<4 x float>* %ptr, <4 x i1> %mask, i32 %evl)
+declare <4 x float> @llvm.vp.load.v4f32.p0v4f32(<4 x float>* %ptr, <4 x i1> %mask, i32 %evl)
 
 ;declare <4 x float> @llvm.vp.fmul.v4f32(<4 x float> %a, <4 x float> %b, <4 x i1> %mask, i32 %evl)
 
@@ -93,7 +93,6 @@ define void @_Z3fooPfS_S_i(ptr %a, ptr %b, ptr %c, i32 %n){
      %wide.load.a = call <4 x float>  @llvm.masked.load.v4f32.p0v4f32 (<4 x float>* %ptr.a, i32 4, <4 x i1> %mask, <4 x float> %passthru)
      %wide.load.b = call <4 x float>  @llvm.masked.load.v4f32.p0v4f32 (<4 x float>* %ptr.b, i32 4, <4 x i1> %mask, <4 x float> %passthru)
 
-     ;%mul = call <4 x float>  @llvm.vp.fadd.v4f32 (<4 x float>  %wide.load.a, <4 x float>  %wide.load.b, <4 x i1> %mask, i32 4)
      %mul = fmul <4 x float> %wide.load.a, %wide.load.b
      call void @llvm.masked.store.v4f32.p0v4f32 (<4 x float> %mul, <4 x float>* %ptr.c, i32 4,  <4 x i1> %mask)
      
