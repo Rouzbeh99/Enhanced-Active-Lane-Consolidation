@@ -1,4 +1,4 @@
-/snap/clion/193/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" -S /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation -B /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/cmake-build-debug
+/snap/clion/198/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" -S /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation -B /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/cmake-build-debug
 -- Linker detection: GNU ld
 -- Configuring done
 -- Generating done
