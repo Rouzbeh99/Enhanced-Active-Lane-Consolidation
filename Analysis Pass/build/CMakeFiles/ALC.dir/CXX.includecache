@@ -6,29 +6,29 @@
 
 #IncludeRegexTransform: 
 
-/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/ALC.cpp
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Analysis Pass/ALC.cpp
 llvm/IR/Function.h
-/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/llvm/IR/Function.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Analysis Pass/llvm/IR/Function.h
 llvm/Support/raw_ostream.h
-/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/llvm/Support/raw_ostream.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Analysis Pass/llvm/Support/raw_ostream.h
 llvm/Analysis/LoopPass.h
-/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/llvm/Analysis/LoopPass.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Analysis Pass/llvm/Analysis/LoopPass.h
 llvm/Analysis/LoopInfo.h
-/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/llvm/Analysis/LoopInfo.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Analysis Pass/llvm/Analysis/LoopInfo.h
 llvm/Analysis/DependenceAnalysis.h
-/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/llvm/Analysis/DependenceAnalysis.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Analysis Pass/llvm/Analysis/DependenceAnalysis.h
 llvm/Analysis/LoopAccessAnalysis.h
-/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/llvm/Analysis/LoopAccessAnalysis.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Analysis Pass/llvm/Analysis/LoopAccessAnalysis.h
 llvm/Passes/PassBuilder.h
-/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/llvm/Passes/PassBuilder.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Analysis Pass/llvm/Passes/PassBuilder.h
 llvm/Passes/PassPlugin.h
-/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/llvm/Passes/PassPlugin.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Analysis Pass/llvm/Passes/PassPlugin.h
 llvm/IR/PassManager.h
-/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/llvm/IR/PassManager.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Analysis Pass/llvm/IR/PassManager.h
 llvm/Analysis/OptimizationRemarkEmitter.h
-/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/llvm/Analysis/OptimizationRemarkEmitter.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Analysis Pass/llvm/Analysis/OptimizationRemarkEmitter.h
 llvm/Transforms/Vectorize/LoopVectorizationLegality.h
-/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/llvm/Transforms/Vectorize/LoopVectorizationLegality.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Analysis Pass/llvm/Transforms/Vectorize/LoopVectorizationLegality.h
 map
 -
 

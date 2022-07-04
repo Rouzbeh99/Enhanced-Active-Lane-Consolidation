@@ -10,6 +10,12 @@ cmake -DCMAKE_VERBOSE_MAKEFILE=ON \
 make
 
 cd ../test
-clang -O0 -emit-llvm -c test.c -o test.bc
-opt -load-pass-plugin ../build/ALC_Vectorizer.so --passes="alc-vectorizer" test.bc -o test.bin
-lli test.bin
+
+#clang -g -S -emit-llvm $1 -o test.ll
+clang -g -O3 -fno-vectorize -fno-slp-vectorize -fno-unroll-loops -S -emit-llvm $1 -o test.ll
+opt -load-pass-plugin ../build/ALC_Vectorizer.so -passes="alc-vectorizer" test.ll --disable-output
+#lli test.bin
+
+
+
+

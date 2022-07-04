@@ -1,31 +1,24 @@
-//=============================================================================
-// FILE:
-//      input_for_hello.c
-//
-// DESCRIPTION:
-//      Sample input file for HelloWorld and InjectFuncCall
-//
-// License: MIT
-//=============================================================================
-int foo(int a) {
-    return a * 2;
+#include <stdio.h>
+
+void foo(float *__restrict__ a, float *__restrict__ b, float *__restrict__ c, int n) {
+    for (int i = 0; i < n; ++i) {
+        if (i % 2 == 1) {
+            c[i] = a[i] * b[i];
+        }
+    }
 }
 
-int bar(int a, int b) {
-    return (a + foo(b) * 2);
-}
+int main() {
+    int n = 8;
+    float a[] = {1, -1, 2, -2, 3, -3, 4, -4};
+    float b[] = {2, 2, 2, 2, 2, 2, 2, 2};
+    float c[] = {0, 0, 0, 0, 0, 0, 0, 0};
 
-int fez(int a, int b, int c) {
-    return (a + bar(a, b) * 2 + c * 3);
-}
+    foo(a, b, c, n);
 
-int main(int argc, char *argv[]) {
-    int a = 123;
-    int ret = 0;
-
-    ret += foo(a);
-    ret += bar(a, ret);
-    ret += fez(a, ret, 123);
-
-    return ret;
+    for (int i = 0; i < n; ++i) {   // 0, -2, 0, -4, 0, -6, 0, -8
+        printf("%f ", c[i]);
+    }
+    printf("\n");
+    return 0;
 }

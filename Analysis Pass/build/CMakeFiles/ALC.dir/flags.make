@@ -6,5 +6,5 @@ CXX_FLAGS = -fPIC   -D_GNU_SOURCE -D_DEBUG -D__STDC_CONSTANT_MACROS -D__STDC_FOR
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include -I/home/rouzbeh/Graduate/LLVM/llvm-project/build/include -I/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/include 
+CXX_INCLUDES = -I/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include -I/home/rouzbeh/Graduate/LLVM/llvm-project/build/include -I"/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Analysis Pass/include" 
 

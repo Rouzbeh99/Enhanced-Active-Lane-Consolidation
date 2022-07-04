@@ -1,4 +1,4 @@
-# Install script for directory: /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation
+# Install script for directory: /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Analysis Pass
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -45,5 +45,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Analysis Pass/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

@@ -46,10 +46,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation
+CMAKE_SOURCE_DIR = "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Analysis Pass"
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/build
+CMAKE_BINARY_DIR = "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Analysis Pass/build"
 
 # Utility rule file for intrinsics_gen.
 
@@ -70,6 +70,6 @@ CMakeFiles/intrinsics_gen.dir/clean:
 .PHONY : CMakeFiles/intrinsics_gen.dir/clean
 
 CMakeFiles/intrinsics_gen.dir/depend:
-	cd /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/build /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/build /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/build/CMakeFiles/intrinsics_gen.dir/DependInfo.cmake --color=$(COLOR)
+	cd "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Analysis Pass/build" && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Analysis Pass" "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Analysis Pass" "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Analysis Pass/build" "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Analysis Pass/build" "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Analysis Pass/build/CMakeFiles/intrinsics_gen.dir/DependInfo.cmake" --color=$(COLOR)
 .PHONY : CMakeFiles/intrinsics_gen.dir/depend
 
