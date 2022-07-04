@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(Vectorizer)
+project(ALC_Vectorizer)
 
 # Add LLVM to build.
 find_package(LLVM REQUIRED CONFIG)
@@ -13,8 +13,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Collect MyLoopPass src.
 set(srcs
-  "${CMAKE_CURRENT_SOURCE_DIR}/ALC.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/ALC_Vectorizer.cpp"
 )
 
 # Create the MyLoopPass library.
-llvm_add_library(Vectorizer MODULE ${srcs})
+llvm_add_library(ALC_Vectorizer MODULE ${srcs})

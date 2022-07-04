@@ -6,7 +6,7 @@
 
 using namespace llvm;
 
-#define DEBUG_TYPE "inject-func-call"
+#define DEBUG_TYPE "alc-vectorizer"
 #ifndef LLVM_TUTOR_INSTRUMENT_BASIC_H
 #define LLVM_TUTOR_INSTRUMENT_BASIC_H
 
@@ -123,12 +123,12 @@ bool LegacyInjectFuncCall::runOnModule(llvm::Module &M) {
 // New PM Registration
 //-----------------------------------------------------------------------------
 llvm::PassPluginLibraryInfo getInjectFuncCallPluginInfo() {
-  return {LLVM_PLUGIN_API_VERSION, "inject-func-call", LLVM_VERSION_STRING,
+  return {LLVM_PLUGIN_API_VERSION, "alc-vectorizer", LLVM_VERSION_STRING,
           [](PassBuilder &PB) {
             PB.registerPipelineParsingCallback(
                 [](StringRef Name, ModulePassManager &MPM,
                    ArrayRef<PassBuilder::PipelineElement>) {
-                  if (Name == "inject-func-call") {
+                  if (Name == "alc-vectorizer") {
                     MPM.addPass(InjectFuncCall());
                     return true;
                   }
@@ -149,6 +149,6 @@ char LegacyInjectFuncCall::ID = 0;
 
 // Register the pass - required for (among others) opt
 static RegisterPass<LegacyInjectFuncCall>
-    X(/*PassArg=*/"legacy-inject-func-call", /*Name=*/"LegacyInjectFuncCall",
+    X(/*PassArg=*/"legacy-alc-vectorizer", /*Name=*/"LegacyAlcVectorizer",
       /*CFGOnly=*/false, /*is_analysis=*/false);
 
