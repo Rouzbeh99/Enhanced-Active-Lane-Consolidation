@@ -11,7 +11,6 @@ make
 
 cd ../test
 
-#clang -g -S -emit-llvm $1 -o test.ll
 clang -g -O3 -fno-vectorize -fno-slp-vectorize -fno-unroll-loops -S -emit-llvm $1 -o test.ll
 opt -load-pass-plugin ../build/ALC_Vectorizer.so -passes="alc-vectorizer" test.ll --disable-output
 #lli test.bin
