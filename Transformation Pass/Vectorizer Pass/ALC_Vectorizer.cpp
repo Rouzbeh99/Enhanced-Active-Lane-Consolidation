@@ -23,11 +23,16 @@ namespace {
 
     void printMap(std::multimap<Value *, Value *> *map);
 
-    void fill_def_use_map(std::multimap<Value *, Value *> *def_use_map, Value *startValue, BasicBlock *header);
+    void fill_def_use_map(std::multimap<Value *, Value *> *def_use_map, Value *startValue, BasicBlock *header,
+                          BasicBlock *latch);
 
     void
     gatherLoopHeaderInstructions(BasicBlock *header, std::vector<Instruction *> *headerInstructions, PHINode **phiNode,
                                  BranchInst **branchInst);
+
+    void doUnrolling(int unrollFactor, std::vector<Instruction *> inductionVariableUpdateInstructions,
+                     const std::vector<Instruction *> &headerInstructions, BranchInst *branchInst,
+                     std::multimap<Value *, Value *> *def_use_map);
 
     bool comesAfter(Instruction *parent, Instruction *child);
 
@@ -53,9 +58,6 @@ namespace {
 
         unrollLoop(L);
 
-//        printInstructions(L->getHeader());
-
-
         return (llvm::PreservedAnalyses::all());
     }
 
@@ -67,7 +69,7 @@ namespace {
      */
     void alc_vectorizer::unrollLoop(Loop *L) {
 
-        //find the instruction that changes the value of induction variable
+        //find the instruction that changes the value of induction variable in the latch
         std::vector<Instruction *> inductionVariableUpdateInstructions;
 
         BasicBlock *latch = L->getLoopLatch();
@@ -96,33 +98,14 @@ namespace {
         auto *def_use_map = new std::multimap<Value *, Value *>;
 
         // provide def_use information required for unrolling
-        fill_def_use_map(def_use_map, dyn_cast<Value>(phiNode), header);
+        fill_def_use_map(def_use_map, dyn_cast<Value>(inductionVariableUpdateInstructions.front()), header, latch);
 
         printMap(def_use_map);
 
-        // Unrolling logic
+//        doUnrolling(2, inductionVariableUpdateInstructions, headerInstructions, branchInst, def_use_map);
 
-//        int unrollFactor = 2;
-//        for (int i = 0; i < unrollFactor - 1; ++i) {
-//
-//            if (inductionVariableUpdateInstructions.size() > 1) {
-//                //TODO: find out the case
-//            } else {
-//                Instruction *&instr = inductionVariableUpdateInstructions.front();
-//
-//                //duplicate
-//                Instruction *newInst = instr->clone();
-//                newInst->insertBefore(branchInst);
-//            }
-//
-//            for (auto *instr: headerInstructions) {
-//                Instruction *newInst = instr->clone();
-//                newInst->insertBefore(branchInst);
-//            }
-//        }
-//
-//        // finally, branch instruction should be eliminated
-//        // branchInst->removeFromParent();
+//        printInstructions(header);
+
 
     }
 
@@ -144,7 +127,8 @@ namespace {
         }
     }
 
-    void fill_def_use_map(std::multimap<Value *, Value *> *def_use_map, Value *startValue, BasicBlock *header) {
+    void fill_def_use_map(std::multimap<Value *, Value *> *def_use_map, Value *startValue, BasicBlock *header,
+                          BasicBlock *latch) {
 
 
 
@@ -157,11 +141,22 @@ namespace {
             }
         }
 
+//        llvm::outs() << "\n------------------------------------------------\n";
+//        printMap(def_use_map);
+//        llvm::outs() << "\n------------------------------------------------\n";
+
 
         std::vector<Value *> toBeReplacedValues;
         toBeReplacedValues.push_back(startValue);
 
-        for (auto currentValue: toBeReplacedValues) {  // values that should be replaced
+        // TODO: needs to be tested by values having multiple uses
+
+        std::vector<Value *>::size_type size = toBeReplacedValues.size();
+
+        for (std::vector<Value *>::size_type i = 0; i < size; ++i) {   // values that should be replaced
+
+            Value *currentValue = toBeReplacedValues[i];
+
             for (auto &it: *def_use_map) {           // search for ALL elements matching with value in the multimap
                 if (it.first == currentValue) {
                     Value *nextValue = it.second;             // value that should be replaced with
@@ -170,15 +165,16 @@ namespace {
                         auto *instr = dyn_cast<Instruction>(use->getUser());
 
                         // NOTE: only consider instruction that come AFTER startInstruction
-                        if (instr->getParent() == header && comesAfter(currentInstr, instr)) {
+                        if ((instr->getParent() == header || instr->getParent() == latch) &&
+                            comesAfter(currentInstr, instr)) {
                             def_use_map->insert({nextValue, dyn_cast<Value>(instr)});
                         }
                     }
                     toBeReplacedValues.push_back(nextValue);
-                    toBeReplacedValues.erase(
-                            toBeReplacedValues.begin()); // remove the first element which is currentValue
+                    size++;
                 }
             }
+
         }
 
 
@@ -214,6 +210,32 @@ namespace {
 
             }
         }
+    }
+
+    void doUnrolling(int unrollFactor, std::vector<Instruction *> inductionVariableUpdateInstructions,
+                     const std::vector<Instruction *> &headerInstructions, BranchInst *branchInst,
+                     std::multimap<Value *, Value *> *def_use_map) {
+
+        for (int i = 0; i < unrollFactor - 1; ++i) {
+
+            if (inductionVariableUpdateInstructions.size() > 1) {
+                //TODO: find out the case
+            } else {
+                Instruction *&instr = inductionVariableUpdateInstructions.front();
+
+                //duplicate
+                Instruction *newInst = instr->clone();
+                newInst->insertBefore(branchInst);
+            }
+
+            for (auto *instr: headerInstructions) {
+                Instruction *newInst = instr->clone();
+                newInst->insertBefore(branchInst);
+            }
+        }
+
+        // finally, branch instruction should be eliminated
+        // branchInst->removeFromParent();
     }
 
     bool comesAfter(Instruction *parent, Instruction *child) {
