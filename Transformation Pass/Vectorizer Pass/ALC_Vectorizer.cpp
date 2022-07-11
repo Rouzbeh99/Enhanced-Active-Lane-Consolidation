@@ -4,6 +4,7 @@
 #include "llvm/IR/PassManager.h"
 #include "llvm/Pass.h"
 #include <map>
+#include <vector>
 
 using namespace llvm;
 
@@ -20,11 +21,16 @@ namespace {
 
     void printInstructions(BasicBlock *BB);
 
-    void fill_def_use_map(std::map<Value *, Value *> *def_use_map, Value *startInst, BasicBlock *header);
+    void printMap(std::multimap<Value *, Value *> *map);
+
+    void fill_def_use_map(std::multimap<Value *, Value *> *def_use_map, Value *startValue, BasicBlock *header);
 
     void
-    gatherLoopHeaderInstructions(BasicBlock *header, std::vector<Instruction *> headerInstructions, PHINode *phiNode,
-                                 BranchInst *branchInst);
+    gatherLoopHeaderInstructions(BasicBlock *header, std::vector<Instruction *> *headerInstructions, PHINode **phiNode,
+                                 BranchInst **branchInst);
+
+    bool comesAfter(Instruction *parent, Instruction *child);
+
 
 
 
@@ -78,7 +84,7 @@ namespace {
         BranchInst *branchInst = nullptr;
 
         // gathering all instructions in loop header to replicate for unrolling
-        gatherLoopHeaderInstructions(header, headerInstructions, phiNode, branchInst);
+        gatherLoopHeaderInstructions(header, &headerInstructions, &phiNode, &branchInst);
 
 
 
@@ -87,16 +93,12 @@ namespace {
 
         auto *loopInductionVariable = dyn_cast<Value>(phiNode);
 
-        auto *def_use_map = new std::map<Value *, Value *>;
+        auto *def_use_map = new std::multimap<Value *, Value *>;
 
         // provide def_use information required for unrolling
         fill_def_use_map(def_use_map, dyn_cast<Value>(phiNode), header);
 
-        Value *&val = def_use_map->at(loopInductionVariable);
-        val->print(errs());
-        llvm::outs() << "\n";
-
-
+        printMap(def_use_map);
 
         // Unrolling logic
 
@@ -132,35 +134,74 @@ namespace {
         }
     }
 
-    void fill_def_use_map(std::map<Value *, Value *> *def_use_map, Value *startInst, BasicBlock *header) {
+    void printMap(std::multimap<Value *, Value *> *map) {
+        for (auto it: *map) {
+            it.first->print(outs());
+            llvm::outs() << " -----------used in----------> ";
+            it.second->print(outs());
+            llvm::outs() << "\n";
 
-        // initialize def-use map
-        for (auto use = startInst->use_begin(), ie = startInst->use_end(); use != ie; ++use) {
-
-            auto *instr = dyn_cast<Instruction>(use->getUser());
-            if (instr->getParent() == header) {
-                def_use_map->insert({startInst, dyn_cast<Value>(instr)});
-            }
         }
     }
 
+    void fill_def_use_map(std::multimap<Value *, Value *> *def_use_map, Value *startValue, BasicBlock *header) {
+
+
+
+        // initialize def-use map
+        for (auto use = startValue->use_begin(), ie = startValue->use_end(); use != ie; ++use) {
+
+            auto *instr = dyn_cast<Instruction>(use->getUser());
+            if (instr->getParent() == header) {
+                def_use_map->insert({startValue, dyn_cast<Value>(instr)});
+            }
+        }
+
+
+        std::vector<Value *> toBeReplacedValues;
+        toBeReplacedValues.push_back(startValue);
+
+        for (auto currentValue: toBeReplacedValues) {  // values that should be replaced
+            for (auto &it: *def_use_map) {           // search for ALL elements matching with value in the multimap
+                if (it.first == currentValue) {
+                    Value *nextValue = it.second;             // value that should be replaced with
+                    auto *currentInstr = dyn_cast<Instruction>(nextValue);
+                    for (auto use = nextValue->use_begin(), ie = nextValue->use_end(); use != ie; ++use) {
+                        auto *instr = dyn_cast<Instruction>(use->getUser());
+
+                        // NOTE: only consider instruction that come AFTER startInstruction
+                        if (instr->getParent() == header && comesAfter(currentInstr, instr)) {
+                            def_use_map->insert({nextValue, dyn_cast<Value>(instr)});
+                        }
+                    }
+                    toBeReplacedValues.push_back(nextValue);
+                    toBeReplacedValues.erase(
+                            toBeReplacedValues.begin()); // remove the first element which is currentValue
+                }
+            }
+        }
+
+
+    }
+
     void
-    gatherLoopHeaderInstructions(BasicBlock *header, std::vector<Instruction *> headerInstructions, PHINode *phiNode,
-                                 BranchInst *branchInst) {
+    gatherLoopHeaderInstructions(BasicBlock *header, std::vector<Instruction *> *headerInstructions, PHINode **phiNode,
+                                 BranchInst **branchInst) {
         for (const auto &instr: header->getInstList()) {
 
             // assumption: There is only one PHi node that is associated with induction variable
             if (isa<PHINode>(instr)) {
-                phiNode = const_cast<PHINode *>( dyn_cast<PHINode>(&instr));
+
+                *phiNode = const_cast<PHINode *>( dyn_cast<PHINode>(&instr));
+
             } else if (!isa<BranchInst>(instr)) {
 
                 // TODO: exclude debug instructions
-                headerInstructions.push_back(const_cast<Instruction *>(&instr));
+                headerInstructions->push_back(const_cast<Instruction *>(&instr));
             }
 
-
             if (isa<BranchInst>(instr)) {
-                branchInst = const_cast<BranchInst *>(dyn_cast<BranchInst>(&instr));
+                *branchInst = const_cast<BranchInst *>(dyn_cast<BranchInst>(&instr));
 
                 Value *condition = dyn_cast<BranchInst>(&instr)->getCondition();
 
@@ -173,6 +214,23 @@ namespace {
 
             }
         }
+    }
+
+    bool comesAfter(Instruction *parent, Instruction *child) {
+        while (parent != child) {
+            parent = parent->getNextNonDebugInstruction();
+
+            if (!parent) {
+                break;
+            }
+
+            if (parent == child) {
+                return true;
+            }
+
+        }
+
+        return false;
     }
 
 }

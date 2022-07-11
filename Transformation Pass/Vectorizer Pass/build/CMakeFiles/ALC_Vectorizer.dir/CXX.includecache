@@ -19,6 +19,8 @@ llvm/Pass.h
 /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/llvm/Pass.h
 map
 -
+vector
+-
 
 /home/rouzbeh/Graduate/LLVM/llvm-project/build/include/llvm/Config/abi-breaking.h
 
