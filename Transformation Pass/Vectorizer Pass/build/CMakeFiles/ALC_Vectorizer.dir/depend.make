@@ -58,6 +58,7 @@ CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/ADT/iterator.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/ADT/iterator_range.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/ADT/simple_ilist.h
+CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Analysis/AssumptionCache.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Analysis/CGSCCPassManager.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Analysis/CallGraphSCCPass.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Analysis/IVDescriptors.h
@@ -171,6 +172,7 @@ CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/IPO/ModuleInliner.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Instrumentation.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Scalar/LoopPassManager.h
+CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Utils/Cloning.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Utils/LCSSA.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Utils/LoopSimplify.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Utils/LoopUtils.h

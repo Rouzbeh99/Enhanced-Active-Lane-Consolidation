@@ -21,6 +21,10 @@ map
 -
 vector
 -
+llvm/IR/ValueMap.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/llvm/IR/ValueMap.h
+llvm/Transforms/Utils/Cloning.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/llvm/Transforms/Utils/Cloning.h
 
 /home/rouzbeh/Graduate/LLVM/llvm-project/build/include/llvm/Config/abi-breaking.h
 
@@ -758,6 +762,24 @@ functional
 iterator
 -
 utility
+-
+
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Analysis/AssumptionCache.h
+llvm/ADT/ArrayRef.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Analysis/llvm/ADT/ArrayRef.h
+llvm/ADT/DenseMap.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Analysis/llvm/ADT/DenseMap.h
+llvm/ADT/DenseMapInfo.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Analysis/llvm/ADT/DenseMapInfo.h
+llvm/ADT/SmallVector.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Analysis/llvm/ADT/SmallVector.h
+llvm/IR/PassManager.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Analysis/llvm/IR/PassManager.h
+llvm/IR/ValueHandle.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Analysis/llvm/IR/ValueHandle.h
+llvm/Pass.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Analysis/llvm/Pass.h
+memory
 -
 
 /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Analysis/CGSCCPassManager.h
@@ -2574,6 +2596,26 @@ llvm/Transforms/Utils/LoopSimplify.h
 llvm/Transforms/Utils/LoopUtils.h
 /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Scalar/llvm/Transforms/Utils/LoopUtils.h
 memory
+-
+
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Utils/Cloning.h
+llvm/ADT/SmallVector.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Utils/llvm/ADT/SmallVector.h
+llvm/ADT/Twine.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Utils/llvm/ADT/Twine.h
+llvm/Analysis/AssumptionCache.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Utils/llvm/Analysis/AssumptionCache.h
+llvm/Analysis/InlineCost.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Utils/llvm/Analysis/InlineCost.h
+llvm/IR/ValueHandle.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Utils/llvm/IR/ValueHandle.h
+llvm/Transforms/Utils/ValueMapper.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Utils/llvm/Transforms/Utils/ValueMapper.h
+functional
+-
+memory
+-
+vector
 -
 
 /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Utils/LCSSA.h
