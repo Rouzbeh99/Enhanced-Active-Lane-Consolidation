@@ -13,6 +13,9 @@ cd ../test
 
 clang -g -O3 -fno-vectorize -fno-slp-vectorize -fno-unroll-loops -S -emit-llvm $1 -o test.ll
 opt -load-pass-plugin ../build/ALC_Vectorizer.so -passes="alc-vectorizer" test.ll --disable-output
+
+#opt -loop-unroll -unroll-count=3 -unroll-allow-partial -print-after=loop-unroll  test.ll -o test.bc
+
 #lli test.bin
 
 

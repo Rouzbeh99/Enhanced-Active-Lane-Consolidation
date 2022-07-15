@@ -3,10 +3,9 @@
 #include "llvm/Passes/PassBuilder.h"
 #include "llvm/IR/PassManager.h"
 #include "llvm/Pass.h"
-#include <map>
-#include <vector>
 #include "llvm/IR/ValueMap.h"
 #include "llvm/Transforms/Utils/Cloning.h"
+#include <math.h>
 
 using namespace llvm;
 
@@ -25,13 +24,15 @@ namespace {
 
     void checkCondition(BasicBlock *header);
 
-    void doUnrolling(BasicBlock *header, BasicBlock *latch, int unrollFactor);
+    void doUnrolling(BasicBlock *header, BasicBlock *latch, Loop *L, int unrollFactor);
 
     void removeLastInstruction(BasicBlock *BB);
 
     Instruction *getLastInstruction(BasicBlock *BB);
 
-    void insertBlockInstructions(BasicBlock *instructionHolder, BasicBlock *target);
+    void insertBlockInstructions(BasicBlock *instructionHolder, BasicBlock *target, ValueToValueMapTy *VMap);
+
+    void printVMap(ValueToValueMapTy *VMap);
 
 
 
@@ -64,17 +65,22 @@ namespace {
      *
      */
     void alc_vectorizer::unrollLoop(Loop *L) {
-        
+
 
         BasicBlock *header = L->getHeader();
 
         BasicBlock *latch = L->getLoopLatch();
-        
+
         checkCondition(header);
 
-        doUnrolling(header, latch, 2);
+        doUnrolling(header, latch, L, 3);
 
-        printInstructions(header);
+        BasicBlock *BB = header;
+
+        while (BB) {
+            printInstructions(BB);
+            BB = BB->getNextNode();
+        }
 
 
     }
@@ -107,38 +113,73 @@ namespace {
     }
 
 
-
     // TODO: Assumption: Loop trip count is a Multiple of unrollFactor
-    void doUnrolling(BasicBlock *header, BasicBlock *latch, int unrollFactor) {
+    void doUnrolling(BasicBlock *header, BasicBlock *latch, Loop *L, int unrollFactor) {
 
-        ValueToValueMapTy tmp;
-        BasicBlock *initialHeader = CloneBasicBlock(header, tmp);
+        std::vector<PHINode *> headerPhiNodes;
 
-        // first attach a latch to header
-        ValueToValueMapTy VMap;
-        BasicBlock *newBB = CloneBasicBlock(latch, VMap);
-        removeLastInstruction(newBB);
-        insertBlockInstructions(newBB, header);
 
-        for (int i = 0; i < unrollFactor; ++i) {
-
-            newBB = CloneBasicBlock(initialHeader, VMap);
-            removeLastInstruction(newBB);
-            insertBlockInstructions(newBB, header);
-
-            if (i < unrollFactor - 1) {
-                newBB = CloneBasicBlock(latch, VMap);
-                removeLastInstruction(newBB);
-                insertBlockInstructions(newBB, header);
-            }
+        for (BasicBlock::iterator I = header->begin(); isa<PHINode>(I); ++I) {
+            headerPhiNodes.push_back(cast<PHINode>(I));
         }
 
-    }
-    
+        ValueToValueMapTy lastValueMap;
 
-    void removeLastInstruction(BasicBlock *BB) {
-        getLastInstruction(BB)->removeFromParent();
+        BasicBlock *prevLatch = latch;
+        BasicBlock *prevHeader = header;
+        auto blockInsertPt = std::next(latch->getIterator());
+
+        for (int i = 0; i < unrollFactor - 1; ++i) {
+
+            SmallVector<BasicBlock *, 2> newBlocks;
+            ValueToValueMapTy VMap;
+
+            //////////////////////////////  ADD HEADER /////////////////////////////////////////////////
+            auto newBB = CloneBasicBlock(prevHeader, VMap);
+            header->getParent()->getBasicBlockList().insert(blockInsertPt, newBB);
+
+            newBlocks.push_back(newBB);
+
+            if (i == 0) {
+                for (PHINode *OrigPHI: headerPhiNodes) {
+                    auto *newPHI = cast<PHINode>(VMap[OrigPHI]);
+                    Value *inVal = newPHI->getIncomingValueForBlock(latch);
+                    VMap[OrigPHI] = inVal;                           // replace phi node with its value coming from latch
+                    newBB->getInstList().erase(newPHI);
+                }
+            }
+
+            // fill lastValueMap with VMap
+            for (ValueToValueMapTy::iterator VI = VMap.begin(), VE = VMap.end();
+                 VI != VE; ++VI) {
+                lastValueMap[VI->first] = VI->second;
+            }
+
+
+            prevHeader = newBB;
+            ///////////////////////////////// ADD LATCH //////////////////////////////////////////////
+
+            newBB = CloneBasicBlock(prevLatch, VMap);
+            header->getParent()->getBasicBlockList().insert(blockInsertPt, newBB);
+            newBlocks.push_back(newBB);
+
+            // fill lastValueMap with VMap
+            for (ValueToValueMapTy::iterator VI = VMap.begin(), VE = VMap.end();
+                 VI != VE; ++VI) {
+                lastValueMap[VI->first] = VI->second;
+            }
+
+            prevLatch = newBB;
+
+            // Remap all instructions in the most recent iteration
+            printVMap(&lastValueMap);
+            remapInstructionsInBlocks(newBlocks, lastValueMap);
+
+        }
+
+
     }
+
 
     Instruction *getLastInstruction(BasicBlock *BB) {
         Instruction *instr = BB->getFirstNonPHI();
@@ -148,16 +189,21 @@ namespace {
         return instr;
     }
 
-    void insertBlockInstructions(BasicBlock *instructionHolder, BasicBlock *target) {
-        Instruction *lastInstruction = getLastInstruction(target);
-        for (auto &instr: instructionHolder->getInstList()) {
-            if (isa<DbgInfoIntrinsic>(instr)) {
+
+    void printVMap(ValueToValueMapTy *VMap) {
+        llvm::outs() << "------------------------------------------------------------------------------------------ \n";
+        for (auto pair: *VMap) {
+            if (isa<DbgInfoIntrinsic>(pair.first)) {
                 continue;
             }
-            Instruction *clonedInstr = instr.clone();
-            clonedInstr->insertBefore(lastInstruction);
+            pair.first->print(outs());
+            llvm::outs() << " ----------------> ";
+            pair.second->print(outs());
+            llvm::outs() << "\n";
         }
+        llvm::outs() << "------------------------------------------------------------------------------------------ \n";
     }
+
 
 }
 
