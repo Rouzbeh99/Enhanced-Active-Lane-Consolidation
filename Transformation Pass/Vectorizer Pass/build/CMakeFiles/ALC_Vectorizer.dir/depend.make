@@ -21,6 +21,7 @@ CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/ADT/DenseMap.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/ADT/DenseMapInfo.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/ADT/DenseSet.h
+CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/ADT/DepthFirstIterator.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/ADT/EpochTracker.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/ADT/FloatingPointMode.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/ADT/FunctionExtras.h
@@ -87,6 +88,7 @@ CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/DebugLoc.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/DerivedTypes.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/DiagnosticHandler.h
+CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/Dominators.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/FMF.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/FPEnv.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/FixedMetadataKinds.def
@@ -138,6 +140,8 @@ CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/Atomic.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/AtomicOrdering.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/CBindingWrapping.h
+CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/CFGDiff.h
+CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/CFGUpdate.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/Casting.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/CodeGen.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/CommandLine.h
@@ -151,6 +155,8 @@ CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/ErrorHandling.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/ErrorOr.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/Format.h
+CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/GenericDomTree.h
+CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/GenericDomTreeConstruction.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/MD5.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/ManagedStatic.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/MathExtras.h
@@ -172,6 +178,7 @@ CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/IPO/ModuleInliner.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Instrumentation.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Scalar/LoopPassManager.h
+CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Utils/BasicBlockUtils.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Utils/Cloning.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Utils/LCSSA.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Utils/LoopSimplify.h

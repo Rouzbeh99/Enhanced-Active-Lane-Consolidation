@@ -5,7 +5,7 @@
 #include "llvm/Pass.h"
 #include "llvm/IR/ValueMap.h"
 #include "llvm/Transforms/Utils/Cloning.h"
-#include <math.h>
+#include "llvm/Transforms/Utils/BasicBlockUtils.h"
 
 using namespace llvm;
 
@@ -20,19 +20,20 @@ namespace {
 
     };
 
-    void printInstructions(BasicBlock *BB);
 
     void checkCondition(BasicBlock *header);
 
-    void doUnrolling(BasicBlock *header, BasicBlock *latch, Loop *L, int unrollFactor);
+    std::vector<BasicBlock *> *doUnrolling(BasicBlock *header, BasicBlock *latch, Loop *L, int unrollFactor);
 
     void removeLastInstruction(BasicBlock *BB);
 
-    Instruction *getLastInstruction(BasicBlock *BB);
 
-    void insertBlockInstructions(BasicBlock *instructionHolder, BasicBlock *target, ValueToValueMapTy *VMap);
+    void refineCFG(std::vector<BasicBlock *> *newBlocks, BasicBlock *header, BasicBlock *latch);
 
     void printVMap(ValueToValueMapTy *VMap);
+
+    void printLoop(BasicBlock *header);
+
 
 
 
@@ -55,7 +56,8 @@ namespace {
 
         unrollLoop(L);
 
-        return (llvm::PreservedAnalyses::all());
+        //return (llvm::PreservedAnalyses::all());
+        return llvm::PreservedAnalyses::none();
     }
 
 
@@ -71,28 +73,19 @@ namespace {
 
         BasicBlock *latch = L->getLoopLatch();
 
+
         checkCondition(header);
 
-        doUnrolling(header, latch, L, 3);
+        std::vector<BasicBlock *> *newBlocks = doUnrolling(header, latch, L, 3);
 
-        BasicBlock *BB = header;
+        refineCFG(newBlocks, header, latch);
 
-        while (BB) {
-            printInstructions(BB);
-            BB = BB->getNextNode();
-        }
+        printLoop(header);
 
 
     }
 
     //////////////////////////////////////////////// Helper Functions /////////////////////////////////////////////////////////////////
-    void printInstructions(BasicBlock *BB) {
-        for (auto &instr: BB->getInstList()) {
-            instr.print(errs());
-            llvm::outs() << "\n";
-        }
-        llvm::outs() << "-----------------------------------\n";
-    }
 
 
     // TODO: Should be moved to analysis pass
@@ -114,10 +107,11 @@ namespace {
 
 
     // TODO: Assumption: Loop trip count is a Multiple of unrollFactor
-    void doUnrolling(BasicBlock *header, BasicBlock *latch, Loop *L, int unrollFactor) {
+    std::vector<BasicBlock *> *doUnrolling(BasicBlock *header, BasicBlock *latch, Loop *L, int unrollFactor) {
+
+        auto *newBlocks = new std::vector<BasicBlock *>;
 
         std::vector<PHINode *> headerPhiNodes;
-
 
         for (BasicBlock::iterator I = header->begin(); isa<PHINode>(I); ++I) {
             headerPhiNodes.push_back(cast<PHINode>(I));
@@ -131,14 +125,15 @@ namespace {
 
         for (int i = 0; i < unrollFactor - 1; ++i) {
 
-            SmallVector<BasicBlock *, 2> newBlocks;
+            SmallVector<BasicBlock *, 2> newlyGeneratedBlock;
             ValueToValueMapTy VMap;
 
             //////////////////////////////  ADD HEADER /////////////////////////////////////////////////
             auto newBB = CloneBasicBlock(prevHeader, VMap);
             header->getParent()->getBasicBlockList().insert(blockInsertPt, newBB);
 
-            newBlocks.push_back(newBB);
+            newlyGeneratedBlock.push_back(newBB);
+            newBlocks->push_back(newBB);
 
             if (i == 0) {
                 for (PHINode *OrigPHI: headerPhiNodes) {
@@ -161,7 +156,8 @@ namespace {
 
             newBB = CloneBasicBlock(prevLatch, VMap);
             header->getParent()->getBasicBlockList().insert(blockInsertPt, newBB);
-            newBlocks.push_back(newBB);
+            newlyGeneratedBlock.push_back(newBB);
+            newBlocks->push_back(newBB);
 
             // fill lastValueMap with VMap
             for (ValueToValueMapTy::iterator VI = VMap.begin(), VE = VMap.end();
@@ -172,21 +168,60 @@ namespace {
             prevLatch = newBB;
 
             // Remap all instructions in the most recent iteration
-            printVMap(&lastValueMap);
-            remapInstructionsInBlocks(newBlocks, lastValueMap);
+            remapInstructionsInBlocks(newlyGeneratedBlock, lastValueMap);
 
         }
 
-
+        llvm::outs() << "-------------------------------------------------------------" << "\n";
+        return newBlocks;
     }
 
+    void refineCFG(std::vector<BasicBlock *> *newBlocks, BasicBlock *header, BasicBlock *latch) {
 
-    Instruction *getLastInstruction(BasicBlock *BB) {
-        Instruction *instr = BB->getFirstNonPHI();
-        while (instr->getNextNonDebugInstruction()) {
-            instr = instr->getNextNonDebugInstruction();
+        // blocks that used to branch to latch should now branch to header
+
+
+        // header should branch to latch
+        header->getTerminator()->eraseFromParent();
+        for (auto succ: successors(header)) {
+            succ->removePredecessor(header);
         }
-        return instr;
+        llvm::BranchInst::Create(latch, header);
+
+        //then latch branches to the first generated block
+        for (auto succ: successors(latch)) {
+            succ->removePredecessor(latch);
+        }
+        latch->getTerminator()->eraseFromParent();
+        llvm::BranchInst::Create(newBlocks->front(), latch);
+
+
+        // let new blocks point to each other
+        for (auto it = newBlocks->begin(); it != newBlocks->end(); ++it) {
+
+            // last block should have its branch instruction
+            if ((*it) != newBlocks->back()) {
+                for (auto succ: successors(*it)) {
+                    succ->removePredecessor(*it);
+                }
+                (*it)->getTerminator()->eraseFromParent();
+                llvm::BranchInst::Create(*(it + 1), *it);
+            }
+
+        }
+
+        // Finally, blocks (then blocks) that used to branch to latch should now branch to header
+        for (auto BB: predecessors(latch)) {
+            if (BB == header) {
+                continue;
+            }
+            BB->getTerminator()->replaceSuccessorWith(latch, header);
+        }
+
+
+        int count = 0;
+
+
     }
 
 
@@ -202,6 +237,17 @@ namespace {
             llvm::outs() << "\n";
         }
         llvm::outs() << "------------------------------------------------------------------------------------------ \n";
+    }
+
+    void printLoop(BasicBlock *header) {
+
+        BasicBlock *BB = header;
+        while (BB) {
+            BB->print(outs());
+            BB = BB->getNextNode();
+        }
+
+        llvm::outs() << "\n";
     }
 
 
