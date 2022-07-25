@@ -15,18 +15,38 @@ llvm/Passes/PassBuilder.h
 /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/llvm/Passes/PassBuilder.h
 llvm/IR/PassManager.h
 /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/llvm/IR/PassManager.h
-llvm/Pass.h
-/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/llvm/Pass.h
-llvm/IR/ValueMap.h
-/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/llvm/IR/ValueMap.h
 llvm/Transforms/Utils/Cloning.h
 /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/llvm/Transforms/Utils/Cloning.h
-llvm/Transforms/Utils/BasicBlockUtils.h
-/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/llvm/Transforms/Utils/BasicBlockUtils.h
 map
 /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/map
 Unroller/Unroller.h
 /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/Unroller/Unroller.h
+SVE_Vectorizer/SVE_Vectorizer.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/SVE_Vectorizer/SVE_Vectorizer.h
+
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/SVE_Vectorizer/SVE_Vectorizer.h
+llvm/Analysis/LoopInfo.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/SVE_Vectorizer/llvm/Analysis/LoopInfo.h
+llvm/IR/BasicBlock.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/SVE_Vectorizer/llvm/IR/BasicBlock.h
+llvm/IR/IRBuilder.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/SVE_Vectorizer/llvm/IR/IRBuilder.h
+llvm/Passes/PassPlugin.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/SVE_Vectorizer/llvm/Passes/PassPlugin.h
+llvm/Passes/PassBuilder.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/SVE_Vectorizer/llvm/Passes/PassBuilder.h
+llvm/IR/PassManager.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/SVE_Vectorizer/llvm/IR/PassManager.h
+llvm/Pass.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/SVE_Vectorizer/llvm/Pass.h
+llvm/IR/ValueMap.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/SVE_Vectorizer/llvm/IR/ValueMap.h
+llvm/Transforms/Utils/Cloning.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/SVE_Vectorizer/llvm/Transforms/Utils/Cloning.h
+llvm/Transforms/Utils/BasicBlockUtils.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/SVE_Vectorizer/llvm/Transforms/Utils/BasicBlockUtils.h
+map
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/SVE_Vectorizer/map
 
 /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/Unroller/Unroller.h
 llvm/Analysis/LoopInfo.h

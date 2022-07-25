@@ -2,12 +2,10 @@
 #include "llvm/Passes/PassPlugin.h"
 #include "llvm/Passes/PassBuilder.h"
 #include "llvm/IR/PassManager.h"
-#include "llvm/Pass.h"
-#include "llvm/IR/ValueMap.h"
 #include "llvm/Transforms/Utils/Cloning.h"
-#include "llvm/Transforms/Utils/BasicBlockUtils.h"
 #include "map"
 #include "Unroller/Unroller.h"
+#include "SVE_Vectorizer/SVE_Vectorizer.h"
 
 using namespace llvm;
 
@@ -45,6 +43,9 @@ namespace {
         auto *unroller = new Unroller(L);
 
         unroller->doUnrolling(4);
+
+        auto *sve = new SVE_Vectorizer();
+        sve->hello();
 
         llvm::outs() << "---------------------------------------------------------------\n";
 

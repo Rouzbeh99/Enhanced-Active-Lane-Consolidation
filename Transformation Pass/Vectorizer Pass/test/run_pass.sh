@@ -1,7 +1,15 @@
 #!/bin/bash
 LLVM_BUILD_DIR=/home/rouzbeh/Graduate/LLVM/llvm-project/build
 
-cd ../Unroller/build
+cd ../SVE_Vectorizer/build
+cmake -DCMAKE_VERBOSE_MAKEFILE=ON \
+  -DLLVM_DIR=$LLVM_BUILD_DIR/lib/cmake/llvm \
+  -DCMAKE_C_COMPILER=$LLVM_BUILD_DIR/bin/clang \
+  -DCMAKE_CXX_COMPILER=$LLVM_BUILD_DIR/bin/clang++ \
+  ../
+make
+
+cd ../../Unroller/build
 cmake -DCMAKE_VERBOSE_MAKEFILE=ON \
   -DLLVM_DIR=$LLVM_BUILD_DIR/lib/cmake/llvm \
   -DCMAKE_C_COMPILER=$LLVM_BUILD_DIR/bin/clang \
