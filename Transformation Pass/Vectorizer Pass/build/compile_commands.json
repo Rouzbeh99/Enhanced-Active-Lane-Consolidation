@@ -1,7 +1,7 @@
 [
 {
   "directory": "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/build",
-  "command": "/home/rouzbeh/Graduate/LLVM/llvm-project/build/bin/clang++   -I/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include -I/home/rouzbeh/Graduate/LLVM/llvm-project/build/include -I\"/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/include\"  -fPIC   -D_GNU_SOURCE -D_DEBUG -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS  -fno-exceptions -o CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o -c \"/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/ALC_Vectorizer.cpp\"",
+  "command": "/home/rouzbeh/Graduate/LLVM/llvm-project/build/bin/clang++   -I/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include -I/home/rouzbeh/Graduate/LLVM/llvm-project/build/include -I\"/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/include\" -I\"/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass}/Unroller\"  -fPIC   -D_GNU_SOURCE -D_DEBUG -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS  -fno-exceptions -o CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o -c \"/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/ALC_Vectorizer.cpp\"",
   "file": "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/ALC_Vectorizer.cpp"
 }
 ]
