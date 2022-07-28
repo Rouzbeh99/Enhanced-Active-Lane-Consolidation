@@ -20,10 +20,11 @@ class Unroller {
 
 private:
     Loop *L;
+    LoopInfo *LI;
 
 public:
-    Unroller(Loop *l);
 
+    Unroller(Loop *l, LoopInfo *li);
 
 public:
     void doUnrolling(int unrollFactor);

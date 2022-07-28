@@ -72,7 +72,9 @@ std::vector<BasicBlock *> *Unroller::replicateBlocks(BasicBlock *header, BasicBl
             newBB = CloneBasicBlock(prevHeader, VMap, "." + std::to_string(count));
         }
 
+
         header->getParent()->getBasicBlockList().insert(blockInsertPt, newBB);
+        L->addBasicBlockToLoop(newBB, *LI);
 
         newlyGeneratedBlock.push_back(newBB);
         newBlocks->push_back(newBB);
@@ -103,6 +105,8 @@ std::vector<BasicBlock *> *Unroller::replicateBlocks(BasicBlock *header, BasicBl
         }
 
         header->getParent()->getBasicBlockList().insert(blockInsertPt, newBB);
+        L->addBasicBlockToLoop(newBB, *LI);
+
         newlyGeneratedBlock.push_back(newBB);
         newBlocks->push_back(newBB);
 
@@ -301,5 +305,9 @@ void Unroller::mapNewPhiNodeInstructions(BasicBlock *BB, const std::map<Instruct
     }
 }
 
+Unroller::Unroller(Loop *l, LoopInfo *li) : L(l), LI(li) {
+    L = l;
+    LI = li;
+}
 
-Unroller::Unroller(Loop *l) : L(l) { L = l; }
+

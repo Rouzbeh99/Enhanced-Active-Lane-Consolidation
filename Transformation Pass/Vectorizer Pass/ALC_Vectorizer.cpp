@@ -3,9 +3,9 @@
 #include "llvm/Passes/PassBuilder.h"
 #include "llvm/IR/PassManager.h"
 #include "llvm/Transforms/Utils/Cloning.h"
-#include "map"
 #include "Unroller/Unroller.h"
 #include "SVE_Vectorizer/SVE_Vectorizer.h"
+#include "llvm/Analysis/LoopAnalysisManager.h"
 
 using namespace llvm;
 
@@ -18,7 +18,7 @@ namespace {
 
     };
 
-    void printLoop(BasicBlock *header);
+    void printLoop(Loop *L);
 
 
 
@@ -40,29 +40,29 @@ namespace {
         const DebugLoc &location = allBlocks.front()->getFirstNonPHIOrDbg()->getDebugLoc();
         llvm::outs() << "Loop at line number: " << location.getLine() - 1 << "\n";
 
-        auto *unroller = new Unroller(L);
+        LoopInfo &LI = AR.LI;
+
+
+        auto *unroller = new Unroller(L, &LI);
 
         unroller->doUnrolling(4);
 
-        auto *sve = new SVE_Vectorizer();
-        sve->hello();
+        auto *sve = new SVE_Vectorizer(L);
+        sve->findPredicates();
 
-        llvm::outs() << "---------------------------------------------------------------\n";
 
-        printLoop(L->getHeader());
-
+//        printLoop(L);
+//        llvm::outs() << "---------------------------------------------------------------\n";
 
         //return (llvm::PreservedAnalyses::all());
         return llvm::PreservedAnalyses::none();
     }
 
 
-    void printLoop(BasicBlock *header) {
+    void printLoop(Loop *L) {
 
-        BasicBlock *BB = header;
-        while (BB) {
+        for (auto BB: L->getBlocks()) {
             BB->print(outs());
-            BB = BB->getNextNode();
         }
 
         llvm::outs() << "\n";
@@ -80,7 +80,7 @@ llvmGetPassPluginInfo() {
             [](PassBuilder &PB) {
                 PB.registerPipelineParsingCallback(
                         [](StringRef Name, LoopPassManager &LPM,
-                           ArrayRef<PassBuilder::PipelineElement>) {
+                           ArrayRef <PassBuilder::PipelineElement>) {
                             if (Name == "alc-vectorizer") {
                                 LPM.addPass(alc_vectorizer());
                                 return true;

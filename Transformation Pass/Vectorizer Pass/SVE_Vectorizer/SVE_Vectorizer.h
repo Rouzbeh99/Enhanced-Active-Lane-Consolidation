@@ -1,6 +1,3 @@
-//
-// Created by rouzbeh on 7/25/22.
-//
 
 #ifndef ALC_VECTORIZER_SVE_VECTORIZER_H
 #define ALC_VECTORIZER_SVE_VECTORIZER_H
@@ -17,10 +14,17 @@
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
 #include "map"
 
+using namespace llvm;
+
 class SVE_Vectorizer {
+public:
+    Loop *L;
+
+    explicit SVE_Vectorizer(Loop *l);
 
 public:
-    void hello();
+
+    std::vector<Value *> *findPredicates();
 
 };
 

@@ -17,12 +17,12 @@ llvm/IR/PassManager.h
 /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/llvm/IR/PassManager.h
 llvm/Transforms/Utils/Cloning.h
 /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/llvm/Transforms/Utils/Cloning.h
-map
-/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/map
 Unroller/Unroller.h
 /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/Unroller/Unroller.h
 SVE_Vectorizer/SVE_Vectorizer.h
 /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/SVE_Vectorizer/SVE_Vectorizer.h
+llvm/Analysis/LoopAnalysisManager.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/llvm/Analysis/LoopAnalysisManager.h
 
 /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/SVE_Vectorizer/SVE_Vectorizer.h
 llvm/Analysis/LoopInfo.h
