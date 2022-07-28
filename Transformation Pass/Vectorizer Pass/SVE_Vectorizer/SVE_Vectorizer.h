@@ -20,11 +20,10 @@ class SVE_Vectorizer {
 public:
     Loop *L;
 
-    explicit SVE_Vectorizer(Loop *l);
+    SVE_Vectorizer(Loop *l, int vectorizingFactor);
 
-public:
+    int vectorizingFactor;
 
-    std::vector<Value *> *findPredicates();
 
 };
 

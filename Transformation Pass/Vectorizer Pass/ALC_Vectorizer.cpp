@@ -42,17 +42,23 @@ namespace {
 
         LoopInfo &LI = AR.LI;
 
+        BasicBlock *initialLatch = L->getLoopLatch();
+
 
         auto *unroller = new Unroller(L, &LI);
-
         unroller->doUnrolling(4);
+        //TODO: getting latch from loop returns wrong block
 
-        auto *sve = new SVE_Vectorizer(L);
-        sve->findPredicates();
+        auto *sve = new SVE_Vectorizer(L, 4);
+
+        for (auto predicate: unroller->getPredicates()) {
+            predicate->print(outs());
+            llvm::outs() << "\n";
+        }
 
 
-//        printLoop(L);
-//        llvm::outs() << "---------------------------------------------------------------\n";
+        llvm::outs() << "---------------------------------------------------------------\n";
+        printLoop(L);
 
         //return (llvm::PreservedAnalyses::all());
         return llvm::PreservedAnalyses::none();
@@ -80,7 +86,7 @@ llvmGetPassPluginInfo() {
             [](PassBuilder &PB) {
                 PB.registerPipelineParsingCallback(
                         [](StringRef Name, LoopPassManager &LPM,
-                           ArrayRef <PassBuilder::PipelineElement>) {
+                           ArrayRef<PassBuilder::PipelineElement>) {
                             if (Name == "alc-vectorizer") {
                                 LPM.addPass(alc_vectorizer());
                                 return true;

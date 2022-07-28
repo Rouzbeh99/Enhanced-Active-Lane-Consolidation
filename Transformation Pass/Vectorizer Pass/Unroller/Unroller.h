@@ -21,9 +21,12 @@ class Unroller {
 private:
     Loop *L;
     LoopInfo *LI;
+    std::vector<Value *> predicates;
 
 public:
+    const std::vector<Value *> &getPredicates() const;
 
+public:
     Unroller(Loop *l, LoopInfo *li);
 
 public:
@@ -34,6 +37,9 @@ private:
 
 private:
     std::vector<BasicBlock *> *replicateBlocks(BasicBlock *header, BasicBlock *latch, Loop *L, int unrollFactor);
+
+private:
+    std::vector<Value *> *findPredicates(BasicBlock *initialLatch, int unrollFactor);
 
 private:
     void refineCFG(std::vector<BasicBlock *> *newBlocks, BasicBlock *header, BasicBlock *latch, BasicBlock *thenBlock,

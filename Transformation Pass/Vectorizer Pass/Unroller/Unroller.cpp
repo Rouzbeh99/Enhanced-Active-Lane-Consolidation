@@ -17,9 +17,14 @@ void Unroller::doUnrolling(int unrollFactor) {
 
     std::vector<BasicBlock *> *newBlocks = replicateBlocks(header, latch, L, unrollFactor);
 
+    std::vector<Value *> *resultedPredicates = findPredicates(latch, unrollFactor);
+    predicates = *resultedPredicates;
+
+
+
     refineCFG(newBlocks, header, latch, thenBlock, L);
 
-    removeRedundantInstructions(header);
+//    removeRedundantInstructions(header);
 
 
 }
@@ -126,6 +131,39 @@ std::vector<BasicBlock *> *Unroller::replicateBlocks(BasicBlock *header, BasicBl
     }
 
     return newBlocks;
+}
+
+std::vector<Value *> *Unroller::findPredicates(BasicBlock *initialLatch, int unrollFactor) {
+    auto *predicateValues = new std::vector<Value *>;
+
+
+    BasicBlock *BB;
+    for (int i = 0; i < unrollFactor; ++i) {
+
+        // finding header copy
+        if (i == 0) {
+            BB = L->getHeader();
+        } else if (i == 1) {
+            BB = initialLatch->getNextNode();
+        } else {
+            BB = BB->getNextNode()->getNextNode(); // go to the next headercopy
+        }
+
+        Instruction *terminatorInstr = BB->getTerminator();
+        auto *branchInstr = dyn_cast<BranchInst>(terminatorInstr);
+        if (branchInstr) {
+            predicateValues->push_back(branchInstr->getCondition());
+            llvm::outs() << "\n";
+        } else {
+            // TODO: raise error
+        }
+
+    }
+
+    llvm::outs() << "---------------------------------------------------------------\n";
+
+    return predicateValues;
+
 }
 
 void
@@ -309,5 +347,10 @@ Unroller::Unroller(Loop *l, LoopInfo *li) : L(l), LI(li) {
     L = l;
     LI = li;
 }
+
+const std::vector<Value *> &Unroller::getPredicates() const {
+    return predicates;
+}
+
 
 
