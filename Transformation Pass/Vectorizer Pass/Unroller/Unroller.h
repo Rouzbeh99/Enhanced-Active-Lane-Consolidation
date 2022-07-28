@@ -52,7 +52,7 @@ private:
     Value *findInductionVariableInLatch(BasicBlock *latch);
 
 private:
-    void removeRedundantInstructions(BasicBlock *header);
+    void removeRedundantInstructions(BasicBlock *initialLatch, int unrollFactor);
 
 private:
     void

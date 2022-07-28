@@ -21,11 +21,9 @@ void Unroller::doUnrolling(int unrollFactor) {
     predicates = *resultedPredicates;
 
 
-
     refineCFG(newBlocks, header, latch, thenBlock, L);
 
-//    removeRedundantInstructions(header);
-
+    removeRedundantInstructions(latch, unrollFactor);
 
 }
 
@@ -153,14 +151,12 @@ std::vector<Value *> *Unroller::findPredicates(BasicBlock *initialLatch, int unr
         auto *branchInstr = dyn_cast<BranchInst>(terminatorInstr);
         if (branchInstr) {
             predicateValues->push_back(branchInstr->getCondition());
-            llvm::outs() << "\n";
         } else {
             // TODO: raise error
         }
 
     }
 
-    llvm::outs() << "---------------------------------------------------------------\n";
 
     return predicateValues;
 
@@ -298,14 +294,14 @@ Value *Unroller::findInductionVariableInLatch(BasicBlock *latch) {
     return nullptr;
 }
 
-void Unroller::removeRedundantInstructions(BasicBlock *header) {
-    BasicBlock *BB = header->getNextNode(); // start from the next node of the header
-    while (BB) {
+void Unroller::removeRedundantInstructions(BasicBlock *initialLatch, int unrollFactor) {
+    BasicBlock *BB;
 
-        // values in headerCopy blocks will be used for predicates later
-        if (BB->getName().contains("headerCopy")) {
-            BB = BB->getNextNode();
-            continue;
+    for (int i = 0; i < unrollFactor; ++i) {
+        if (i == 0) {
+            BB = initialLatch;
+        } else {
+            BB = BB->getNextNode()->getNextNode();  // iterating over latches
         }
 
         for (auto &instr: make_early_inc_range(*BB)) {  // need to be able to remove while iterating
@@ -319,13 +315,10 @@ void Unroller::removeRedundantInstructions(BasicBlock *header) {
                     instr.dropAllReferences();
                     instr.removeFromParent();
                 }
-
             }
-
         }
-
-        BB = BB->getNextNode();
     }
+
 }
 
 void Unroller::mapNewPhiNodeInstructions(BasicBlock *BB, const std::map<Instruction *, int> &inductionVariableUsers,

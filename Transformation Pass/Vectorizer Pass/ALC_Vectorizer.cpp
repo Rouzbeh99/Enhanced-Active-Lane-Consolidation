@@ -51,12 +51,12 @@ namespace {
 
         auto *sve = new SVE_Vectorizer(L, 4);
 
+        llvm::outs() << "---------------------------------------------------------------\n";
         for (auto predicate: unroller->getPredicates()) {
             predicate->print(outs());
             llvm::outs() << "\n";
         }
-
-
+        
         llvm::outs() << "---------------------------------------------------------------\n";
         printLoop(L);
 
