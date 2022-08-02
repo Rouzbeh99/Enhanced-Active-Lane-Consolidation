@@ -20,6 +20,8 @@ namespace {
 
     void printLoop(Loop *L);
 
+    BasicBlock *getLastHeaderCopy(Loop *L, int vectorizationFactor);
+
 
 
 
@@ -50,14 +52,10 @@ namespace {
         //TODO: getting latch from loop returns wrong block
 
         auto *sve = new SVE_Vectorizer(L, 4);
-
-        llvm::outs() << "---------------------------------------------------------------\n";
-        for (auto predicate: unroller->getPredicates()) {
-            predicate->print(outs());
-            llvm::outs() << "\n";
-        }
+        Instruction *insertionPoint = getLastHeaderCopy(L, 4)->getTerminator();
+        sve->formPredicateVector(unroller->getPredicates(), insertionPoint);
+        sve->createAllTruePredicates(insertionPoint);
         
-        llvm::outs() << "---------------------------------------------------------------\n";
         printLoop(L);
 
         //return (llvm::PreservedAnalyses::all());
@@ -70,8 +68,16 @@ namespace {
         for (auto BB: L->getBlocks()) {
             BB->print(outs());
         }
-
         llvm::outs() << "\n";
+    }
+
+    BasicBlock *getLastHeaderCopy(Loop *L, int vectorizationFactor) {
+        BasicBlock *BB = L->getHeader();
+        for (int i = 0; i < 2 * vectorizationFactor - 1; ++i) {
+            BB = BB->getNextNode();
+        }
+
+        return BB;
     }
 
 

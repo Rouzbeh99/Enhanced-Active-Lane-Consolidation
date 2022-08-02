@@ -8,6 +8,7 @@ CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/build/include/llvm/Config/llvm-config.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/build/include/llvm/IR/Attributes.inc
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/build/include/llvm/IR/IntrinsicEnums.inc
+CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/build/include/llvm/IR/IntrinsicsAArch64.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm-c/DataTypes.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm-c/Error.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm-c/ExternC.h

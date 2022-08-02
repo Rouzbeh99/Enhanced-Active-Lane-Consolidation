@@ -31,6 +31,10 @@ llvm/IR/BasicBlock.h
 /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/SVE_Vectorizer/llvm/IR/BasicBlock.h
 llvm/IR/IRBuilder.h
 /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/SVE_Vectorizer/llvm/IR/IRBuilder.h
+llvm/IR/IntrinsicInst.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/SVE_Vectorizer/llvm/IR/IntrinsicInst.h
+llvm/IR/IntrinsicsAArch64.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/SVE_Vectorizer/llvm/IR/IntrinsicsAArch64.h
 llvm/Passes/PassPlugin.h
 /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/SVE_Vectorizer/llvm/Passes/PassPlugin.h
 llvm/Passes/PassBuilder.h
@@ -79,6 +83,8 @@ map
 /home/rouzbeh/Graduate/LLVM/llvm-project/build/include/llvm/IR/Attributes.inc
 
 /home/rouzbeh/Graduate/LLVM/llvm-project/build/include/llvm/IR/IntrinsicEnums.inc
+
+/home/rouzbeh/Graduate/LLVM/llvm-project/build/include/llvm/IR/IntrinsicsAArch64.h
 
 /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm-c/DataTypes.h
 inttypes.h

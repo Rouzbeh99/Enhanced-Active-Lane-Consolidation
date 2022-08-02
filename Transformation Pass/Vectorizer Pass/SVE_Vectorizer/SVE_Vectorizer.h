@@ -5,6 +5,8 @@
 #include "llvm/Analysis/LoopInfo.h"
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/IRBuilder.h"
+#include "llvm/IR/IntrinsicInst.h"
+#include "llvm/IR/IntrinsicsAArch64.h"
 #include "llvm/Passes/PassPlugin.h"
 #include "llvm/Passes/PassBuilder.h"
 #include "llvm/IR/PassManager.h"
@@ -23,6 +25,16 @@ public:
     SVE_Vectorizer(Loop *l, int vectorizingFactor);
 
     int vectorizingFactor;
+
+private:
+    Module *module;
+
+
+public:
+    CallInst *formPredicateVector(std::vector<Value *> predicates, Instruction *insertionPoint);
+
+public:
+    CallInst *createAllTruePredicates(Instruction *insertionPoint);
 
 
 };
