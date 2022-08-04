@@ -32,6 +32,9 @@ void SVE_Vectorizer::doVectorization(std::vector<Value *> predicates) {
     CallInst *loadedElements = loadElements(predicateVector, ptr, targetedBB->getTerminator());
     storeElements(loadedElements, predicateVector, ptr, targetedBB->getTerminator());
 
+    auto intrinsic = Intrinsic::aarch64_sve_mul;
+    insertArithmeticInstruction(intrinsic, loadedElements, loadedElements, predicateVector,
+                                targetedBB->getTerminator());
 
 
 }
@@ -128,6 +131,7 @@ void SVE_Vectorizer::storeElements(Value *elementsVector, Value *predicateVector
 
     auto intrinsic = Intrinsic::aarch64_sve_st1;
 
+
     VectorType *returnType = VectorType::get(Type::getInt32Ty(context), vectorizingFactor, false);
     Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, returnType);
 
@@ -139,6 +143,27 @@ void SVE_Vectorizer::storeElements(Value *elementsVector, Value *predicateVector
 
 
     builder.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
+}
+
+// TODO: handle double types by changing return type and operands
+CallInst *SVE_Vectorizer::insertArithmeticInstruction(Intrinsic::ID intrinsic, Value *firstOp, Value *secondOp,
+                                                      Value *predicateVector, Instruction *insertionPoint) {
+
+    LLVMContext &context = L->getHeader()->getContext();
+    IRBuilder<> builder(context);
+    builder.SetInsertPoint(insertionPoint);
+
+    VectorType *returnType = VectorType::get(Type::getInt32Ty(context), vectorizingFactor, false);
+    Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, returnType);
+
+    intrinsicFunction->print(outs());
+
+    std::vector<Value *> arguments;
+    arguments.push_back(predicateVector);
+    arguments.push_back(firstOp);
+    arguments.push_back(secondOp);
+
+    return builder.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
 }
 
 

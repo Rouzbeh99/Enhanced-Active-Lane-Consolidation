@@ -57,6 +57,10 @@ private:
 private:
 
     BasicBlock *getLastHeaderCopy() const;
+
+private:
+
+    CallInst* insertArithmeticInstruction(Intrinsic::ID intrinsic, Value *firstOp, Value *secondOp, Value *predicateVector, Instruction *insertionPoint);
 };
 
 
