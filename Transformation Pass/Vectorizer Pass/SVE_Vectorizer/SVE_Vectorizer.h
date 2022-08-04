@@ -31,12 +31,32 @@ private:
 
 
 public:
-    CallInst *formPredicateVector(std::vector<Value *> predicates, Instruction *insertionPoint);
 
-public:
+    void doVectorization(std::vector<Value *> predicates);
+
+private:
+
+    Value *formPredicateVector(std::vector<Value *> predicates, Instruction *insertionPoint);
+
+private:
+
     CallInst *createAllTruePredicates(Instruction *insertionPoint);
 
+private:
 
+    CallInst *loadElements(Value *predicateVector, GEPOperator *ptr, Instruction *insertionPoint);
+
+private:
+
+    void storeElements(Value *elementsVector, Value *predicateVector, GEPOperator *ptr, Instruction *insertionPoint);
+
+private:
+
+    BasicBlock *getTargetedBB();
+
+private:
+
+    BasicBlock *getLastHeaderCopy() const;
 };
 
 
