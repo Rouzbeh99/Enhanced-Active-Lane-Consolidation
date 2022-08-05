@@ -5,6 +5,7 @@
 #include "SVE_Vectorizer.h"
 
 #include <utility>
+#include <stack>
 
 
 SVE_Vectorizer::SVE_Vectorizer(Loop *l, int factor) : L(l), vectorizingFactor(factor) {
@@ -16,26 +17,71 @@ SVE_Vectorizer::SVE_Vectorizer(Loop *l, int factor) : L(l), vectorizingFactor(fa
 
 void SVE_Vectorizer::doVectorization(std::vector<Value *> predicates) {
 
-    Instruction *insertionPoint = getLastHeaderCopy()->getTerminator();
-    CallInst *allTrue = createAllTruePredicates(insertionPoint);
-    Value *predicateVector = formPredicateVector(std::move(predicates), insertionPoint);
+    // TODO: how to determine targeted block?
     BasicBlock *targetedBB = getTargetedBB();
-    ///////////////////////////////////////////////////////////////////////
+
+    Instruction *insertionPoint = targetedBB->getTerminator();
+    Value *predicateVector = formPredicateVector(std::move(predicates), insertionPoint);
 
 
-    Instruction *instr = targetedBB->getFirstNonPHI();
-    GEPOperator *ptr = nullptr;
-    if (isa<GEPOperator>(instr)) {
-        ptr = dyn_cast<GEPOperator>(instr);
+    std::map<Value *, Value *> vMap;
+
+    // Should be remove in FILO manner to prevent removing a value that is used in following lines
+    std::stack<Instruction *> toBeRemoved;
+
+    // TODO: Is there any case we could have PHI?
+    // TODO: Complete the list
+    // TODO: handle binary operation for doubles
+    for (auto &instr: targetedBB->getInstList()) {
+        if (isa<GEPOperator>(instr)) {
+            continue;
+        } else if (isa<StoreInst>(instr)) {
+            auto storeInstr = dyn_cast<StoreInst>(&instr);
+            // it's the value to be stored
+            Value *firtOp = nullptr;
+            if (vMap.count(storeInstr->getOperand(0))) {
+                firtOp = vMap[storeInstr->getOperand(0)];
+            } else {
+                // TODO: can this happen?
+            }
+            auto ptr = dyn_cast<GEPOperator>(instr.getOperand(1));
+            storeElements(firtOp, predicateVector, ptr, insertionPoint);
+            toBeRemoved.push(&instr);
+        } else if (isa<LoadInst>(instr)) {
+            auto loadInstr = dyn_cast<LoadInst>(&instr);
+
+            auto ptr = dyn_cast<GEPOperator>(instr.getOperand(0));
+            CallInst *loadedData = loadElements(predicateVector, ptr, insertionPoint);
+            vMap[&instr] = loadedData;
+            toBeRemoved.push(&instr);
+        } else if (isa<BinaryOperator>(instr)) {
+            if (isa<MulOperator>(instr)) {
+                Value *firstOp = nullptr;
+                Value *secondOp = nullptr;
+                if (vMap.count(instr.getOperand(0))) {
+                    firstOp = vMap[instr.getOperand(0)];
+                } else {
+                    //TODO: ?????
+                }
+
+                if (vMap.count(instr.getOperand(1))) {
+                    secondOp = vMap[instr.getOperand(1)];
+                } else {
+                    //TODO: ?????
+                }
+                auto intrinsic = Intrinsic::aarch64_sve_mul;
+                CallInst *multResult = insertArithmeticOrLogicalInstruction(intrinsic, firstOp, secondOp,
+                                                                            predicateVector, insertionPoint);
+                vMap[&instr] = multResult;
+                toBeRemoved.push(&instr);
+            }
+        }
     }
 
-    CallInst *loadedElements = loadElements(predicateVector, ptr, targetedBB->getTerminator());
-    storeElements(loadedElements, predicateVector, ptr, targetedBB->getTerminator());
-
-    auto intrinsic = Intrinsic::aarch64_sve_mul;
-    insertArithmeticInstruction(intrinsic, loadedElements, loadedElements, predicateVector,
-                                targetedBB->getTerminator());
-
+    while (!toBeRemoved.empty()) {
+        toBeRemoved.top()->eraseFromParent();
+        toBeRemoved.pop();
+    }
 
 }
 
@@ -47,9 +93,6 @@ Value *SVE_Vectorizer::formPredicateVector(std::vector<Value *> predicates, Inst
     builder.SetInsertPoint(insertionPoint);
 
     VectorType *returnType = VectorType::get(Type::getInt1Ty(context), vectorizingFactor, false);
-//    auto intrinsic = Intrinsic::aarch64_sve_convert_to_svbool;
-//    Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, returnType);
-
 
     Type *int1Ty = Type::getInt1Ty(context);
     Value *predicateHolder = UndefValue::get(returnType);
@@ -58,8 +101,6 @@ Value *SVE_Vectorizer::formPredicateVector(std::vector<Value *> predicates, Inst
         Constant *index = Constant::getIntegerValue(int1Ty, llvm::APInt(1, i));
         predicateHolder = builder.CreateInsertElement(predicateHolder, predicates[i], index);
     }
-
-//    CallInst *vectorPredicates = builder.CreateCall(intrinsicFunction, predicateHolder);
 
     return predicateHolder;
 
@@ -100,6 +141,7 @@ BasicBlock *SVE_Vectorizer::getTargetedBB() {
             return BB;
         }
     }
+    // TODO: raise error
     return nullptr;
 }
 
@@ -110,7 +152,6 @@ CallInst *SVE_Vectorizer::loadElements(Value *predicateVector, GEPOperator *ptr,
     builder.SetInsertPoint(insertionPoint);
 
     auto intrinsic = Intrinsic::aarch64_sve_ld1;
-
     VectorType *returnType = VectorType::get(Type::getInt32Ty(context), vectorizingFactor, false);
     Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, returnType);
 
@@ -146,8 +187,8 @@ void SVE_Vectorizer::storeElements(Value *elementsVector, Value *predicateVector
 }
 
 // TODO: handle double types by changing return type and operands
-CallInst *SVE_Vectorizer::insertArithmeticInstruction(Intrinsic::ID intrinsic, Value *firstOp, Value *secondOp,
-                                                      Value *predicateVector, Instruction *insertionPoint) {
+CallInst *SVE_Vectorizer::insertArithmeticOrLogicalInstruction(Intrinsic::ID intrinsic, Value *firstOp, Value *secondOp,
+                                                               Value *predicateVector, Instruction *insertionPoint) {
 
     LLVMContext &context = L->getHeader()->getContext();
     IRBuilder<> builder(context);
@@ -156,7 +197,7 @@ CallInst *SVE_Vectorizer::insertArithmeticInstruction(Intrinsic::ID intrinsic, V
     VectorType *returnType = VectorType::get(Type::getInt32Ty(context), vectorizingFactor, false);
     Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, returnType);
 
-    intrinsicFunction->print(outs());
+//    intrinsicFunction->print(outs());
 
     std::vector<Value *> arguments;
     arguments.push_back(predicateVector);

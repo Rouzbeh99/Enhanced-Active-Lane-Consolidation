@@ -60,7 +60,7 @@ private:
 
 private:
 
-    CallInst* insertArithmeticInstruction(Intrinsic::ID intrinsic, Value *firstOp, Value *secondOp, Value *predicateVector, Instruction *insertionPoint);
+    CallInst* insertArithmeticOrLogicalInstruction(Intrinsic::ID intrinsic, Value *firstOp, Value *secondOp, Value *predicateVector, Instruction *insertionPoint);
 };
 
 
