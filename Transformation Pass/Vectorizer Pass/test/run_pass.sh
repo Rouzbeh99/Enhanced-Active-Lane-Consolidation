@@ -17,6 +17,14 @@ cmake -DCMAKE_VERBOSE_MAKEFILE=ON \
   ../
 make
 
+cd ../../SVE_Permute/build
+cmake -DCMAKE_VERBOSE_MAKEFILE=ON \
+  -DLLVM_DIR=$LLVM_BUILD_DIR/lib/cmake/llvm \
+  -DCMAKE_C_COMPILER=$LLVM_BUILD_DIR/bin/clang \
+  -DCMAKE_CXX_COMPILER=$LLVM_BUILD_DIR/bin/clang++ \
+  ../
+make
+
 cd ../../build
 cmake -DCMAKE_VERBOSE_MAKEFILE=ON \
   -DLLVM_DIR=$LLVM_BUILD_DIR/lib/cmake/llvm \
@@ -28,7 +36,7 @@ make
 cd ../test
 
 $LLVM_BUILD_DIR/bin/clang -g -O3 -target aarch64-none-linux-gnu -fno-vectorize -fno-slp-vectorize -fno-unroll-loops -S -emit-llvm $1 -o test.ll
-$LLVM_BUILD_DIR/bin/opt -load-pass-plugin ../build/ALC_Vectorizer.so -passes="alc-vectorizer" test.ll --disable-output
+$LLVM_BUILD_DIR/bin/opt -load-pass-plugin ../build/ALC_Vectorizer.so -passes="alc-vectorizer" test.ll -o vectorized.bin
 
 #opt -loop-unroll -unroll-count=3 -unroll-allow-partial -print-after=loop-unroll  test.ll -o test.bc
 

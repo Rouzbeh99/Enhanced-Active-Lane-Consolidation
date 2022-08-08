@@ -21,10 +21,17 @@ using namespace llvm;
 class SVE_Vectorizer {
 public:
     Loop *L;
+    Value *predicateVector;
+    BasicBlock *targetedBB;
+    Instruction *insertionPoint;
+    std::vector<Value *> predicates;
+    int vectorizationFactor;
 
-    SVE_Vectorizer(Loop *l, int vectorizingFactor);
+    SVE_Vectorizer(Loop *l, int vectorizationFactor, std::vector<Value *> predicates);
 
-    int vectorizingFactor;
+    Value *getPredicateVector() const;
+
+    Instruction *getInsertionPoint() const;
 
 private:
     Module *module;
@@ -32,23 +39,23 @@ private:
 
 public:
 
-    void doVectorization(std::vector<Value *> predicates);
+    void doVectorization();
 
 private:
 
-    Value *formPredicateVector(std::vector<Value *> predicates, Instruction *insertionPoint);
+    Value *formPredicateVector();
 
 private:
 
-    CallInst *createAllTruePredicates(Instruction *insertionPoint);
+    CallInst *createAllTruePredicates();
 
 private:
 
-    CallInst *loadElements(Value *predicateVector, GEPOperator *ptr, Instruction *insertionPoint);
+    CallInst *loadElements( GEPOperator *ptr);
 
 private:
 
-    void storeElements(Value *elementsVector, Value *predicateVector, GEPOperator *ptr, Instruction *insertionPoint);
+    void storeElements(Value *elementsVector,  GEPOperator *ptr);
 
 private:
 
@@ -60,7 +67,7 @@ private:
 
 private:
 
-    CallInst* insertArithmeticOrLogicalInstruction(Intrinsic::ID intrinsic, Value *firstOp, Value *secondOp, Value *predicateVector, Instruction *insertionPoint);
+    CallInst *insertArithmeticOrLogicalInstruction(Intrinsic::ID intrinsic, Value *firstOp, Value *secondOp);
 };
 
 

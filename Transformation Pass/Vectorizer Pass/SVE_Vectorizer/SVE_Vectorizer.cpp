@@ -8,21 +8,22 @@
 #include <stack>
 
 
-SVE_Vectorizer::SVE_Vectorizer(Loop *l, int factor) : L(l), vectorizingFactor(factor) {
+SVE_Vectorizer::SVE_Vectorizer(Loop *l, int vectorizationFactor, std::vector<Value *> preds) : L(l), vectorizationFactor(vectorizationFactor),
+                                                                                               predicates(preds) {
     L = l;
-    vectorizingFactor = factor;
+    vectorizationFactor = vectorizationFactor;
     module = L->getBlocks().front()->getParent()->getParent();
+    predicates = preds;
+
+    // TODO: how to determine targeted block?
+    targetedBB = getTargetedBB();
+
+    insertionPoint = targetedBB->getTerminator();
+    predicateVector = formPredicateVector();
 }
 
 
-void SVE_Vectorizer::doVectorization(std::vector<Value *> predicates) {
-
-    // TODO: how to determine targeted block?
-    BasicBlock *targetedBB = getTargetedBB();
-
-    Instruction *insertionPoint = targetedBB->getTerminator();
-    Value *predicateVector = formPredicateVector(std::move(predicates), insertionPoint);
-
+void SVE_Vectorizer::doVectorization() {
 
     std::map<Value *, Value *> vMap;
 
@@ -38,20 +39,20 @@ void SVE_Vectorizer::doVectorization(std::vector<Value *> predicates) {
         } else if (isa<StoreInst>(instr)) {
             auto storeInstr = dyn_cast<StoreInst>(&instr);
             // it's the value to be stored
-            Value *firtOp = nullptr;
+            Value *firstOp = nullptr;
             if (vMap.count(storeInstr->getOperand(0))) {
-                firtOp = vMap[storeInstr->getOperand(0)];
+                firstOp = vMap[storeInstr->getOperand(0)];
             } else {
                 // TODO: can this happen?
             }
             auto ptr = dyn_cast<GEPOperator>(instr.getOperand(1));
-            storeElements(firtOp, predicateVector, ptr, insertionPoint);
+            storeElements(firstOp, ptr);
             toBeRemoved.push(&instr);
         } else if (isa<LoadInst>(instr)) {
             auto loadInstr = dyn_cast<LoadInst>(&instr);
 
             auto ptr = dyn_cast<GEPOperator>(instr.getOperand(0));
-            CallInst *loadedData = loadElements(predicateVector, ptr, insertionPoint);
+            CallInst *loadedData = loadElements(ptr);
             vMap[&instr] = loadedData;
             toBeRemoved.push(&instr);
         } else if (isa<BinaryOperator>(instr)) {
@@ -70,8 +71,7 @@ void SVE_Vectorizer::doVectorization(std::vector<Value *> predicates) {
                     //TODO: ?????
                 }
                 auto intrinsic = Intrinsic::aarch64_sve_mul;
-                CallInst *multResult = insertArithmeticOrLogicalInstruction(intrinsic, firstOp, secondOp,
-                                                                            predicateVector, insertionPoint);
+                CallInst *multResult = insertArithmeticOrLogicalInstruction(intrinsic, firstOp, secondOp);
                 vMap[&instr] = multResult;
                 toBeRemoved.push(&instr);
             }
@@ -86,18 +86,18 @@ void SVE_Vectorizer::doVectorization(std::vector<Value *> predicates) {
 }
 
 
-Value *SVE_Vectorizer::formPredicateVector(std::vector<Value *> predicates, Instruction *insertionPoint) {
+Value *SVE_Vectorizer::formPredicateVector() {
 
     LLVMContext &context = L->getHeader()->getContext();
     IRBuilder<> builder(context);
     builder.SetInsertPoint(insertionPoint);
 
-    VectorType *returnType = VectorType::get(Type::getInt1Ty(context), vectorizingFactor, false);
+    VectorType *returnType = VectorType::get(Type::getInt1Ty(context), vectorizationFactor, false);
 
     Type *int1Ty = Type::getInt1Ty(context);
     Value *predicateHolder = UndefValue::get(returnType);
 
-    for (int i = 0; i < vectorizingFactor; ++i) {
+    for (int i = 0; i < vectorizationFactor; ++i) {
         Constant *index = Constant::getIntegerValue(int1Ty, llvm::APInt(1, i));
         predicateHolder = builder.CreateInsertElement(predicateHolder, predicates[i], index);
     }
@@ -106,7 +106,7 @@ Value *SVE_Vectorizer::formPredicateVector(std::vector<Value *> predicates, Inst
 
 }
 
-CallInst *SVE_Vectorizer::createAllTruePredicates(Instruction *insertionPoint) {
+CallInst *SVE_Vectorizer::createAllTruePredicates() {
 
     LLVMContext &context = L->getHeader()->getContext();
     IRBuilder<> builder(context);
@@ -114,16 +114,16 @@ CallInst *SVE_Vectorizer::createAllTruePredicates(Instruction *insertionPoint) {
             insertionPoint);// append to the end of block, before terminator
 
     auto intrinsic = Intrinsic::aarch64_sve_ptrue;
-    VectorType *returnType = VectorType::get(Type::getInt1Ty(context), vectorizingFactor, false);
+    VectorType *returnType = VectorType::get(Type::getInt1Ty(context), vectorizationFactor, false);
     Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, returnType);
     llvm::Type *i32_type = llvm::IntegerType::getInt32Ty(context);
-    llvm::Constant *constantInt = llvm::ConstantInt::get(i32_type, vectorizingFactor, true);
+    llvm::Constant *constantInt = llvm::ConstantInt::get(i32_type, vectorizationFactor, true);
     return builder.CreateCall(intrinsicFunction, constantInt);
 }
 
 BasicBlock *SVE_Vectorizer::getLastHeaderCopy() const {
     BasicBlock *BB = L->getHeader();
-    for (int i = 0; i < 2 * vectorizingFactor - 1; ++i) {
+    for (int i = 0; i < 2 * vectorizationFactor - 1; ++i) {
         BB = BB->getNextNode();
     }
 
@@ -145,14 +145,14 @@ BasicBlock *SVE_Vectorizer::getTargetedBB() {
     return nullptr;
 }
 
-CallInst *SVE_Vectorizer::loadElements(Value *predicateVector, GEPOperator *ptr, Instruction *insertionPoint) {
+CallInst *SVE_Vectorizer::loadElements(GEPOperator *ptr) {
 
     LLVMContext &context = L->getHeader()->getContext();
     IRBuilder<> builder(context);
     builder.SetInsertPoint(insertionPoint);
 
     auto intrinsic = Intrinsic::aarch64_sve_ld1;
-    VectorType *returnType = VectorType::get(Type::getInt32Ty(context), vectorizingFactor, false);
+    VectorType *returnType = VectorType::get(Type::getInt32Ty(context), vectorizationFactor, false);
     Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, returnType);
 
     std::vector<Value *> arguments;
@@ -164,8 +164,7 @@ CallInst *SVE_Vectorizer::loadElements(Value *predicateVector, GEPOperator *ptr,
 
 }
 
-void SVE_Vectorizer::storeElements(Value *elementsVector, Value *predicateVector, GEPOperator *ptr,
-                                   Instruction *insertionPoint) {
+void SVE_Vectorizer::storeElements(Value *elementsVector, GEPOperator *ptr) {
     LLVMContext &context = L->getHeader()->getContext();
     IRBuilder<> builder(context);
     builder.SetInsertPoint(insertionPoint);
@@ -173,7 +172,7 @@ void SVE_Vectorizer::storeElements(Value *elementsVector, Value *predicateVector
     auto intrinsic = Intrinsic::aarch64_sve_st1;
 
 
-    VectorType *returnType = VectorType::get(Type::getInt32Ty(context), vectorizingFactor, false);
+    VectorType *returnType = VectorType::get(Type::getInt32Ty(context), vectorizationFactor, false);
     Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, returnType);
 
 
@@ -187,14 +186,14 @@ void SVE_Vectorizer::storeElements(Value *elementsVector, Value *predicateVector
 }
 
 // TODO: handle double types by changing return type and operands
-CallInst *SVE_Vectorizer::insertArithmeticOrLogicalInstruction(Intrinsic::ID intrinsic, Value *firstOp, Value *secondOp,
-                                                               Value *predicateVector, Instruction *insertionPoint) {
+CallInst *
+SVE_Vectorizer::insertArithmeticOrLogicalInstruction(Intrinsic::ID intrinsic, Value *firstOp, Value *secondOp) {
 
     LLVMContext &context = L->getHeader()->getContext();
     IRBuilder<> builder(context);
     builder.SetInsertPoint(insertionPoint);
 
-    VectorType *returnType = VectorType::get(Type::getInt32Ty(context), vectorizingFactor, false);
+    VectorType *returnType = VectorType::get(Type::getInt32Ty(context), vectorizationFactor, false);
     Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, returnType);
 
 //    intrinsicFunction->print(outs());
@@ -205,6 +204,14 @@ CallInst *SVE_Vectorizer::insertArithmeticOrLogicalInstruction(Intrinsic::ID int
     arguments.push_back(secondOp);
 
     return builder.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
+}
+
+Value *SVE_Vectorizer::getPredicateVector() const {
+    return predicateVector;
+}
+
+Instruction *SVE_Vectorizer::getInsertionPoint() const {
+    return insertionPoint;
 }
 
 
