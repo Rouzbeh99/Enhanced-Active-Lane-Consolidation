@@ -14,6 +14,8 @@
 #include "llvm/Transforms/Utils/Cloning.h"
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
 
+
+
 #ifndef SVE_PERMUTE_SVE_PERMUTE_H
 #define SVE_PERMUTE_SVE_PERMUTE_H
 
@@ -22,20 +24,38 @@ using namespace llvm;
 class SVE_Permute {
 public:
 
-    Loop* L;
-    Module* module;
+    Loop *L;
+    Module *module;
     int vectorizationFactor;
-    Value* predicatedVector;
-    Instruction* insertionPoint;
+    Value *predicatedVector;
+    Instruction *insertionPoint;
 
-    SVE_Permute(Loop *l, int vectorizationFactor, Value *predicatedVector, Instruction* insertPoint);
+    SVE_Permute(Loop *l, int vectorizationFactor, Value *predicatedVector, Instruction *insertPoint);
 
 
 public:
+
     void doPermutation();
 
 private:
+
     CallInst *createAllTruePredicates();
+
+private:
+
+    CallInst *createCompactInstruction(Value *toBeCompacted);
+
+private:
+
+    Value *createNotInstruction(Value* elements);
+
+private:
+
+    CallInst* createCntpInstruction(Value* elements);
+
+private:
+
+    CallInst* createWhileltInstruction(Value* firstOp, Value* secondOp);
 };
 
 
