@@ -7,27 +7,7 @@
 
 void SVE_Permute::doPermutation() {
 
-    LLVMContext &context = L->getHeader()->getContext();
-    IRBuilder<> builder(context);
-    builder.SetInsertPoint(insertionPoint);
 
-    auto intrinsic = Intrinsic::aarch64_sve_whilelt;
-
-    VectorType *returnType = VectorType::get(Type::getInt32Ty(context), vectorizationFactor, false);
-    std::vector<Type *> types;
-
-    types.push_back(Type::getInt32Ty(context));
-    types.push_back(Type::getInt32Ty(context));
-
-    Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, ArrayRef<Type *>(types));
-
-    intrinsicFunction->print(outs());
-//    std::vector<Value *> arguments;
-
-//    arguments.push_back();
-
-
-//    builder.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
 }
 
 CallInst *SVE_Permute::createAllTruePredicates() {
@@ -106,6 +86,7 @@ SVE_Permute::SVE_Permute(Loop *l, int factor, Value *pred, Instruction *insertPo
     insertionPoint = insertPoint;
 }
 
+//TODO: Not sure if works!! check parameter types
 CallInst *SVE_Permute::createWhileltInstruction(Value *firstOp, Value *secondOp) {
 
     LLVMContext &context = L->getHeader()->getContext();
@@ -114,9 +95,10 @@ CallInst *SVE_Permute::createWhileltInstruction(Value *firstOp, Value *secondOp)
 
     auto intrinsic = Intrinsic::aarch64_sve_whilelt;
 
-    VectorType *returnType = VectorType::get(Type::getInt32Ty(context), vectorizationFactor, false);
+    VectorType *returnType = VectorType::get(Type::getInt1Ty(context), vectorizationFactor, false);
     std::vector<Type *> types;
 
+    types.push_back(returnType);
     types.push_back(Type::getInt32Ty(context));
     types.push_back(Type::getInt32Ty(context));
 
@@ -127,7 +109,53 @@ CallInst *SVE_Permute::createWhileltInstruction(Value *firstOp, Value *secondOp)
     arguments.push_back(firstOp);
     arguments.push_back(secondOp);
 
-    builder.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
+    return builder.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
+}
+
+CallInst *SVE_Permute::createSpliceInstruction(Value *firstOp, Value *secondOp) {
+
+
+    LLVMContext &context = L->getHeader()->getContext();
+    IRBuilder<> builder(context);
+    builder.SetInsertPoint(insertionPoint);
+
+    auto intrinsic = Intrinsic::aarch64_sve_splice;
+
+    VectorType *returnType = VectorType::get(Type::getInt32Ty(context), vectorizationFactor, false);
+
+    Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, returnType);
+
+    intrinsicFunction->print(outs());
+    std::vector<Value *> arguments;
+
+    arguments.push_back(predicatedVector);
+    arguments.push_back(firstOp);
+    arguments.push_back(secondOp);
+
+    return builder.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
+
+}
+
+CallInst *SVE_Permute::createSelInstruction(Value *firstOp, Value *secondOp) {
+    LLVMContext &context = L->getHeader()->getContext();
+    IRBuilder<> builder(context);
+    builder.SetInsertPoint(insertionPoint);
+
+    auto intrinsic = Intrinsic::aarch64_sve_sel;
+
+    VectorType *returnType = VectorType::get(Type::getInt32Ty(context), vectorizationFactor, false);
+
+    Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, returnType);
+
+    intrinsicFunction->print(outs());
+    std::vector<Value *> arguments;
+
+    arguments.push_back(predicatedVector);
+    arguments.push_back(firstOp);
+    arguments.push_back(secondOp);
+
+    return builder.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
+
 }
 
 

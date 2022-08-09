@@ -15,7 +15,6 @@
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
 
 
-
 #ifndef SVE_PERMUTE_SVE_PERMUTE_H
 #define SVE_PERMUTE_SVE_PERMUTE_H
 
@@ -47,15 +46,22 @@ private:
 
 private:
 
-    Value *createNotInstruction(Value* elements);
+    Value *createNotInstruction(Value *elements);
 
 private:
 
-    CallInst* createCntpInstruction(Value* elements);
+    CallInst *createCntpInstruction(Value *elements);
 
 private:
 
-    CallInst* createWhileltInstruction(Value* firstOp, Value* secondOp);
+    CallInst *createWhileltInstruction(Value *firstOp, Value *secondOp);
+
+private:
+
+    CallInst *createSpliceInstruction(Value *firstOp, Value *secondOp);
+
+private:
+    CallInst *createSelInstruction(Value *firstOp, Value *secondOp);
 };
 
 

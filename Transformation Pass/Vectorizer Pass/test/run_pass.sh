@@ -36,8 +36,7 @@ make
 cd ../test
 
 $LLVM_BUILD_DIR/bin/clang -g -O3 -target aarch64-none-linux-gnu -fno-vectorize -fno-slp-vectorize -fno-unroll-loops -S -emit-llvm $1 -o test.ll
-$LLVM_BUILD_DIR/bin/opt -load-pass-plugin ../build/ALC_Vectorizer.so -passes="alc-vectorizer" test.ll -o vectorized.bin
+$LLVM_BUILD_DIR/bin/opt -S -load-pass-plugin ../build/ALC_Vectorizer.so -passes="alc-vectorizer" test.ll -o vectorized.ll
 
-#opt -loop-unroll -unroll-count=3 -unroll-allow-partial -print-after=loop-unroll  test.ll -o test.bc
+#$LLVM_BUILD_DIR/bin/llc -mtriple=aarch64-linux-gnu -mattr=sve,sve2 -filetype=asm vectorized.ll -o vectorized.s
 
-#lli test.bin
