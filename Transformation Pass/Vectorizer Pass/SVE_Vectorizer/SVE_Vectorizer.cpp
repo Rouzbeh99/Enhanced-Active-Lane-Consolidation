@@ -8,7 +8,9 @@
 #include <stack>
 
 
-SVE_Vectorizer::SVE_Vectorizer(Loop *l, int vectorizationFactor, std::vector<Value *> preds) : L(l), vectorizationFactor(vectorizationFactor),
+SVE_Vectorizer::SVE_Vectorizer(Loop *l, int vectorizationFactor, std::vector<Value *> preds) : L(l),
+                                                                                               vectorizationFactor(
+                                                                                                       vectorizationFactor),
                                                                                                predicates(preds) {
     L = l;
     vectorizationFactor = vectorizationFactor;
@@ -92,7 +94,7 @@ Value *SVE_Vectorizer::formPredicateVector() {
     IRBuilder<> builder(context);
     builder.SetInsertPoint(insertionPoint);
 
-    VectorType *returnType = VectorType::get(Type::getInt1Ty(context), vectorizationFactor, false);
+    VectorType *returnType = VectorType::get(Type::getInt1Ty(context), vectorizationFactor, true);
 
     Type *int1Ty = Type::getInt1Ty(context);
     Value *predicateHolder = UndefValue::get(returnType);
@@ -114,7 +116,7 @@ CallInst *SVE_Vectorizer::createAllTruePredicates() {
             insertionPoint);// append to the end of block, before terminator
 
     auto intrinsic = Intrinsic::aarch64_sve_ptrue;
-    VectorType *returnType = VectorType::get(Type::getInt1Ty(context), vectorizationFactor, false);
+    VectorType *returnType = VectorType::get(Type::getInt1Ty(context), vectorizationFactor, true);
     Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, returnType);
     llvm::Type *i32_type = llvm::IntegerType::getInt32Ty(context);
     llvm::Constant *constantInt = llvm::ConstantInt::get(i32_type, vectorizationFactor, true);
@@ -152,8 +154,9 @@ CallInst *SVE_Vectorizer::loadElements(GEPOperator *ptr) {
     builder.SetInsertPoint(insertionPoint);
 
     auto intrinsic = Intrinsic::aarch64_sve_ld1;
-    VectorType *returnType = VectorType::get(Type::getInt32Ty(context), vectorizationFactor, false);
+    VectorType *returnType = VectorType::get(Type::getInt32Ty(context), vectorizationFactor, true);
     Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, returnType);
+
 
     std::vector<Value *> arguments;
     arguments.push_back(predicateVector);
@@ -172,7 +175,7 @@ void SVE_Vectorizer::storeElements(Value *elementsVector, GEPOperator *ptr) {
     auto intrinsic = Intrinsic::aarch64_sve_st1;
 
 
-    VectorType *returnType = VectorType::get(Type::getInt32Ty(context), vectorizationFactor, false);
+    VectorType *returnType = VectorType::get(Type::getInt32Ty(context), vectorizationFactor, true);
     Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, returnType);
 
 
@@ -193,7 +196,7 @@ SVE_Vectorizer::insertArithmeticOrLogicalInstruction(Intrinsic::ID intrinsic, Va
     IRBuilder<> builder(context);
     builder.SetInsertPoint(insertionPoint);
 
-    VectorType *returnType = VectorType::get(Type::getInt32Ty(context), vectorizationFactor, false);
+    VectorType *returnType = VectorType::get(Type::getInt32Ty(context), vectorizationFactor, true);
     Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, returnType);
 
 //    intrinsicFunction->print(outs());

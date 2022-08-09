@@ -7,7 +7,6 @@
 
 void SVE_Permute::doPermutation() {
 
-
 }
 
 CallInst *SVE_Permute::createAllTruePredicates() {
@@ -18,7 +17,7 @@ CallInst *SVE_Permute::createAllTruePredicates() {
             insertionPoint);// append to the end of block, before terminator
 
     auto intrinsic = Intrinsic::aarch64_sve_ptrue;
-    VectorType *type = VectorType::get(Type::getInt1Ty(context), vectorizationFactor, false);
+    VectorType *type = VectorType::get(Type::getInt1Ty(context), vectorizationFactor, true);
     Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, type);
     llvm::Type *i32_type = llvm::IntegerType::getInt32Ty(context);
     llvm::Constant *constantInt = llvm::ConstantInt::get(i32_type, vectorizationFactor, true);
@@ -34,10 +33,9 @@ CallInst *SVE_Permute::createCompactInstruction(Value *toBeCompacted) {
 
     auto intrinsic = Intrinsic::aarch64_sve_compact;
 
-    VectorType *type = VectorType::get(Type::getInt32Ty(context), vectorizationFactor, false);
+    VectorType *type = VectorType::get(Type::getInt32Ty(context), vectorizationFactor, true);
     Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, type);
 
-    intrinsicFunction->print(outs());
 
     std::vector<Value *> arguments;
     arguments.push_back(predicatedVector);
@@ -47,6 +45,7 @@ CallInst *SVE_Permute::createCompactInstruction(Value *toBeCompacted) {
     return builder.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
 }
 
+//TODO: does it work with vscale??
 Value *SVE_Permute::createNotInstruction(Value *elements) {
     LLVMContext &context = L->getHeader()->getContext();
     IRBuilder<> builder(context);
@@ -64,10 +63,10 @@ CallInst *SVE_Permute::createCntpInstruction(Value *elements) {
 
     auto intrinsic = Intrinsic::aarch64_sve_cntp;
 
-    VectorType *type = VectorType::get(Type::getInt1Ty(context), vectorizationFactor, false);
+    VectorType *type = VectorType::get(Type::getInt1Ty(context), vectorizationFactor, true);
     Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, type);
 
-    intrinsicFunction->print(outs());
+
     std::vector<Value *> arguments;
 
     arguments.push_back(predicatedVector);
@@ -77,16 +76,7 @@ CallInst *SVE_Permute::createCntpInstruction(Value *elements) {
 }
 
 
-SVE_Permute::SVE_Permute(Loop *l, int factor, Value *pred, Instruction *insertPoint) : L(l), vectorizationFactor(
-        factor), predicatedVector(pred), insertionPoint(insertPoint) {
-    L = l;
-    vectorizationFactor = factor;
-    module = L->getBlocks().front()->getParent()->getParent();
-    predicatedVector = pred;
-    insertionPoint = insertPoint;
-}
 
-//TODO: Not sure if works!! check parameter types
 CallInst *SVE_Permute::createWhileltInstruction(Value *firstOp, Value *secondOp) {
 
     LLVMContext &context = L->getHeader()->getContext();
@@ -95,7 +85,7 @@ CallInst *SVE_Permute::createWhileltInstruction(Value *firstOp, Value *secondOp)
 
     auto intrinsic = Intrinsic::aarch64_sve_whilelt;
 
-    VectorType *returnType = VectorType::get(Type::getInt1Ty(context), vectorizationFactor, false);
+    VectorType *returnType = VectorType::get(Type::getInt1Ty(context), vectorizationFactor, true);
     std::vector<Type *> types;
 
     types.push_back(returnType);
@@ -121,11 +111,10 @@ CallInst *SVE_Permute::createSpliceInstruction(Value *firstOp, Value *secondOp) 
 
     auto intrinsic = Intrinsic::aarch64_sve_splice;
 
-    VectorType *returnType = VectorType::get(Type::getInt32Ty(context), vectorizationFactor, false);
+    VectorType *returnType = VectorType::get(Type::getInt32Ty(context), vectorizationFactor, true);
 
     Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, returnType);
 
-    intrinsicFunction->print(outs());
     std::vector<Value *> arguments;
 
     arguments.push_back(predicatedVector);
@@ -143,11 +132,10 @@ CallInst *SVE_Permute::createSelInstruction(Value *firstOp, Value *secondOp) {
 
     auto intrinsic = Intrinsic::aarch64_sve_sel;
 
-    VectorType *returnType = VectorType::get(Type::getInt32Ty(context), vectorizationFactor, false);
+    VectorType *returnType = VectorType::get(Type::getInt32Ty(context), vectorizationFactor, true);
 
     Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, returnType);
 
-    intrinsicFunction->print(outs());
     std::vector<Value *> arguments;
 
     arguments.push_back(predicatedVector);
@@ -158,6 +146,12 @@ CallInst *SVE_Permute::createSelInstruction(Value *firstOp, Value *secondOp) {
 
 }
 
-
-
+SVE_Permute::SVE_Permute(Loop *l, int factor, Value *pred, Instruction *insertPoint) : L(l), vectorizationFactor(
+        factor), predicatedVector(pred), insertionPoint(insertPoint) {
+    L = l;
+    vectorizationFactor = factor;
+    module = L->getBlocks().front()->getParent()->getParent();
+    predicatedVector = pred;
+    insertionPoint = insertPoint;
+}
 

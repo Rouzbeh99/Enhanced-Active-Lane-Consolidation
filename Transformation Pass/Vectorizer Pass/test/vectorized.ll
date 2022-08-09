@@ -39,14 +39,14 @@ if.then:                                          ; preds = %for.inc.latchCopy.1
   %arrayidx = getelementptr inbounds i32, ptr %a, i64 %0, !dbg !36
   %arrayidx3 = getelementptr inbounds i32, ptr %b, i64 %0, !dbg !38
   %arrayidx5 = getelementptr inbounds i32, ptr %c, i64 %0, !dbg !39
-  %1 = insertelement <4 x i1> undef, i1 %cmp1.not, i1 false
-  %2 = insertelement <4 x i1> %1, i1 %cmp1.not.headerCopy.1, i1 true
-  %3 = insertelement <4 x i1> %2, i1 %cmp1.not.headerCopy.1.2, i1 false
-  %4 = insertelement <4 x i1> %3, i1 %cmp1.not.headerCopy.1.2.3, i1 true
-  %5 = call <4 x i32> @llvm.aarch64.sve.ld1.v4i32(<4 x i1> %4, ptr %arrayidx)
-  %6 = call <4 x i32> @llvm.aarch64.sve.ld1.v4i32(<4 x i1> %4, ptr %arrayidx3)
-  %7 = call <4 x i32> @llvm.aarch64.sve.mul.v4i32(<4 x i1> %4, <4 x i32> %6, <4 x i32> %5)
-  call void @llvm.aarch64.sve.st1.v4i32(<4 x i32> %7, <4 x i1> %4, ptr %arrayidx5)
+  %1 = insertelement <vscale x 4 x i1> undef, i1 %cmp1.not, i1 false
+  %2 = insertelement <vscale x 4 x i1> %1, i1 %cmp1.not.headerCopy.1, i1 true
+  %3 = insertelement <vscale x 4 x i1> %2, i1 %cmp1.not.headerCopy.1.2, i1 false
+  %4 = insertelement <vscale x 4 x i1> %3, i1 %cmp1.not.headerCopy.1.2.3, i1 true
+  %5 = call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.nxv4i32(<vscale x 4 x i1> %4, ptr %arrayidx)
+  %6 = call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.nxv4i32(<vscale x 4 x i1> %4, ptr %arrayidx3)
+  %7 = call <vscale x 4 x i32> @llvm.aarch64.sve.mul.nxv4i32(<vscale x 4 x i1> %4, <vscale x 4 x i32> %6, <vscale x 4 x i32> %5)
+  call void @llvm.aarch64.sve.st1.nxv4i32(<vscale x 4 x i32> %7, <vscale x 4 x i1> %4, ptr %arrayidx5)
   br label %for.body
 
 for.inc:                                          ; preds = %for.body
@@ -177,13 +177,13 @@ declare noundef i32 @putchar(i32 noundef) local_unnamed_addr #6
 declare void @llvm.experimental.noalias.scope.decl(metadata) #7
 
 ; Function Attrs: argmemonly nocallback nofree nosync nounwind readonly willreturn
-declare <4 x i32> @llvm.aarch64.sve.ld1.v4i32(<4 x i1>, ptr) #8
+declare <vscale x 4 x i32> @llvm.aarch64.sve.ld1.nxv4i32(<vscale x 4 x i1>, ptr) #8
 
 ; Function Attrs: nocallback nofree nosync nounwind readnone willreturn
-declare <4 x i32> @llvm.aarch64.sve.mul.v4i32(<4 x i1>, <4 x i32>, <4 x i32>) #9
+declare <vscale x 4 x i32> @llvm.aarch64.sve.mul.nxv4i32(<vscale x 4 x i1>, <vscale x 4 x i32>, <vscale x 4 x i32>) #9
 
 ; Function Attrs: argmemonly nocallback nofree nosync nounwind willreturn
-declare void @llvm.aarch64.sve.st1.v4i32(<4 x i32>, <4 x i1>, ptr nocapture) #2
+declare void @llvm.aarch64.sve.st1.nxv4i32(<vscale x 4 x i32>, <vscale x 4 x i1>, ptr nocapture) #2
 
 attributes #0 = { argmemonly nofree norecurse nosync nounwind uwtable "frame-pointer"="non-leaf" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="generic" "target-features"="+neon,+v8a" }
 attributes #1 = { nocallback nofree nosync nounwind readnone speculatable willreturn }
