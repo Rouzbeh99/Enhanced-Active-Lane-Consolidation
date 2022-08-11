@@ -41,6 +41,8 @@ public:
 
     void doVectorization();
 
+    BasicBlock *getTargetedBB() const;
+
 private:
 
     Value *formPredicateVector();
@@ -59,7 +61,7 @@ private:
 
 private:
 
-    BasicBlock *getTargetedBB();
+    BasicBlock *findTargetedBB();
 
 private:
 
@@ -68,7 +70,13 @@ private:
 private:
 
     CallInst *insertArithmeticOrLogicalInstruction(Intrinsic::ID intrinsic, Value *firstOp, Value *secondOp);
+
+
 };
+
+BasicBlock *SVE_Vectorizer::getTargetedBB() const {
+    return targetedBB;
+}
 
 
 #endif //ALC_VECTORIZER_SVE_VECTORIZER_H

@@ -26,15 +26,17 @@ public:
     Loop *L;
     Module *module;
     int vectorizationFactor;
-    Value *predicatedVector;
     Instruction *insertionPoint;
+    BasicBlock *targetedBlock;
+    LoopInfo *LI;
 
-    SVE_Permute(Loop *l, int vectorizationFactor, Value *predicatedVector, Instruction *insertPoint);
+
+    SVE_Permute(Loop *l, int vectorizationFactor, BasicBlock *targetedBlock, LoopInfo *LI);
 
 
 public:
 
-    void doPermutation();
+    void doPermutation(Value *z0, Value *z1, Value *p0, Value *p1);
 
 private:
 
@@ -42,7 +44,7 @@ private:
 
 private:
 
-    CallInst *createCompactInstruction(Value *toBeCompacted);
+    CallInst *createCompactInstruction(Value *toBeCompacted, Value *predicatedVector);
 
 private:
 
@@ -50,7 +52,15 @@ private:
 
 private:
 
-    CallInst *createCntpInstruction(Value *elements);
+    Value *createANDInstruction(ArrayRef<Value *> elements);
+
+private:
+
+    Value *createORInstruction(ArrayRef<Value *> elements);
+
+private:
+
+    CallInst *createCntpInstruction(Value *elements, Value *predicatedVector);
 
 private:
 
@@ -58,10 +68,17 @@ private:
 
 private:
 
-    CallInst *createSpliceInstruction(Value *firstOp, Value *secondOp);
+    CallInst *createSpliceInstruction(Value *firstOp, Value *secondOp, Value *predicatedVector);
 
 private:
-    CallInst *createSelInstruction(Value *firstOp, Value *secondOp);
+    CallInst *createSelInstruction(Value *firstOp, Value *secondOp, Value *predicatedVector);
+
+public:
+    CallInst* createIndexInstruction(Value* firstOp, Value* secondOp);
+
+private:
+    BasicBlock *createBlockForPermutation();
+
 };
 
 

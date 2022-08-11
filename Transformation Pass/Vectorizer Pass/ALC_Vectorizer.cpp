@@ -53,9 +53,15 @@ namespace {
         auto *sve_vectorizer = new SVE_Vectorizer(L, 4, unroller->getPredicates());
         sve_vectorizer->doVectorization();
 
-        auto *sve_permute = new SVE_Permute(L, 4, sve_vectorizer->getPredicateVector(),
-                                            sve_vectorizer->getInsertionPoint());
-        sve_permute->doPermutation();
+        auto *sve_permute = new SVE_Permute(L, 4, sve_vectorizer->getTargetedBB(), &LI);
+//
+        ConstantInt *constZero = llvm::ConstantInt::get(llvm::Type::getInt32Ty(L->getHeader()->getContext()), 0);
+        ConstantInt *constOne = llvm::ConstantInt::get(llvm::Type::getInt32Ty(L->getHeader()->getContext()), 1);
+        CallInst *elements = sve_permute->createIndexInstruction(dyn_cast<Value>(constZero), dyn_cast<Value>(constOne));
+
+        sve_permute->doPermutation(elements, elements, sve_vectorizer->getPredicateVector(),
+                                   sve_vectorizer->getPredicateVector());
+
 
         printLoop(L);
 

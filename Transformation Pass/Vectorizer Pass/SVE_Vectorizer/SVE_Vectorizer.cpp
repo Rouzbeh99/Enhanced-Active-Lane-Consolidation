@@ -18,7 +18,7 @@ SVE_Vectorizer::SVE_Vectorizer(Loop *l, int vectorizationFactor, std::vector<Val
     predicates = preds;
 
     // TODO: how to determine targeted block?
-    targetedBB = getTargetedBB();
+    targetedBB = findTargetedBB();
 
     insertionPoint = targetedBB->getTerminator();
     predicateVector = formPredicateVector();
@@ -92,7 +92,10 @@ Value *SVE_Vectorizer::formPredicateVector() {
 
     LLVMContext &context = L->getHeader()->getContext();
     IRBuilder<> builder(context);
-    builder.SetInsertPoint(insertionPoint);
+
+    // predicates should be generated in the new latch
+    Instruction *insertAt = targetedBB->getSinglePredecessor()->getTerminator();
+    builder.SetInsertPoint(insertAt);
 
     VectorType *returnType = VectorType::get(Type::getInt1Ty(context), vectorizationFactor, true);
 
@@ -132,7 +135,7 @@ BasicBlock *SVE_Vectorizer::getLastHeaderCopy() const {
     return BB;
 }
 
-BasicBlock *SVE_Vectorizer::getTargetedBB() {
+BasicBlock *SVE_Vectorizer::findTargetedBB() {
     BasicBlock *lastLatchBlock = getLastHeaderCopy()->getNextNode();
 
     // it has two successors, exiting block and then block. we find then block 
