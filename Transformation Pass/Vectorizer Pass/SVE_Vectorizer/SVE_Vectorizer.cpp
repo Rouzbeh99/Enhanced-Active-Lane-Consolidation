@@ -25,9 +25,10 @@ SVE_Vectorizer::SVE_Vectorizer(Loop *l, int vectorizationFactor, std::vector<Val
 }
 
 
-void SVE_Vectorizer::doVectorization() {
+ void SVE_Vectorizer::doVectorization() {
 
     std::map<Value *, Value *> vMap;
+
 
     // Should be remove in FILO manner to prevent removing a value that is used in following lines
     std::stack<Instruction *> toBeRemoved;
@@ -84,6 +85,7 @@ void SVE_Vectorizer::doVectorization() {
         toBeRemoved.top()->eraseFromParent();
         toBeRemoved.pop();
     }
+
 
 }
 

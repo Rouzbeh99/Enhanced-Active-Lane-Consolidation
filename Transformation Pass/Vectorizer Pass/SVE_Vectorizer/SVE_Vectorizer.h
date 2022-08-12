@@ -39,7 +39,7 @@ private:
 
 public:
 
-    void doVectorization();
+   void doVectorization();
 
     BasicBlock *getTargetedBB() const;
 
@@ -53,11 +53,11 @@ private:
 
 private:
 
-    CallInst *loadElements( GEPOperator *ptr);
+    CallInst *loadElements(GEPOperator *ptr);
 
 private:
 
-    void storeElements(Value *elementsVector,  GEPOperator *ptr);
+    void storeElements(Value *elementsVector, GEPOperator *ptr);
 
 private:
 

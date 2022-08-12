@@ -36,7 +36,7 @@ public:
 
 public:
 
-    void doPermutation(Value *z0, Value *z1, Value *p0, Value *p1);
+  void doPermutation(Value *z0, Value *z1, Value *p0, Value *p1);
 
 private:
 
@@ -74,9 +74,16 @@ private:
     CallInst *createSelInstruction(Value *firstOp, Value *secondOp, Value *predicatedVector);
 
 public:
-    CallInst* createIndexInstruction(Value* firstOp, Value* secondOp);
+    CallInst *createIndexInstruction(Value *firstOp, Value *secondOp);
 
 private:
+    Value *createAddInstruction(Value *firstOp, Value *secondOp);
+
+private:
+    Value *createSubInstruction(Value *firstOp, Value *secondOp);
+
+private:
+
     BasicBlock *createBlockForPermutation();
 
 };

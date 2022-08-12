@@ -36,7 +36,7 @@ make
 cd ../test
 
 $LLVM_BUILD_DIR/bin/clang -g -O3 -target aarch64-none-linux-gnu -fno-vectorize -fno-slp-vectorize -fno-unroll-loops -S -emit-llvm $1 -o test.ll
-$LLVM_BUILD_DIR/bin/opt -S -load-pass-plugin ../build/ALC_Vectorizer.so -passes="alc-vectorizer" test.ll -o vectorized.ll
+$LLVM_BUILD_DIR/bin/opt -S -load-pass-plugin ../build/ALC_Vectorizer.so -passes="alc-vectorizer" test.ll -o permuted.ll
 
-#$LLVM_BUILD_DIR/bin/llc -mtriple=aarch64-linux-gnu -mattr=sve,sve2 -filetype=asm vectorized.ll -o vectorized.s
+$LLVM_BUILD_DIR/bin/llc -mtriple=aarch64-linux-gnu -mattr=sve,sve2 -filetype=asm -print-after-all permuted.ll -o permuted.s  &> log.txt
 
