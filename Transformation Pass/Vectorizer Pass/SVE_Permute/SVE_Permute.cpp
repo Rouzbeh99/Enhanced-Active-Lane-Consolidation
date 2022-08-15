@@ -7,77 +7,89 @@
 
 void SVE_Permute::doPermutation(Value *z0, Value *z1, Value *p0, Value *p1) {
 
+    auto &context = L->getHeader()->getContext();
+
+    VectorType *type = VectorType::get(Type::getInt32Ty(context), vectorizationFactor, true);
+
+    refineLoopTripCountAndInitialValue();
+
+//    Instruction *insertionPoint = newLatch->getTerminator();
+//    insertPermutationLogic(insertionPoint, z0, z1, p0, p1);
+
+
+}
+
+
+void SVE_Permute::insertPermutationLogic(Instruction *insertAt, Value *z0, Value *z1, Value *p0, Value *p1) {
+
+
     IntegerType *int64Type = llvm::Type::getInt64Ty(L->getHeader()->getContext());
 
     ConstantInt *constZero = llvm::ConstantInt::get(int64Type, 0);
 
-    BasicBlock *permutationBlock = createBlockForPermutation();
+    CallInst *allTruePredicates = createAllTruePredicates(insertAt);
 
-    insertionPoint = permutationBlock->getTerminator();
-
-    CallInst *allTruePredicates = createAllTruePredicates();
 
     // gather active lanes
-    CallInst *z2 = createCompactInstruction(z0, p0);
-    CallInst *z3 = createCompactInstruction(z1, p1);
-
+    CallInst *z2 = createCompactInstruction(insertAt, z0, p0);
+    CallInst *z3 = createCompactInstruction(insertAt, z1, p1);
 
 
     //gather inactive lanes
-    Value *p2 = createNotInstruction(p0);
-    Value *p3 = createNotInstruction(p1);
+    Value *p2 = createNotInstruction(insertAt, p0);
+    Value *p3 = createNotInstruction(insertAt, p1);
 
-    CallInst *z4 = createCompactInstruction(z0, p2);
-    CallInst *z5 = createCompactInstruction(z1, p3);
+    CallInst *z4 = createCompactInstruction(insertAt, z0, p2);
+    CallInst *z5 = createCompactInstruction(insertAt, z1, p3);
 
     // gathering all active lanes to z0
-    auto x0 = dyn_cast<Value>(createCntpInstruction(p0, allTruePredicates));
+    auto x0 = dyn_cast<Value>(createCntpInstruction(insertAt, p0, allTruePredicates));
 
-    CallInst *p4 = createWhileltInstruction(constZero, x0);
+    CallInst *p4 = createWhileltInstruction(insertAt, constZero, x0);
 
-//    //TODO: how to output ???????????????????????
-    z0 = createSpliceInstruction(z2, z3, p4);
-//
-//    //gather others to z1
-    auto x1 = dyn_cast<Value>(createCntpInstruction(p1, allTruePredicates));
-    auto p5 = createWhileltInstruction(constZero, x1);
-    z2 = createSpliceInstruction(z3, z5, p5); // contains active ... inactive
-    CallInst *x2 = createCntpInstruction(p2, allTruePredicates);
-    p2 = createWhileltInstruction(constZero, x2);
-//    //TODO: how to output ??????????????????
-    z1 = createSelInstruction(z4, z2, p2);
-//
-//    //find result predicate
-    p1 = createNotInstruction(p2);
-    CallInst *x3 = createCntpInstruction(p2, allTruePredicates);
 
-    Value *numOfActivesInResult = createAddInstruction(createSubInstruction(x1, x2), x3);
+    permutedZ0 = createSpliceInstruction(insertAt, z2, z3, p4);
 
-    p2 = createWhileltInstruction(constZero, numOfActivesInResult);
-    auto p6 = createNotInstruction(p2);
+    //gather others to z1
+    auto x1 = dyn_cast<Value>(createCntpInstruction(insertAt, p1, allTruePredicates));
+    auto p5 = createWhileltInstruction(insertAt, constZero, x1);
+    z2 = createSpliceInstruction(insertAt, z3, z5, p5); // contains active ... inactive
+    CallInst *x2 = createCntpInstruction(insertAt, p2, allTruePredicates);
+    p2 = createWhileltInstruction(insertAt, constZero, x2);
+
+    permutedZ1 = createSelInstruction(insertAt, z4, z2, p2);
+
+    //find result predicate
+    p1 = createNotInstruction(insertAt, p2);
+    CallInst *x3 = createCntpInstruction(insertAt, p2, allTruePredicates);
+
+    Value *numOfActivesInResult = createAddInstruction(insertAt, createSubInstruction(insertAt, x1, x2), x3);
+
+    p2 = createWhileltInstruction(insertAt, constZero, numOfActivesInResult);
+    auto p6 = createNotInstruction(insertAt, p2);
 
     std::vector<Value *> firstAndOperands;
     firstAndOperands.push_back(p1);
     firstAndOperands.push_back(p2);       // !p6 = p2
-    Value *firstAnd = createANDInstruction(ArrayRef<Value *>(firstAndOperands));
+    Value *firstAnd = createANDInstruction(insertAt, ArrayRef<Value *>(firstAndOperands));
 
     std::vector<Value *> secondAndOperands;
     secondAndOperands.push_back(p1);
     secondAndOperands.push_back(p2);
     secondAndOperands.push_back(p6);
-    Value *secondAnd = createANDInstruction(ArrayRef<Value *>(secondAndOperands));
+    Value *secondAnd = createANDInstruction(insertAt, ArrayRef<Value *>(secondAndOperands));
 
     std::vector<Value *> orOperands;
     orOperands.push_back(firstAnd);
     orOperands.push_back(secondAnd);
 
-    //TODO: how to output ????????????????
-    p1 = createORInstruction(ArrayRef<Value *>(orOperands));
+    permutedPredicates = createORInstruction(insertAt, ArrayRef<Value *>(orOperands));
 
 
 }
 
-CallInst *SVE_Permute::createAllTruePredicates() {
+
+CallInst *SVE_Permute::createAllTruePredicates(Instruction *insertionPoint) {
 
     LLVMContext &context = L->getHeader()->getContext();
     IRBuilder<> builder(context);
@@ -93,17 +105,18 @@ CallInst *SVE_Permute::createAllTruePredicates() {
 }
 
 
-CallInst *SVE_Permute::createCompactInstruction(Value *toBeCompacted, Value *predicatedVector) {
+CallInst *
+SVE_Permute::createCompactInstruction(Instruction *insertionPoint, Value *toBeCompacted, Value *predicatedVector) {
 
     LLVMContext &context = L->getHeader()->getContext();
     IRBuilder<> builder(context);
     builder.SetInsertPoint(insertionPoint);
 
+
     auto intrinsic = Intrinsic::aarch64_sve_compact;
 
     VectorType *type = VectorType::get(Type::getInt32Ty(context), vectorizationFactor, true);
     Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, type);
-
 
 
     std::vector<Value *> arguments;
@@ -114,7 +127,7 @@ CallInst *SVE_Permute::createCompactInstruction(Value *toBeCompacted, Value *pre
     return builder.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
 }
 
-Value *SVE_Permute::createNotInstruction(Value *elements) {
+Value *SVE_Permute::createNotInstruction(Instruction *insertionPoint, Value *elements) {
     LLVMContext &context = L->getHeader()->getContext();
     IRBuilder<> builder(context);
     builder.SetInsertPoint(
@@ -123,7 +136,7 @@ Value *SVE_Permute::createNotInstruction(Value *elements) {
     return builder.CreateNot(elements);
 }
 
-CallInst *SVE_Permute::createCntpInstruction(Value *elements, Value *predicatedVector) {
+CallInst *SVE_Permute::createCntpInstruction(Instruction *insertionPoint, Value *elements, Value *predicatedVector) {
 
     LLVMContext &context = L->getHeader()->getContext();
     IRBuilder<> builder(context);
@@ -144,7 +157,7 @@ CallInst *SVE_Permute::createCntpInstruction(Value *elements, Value *predicatedV
 }
 
 
-CallInst *SVE_Permute::createWhileltInstruction(Value *firstOp, Value *secondOp) {
+CallInst *SVE_Permute::createWhileltInstruction(Instruction *insertionPoint, Value *firstOp, Value *secondOp) {
 
     LLVMContext &context = L->getHeader()->getContext();
     IRBuilder<> builder(context);
@@ -168,7 +181,8 @@ CallInst *SVE_Permute::createWhileltInstruction(Value *firstOp, Value *secondOp)
     return builder.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
 }
 
-CallInst *SVE_Permute::createSpliceInstruction(Value *firstOp, Value *secondOp, Value *predicatedVector) {
+CallInst *SVE_Permute::createSpliceInstruction(Instruction *insertionPoint, Value *firstOp, Value *secondOp,
+                                               Value *predicatedVector) {
 
 
     LLVMContext &context = L->getHeader()->getContext();
@@ -191,7 +205,8 @@ CallInst *SVE_Permute::createSpliceInstruction(Value *firstOp, Value *secondOp, 
 
 }
 
-CallInst *SVE_Permute::createSelInstruction(Value *firstOp, Value *secondOp, Value *predicatedVector) {
+CallInst *SVE_Permute::createSelInstruction(Instruction *insertionPoint, Value *firstOp, Value *secondOp,
+                                            Value *predicatedVector) {
     LLVMContext &context = L->getHeader()->getContext();
     IRBuilder<> builder(context);
     builder.SetInsertPoint(insertionPoint);
@@ -212,7 +227,7 @@ CallInst *SVE_Permute::createSelInstruction(Value *firstOp, Value *secondOp, Val
 
 }
 
-Value *SVE_Permute::createORInstruction(ArrayRef<Value *> elements) {
+Value *SVE_Permute::createORInstruction(Instruction *insertionPoint, ArrayRef<Value *> elements) {
     LLVMContext &context = L->getHeader()->getContext();
     IRBuilder<> builder(context);
     builder.SetInsertPoint(insertionPoint);// append to the end of block, before terminator
@@ -220,7 +235,7 @@ Value *SVE_Permute::createORInstruction(ArrayRef<Value *> elements) {
     return builder.CreateOr(elements);
 }
 
-Value *SVE_Permute::createANDInstruction(ArrayRef<Value *> elements) {
+Value *SVE_Permute::createANDInstruction(Instruction *insertionPoint, ArrayRef<Value *> elements) {
     LLVMContext &context = L->getHeader()->getContext();
     IRBuilder<> builder(context);
     builder.SetInsertPoint(insertionPoint);// append to the end of block, before terminator
@@ -228,7 +243,7 @@ Value *SVE_Permute::createANDInstruction(ArrayRef<Value *> elements) {
     return builder.CreateAnd(elements);
 }
 
-CallInst *SVE_Permute::createIndexInstruction(Value *firstOp, Value *secondOp) {
+CallInst *SVE_Permute::createIndexInstruction(Instruction *insertionPoint, Value *firstOp, Value *secondOp) {
     LLVMContext &context = L->getHeader()->getContext();
     IRBuilder<> builder(context);
 
@@ -253,32 +268,35 @@ CallInst *SVE_Permute::createIndexInstruction(Value *firstOp, Value *secondOp) {
 }
 
 
-BasicBlock *SVE_Permute::createBlockForPermutation() {
+BasicBlock *SVE_Permute::createBlockForPermutation(Function *F) {
     BasicBlock *header = L->getHeader();
     BasicBlock *blockInsertionPoint = header->getNextNode();
     LLVMContext &context = L->getHeader()->getContext();
-    BasicBlock *permuteBlock = BasicBlock::Create(context, "permute", header->getParent(), blockInsertionPoint);
+
+    BasicBlock *permuteBlock = BasicBlock::Create(context, "permute", F);
     permuteBlock->setName("loop.permute");
+
+    llvm::ReturnInst::Create(context, permuteBlock);
 
     // The new latch which jumps conditionally to targeted block should now branch to permute block instead of targeted block
     BasicBlock *latch = targetedBlock->getSinglePredecessor();
     auto *brInstr = dyn_cast<BranchInst>(latch->getTerminator());
     for (int i = 0; i < brInstr->getNumOperands(); ++i) {
         if (brInstr->getOperand(i) == targetedBlock) {
-            brInstr->setOperand(i, permuteBlock);
+//            brInstr->setOperand(i, permuteBlock);
         }
     }
 
     //create terminator
-    llvm::BranchInst::Create(targetedBlock, permuteBlock);
+//    llvm::BranchInst::Create(targetedBlock, permuteBlock);
 
     //register to the loop
-    L->addBasicBlockToLoop(permuteBlock, *LI);
+//    L->addBasicBlockToLoop(permuteBlock, *LI);
 
     return permuteBlock;
 }
 
-Value *SVE_Permute::createAddInstruction(Value *firstOp, Value *secondOp) {
+Value *SVE_Permute::createAddInstruction(Instruction *insertionPoint, Value *firstOp, Value *secondOp) {
     LLVMContext &context = L->getHeader()->getContext();
     IRBuilder<> builder(context);
     builder.SetInsertPoint(insertionPoint);
@@ -289,7 +307,7 @@ Value *SVE_Permute::createAddInstruction(Value *firstOp, Value *secondOp) {
 
 }
 
-Value *SVE_Permute::createSubInstruction(Value *firstOp, Value *secondOp) {
+Value *SVE_Permute::createSubInstruction(Instruction *insertionPoint, Value *firstOp, Value *secondOp) {
     LLVMContext &context = L->getHeader()->getContext();
     IRBuilder<> builder(context);
     builder.SetInsertPoint(insertionPoint);
@@ -299,16 +317,70 @@ Value *SVE_Permute::createSubInstruction(Value *firstOp, Value *secondOp) {
 }
 
 
-SVE_Permute::SVE_Permute(Loop *l, int factor, BasicBlock *block, LoopInfo *loopInfo) : L(l),
-                                                                                       vectorizationFactor(factor),
-                                                                                       targetedBlock(block),
-                                                                                       LI(loopInfo) {
+SVE_Permute::SVE_Permute(Loop *l, int factor, BasicBlock *block, LoopInfo *loopInfo, BasicBlock *latch) : L(l),
+                                                                                                          vectorizationFactor(
+                                                                                                                  factor),
+                                                                                                          targetedBlock(
+                                                                                                                  block),
+                                                                                                          LI(loopInfo),
+                                                                                                          newLatch(
+                                                                                                                  latch) {
     L = l;
     vectorizationFactor = factor;
     module = L->getBlocks().front()->getParent()->getParent();
     targetedBlock = block;
     LI = loopInfo;
+    newLatch = latch;
 }
+
+void SVE_Permute::refineLoopTripCountAndInitialValue() {
+    auto *brInstr = dyn_cast<BranchInst>(newLatch->getTerminator());
+    auto *condition = dyn_cast<Instruction>(brInstr->getCondition());
+
+
+    // set new trip count to  n - (VLength - 1)
+    LLVMContext &context = L->getHeader()->getContext();
+    IRBuilder<> builder(context);
+    builder.SetInsertPoint(condition);
+
+    Value *prevTripCount;
+    int index;
+    // find trip count
+    for (int i = 0; i < condition->getNumOperands(); ++i) {
+        auto *instr = dyn_cast<Instruction>(condition->getOperand(i));
+        if (instr->getParent() != newLatch) {
+            index = i;
+            prevTripCount = dyn_cast<Value>(instr);
+        }
+    }
+
+    auto *constValue = llvm::ConstantInt::get(prevTripCount->getType(), vectorizationFactor - 1);
+    Value *newTripCount = createSubInstruction(condition, prevTripCount, constValue);
+    condition->setOperand(index, newTripCount);
+
+    // find phi node of induction variable
+    PHINode *phiNode = nullptr;
+
+    // TODO: Handle the case where there are other phinNodes
+    for (auto &instr: L->getHeader()->getInstList()) {
+        if (isa<PHINode>(instr)) {
+            phiNode = dyn_cast<PHINode>(&instr);
+            break;
+        }
+    }
+
+    // TODO: what if loop does not start from zero?
+    for (int i = 0; i < phiNode->getNumOperands(); ++i) {
+        Value *operand = phiNode->getOperand(i);
+        if (isa<ConstantInt>(operand)) {
+            auto *newValue = llvm::ConstantInt::get(prevTripCount->getType(), 2 * vectorizationFactor);
+            phiNode->setOperand(i, newValue);
+        }
+    }
+
+}
+
+
 
 
 

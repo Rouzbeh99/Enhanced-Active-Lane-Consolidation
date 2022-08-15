@@ -21,17 +21,23 @@
 using namespace llvm;
 
 class SVE_Permute {
-public:
+
+private:
 
     Loop *L;
     Module *module;
     int vectorizationFactor;
-    Instruction *insertionPoint;
     BasicBlock *targetedBlock;
     LoopInfo *LI;
+    BasicBlock* newLatch;
+
+    Value * permutedZ0;
+    Value * permutedZ1;
+    Value * permutedPredicates;
 
 
-    SVE_Permute(Loop *l, int vectorizationFactor, BasicBlock *targetedBlock, LoopInfo *LI);
+public:
+    SVE_Permute(Loop *l, int vectorizationFactor, BasicBlock *targetedBlock, LoopInfo *LI, BasicBlock* newLatch);
 
 
 public:
@@ -39,52 +45,58 @@ public:
   void doPermutation(Value *z0, Value *z1, Value *p0, Value *p1);
 
 private:
-
-    CallInst *createAllTruePredicates();
-
-private:
-
-    CallInst *createCompactInstruction(Value *toBeCompacted, Value *predicatedVector);
+    void insertPermutationLogic(Instruction* insertionPoint, Value *z0, Value *z1, Value *p0, Value *p1);
 
 private:
 
-    Value *createNotInstruction(Value *elements);
+    CallInst *createAllTruePredicates(Instruction* insertionPoint);
 
 private:
 
-    Value *createANDInstruction(ArrayRef<Value *> elements);
+    CallInst *createCompactInstruction(Instruction* insertionPoint, Value *toBeCompacted, Value *predicatedVector);
 
 private:
 
-    Value *createORInstruction(ArrayRef<Value *> elements);
+    Value *createNotInstruction(Instruction* insertionPoint, Value *elements);
 
 private:
 
-    CallInst *createCntpInstruction(Value *elements, Value *predicatedVector);
+    Value *createANDInstruction(Instruction* insertionPoint, ArrayRef<Value *> elements);
 
 private:
 
-    CallInst *createWhileltInstruction(Value *firstOp, Value *secondOp);
+    Value *createORInstruction(Instruction* insertionPoint, ArrayRef<Value *> elements);
 
 private:
 
-    CallInst *createSpliceInstruction(Value *firstOp, Value *secondOp, Value *predicatedVector);
+    CallInst *createCntpInstruction(Instruction* insertionPoint, Value *elements, Value *predicatedVector);
 
 private:
-    CallInst *createSelInstruction(Value *firstOp, Value *secondOp, Value *predicatedVector);
+
+    CallInst *createWhileltInstruction(Instruction* insertionPoint, Value *firstOp, Value *secondOp);
+
+private:
+
+    CallInst *createSpliceInstruction(Instruction* insertionPoint, Value *firstOp, Value *secondOp, Value *predicatedVector);
+
+private:
+    CallInst *createSelInstruction(Instruction* insertionPoint, Value *firstOp, Value *secondOp, Value *predicatedVector);
 
 public:
-    CallInst *createIndexInstruction(Value *firstOp, Value *secondOp);
+    CallInst *createIndexInstruction(Instruction* insertionPoint, Value *firstOp, Value *secondOp);
 
 private:
-    Value *createAddInstruction(Value *firstOp, Value *secondOp);
+    Value *createAddInstruction(Instruction* insertionPoint, Value *firstOp, Value *secondOp);
 
 private:
-    Value *createSubInstruction(Value *firstOp, Value *secondOp);
+    Value *createSubInstruction(Instruction* insertionPoint, Value *firstOp, Value *secondOp);
 
 private:
 
-    BasicBlock *createBlockForPermutation();
+    BasicBlock *createBlockForPermutation(Function *F);
+
+private:
+   void refineLoopTripCountAndInitialValue();
 
 };
 

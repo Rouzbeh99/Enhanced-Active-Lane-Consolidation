@@ -29,50 +29,21 @@ for.cond.cleanup:                                 ; preds = %for.cond.cleanup.lo
   ret void, !dbg !32
 
 for.body:                                         ; preds = %if.then, %for.body.preheader
-  %0 = phi i64 [ %indvars.iv.next.latchCopy.1.2.3, %if.then ], [ 0, %for.body.preheader ]
+  %0 = phi i64 [ %indvars.iv.next.latchCopy.1.2.3, %if.then ], [ 8, %for.body.preheader ]
   call void @llvm.dbg.value(metadata i64 0, metadata !25, metadata !DIExpression()), !dbg !28
   %rem15 = and i64 %0, 1, !dbg !33
   %cmp1.not = icmp eq i64 %rem15, 0, !dbg !33
   %1 = call <vscale x 4 x i32> @llvm.aarch64.sve.index.nxv4i32(i32 0, i32 1)
   br label %for.inc
 
-loop.permute:                                     ; preds = %for.inc.latchCopy.1.2.3
-  %2 = call <vscale x 4 x i1> @llvm.aarch64.sve.ptrue.nxv4i1(i32 4)
-  %3 = call <vscale x 4 x i32> @llvm.aarch64.sve.compact.nxv4i32(<vscale x 4 x i1> %34, <vscale x 4 x i32> %1)
-  %4 = call <vscale x 4 x i32> @llvm.aarch64.sve.compact.nxv4i32(<vscale x 4 x i1> %34, <vscale x 4 x i32> %1)
-  %5 = xor <vscale x 4 x i1> %34, shufflevector (<vscale x 4 x i1> insertelement (<vscale x 4 x i1> poison, i1 true, i32 0), <vscale x 4 x i1> poison, <vscale x 4 x i32> zeroinitializer)
-  %6 = xor <vscale x 4 x i1> %34, shufflevector (<vscale x 4 x i1> insertelement (<vscale x 4 x i1> poison, i1 true, i32 0), <vscale x 4 x i1> poison, <vscale x 4 x i32> zeroinitializer)
-  %7 = call <vscale x 4 x i32> @llvm.aarch64.sve.compact.nxv4i32(<vscale x 4 x i1> %5, <vscale x 4 x i32> %1)
-  %8 = call <vscale x 4 x i32> @llvm.aarch64.sve.compact.nxv4i32(<vscale x 4 x i1> %6, <vscale x 4 x i32> %1)
-  %9 = call i64 @llvm.aarch64.sve.cntp.nxv4i1(<vscale x 4 x i1> %2, <vscale x 4 x i1> %34)
-  %10 = call <vscale x 4 x i1> @llvm.aarch64.sve.whilelt.nxv4i1.i64(i64 0, i64 %9)
-  %11 = call <vscale x 4 x i32> @llvm.aarch64.sve.splice.nxv4i32(<vscale x 4 x i1> %10, <vscale x 4 x i32> %3, <vscale x 4 x i32> %4)
-  %12 = call i64 @llvm.aarch64.sve.cntp.nxv4i1(<vscale x 4 x i1> %2, <vscale x 4 x i1> %34)
-  %13 = call <vscale x 4 x i1> @llvm.aarch64.sve.whilelt.nxv4i1.i64(i64 0, i64 %12)
-  %14 = call <vscale x 4 x i32> @llvm.aarch64.sve.splice.nxv4i32(<vscale x 4 x i1> %13, <vscale x 4 x i32> %4, <vscale x 4 x i32> %8)
-  %15 = call i64 @llvm.aarch64.sve.cntp.nxv4i1(<vscale x 4 x i1> %2, <vscale x 4 x i1> %5)
-  %16 = call <vscale x 4 x i1> @llvm.aarch64.sve.whilelt.nxv4i1.i64(i64 0, i64 %15)
-  %17 = call <vscale x 4 x i32> @llvm.aarch64.sve.sel.nxv4i32(<vscale x 4 x i1> %16, <vscale x 4 x i32> %7, <vscale x 4 x i32> %14)
-  %18 = xor <vscale x 4 x i1> %16, shufflevector (<vscale x 4 x i1> insertelement (<vscale x 4 x i1> poison, i1 true, i32 0), <vscale x 4 x i1> poison, <vscale x 4 x i32> zeroinitializer)
-  %19 = call i64 @llvm.aarch64.sve.cntp.nxv4i1(<vscale x 4 x i1> %2, <vscale x 4 x i1> %16)
-  %20 = sub i64 %12, %15
-  %21 = add i64 %20, %19
-  %22 = call <vscale x 4 x i1> @llvm.aarch64.sve.whilelt.nxv4i1.i64(i64 0, i64 %21)
-  %23 = xor <vscale x 4 x i1> %22, shufflevector (<vscale x 4 x i1> insertelement (<vscale x 4 x i1> poison, i1 true, i32 0), <vscale x 4 x i1> poison, <vscale x 4 x i32> zeroinitializer)
-  %24 = and <vscale x 4 x i1> %18, %22
-  %25 = and <vscale x 4 x i1> %18, %22
-  %26 = and <vscale x 4 x i1> %25, %23
-  %27 = or <vscale x 4 x i1> %24, %26
-  br label %if.then
-
-if.then:                                          ; preds = %loop.permute
+if.then:                                          ; preds = %for.inc.latchCopy.1.2.3
   %arrayidx = getelementptr inbounds i32, ptr %a, i64 %0, !dbg !36
   %arrayidx3 = getelementptr inbounds i32, ptr %b, i64 %0, !dbg !38
   %arrayidx5 = getelementptr inbounds i32, ptr %c, i64 %0, !dbg !39
-  %28 = call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.nxv4i32(<vscale x 4 x i1> %34, ptr %arrayidx)
-  %29 = call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.nxv4i32(<vscale x 4 x i1> %34, ptr %arrayidx3)
-  %30 = call <vscale x 4 x i32> @llvm.aarch64.sve.mul.nxv4i32(<vscale x 4 x i1> %34, <vscale x 4 x i32> %29, <vscale x 4 x i32> %28)
-  call void @llvm.aarch64.sve.st1.nxv4i32(<vscale x 4 x i32> %30, <vscale x 4 x i1> %34, ptr %arrayidx5)
+  %2 = call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.nxv4i32(<vscale x 4 x i1> %9, ptr %arrayidx)
+  %3 = call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.nxv4i32(<vscale x 4 x i1> %9, ptr %arrayidx3)
+  %4 = call <vscale x 4 x i32> @llvm.aarch64.sve.mul.nxv4i32(<vscale x 4 x i1> %9, <vscale x 4 x i32> %3, <vscale x 4 x i32> %2)
+  call void @llvm.aarch64.sve.st1.nxv4i32(<vscale x 4 x i32> %4, <vscale x 4 x i1> %9, ptr %arrayidx5)
   br label %for.body
 
 for.inc:                                          ; preds = %for.body
@@ -111,12 +82,13 @@ for.body.headerCopy.1.2.3:                        ; preds = %for.inc.latchCopy.1
 for.inc.latchCopy.1.2.3:                          ; preds = %for.body.headerCopy.1.2.3
   %indvars.iv.next.latchCopy.1.2.3 = add nuw nsw i64 %indvars.iv.next.latchCopy.1.2, 1, !dbg !40
   call void @llvm.dbg.value(metadata i64 %indvars.iv.next.latchCopy.1.2.3, metadata !25, metadata !DIExpression()), !dbg !28
-  %exitcond.not.latchCopy.1.2.3 = icmp eq i64 %indvars.iv.next.latchCopy.1.2.3, %wide.trip.count, !dbg !29
-  %31 = insertelement <vscale x 4 x i1> undef, i1 %cmp1.not, i1 false, !dbg !31
-  %32 = insertelement <vscale x 4 x i1> %31, i1 %cmp1.not.headerCopy.1, i1 true, !dbg !31
-  %33 = insertelement <vscale x 4 x i1> %32, i1 %cmp1.not.headerCopy.1.2, i1 false, !dbg !31
-  %34 = insertelement <vscale x 4 x i1> %33, i1 %cmp1.not.headerCopy.1.2.3, i1 true, !dbg !31
-  br i1 %exitcond.not.latchCopy.1.2.3, label %for.cond.cleanup.loopexit, label %loop.permute, !dbg !31, !llvm.loop !41
+  %5 = sub i64 %wide.trip.count, 3, !dbg !29
+  %exitcond.not.latchCopy.1.2.3 = icmp eq i64 %indvars.iv.next.latchCopy.1.2.3, %5, !dbg !29
+  %6 = insertelement <vscale x 4 x i1> undef, i1 %cmp1.not, i1 false, !dbg !31
+  %7 = insertelement <vscale x 4 x i1> %6, i1 %cmp1.not.headerCopy.1, i1 true, !dbg !31
+  %8 = insertelement <vscale x 4 x i1> %7, i1 %cmp1.not.headerCopy.1.2, i1 false, !dbg !31
+  %9 = insertelement <vscale x 4 x i1> %8, i1 %cmp1.not.headerCopy.1.2.3, i1 true, !dbg !31
+  br i1 %exitcond.not.latchCopy.1.2.3, label %for.cond.cleanup.loopexit, label %if.then, !dbg !31, !llvm.loop !41
 }
 
 ; Function Attrs: nocallback nofree nosync nounwind readnone speculatable willreturn
@@ -217,24 +189,6 @@ declare void @llvm.aarch64.sve.st1.nxv4i32(<vscale x 4 x i32>, <vscale x 4 x i1>
 
 ; Function Attrs: nocallback nofree nosync nounwind readnone willreturn
 declare <vscale x 4 x i32> @llvm.aarch64.sve.index.nxv4i32(i32, i32) #9
-
-; Function Attrs: nocallback nofree nosync nounwind readnone willreturn
-declare <vscale x 4 x i1> @llvm.aarch64.sve.ptrue.nxv4i1(i32 immarg) #9
-
-; Function Attrs: nocallback nofree nosync nounwind readnone willreturn
-declare <vscale x 4 x i32> @llvm.aarch64.sve.compact.nxv4i32(<vscale x 4 x i1>, <vscale x 4 x i32>) #9
-
-; Function Attrs: nocallback nofree nosync nounwind readnone willreturn
-declare i64 @llvm.aarch64.sve.cntp.nxv4i1(<vscale x 4 x i1>, <vscale x 4 x i1>) #9
-
-; Function Attrs: nocallback nofree nosync nounwind readnone willreturn
-declare <vscale x 4 x i1> @llvm.aarch64.sve.whilelt.nxv4i1.i64(i64, i64) #9
-
-; Function Attrs: nocallback nofree nosync nounwind readnone willreturn
-declare <vscale x 4 x i32> @llvm.aarch64.sve.splice.nxv4i32(<vscale x 4 x i1>, <vscale x 4 x i32>, <vscale x 4 x i32>) #9
-
-; Function Attrs: nocallback nofree nosync nounwind readnone willreturn
-declare <vscale x 4 x i32> @llvm.aarch64.sve.sel.nxv4i32(<vscale x 4 x i1>, <vscale x 4 x i32>, <vscale x 4 x i32>) #9
 
 attributes #0 = { argmemonly nofree norecurse nosync nounwind uwtable "frame-pointer"="non-leaf" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="generic" "target-features"="+neon,+v8a" }
 attributes #1 = { nocallback nofree nosync nounwind readnone speculatable willreturn }

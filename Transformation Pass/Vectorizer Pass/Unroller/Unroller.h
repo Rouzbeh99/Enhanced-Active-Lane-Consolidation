@@ -21,7 +21,10 @@ class Unroller {
 private:
     Loop *L;
     LoopInfo *LI;
+    BasicBlock *newLatch;
     std::vector<Value *> predicates;
+public:
+    BasicBlock *getNewLatch() const;
 
 public:
     const std::vector<Value *> &getPredicates() const;
@@ -58,7 +61,6 @@ private:
     void
     mapNewPhiNodeInstructions(BasicBlock *BB, const std::map<Instruction *, int> &inductionVariableUsers,
                               PHINode *phiNode);
-
 
 };
 

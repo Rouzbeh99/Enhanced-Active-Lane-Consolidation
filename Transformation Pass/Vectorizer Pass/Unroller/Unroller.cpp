@@ -128,6 +128,8 @@ std::vector<BasicBlock *> *Unroller::replicateBlocks(BasicBlock *header, BasicBl
 
     }
 
+    newLatch = newBlocks->back();
+
     return newBlocks;
 }
 
@@ -344,6 +346,11 @@ Unroller::Unroller(Loop *l, LoopInfo *li) : L(l), LI(li) {
 const std::vector<Value *> &Unroller::getPredicates() const {
     return predicates;
 }
+
+BasicBlock *Unroller::getNewLatch() const {
+    return newLatch;
+}
+
 
 
 

@@ -48,19 +48,22 @@ namespace {
 
         auto *unroller = new Unroller(L, &LI);
         unroller->doUnrolling(4);
-        //TODO: getting latch from loop returns wrong block
+
+
 
         auto *sve_vectorizer = new SVE_Vectorizer(L, 4, unroller->getPredicates());
         sve_vectorizer->doVectorization();
 
-        auto *sve_permute = new SVE_Permute(L, 4, sve_vectorizer->getTargetedBB(), &LI);
+        auto *sve_permute = new SVE_Permute(L, 4, sve_vectorizer->getTargetedBB(), &LI, unroller->getNewLatch());
 
         ConstantInt *constZero = llvm::ConstantInt::get(llvm::Type::getInt32Ty(L->getHeader()->getContext()), 0);
         ConstantInt *constOne = llvm::ConstantInt::get(llvm::Type::getInt32Ty(L->getHeader()->getContext()), 1);
-        CallInst *elements = sve_permute->createIndexInstruction(dyn_cast<Value>(constZero), dyn_cast<Value>(constOne));
+        CallInst *elements = sve_permute->createIndexInstruction(unroller->getNewLatch()->getTerminator(),
+                                                                 dyn_cast<Value>(constZero), dyn_cast<Value>(constOne));
 
         sve_permute->doPermutation(elements, elements, sve_vectorizer->getPredicateVector(),
                                    sve_vectorizer->getPredicateVector());
+
 
         printLoop(L);
 
