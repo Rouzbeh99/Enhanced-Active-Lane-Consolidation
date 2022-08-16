@@ -52,7 +52,7 @@ void ACLEVersion(int *a, int *b, int *c, int n) {
     svint32_t idxR = svundef_s32();
     svbool_t cond_r = svptrue_b32();
 
-    for (i = 2 * VLength; i < n + 1; i += VLength) {
+    for (i = 2 * VLength; i < n - VLength + 1; i += VLength) {
 
         if (svcntp_b32(allActive, uniformVectorPredicate) + svcntp_b32(allActive, remainingVectorPredicate) >=
             4) {  // active elements are more than inactive ones
@@ -73,10 +73,8 @@ void ACLEVersion(int *a, int *b, int *c, int n) {
 
 
             // fill uniformVector with new instances
-            if (i < n - VLength + 1) {
-                uniformVector = svindex_s32(i, 1);
-                uniformVectorPredicate = svdupq_b32(a[i] > 10, a[i + 1] > 10, a[i + 2] > 10, a[i + 3] > 10);
-            }
+            uniformVector = svindex_s32(i, 1);
+            uniformVectorPredicate = svdupq_b32(a[i] > 10, a[i + 1] > 10, a[i + 2] > 10, a[i + 3] > 10);
 
         } else { // inactive lanes are more than active ones
 
@@ -90,13 +88,20 @@ void ACLEVersion(int *a, int *b, int *c, int n) {
             uniformVector = idxR;
             uniformVectorPredicate = svnot_z(allActive, cond_r);
 
-            if (i < n - VLength + 1) {
-                remainingVector = svindex_s32(i, 1);
-                remainingVectorPredicate = svdupq_b32(a[i] > 10, a[i + 1] > 10, a[i + 2] > 10, a[i + 3] > 10);
-            }
+            remainingVector = svindex_s32(i, 1);
+            remainingVectorPredicate = svdupq_b32(a[i] > 10, a[i + 1] > 10, a[i + 2] > 10, a[i + 3] > 10);
         }
 
-        // executing blocks other than then block
+        // linearized path
+        p0 = svdupq_b32(a[i - 4] >= -10, a[i - 3] >= -10, a[i - 2] >= -10, a[i - 1] >= -10);
+        z0 = svindex_s32(i - 4, 1);
+
+        firstOp = svld1_gather_s32index_s32(allActive, a, z0);
+        secondOp = svld1_gather_s32index_s32(allActive, b, z0);
+        svint32_t addResult = svadd_s32_z(p0, firstOp, secondOp);
+        svst1_scatter_s32index_s32(p0, c, z0, addResult);
+
+
         p0 = svdupq_b32(a[i - 4] < -10, a[i - 3] < -10, a[i - 2] < -10, a[i - 1] < -10);
         z0 = svindex_s32(i - 4, 1);
 

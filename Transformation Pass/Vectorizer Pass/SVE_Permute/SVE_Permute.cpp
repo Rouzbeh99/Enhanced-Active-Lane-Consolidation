@@ -5,13 +5,29 @@
 #include "SVE_Permute.h"
 
 
-void SVE_Permute::doPermutation(Value *z0, Value *z1, Value *p0, Value *p1) {
+void SVE_Permute::doPermutation() {
+
 
     auto &context = L->getHeader()->getContext();
 
     VectorType *type = VectorType::get(Type::getInt32Ty(context), vectorizationFactor, true);
 
     refineLoopTripCountAndInitialValue();
+
+    //create initial vectors
+    //TODO: what is steps are not 1 ?
+    ConstantInt *constZero = llvm::ConstantInt::get(llvm::Type::getInt32Ty(L->getHeader()->getContext()), 0);
+    ConstantInt *constOne = llvm::ConstantInt::get(llvm::Type::getInt32Ty(L->getHeader()->getContext()), 1);
+    ConstantInt *constVecFactor = llvm::ConstantInt::get(llvm::Type::getInt32Ty(L->getHeader()->getContext()),
+                                                         vectorizationFactor);
+
+    Instruction *insertAtPreHeader = L->getLoopPreheader()->getTerminator();
+    auto *uniformVector = dyn_cast<Value>(
+            createIndexInstruction(insertAtPreHeader, dyn_cast<Value>(constZero), dyn_cast<Value>(constOne)));
+    auto *remainingVector = dyn_cast<Value>(
+            createIndexInstruction(insertAtPreHeader, dyn_cast<Value>(constVecFactor), dyn_cast<Value>(constOne)));
+
+    /////////////////////////////////////////how to form initial conditions?
 
 //    Instruction *insertionPoint = newLatch->getTerminator();
 //    insertPermutationLogic(insertionPoint, z0, z1, p0, p1);
@@ -317,22 +333,6 @@ Value *SVE_Permute::createSubInstruction(Instruction *insertionPoint, Value *fir
 }
 
 
-SVE_Permute::SVE_Permute(Loop *l, int factor, BasicBlock *block, LoopInfo *loopInfo, BasicBlock *latch) : L(l),
-                                                                                                          vectorizationFactor(
-                                                                                                                  factor),
-                                                                                                          targetedBlock(
-                                                                                                                  block),
-                                                                                                          LI(loopInfo),
-                                                                                                          newLatch(
-                                                                                                                  latch) {
-    L = l;
-    vectorizationFactor = factor;
-    module = L->getBlocks().front()->getParent()->getParent();
-    targetedBlock = block;
-    LI = loopInfo;
-    newLatch = latch;
-}
-
 void SVE_Permute::refineLoopTripCountAndInitialValue() {
     auto *brInstr = dyn_cast<BranchInst>(newLatch->getTerminator());
     auto *condition = dyn_cast<Instruction>(brInstr->getCondition());
@@ -358,30 +358,52 @@ void SVE_Permute::refineLoopTripCountAndInitialValue() {
     Value *newTripCount = createSubInstruction(condition, prevTripCount, constValue);
     condition->setOperand(index, newTripCount);
 
-    // find phi node of induction variable
-    PHINode *phiNode = nullptr;
-
-    // TODO: Handle the case where there are other phinNodes
-    for (auto &instr: L->getHeader()->getInstList()) {
-        if (isa<PHINode>(instr)) {
-            phiNode = dyn_cast<PHINode>(&instr);
-            break;
-        }
-    }
-
-    // TODO: what if loop does not start from zero?
-    for (int i = 0; i < phiNode->getNumOperands(); ++i) {
-        Value *operand = phiNode->getOperand(i);
-        if (isa<ConstantInt>(operand)) {
-            auto *newValue = llvm::ConstantInt::get(prevTripCount->getType(), 2 * vectorizationFactor);
-            phiNode->setOperand(i, newValue);
-        }
-    }
+    // change initial value
+//    PHINode *phiNode = nullptr;
+//
+//    // TODO: Handle the case where there are other phinNodes
+//    for (auto &instr: L->getHeader()->getInstList()) {
+//        if (isa<PHINode>(instr)) {
+//            phiNode = dyn_cast<PHINode>(&instr);
+//            break;
+//        }
+//    }
+//
+//    // TODO: what if loop does not start from zero?
+//    for (int i = 0; i < phiNode->getNumOperands(); ++i) {
+//        Value *operand = phiNode->getOperand(i);
+//        if (isa<ConstantInt>(operand)) {
+//            auto *newValue = llvm::ConstantInt::get(prevTripCount->getType(), 2 * vectorizationFactor);
+//            phiNode->setOperand(i, newValue);
+//        }
+//    }
 
 }
 
 
+void SVE_Permute::formInitialPredicateVectors(int initialValue) {
 
+}
+
+
+SVE_Permute::SVE_Permute(Loop *l, int factor, BasicBlock *block, LoopInfo *loopInfo, BasicBlock *latch, Value *preds)
+        : L(l),
+          vectorizationFactor(
+                  factor),
+          targetedBlock(
+                  block),
+          LI(loopInfo),
+          newLatch(
+                  latch),
+          predicateVector(preds) {
+    L = l;
+    vectorizationFactor = factor;
+    module = L->getBlocks().front()->getParent()->getParent();
+    targetedBlock = block;
+    LI = loopInfo;
+    newLatch = latch;
+    predicateVector = preds;
+}
 
 
 

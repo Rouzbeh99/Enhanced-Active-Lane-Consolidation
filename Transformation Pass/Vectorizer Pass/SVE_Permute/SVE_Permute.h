@@ -30,6 +30,7 @@ private:
     BasicBlock *targetedBlock;
     LoopInfo *LI;
     BasicBlock* newLatch;
+    Value *predicateVector;
 
     Value * permutedZ0;
     Value * permutedZ1;
@@ -37,12 +38,15 @@ private:
 
 
 public:
-    SVE_Permute(Loop *l, int vectorizationFactor, BasicBlock *targetedBlock, LoopInfo *LI, BasicBlock* newLatch);
+    SVE_Permute(Loop *l, int vectorizationFactor, BasicBlock *targetedBlock, LoopInfo *LI, BasicBlock* newLatch, Value* predicateVector);
 
 
 public:
 
-  void doPermutation(Value *z0, Value *z1, Value *p0, Value *p1);
+  void doPermutation();
+
+private:
+    void formInitialPredicateVectors(int initialValue);
 
 private:
     void insertPermutationLogic(Instruction* insertionPoint, Value *z0, Value *z1, Value *p0, Value *p1);
