@@ -28,26 +28,52 @@ for.cond.cleanup.loopexit:                        ; preds = %for.inc.latchCopy.1
 for.cond.cleanup:                                 ; preds = %for.cond.cleanup.loopexit, %entry
   ret void, !dbg !32
 
-for.body:                                         ; preds = %if.then, %for.body.preheader
-  %0 = phi i64 [ %indvars.iv.next.latchCopy.1.2.3, %if.then ], [ 8, %for.body.preheader ]
+headerPredecessor:                                ; preds = %if.then, %preds.2, %preds.1
+  br label %for.body
+
+for.body:                                         ; preds = %headerPredecessor, %for.body.preheader
+  %0 = phi i64 [ 0, %for.body.preheader ], [ %indvars.iv.next.latchCopy.1.2.3, %headerPredecessor ]
   call void @llvm.dbg.value(metadata i64 0, metadata !25, metadata !DIExpression()), !dbg !28
   %rem15 = and i64 %0, 1, !dbg !33
   %cmp1.not = icmp eq i64 %rem15, 0, !dbg !33
   %1 = call <vscale x 4 x i32> @llvm.aarch64.sve.index.nxv4i32(i32 0, i32 1)
+  %2 = call <vscale x 4 x i32> @llvm.aarch64.sve.index.nxv4i32(i32 4, i32 1)
   br label %for.inc
 
-if.then:                                          ; preds = %for.inc.latchCopy.1.2.3
+decision.1:                                       ; preds = %for.inc.latchCopy.1.2.3
+  %3 = icmp eq i64 %0, 0
+  br i1 %3, label %preds.1, label %decision.2
+
+preds.1:                                          ; preds = %decision.1
+  %4 = insertelement <vscale x 4 x i1> undef, i1 %cmp1.not, i1 false
+  %5 = insertelement <vscale x 4 x i1> %4, i1 %cmp1.not.headerCopy.1, i1 true
+  %6 = insertelement <vscale x 4 x i1> %5, i1 %cmp1.not.headerCopy.1.2, i1 false
+  %7 = insertelement <vscale x 4 x i1> %6, i1 %cmp1.not.headerCopy.1.2.3, i1 true
+  br label %headerPredecessor
+
+decision.2:                                       ; preds = %decision.1
+  %8 = icmp eq i64 %0, 4
+  br i1 %8, label %preds.2, label %if.then
+
+preds.2:                                          ; preds = %decision.2
+  %9 = insertelement <vscale x 4 x i1> undef, i1 %cmp1.not, i1 false
+  %10 = insertelement <vscale x 4 x i1> %9, i1 %cmp1.not.headerCopy.1, i1 true
+  %11 = insertelement <vscale x 4 x i1> %10, i1 %cmp1.not.headerCopy.1.2, i1 false
+  %12 = insertelement <vscale x 4 x i1> %11, i1 %cmp1.not.headerCopy.1.2.3, i1 true
+  br label %headerPredecessor
+
+if.then:                                          ; preds = %decision.2
   %arrayidx = getelementptr inbounds i32, ptr %a, i64 %0, !dbg !36
-  %arrayidx3 = getelementptr inbounds i32, ptr %b, i64 %0, !dbg !38
-  %arrayidx5 = getelementptr inbounds i32, ptr %c, i64 %0, !dbg !39
-  %2 = call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.nxv4i32(<vscale x 4 x i1> %9, ptr %arrayidx)
-  %3 = call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.nxv4i32(<vscale x 4 x i1> %9, ptr %arrayidx3)
-  %4 = call <vscale x 4 x i32> @llvm.aarch64.sve.mul.nxv4i32(<vscale x 4 x i1> %9, <vscale x 4 x i32> %3, <vscale x 4 x i32> %2)
-  call void @llvm.aarch64.sve.st1.nxv4i32(<vscale x 4 x i32> %4, <vscale x 4 x i1> %9, ptr %arrayidx5)
-  br label %for.body
+  %13 = load i32, ptr %arrayidx, align 4, !dbg !36, !tbaa !38
+  %arrayidx3 = getelementptr inbounds i32, ptr %b, i64 %0, !dbg !42
+  %14 = load i32, ptr %arrayidx3, align 4, !dbg !42, !tbaa !38
+  %mul = mul nsw i32 %14, %13, !dbg !43
+  %arrayidx5 = getelementptr inbounds i32, ptr %c, i64 %0, !dbg !44
+  store i32 %mul, ptr %arrayidx5, align 4, !dbg !45, !tbaa !38
+  br label %headerPredecessor
 
 for.inc:                                          ; preds = %for.body
-  %indvars.iv.next = add nuw nsw i64 %0, 1, !dbg !40
+  %indvars.iv.next = add nuw nsw i64 %0, 1, !dbg !46
   call void @llvm.dbg.value(metadata i64 %indvars.iv.next, metadata !25, metadata !DIExpression()), !dbg !28
   br label %for.body.headerCopy.1
 
@@ -58,7 +84,7 @@ for.body.headerCopy.1:                            ; preds = %for.inc
   br label %for.inc.latchCopy.1
 
 for.inc.latchCopy.1:                              ; preds = %for.body.headerCopy.1
-  %indvars.iv.next.latchCopy.1 = add nuw nsw i64 %indvars.iv.next, 1, !dbg !40
+  %indvars.iv.next.latchCopy.1 = add nuw nsw i64 %indvars.iv.next, 1, !dbg !46
   call void @llvm.dbg.value(metadata i64 %indvars.iv.next.latchCopy.1, metadata !25, metadata !DIExpression()), !dbg !28
   br label %for.body.headerCopy.1.2
 
@@ -69,7 +95,7 @@ for.body.headerCopy.1.2:                          ; preds = %for.inc.latchCopy.1
   br label %for.inc.latchCopy.1.2
 
 for.inc.latchCopy.1.2:                            ; preds = %for.body.headerCopy.1.2
-  %indvars.iv.next.latchCopy.1.2 = add nuw nsw i64 %indvars.iv.next.latchCopy.1, 1, !dbg !40
+  %indvars.iv.next.latchCopy.1.2 = add nuw nsw i64 %indvars.iv.next.latchCopy.1, 1, !dbg !46
   call void @llvm.dbg.value(metadata i64 %indvars.iv.next.latchCopy.1.2, metadata !25, metadata !DIExpression()), !dbg !28
   br label %for.body.headerCopy.1.2.3
 
@@ -80,15 +106,11 @@ for.body.headerCopy.1.2.3:                        ; preds = %for.inc.latchCopy.1
   br label %for.inc.latchCopy.1.2.3
 
 for.inc.latchCopy.1.2.3:                          ; preds = %for.body.headerCopy.1.2.3
-  %indvars.iv.next.latchCopy.1.2.3 = add nuw nsw i64 %indvars.iv.next.latchCopy.1.2, 1, !dbg !40
+  %indvars.iv.next.latchCopy.1.2.3 = add nuw nsw i64 %indvars.iv.next.latchCopy.1.2, 1, !dbg !46
   call void @llvm.dbg.value(metadata i64 %indvars.iv.next.latchCopy.1.2.3, metadata !25, metadata !DIExpression()), !dbg !28
-  %5 = sub i64 %wide.trip.count, 3, !dbg !29
-  %exitcond.not.latchCopy.1.2.3 = icmp eq i64 %indvars.iv.next.latchCopy.1.2.3, %5, !dbg !29
-  %6 = insertelement <vscale x 4 x i1> undef, i1 %cmp1.not, i1 false, !dbg !31
-  %7 = insertelement <vscale x 4 x i1> %6, i1 %cmp1.not.headerCopy.1, i1 true, !dbg !31
-  %8 = insertelement <vscale x 4 x i1> %7, i1 %cmp1.not.headerCopy.1.2, i1 false, !dbg !31
-  %9 = insertelement <vscale x 4 x i1> %8, i1 %cmp1.not.headerCopy.1.2.3, i1 true, !dbg !31
-  br i1 %exitcond.not.latchCopy.1.2.3, label %for.cond.cleanup.loopexit, label %if.then, !dbg !31, !llvm.loop !41
+  %15 = sub i64 %wide.trip.count, 3, !dbg !29
+  %exitcond.not.latchCopy.1.2.3 = icmp eq i64 %indvars.iv.next.latchCopy.1.2.3, %15, !dbg !29
+  br i1 %exitcond.not.latchCopy.1.2.3, label %for.cond.cleanup.loopexit, label %decision.1, !dbg !31, !llvm.loop !47
 }
 
 ; Function Attrs: nocallback nofree nosync nounwind readnone speculatable willreturn
@@ -101,66 +123,66 @@ declare void @llvm.lifetime.start.p0(i64 immarg, ptr nocapture) #2
 declare void @llvm.lifetime.end.p0(i64 immarg, ptr nocapture) #2
 
 ; Function Attrs: nofree nounwind uwtable
-define dso_local i32 @main() local_unnamed_addr #3 !dbg !45 {
+define dso_local i32 @main() local_unnamed_addr #3 !dbg !51 {
 entry:
   %c = alloca [8 x i32], align 4
-  call void @llvm.dbg.value(metadata i32 8, metadata !49, metadata !DIExpression()), !dbg !58
-  call void @llvm.dbg.declare(metadata ptr @__const.main.a, metadata !50, metadata !DIExpression()), !dbg !59
-  call void @llvm.dbg.declare(metadata ptr @__const.main.b, metadata !54, metadata !DIExpression()), !dbg !60
-  call void @llvm.lifetime.start.p0(i64 32, ptr nonnull %c) #10, !dbg !61
-  call void @llvm.dbg.declare(metadata ptr %c, metadata !55, metadata !DIExpression()), !dbg !62
-  call void @llvm.memset.p0.i64(ptr noundef nonnull align 4 dereferenceable(32) %c, i8 0, i64 32, i1 false), !dbg !62
-  tail call void @llvm.experimental.noalias.scope.decl(metadata !63), !dbg !66
-  tail call void @llvm.experimental.noalias.scope.decl(metadata !67), !dbg !66
-  tail call void @llvm.experimental.noalias.scope.decl(metadata !69), !dbg !66
-  call void @llvm.dbg.value(metadata ptr @__const.main.a, metadata !21, metadata !DIExpression()), !dbg !71
-  call void @llvm.dbg.value(metadata ptr @__const.main.b, metadata !22, metadata !DIExpression()), !dbg !71
-  call void @llvm.dbg.value(metadata ptr %c, metadata !23, metadata !DIExpression()), !dbg !71
-  call void @llvm.dbg.value(metadata i32 8, metadata !24, metadata !DIExpression()), !dbg !71
-  call void @llvm.dbg.value(metadata i32 0, metadata !25, metadata !DIExpression()), !dbg !73
-  br label %for.body.i, !dbg !74
+  call void @llvm.dbg.value(metadata i32 8, metadata !55, metadata !DIExpression()), !dbg !64
+  call void @llvm.dbg.declare(metadata ptr @__const.main.a, metadata !56, metadata !DIExpression()), !dbg !65
+  call void @llvm.dbg.declare(metadata ptr @__const.main.b, metadata !60, metadata !DIExpression()), !dbg !66
+  call void @llvm.lifetime.start.p0(i64 32, ptr nonnull %c) #9, !dbg !67
+  call void @llvm.dbg.declare(metadata ptr %c, metadata !61, metadata !DIExpression()), !dbg !68
+  call void @llvm.memset.p0.i64(ptr noundef nonnull align 4 dereferenceable(32) %c, i8 0, i64 32, i1 false), !dbg !68
+  tail call void @llvm.experimental.noalias.scope.decl(metadata !69), !dbg !72
+  tail call void @llvm.experimental.noalias.scope.decl(metadata !73), !dbg !72
+  tail call void @llvm.experimental.noalias.scope.decl(metadata !75), !dbg !72
+  call void @llvm.dbg.value(metadata ptr @__const.main.a, metadata !21, metadata !DIExpression()), !dbg !77
+  call void @llvm.dbg.value(metadata ptr @__const.main.b, metadata !22, metadata !DIExpression()), !dbg !77
+  call void @llvm.dbg.value(metadata ptr %c, metadata !23, metadata !DIExpression()), !dbg !77
+  call void @llvm.dbg.value(metadata i32 8, metadata !24, metadata !DIExpression()), !dbg !77
+  call void @llvm.dbg.value(metadata i32 0, metadata !25, metadata !DIExpression()), !dbg !79
+  br label %for.body.i, !dbg !80
 
 for.body.i:                                       ; preds = %for.inc.i, %entry
   %indvars.iv.i = phi i64 [ 0, %entry ], [ %indvars.iv.next.i, %for.inc.i ]
-  call void @llvm.dbg.value(metadata i64 %indvars.iv.i, metadata !25, metadata !DIExpression()), !dbg !73
-  %rem15.i = and i64 %indvars.iv.i, 1, !dbg !75
-  %cmp1.not.i = icmp eq i64 %rem15.i, 0, !dbg !75
-  br i1 %cmp1.not.i, label %for.inc.i, label %if.then.i, !dbg !76
+  call void @llvm.dbg.value(metadata i64 %indvars.iv.i, metadata !25, metadata !DIExpression()), !dbg !79
+  %rem15.i = and i64 %indvars.iv.i, 1, !dbg !81
+  %cmp1.not.i = icmp eq i64 %rem15.i, 0, !dbg !81
+  br i1 %cmp1.not.i, label %for.inc.i, label %if.then.i, !dbg !82
 
 if.then.i:                                        ; preds = %for.body.i
-  %arrayidx.i = getelementptr inbounds i32, ptr @__const.main.a, i64 %indvars.iv.i, !dbg !77
-  %0 = load i32, ptr %arrayidx.i, align 4, !dbg !77, !tbaa !78, !alias.scope !63, !noalias !82
-  %arrayidx3.i = getelementptr inbounds i32, ptr @__const.main.b, i64 %indvars.iv.i, !dbg !83
-  %1 = load i32, ptr %arrayidx3.i, align 4, !dbg !83, !tbaa !78, !alias.scope !67, !noalias !84
-  %mul.i = mul nsw i32 %1, %0, !dbg !85
-  %arrayidx5.i = getelementptr inbounds i32, ptr %c, i64 %indvars.iv.i, !dbg !86
-  store i32 %mul.i, ptr %arrayidx5.i, align 4, !dbg !87, !tbaa !78, !alias.scope !69, !noalias !88
-  br label %for.inc.i, !dbg !89
+  %arrayidx.i = getelementptr inbounds i32, ptr @__const.main.a, i64 %indvars.iv.i, !dbg !83
+  %0 = load i32, ptr %arrayidx.i, align 4, !dbg !83, !tbaa !38, !alias.scope !69, !noalias !84
+  %arrayidx3.i = getelementptr inbounds i32, ptr @__const.main.b, i64 %indvars.iv.i, !dbg !85
+  %1 = load i32, ptr %arrayidx3.i, align 4, !dbg !85, !tbaa !38, !alias.scope !73, !noalias !86
+  %mul.i = mul nsw i32 %1, %0, !dbg !87
+  %arrayidx5.i = getelementptr inbounds i32, ptr %c, i64 %indvars.iv.i, !dbg !88
+  store i32 %mul.i, ptr %arrayidx5.i, align 4, !dbg !89, !tbaa !38, !alias.scope !75, !noalias !90
+  br label %for.inc.i, !dbg !91
 
 for.inc.i:                                        ; preds = %if.then.i, %for.body.i
-  %indvars.iv.next.i = add nuw nsw i64 %indvars.iv.i, 1, !dbg !90
-  call void @llvm.dbg.value(metadata i64 %indvars.iv.next.i, metadata !25, metadata !DIExpression()), !dbg !73
-  %exitcond.not.i = icmp eq i64 %indvars.iv.next.i, 8, !dbg !91
-  br i1 %exitcond.not.i, label %for.body.preheader, label %for.body.i, !dbg !74, !llvm.loop !92
+  %indvars.iv.next.i = add nuw nsw i64 %indvars.iv.i, 1, !dbg !92
+  call void @llvm.dbg.value(metadata i64 %indvars.iv.next.i, metadata !25, metadata !DIExpression()), !dbg !79
+  %exitcond.not.i = icmp eq i64 %indvars.iv.next.i, 8, !dbg !93
+  br i1 %exitcond.not.i, label %for.body.preheader, label %for.body.i, !dbg !80, !llvm.loop !94
 
 for.body.preheader:                               ; preds = %for.inc.i
-  br label %for.body, !dbg !94
+  br label %for.body, !dbg !96
 
 for.cond.cleanup:                                 ; preds = %for.body
-  %putchar = tail call i32 @putchar(i32 10), !dbg !95
-  call void @llvm.lifetime.end.p0(i64 32, ptr nonnull %c) #10, !dbg !96
-  ret i32 0, !dbg !97
+  %putchar = tail call i32 @putchar(i32 10), !dbg !97
+  call void @llvm.lifetime.end.p0(i64 32, ptr nonnull %c) #9, !dbg !98
+  ret i32 0, !dbg !99
 
 for.body:                                         ; preds = %for.body.preheader, %for.body
   %indvars.iv = phi i64 [ %indvars.iv.next, %for.body ], [ 0, %for.body.preheader ]
-  call void @llvm.dbg.value(metadata i64 %indvars.iv, metadata !56, metadata !DIExpression()), !dbg !98
-  %arrayidx = getelementptr inbounds [8 x i32], ptr %c, i64 0, i64 %indvars.iv, !dbg !99
-  %2 = load i32, ptr %arrayidx, align 4, !dbg !99, !tbaa !78
-  %call = tail call i32 (ptr, ...) @printf(ptr noundef nonnull @.str, i32 noundef %2), !dbg !102
-  %indvars.iv.next = add nuw nsw i64 %indvars.iv, 1, !dbg !103
-  call void @llvm.dbg.value(metadata i64 %indvars.iv.next, metadata !56, metadata !DIExpression()), !dbg !98
-  %exitcond.not = icmp eq i64 %indvars.iv.next, 8, !dbg !104
-  br i1 %exitcond.not, label %for.cond.cleanup, label %for.body, !dbg !94, !llvm.loop !105
+  call void @llvm.dbg.value(metadata i64 %indvars.iv, metadata !62, metadata !DIExpression()), !dbg !100
+  %arrayidx = getelementptr inbounds [8 x i32], ptr %c, i64 0, i64 %indvars.iv, !dbg !101
+  %2 = load i32, ptr %arrayidx, align 4, !dbg !101, !tbaa !38
+  %call = tail call i32 (ptr, ...) @printf(ptr noundef nonnull @.str, i32 noundef %2), !dbg !104
+  %indvars.iv.next = add nuw nsw i64 %indvars.iv, 1, !dbg !105
+  call void @llvm.dbg.value(metadata i64 %indvars.iv.next, metadata !62, metadata !DIExpression()), !dbg !100
+  %exitcond.not = icmp eq i64 %indvars.iv.next, 8, !dbg !106
+  br i1 %exitcond.not, label %for.cond.cleanup, label %for.body, !dbg !96, !llvm.loop !107
 }
 
 ; Function Attrs: argmemonly nofree nounwind willreturn writeonly
@@ -178,17 +200,8 @@ declare noundef i32 @putchar(i32 noundef) local_unnamed_addr #6
 ; Function Attrs: inaccessiblememonly nocallback nofree nosync nounwind willreturn
 declare void @llvm.experimental.noalias.scope.decl(metadata) #7
 
-; Function Attrs: argmemonly nocallback nofree nosync nounwind readonly willreturn
-declare <vscale x 4 x i32> @llvm.aarch64.sve.ld1.nxv4i32(<vscale x 4 x i1>, ptr) #8
-
 ; Function Attrs: nocallback nofree nosync nounwind readnone willreturn
-declare <vscale x 4 x i32> @llvm.aarch64.sve.mul.nxv4i32(<vscale x 4 x i1>, <vscale x 4 x i32>, <vscale x 4 x i32>) #9
-
-; Function Attrs: argmemonly nocallback nofree nosync nounwind willreturn
-declare void @llvm.aarch64.sve.st1.nxv4i32(<vscale x 4 x i32>, <vscale x 4 x i1>, ptr nocapture) #2
-
-; Function Attrs: nocallback nofree nosync nounwind readnone willreturn
-declare <vscale x 4 x i32> @llvm.aarch64.sve.index.nxv4i32(i32, i32) #9
+declare <vscale x 4 x i32> @llvm.aarch64.sve.index.nxv4i32(i32, i32) #8
 
 attributes #0 = { argmemonly nofree norecurse nosync nounwind uwtable "frame-pointer"="non-leaf" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="generic" "target-features"="+neon,+v8a" }
 attributes #1 = { nocallback nofree nosync nounwind readnone speculatable willreturn }
@@ -198,9 +211,8 @@ attributes #4 = { argmemonly nofree nounwind willreturn writeonly }
 attributes #5 = { nofree nounwind "frame-pointer"="non-leaf" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="generic" "target-features"="+neon,+v8a" }
 attributes #6 = { nofree nounwind }
 attributes #7 = { inaccessiblememonly nocallback nofree nosync nounwind willreturn }
-attributes #8 = { argmemonly nocallback nofree nosync nounwind readonly willreturn }
-attributes #9 = { nocallback nofree nosync nounwind readnone willreturn }
-attributes #10 = { nounwind }
+attributes #8 = { nocallback nofree nosync nounwind readnone willreturn }
+attributes #9 = { nounwind }
 
 !llvm.dbg.cu = !{!0}
 !llvm.module.flags = !{!2, !3, !4, !5, !6, !7, !8, !9, !10, !11, !12}
@@ -244,72 +256,74 @@ attributes #10 = { nounwind }
 !35 = distinct !DILexicalBlock(scope: !30, file: !1, line: 6, column: 33)
 !36 = !DILocation(line: 8, column: 20, scope: !37)
 !37 = distinct !DILexicalBlock(scope: !34, file: !1, line: 7, column: 25)
-!38 = !DILocation(line: 8, column: 27, scope: !37)
-!39 = !DILocation(line: 8, column: 13, scope: !37)
-!40 = !DILocation(line: 6, column: 28, scope: !30)
-!41 = distinct !{!41, !31, !42, !43, !44}
-!42 = !DILocation(line: 10, column: 5, scope: !26)
-!43 = !{!"llvm.loop.mustprogress"}
-!44 = !{!"llvm.loop.unroll.disable"}
-!45 = distinct !DISubprogram(name: "main", scope: !1, file: !1, line: 13, type: !46, scopeLine: 13, flags: DIFlagAllCallsDescribed, spFlags: DISPFlagDefinition | DISPFlagOptimized, unit: !0, retainedNodes: !48)
-!46 = !DISubroutineType(types: !47)
-!47 = !{!19}
-!48 = !{!49, !50, !54, !55, !56}
-!49 = !DILocalVariable(name: "n", scope: !45, file: !1, line: 14, type: !19)
-!50 = !DILocalVariable(name: "a", scope: !45, file: !1, line: 15, type: !51)
-!51 = !DICompositeType(tag: DW_TAG_array_type, baseType: !19, size: 256, elements: !52)
-!52 = !{!53}
-!53 = !DISubrange(count: 8)
-!54 = !DILocalVariable(name: "b", scope: !45, file: !1, line: 16, type: !51)
-!55 = !DILocalVariable(name: "c", scope: !45, file: !1, line: 17, type: !51)
-!56 = !DILocalVariable(name: "i", scope: !57, file: !1, line: 21, type: !19)
-!57 = distinct !DILexicalBlock(scope: !45, file: !1, line: 21, column: 5)
-!58 = !DILocation(line: 0, scope: !45)
-!59 = !DILocation(line: 15, column: 9, scope: !45)
-!60 = !DILocation(line: 16, column: 9, scope: !45)
-!61 = !DILocation(line: 17, column: 5, scope: !45)
-!62 = !DILocation(line: 17, column: 9, scope: !45)
-!63 = !{!64}
-!64 = distinct !{!64, !65, !"foo: %a"}
-!65 = distinct !{!65, !"foo"}
-!66 = !DILocation(line: 19, column: 5, scope: !45)
-!67 = !{!68}
-!68 = distinct !{!68, !65, !"foo: %b"}
+!38 = !{!39, !39, i64 0}
+!39 = !{!"int", !40, i64 0}
+!40 = !{!"omnipotent char", !41, i64 0}
+!41 = !{!"Simple C/C++ TBAA"}
+!42 = !DILocation(line: 8, column: 27, scope: !37)
+!43 = !DILocation(line: 8, column: 25, scope: !37)
+!44 = !DILocation(line: 8, column: 13, scope: !37)
+!45 = !DILocation(line: 8, column: 18, scope: !37)
+!46 = !DILocation(line: 6, column: 28, scope: !30)
+!47 = distinct !{!47, !31, !48, !49, !50}
+!48 = !DILocation(line: 10, column: 5, scope: !26)
+!49 = !{!"llvm.loop.mustprogress"}
+!50 = !{!"llvm.loop.unroll.disable"}
+!51 = distinct !DISubprogram(name: "main", scope: !1, file: !1, line: 13, type: !52, scopeLine: 13, flags: DIFlagAllCallsDescribed, spFlags: DISPFlagDefinition | DISPFlagOptimized, unit: !0, retainedNodes: !54)
+!52 = !DISubroutineType(types: !53)
+!53 = !{!19}
+!54 = !{!55, !56, !60, !61, !62}
+!55 = !DILocalVariable(name: "n", scope: !51, file: !1, line: 14, type: !19)
+!56 = !DILocalVariable(name: "a", scope: !51, file: !1, line: 15, type: !57)
+!57 = !DICompositeType(tag: DW_TAG_array_type, baseType: !19, size: 256, elements: !58)
+!58 = !{!59}
+!59 = !DISubrange(count: 8)
+!60 = !DILocalVariable(name: "b", scope: !51, file: !1, line: 16, type: !57)
+!61 = !DILocalVariable(name: "c", scope: !51, file: !1, line: 17, type: !57)
+!62 = !DILocalVariable(name: "i", scope: !63, file: !1, line: 21, type: !19)
+!63 = distinct !DILexicalBlock(scope: !51, file: !1, line: 21, column: 5)
+!64 = !DILocation(line: 0, scope: !51)
+!65 = !DILocation(line: 15, column: 9, scope: !51)
+!66 = !DILocation(line: 16, column: 9, scope: !51)
+!67 = !DILocation(line: 17, column: 5, scope: !51)
+!68 = !DILocation(line: 17, column: 9, scope: !51)
 !69 = !{!70}
-!70 = distinct !{!70, !65, !"foo: %c"}
-!71 = !DILocation(line: 0, scope: !14, inlinedAt: !72)
-!72 = distinct !DILocation(line: 19, column: 5, scope: !45)
-!73 = !DILocation(line: 0, scope: !26, inlinedAt: !72)
-!74 = !DILocation(line: 6, column: 5, scope: !26, inlinedAt: !72)
-!75 = !DILocation(line: 7, column: 19, scope: !34, inlinedAt: !72)
-!76 = !DILocation(line: 7, column: 13, scope: !35, inlinedAt: !72)
-!77 = !DILocation(line: 8, column: 20, scope: !37, inlinedAt: !72)
-!78 = !{!79, !79, i64 0}
-!79 = !{!"int", !80, i64 0}
-!80 = !{!"omnipotent char", !81, i64 0}
-!81 = !{!"Simple C/C++ TBAA"}
-!82 = !{!68, !70}
-!83 = !DILocation(line: 8, column: 27, scope: !37, inlinedAt: !72)
-!84 = !{!64, !70}
-!85 = !DILocation(line: 8, column: 25, scope: !37, inlinedAt: !72)
-!86 = !DILocation(line: 8, column: 13, scope: !37, inlinedAt: !72)
-!87 = !DILocation(line: 8, column: 18, scope: !37, inlinedAt: !72)
-!88 = !{!64, !68}
-!89 = !DILocation(line: 9, column: 9, scope: !37, inlinedAt: !72)
-!90 = !DILocation(line: 6, column: 28, scope: !30, inlinedAt: !72)
-!91 = !DILocation(line: 6, column: 23, scope: !30, inlinedAt: !72)
-!92 = distinct !{!92, !74, !93, !43, !44}
-!93 = !DILocation(line: 10, column: 5, scope: !26, inlinedAt: !72)
-!94 = !DILocation(line: 21, column: 5, scope: !57)
-!95 = !DILocation(line: 24, column: 5, scope: !45)
-!96 = !DILocation(line: 26, column: 1, scope: !45)
-!97 = !DILocation(line: 25, column: 5, scope: !45)
-!98 = !DILocation(line: 0, scope: !57)
-!99 = !DILocation(line: 22, column: 23, scope: !100)
-!100 = distinct !DILexicalBlock(scope: !101, file: !1, line: 21, column: 33)
-!101 = distinct !DILexicalBlock(scope: !57, file: !1, line: 21, column: 5)
-!102 = !DILocation(line: 22, column: 9, scope: !100)
-!103 = !DILocation(line: 21, column: 28, scope: !101)
-!104 = !DILocation(line: 21, column: 23, scope: !101)
-!105 = distinct !{!105, !94, !106, !43, !44}
-!106 = !DILocation(line: 23, column: 5, scope: !57)
+!70 = distinct !{!70, !71, !"foo: %a"}
+!71 = distinct !{!71, !"foo"}
+!72 = !DILocation(line: 19, column: 5, scope: !51)
+!73 = !{!74}
+!74 = distinct !{!74, !71, !"foo: %b"}
+!75 = !{!76}
+!76 = distinct !{!76, !71, !"foo: %c"}
+!77 = !DILocation(line: 0, scope: !14, inlinedAt: !78)
+!78 = distinct !DILocation(line: 19, column: 5, scope: !51)
+!79 = !DILocation(line: 0, scope: !26, inlinedAt: !78)
+!80 = !DILocation(line: 6, column: 5, scope: !26, inlinedAt: !78)
+!81 = !DILocation(line: 7, column: 19, scope: !34, inlinedAt: !78)
+!82 = !DILocation(line: 7, column: 13, scope: !35, inlinedAt: !78)
+!83 = !DILocation(line: 8, column: 20, scope: !37, inlinedAt: !78)
+!84 = !{!74, !76}
+!85 = !DILocation(line: 8, column: 27, scope: !37, inlinedAt: !78)
+!86 = !{!70, !76}
+!87 = !DILocation(line: 8, column: 25, scope: !37, inlinedAt: !78)
+!88 = !DILocation(line: 8, column: 13, scope: !37, inlinedAt: !78)
+!89 = !DILocation(line: 8, column: 18, scope: !37, inlinedAt: !78)
+!90 = !{!70, !74}
+!91 = !DILocation(line: 9, column: 9, scope: !37, inlinedAt: !78)
+!92 = !DILocation(line: 6, column: 28, scope: !30, inlinedAt: !78)
+!93 = !DILocation(line: 6, column: 23, scope: !30, inlinedAt: !78)
+!94 = distinct !{!94, !80, !95, !49, !50}
+!95 = !DILocation(line: 10, column: 5, scope: !26, inlinedAt: !78)
+!96 = !DILocation(line: 21, column: 5, scope: !63)
+!97 = !DILocation(line: 24, column: 5, scope: !51)
+!98 = !DILocation(line: 26, column: 1, scope: !51)
+!99 = !DILocation(line: 25, column: 5, scope: !51)
+!100 = !DILocation(line: 0, scope: !63)
+!101 = !DILocation(line: 22, column: 23, scope: !102)
+!102 = distinct !DILexicalBlock(scope: !103, file: !1, line: 21, column: 33)
+!103 = distinct !DILexicalBlock(scope: !63, file: !1, line: 21, column: 5)
+!104 = !DILocation(line: 22, column: 9, scope: !102)
+!105 = !DILocation(line: 21, column: 28, scope: !103)
+!106 = !DILocation(line: 21, column: 23, scope: !103)
+!107 = distinct !{!107, !96, !108, !49, !50}
+!108 = !DILocation(line: 23, column: 5, scope: !63)

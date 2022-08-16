@@ -29,78 +29,86 @@ private:
     int vectorizationFactor;
     BasicBlock *targetedBlock;
     LoopInfo *LI;
-    BasicBlock* newLatch;
-    Value *predicateVector;
+    BasicBlock *newLatch;
+    std::vector<Value *> predicates;
 
-    Value * permutedZ0;
-    Value * permutedZ1;
-    Value * permutedPredicates;
-
-
-public:
-    SVE_Permute(Loop *l, int vectorizationFactor, BasicBlock *targetedBlock, LoopInfo *LI, BasicBlock* newLatch, Value* predicateVector);
+    Value *permutedZ0;
+    Value *permutedZ1;
+    Value *permutedPredicates;
 
 
 public:
+    SVE_Permute(Loop *l, int vectorizationFactor, LoopInfo *LI, BasicBlock *newLatch,
+                std::vector<Value *> predicateVector);
 
-  void doPermutation();
-
-private:
-    void formInitialPredicateVectors(int initialValue);
-
-private:
-    void insertPermutationLogic(Instruction* insertionPoint, Value *z0, Value *z1, Value *p0, Value *p1);
-
-private:
-
-    CallInst *createAllTruePredicates(Instruction* insertionPoint);
-
-private:
-
-    CallInst *createCompactInstruction(Instruction* insertionPoint, Value *toBeCompacted, Value *predicatedVector);
-
-private:
-
-    Value *createNotInstruction(Instruction* insertionPoint, Value *elements);
-
-private:
-
-    Value *createANDInstruction(Instruction* insertionPoint, ArrayRef<Value *> elements);
-
-private:
-
-    Value *createORInstruction(Instruction* insertionPoint, ArrayRef<Value *> elements);
-
-private:
-
-    CallInst *createCntpInstruction(Instruction* insertionPoint, Value *elements, Value *predicatedVector);
-
-private:
-
-    CallInst *createWhileltInstruction(Instruction* insertionPoint, Value *firstOp, Value *secondOp);
-
-private:
-
-    CallInst *createSpliceInstruction(Instruction* insertionPoint, Value *firstOp, Value *secondOp, Value *predicatedVector);
-
-private:
-    CallInst *createSelInstruction(Instruction* insertionPoint, Value *firstOp, Value *secondOp, Value *predicatedVector);
 
 public:
-    CallInst *createIndexInstruction(Instruction* insertionPoint, Value *firstOp, Value *secondOp);
+
+    void doPermutation();
 
 private:
-    Value *createAddInstruction(Instruction* insertionPoint, Value *firstOp, Value *secondOp);
+    void formInitialPredicateVectors(Value *inductionVariable, Value **firstPredicates, Value **secondPredicates);
 
 private:
-    Value *createSubInstruction(Instruction* insertionPoint, Value *firstOp, Value *secondOp);
+    void insertPermutationLogic(Instruction *insertionPoint, Value *z0, Value *z1, Value *p0, Value *p1);
+
+private:
+    BasicBlock *findTargetedBB();
+
+private:
+    Value *formPredicateVector(BasicBlock *insertAt);
+
+private:
+    BasicBlock *getLastHeaderCopy();
 
 private:
 
-    BasicBlock *createBlockForPermutation(Function *F);
+    CallInst *createAllTruePredicates(Instruction *insertionPoint);
 
 private:
-   void refineLoopTripCountAndInitialValue();
+
+    CallInst *createCompactInstruction(Instruction *insertionPoint, Value *toBeCompacted, Value *predicatedVector);
+
+private:
+
+    Value *createNotInstruction(Instruction *insertionPoint, Value *elements);
+
+private:
+
+    Value *createANDInstruction(Instruction *insertionPoint, ArrayRef<Value *> elements);
+
+private:
+
+    Value *createORInstruction(Instruction *insertionPoint, ArrayRef<Value *> elements);
+
+private:
+
+    CallInst *createCntpInstruction(Instruction *insertionPoint, Value *elements, Value *predicatedVector);
+
+private:
+
+    CallInst *createWhileltInstruction(Instruction *insertionPoint, Value *firstOp, Value *secondOp);
+
+private:
+
+    CallInst *
+    createSpliceInstruction(Instruction *insertionPoint, Value *firstOp, Value *secondOp, Value *predicatedVector);
+
+private:
+    CallInst *
+    createSelInstruction(Instruction *insertionPoint, Value *firstOp, Value *secondOp, Value *predicatedVector);
+
+public:
+    CallInst *createIndexInstruction(Instruction *insertionPoint, Value *firstOp, Value *secondOp);
+
+private:
+    Value *createAddInstruction(Instruction *insertionPoint, Value *firstOp, Value *secondOp);
+
+private:
+    Value *createSubInstruction(Instruction *insertionPoint, Value *firstOp, Value *secondOp);
+
+private:
+    void refineLoopTripCountAndInitialValue();
 
 };
 

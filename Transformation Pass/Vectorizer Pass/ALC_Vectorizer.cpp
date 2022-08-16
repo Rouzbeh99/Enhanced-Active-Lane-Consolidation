@@ -51,10 +51,10 @@ namespace {
 
 
 
-        auto *sve_vectorizer = new SVE_Vectorizer(L, 4, unroller->getPredicates());
-        sve_vectorizer->doVectorization();
+//        auto *sve_vectorizer = new SVE_Vectorizer(L, 4, unroller->getPredicates());
+//        sve_vectorizer->doVectorization();
 
-        auto *sve_permute = new SVE_Permute(L, 4, sve_vectorizer->getTargetedBB(), &LI, unroller->getNewLatch());
+        auto *sve_permute = new SVE_Permute(L, 4, &LI, unroller->getNewLatch(), unroller->getPredicates());
 
         sve_permute->doPermutation();
 
