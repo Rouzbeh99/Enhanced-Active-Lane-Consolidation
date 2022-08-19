@@ -45,18 +45,19 @@ namespace {
 
         BasicBlock *initialLatch = L->getLoopLatch();
 
+        int factor = 3;
 
         auto *unroller = new Unroller(L, &LI);
-        unroller->doUnrolling(4);
+        unroller->doUnrolling(factor);
 
 
 
-//        auto *sve_vectorizer = new SVE_Vectorizer(L, 4, unroller->getPredicates());
+//        auto *sve_vectorizer = new SVE_Vectorizer(L, factor, unroller->getPredicates());
 //        sve_vectorizer->doVectorization();
 
-        auto *sve_permute = new SVE_Permute(L, 4, &LI, unroller->getNewLatch(), unroller->getPredicates());
+        auto *sve_permute = new SVE_Permute(L, factor, &LI, unroller->getNewLatch(), unroller->getPredicates());
 
-        sve_permute->doPermutation();
+        sve_permute->doTransformation();
 
 
         printLoop(L);
@@ -68,8 +69,15 @@ namespace {
 
     void printLoop(Loop *L) {
 
-        for (auto BB: L->getBlocks()) {
-            BB->print(outs());
+//        for (auto BB: L->getBlocks()) {
+//            BB->print(outs());
+//        }
+//        llvm::outs() << "\n";
+        for (auto &BB: L->getHeader()->getParent()->getBasicBlockList()) {
+            if (L->contains(&BB)) {
+                continue;
+            }
+            BB.print(outs());
         }
         llvm::outs() << "\n";
     }

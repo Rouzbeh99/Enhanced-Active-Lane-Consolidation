@@ -5,36 +5,28 @@
 #include "SVE_Permute.h"
 
 
-void SVE_Permute::doPermutation() {
+void SVE_Permute::doTransformation() {
 
 
     auto &context = L->getHeader()->getContext();
 
-    VectorType *type = VectorType::get(Type::getInt32Ty(context), vectorizationFactor, true);
+    //TODO: find induction variable
+    auto *inductionVar = dyn_cast<PHINode>(&L->getHeader()->getInstList().front());
 
-    refineLoopTripCountAndInitialValue();
 
-    //create initial vectors
-    //TODO: what is steps are not 1 ?
-    ConstantInt *constZero = llvm::ConstantInt::get(llvm::Type::getInt32Ty(L->getHeader()->getContext()), 0);
-    ConstantInt *constOne = llvm::ConstantInt::get(llvm::Type::getInt32Ty(L->getHeader()->getContext()), 1);
-    ConstantInt *constVecFactor = llvm::ConstantInt::get(llvm::Type::getInt32Ty(L->getHeader()->getContext()),
-                                                         vectorizationFactor);
+    refineLoopTripCount();
 
-    Instruction *insertAtPreHeader = L->getLoopPreheader()->getTerminator();
-    auto *uniformVector = dyn_cast<Value>(
-            createIndexInstruction(insertAtPreHeader, dyn_cast<Value>(constZero), dyn_cast<Value>(constOne)));
-    auto *remainingVector = dyn_cast<Value>(
-            createIndexInstruction(insertAtPreHeader, dyn_cast<Value>(constVecFactor), dyn_cast<Value>(constOne)));
+
+    Value *uniformVector = nullptr;
+    Value *remainingVector = nullptr;
 
     Value *uniformVectorPredicates = nullptr;
     Value *remainingVectorPredicates = nullptr;
 
-    //TODO: find induction variable
-    auto *inductionVar = dyn_cast<PHINode>(&L->getHeader()->getInstList().front());
-    formInitialPredicateVectors(inductionVar, &uniformVector, &remainingVector);
+    formInitialVectors(inductionVar, &uniformVectorPredicates, &remainingVectorPredicates, &uniformVector,
+                       &remainingVector);
 
-
+//    doPermutation(uniformVectorPredicates, remainingVectorPredicates, uniformVector, remainingVector);
 
 //    Instruction *insertionPoint = newLatch->getTerminator();
 //    insertPermutationLogic(insertionPoint, z0, z1, p0, p1);
@@ -270,9 +262,8 @@ CallInst *SVE_Permute::createIndexInstruction(Instruction *insertionPoint, Value
     LLVMContext &context = L->getHeader()->getContext();
     IRBuilder<> builder(context);
 
-    auto insertAt = L->getHeader()->getTerminator();
 
-    builder.SetInsertPoint(insertAt);
+    builder.SetInsertPoint(insertionPoint);
 
 
     auto intrinsic = Intrinsic::aarch64_sve_index;
@@ -312,7 +303,7 @@ Value *SVE_Permute::createSubInstruction(Instruction *insertionPoint, Value *fir
 }
 
 
-void SVE_Permute::refineLoopTripCountAndInitialValue() {
+void SVE_Permute::refineLoopTripCount() {
     auto *brInstr = dyn_cast<BranchInst>(newLatch->getTerminator());
     auto *condition = dyn_cast<Instruction>(brInstr->getCondition());
 
@@ -336,26 +327,6 @@ void SVE_Permute::refineLoopTripCountAndInitialValue() {
     auto *constValue = llvm::ConstantInt::get(prevTripCount->getType(), vectorizationFactor - 1);
     Value *newTripCount = createSubInstruction(condition, prevTripCount, constValue);
     condition->setOperand(index, newTripCount);
-
-    // change initial value
-//    PHINode *phiNode = nullptr;
-//
-//    // TODO: Handle the case where there are other phinNodes
-//    for (auto &instr: L->getHeader()->getInstList()) {
-//        if (isa<PHINode>(instr)) {
-//            phiNode = dyn_cast<PHINode>(&instr);
-//            break;
-//        }
-//    }
-//
-//    // TODO: what if loop does not start from zero?
-//    for (int i = 0; i < phiNode->getNumOperands(); ++i) {
-//        Value *operand = phiNode->getOperand(i);
-//        if (isa<ConstantInt>(operand)) {
-//            auto *newValue = llvm::ConstantInt::get(prevTripCount->getType(), 2 * vectorizationFactor);
-//            phiNode->setOperand(i, newValue);
-//        }
-//    }
 
 }
 
@@ -409,73 +380,196 @@ void SVE_Permute::refineLoopTripCountAndInitialValue() {
  * @param initialValue
  */
 void
-SVE_Permute::formInitialPredicateVectors(Value *inductionVariable, Value **firstPredicates, Value **secondPredicates) {
+
+
+SVE_Permute::formInitialVectors(Value *inductionVariable, Value **firstPredicates, Value **secondPredicates,
+                                Value **firstVector, Value **secondVector) {
+
+    // gather header and latch copy blocks
+
+    std::vector<BasicBlock *> initialBlocks;
+    BasicBlock *BB = L->getHeader();
+    for (int i = 0; i < 2 * vectorizationFactor; ++i) {
+        initialBlocks.push_back(BB);
+        BB = BB->getSingleSuccessor();
+    }
+
+    // find preHeaderBlock
+    BasicBlock *preHeader;
+    for (auto pred: predecessors(L->getHeader())) {
+        if (!std::count(initialBlocks.begin(), initialBlocks.end(), pred)) { // initialBlocks does not contain pred
+            preHeader = pred;
+        }
+    }
+
+
+    // cloning all blocks
+
+    std::vector<PHINode *> headerPhiNodes;
+    for (BasicBlock::iterator I = L->getHeader()->begin(); isa<PHINode>(I); ++I) {
+        headerPhiNodes.push_back(cast<PHINode>(I));
+    }
+
+    std::vector<BasicBlock *> firstNewBlocks;
+
+    auto blockInsertPt = std::next(preHeader->getIterator());
+    ValueToValueMapTy lastValueMap;
+
+    for (auto block: initialBlocks) {
+
+        SmallVector<BasicBlock *, 2> newlyGeneratedBlock;
+        ValueToValueMapTy VMap;
+
+        BasicBlock *newBB = CloneBasicBlock(block, VMap, ".init.1");
+        preHeader->getParent()->getBasicBlockList().insert(blockInsertPt, newBB);
+
+        // remove phi node from first block
+        if (block == L->getHeader()) {
+            for (PHINode *OrigPHI: headerPhiNodes) {
+                auto *newPHI = cast<PHINode>(VMap[OrigPHI]);
+                Value *inVal = llvm::ConstantInt::get(inductionVariable->getType(), 0);
+                VMap[OrigPHI] = inVal;                           // replace phi node with its value coming from latch
+                newBB->getInstList().erase(newPHI);
+            }
+        }
+
+        newlyGeneratedBlock.push_back(newBB);
+        firstNewBlocks.push_back(newBB);
+
+        for (ValueToValueMapTy::iterator VI = VMap.begin(), VE = VMap.end();
+             VI != VE; ++VI) {
+            lastValueMap[VI->first] = VI->second;
+        }
+
+        remapInstructionsInBlocks(newlyGeneratedBlock, lastValueMap);
+    }
+
+    // refine branch instructions
+    for (int i = 0; i < firstNewBlocks.size() - 1; ++i) {
+        firstNewBlocks[i]->getTerminator()->setOperand(0, firstNewBlocks[i + 1]);
+    }
+
+    //preHeader block should jump to the first new block
+    preHeader->getTerminator()->setOperand(0, firstNewBlocks.front());
+
+
+    // keep last block
+    BasicBlock *lastLatch = firstNewBlocks.back();
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // should find the last value of induction variable to be used in the next block
+    //TODO: find a way to detect it
+    auto *lastValueForInductionVar = dyn_cast<Value>(lastLatch->getFirstNonPHI());
+
+    std::vector<BasicBlock *> secondNewBlocks;
+
+    for (auto block: initialBlocks) {
+
+        SmallVector<BasicBlock *, 2> newlyGeneratedBlock;
+        ValueToValueMapTy VMap;
+
+        BasicBlock *newBB = CloneBasicBlock(block, VMap, ".init.2");
+        preHeader->getParent()->getBasicBlockList().insert(blockInsertPt, newBB);
+
+        // remove phi node from first block
+        if (block == L->getHeader()) {
+            for (PHINode *OrigPHI: headerPhiNodes) {
+                auto *newPHI = cast<PHINode>(VMap[OrigPHI]);
+                Value *inVal = lastValueForInductionVar;
+                VMap[OrigPHI] = inVal;
+                newBB->getInstList().erase(newPHI);
+            }
+        }
+
+        newlyGeneratedBlock.push_back(newBB);
+        secondNewBlocks.push_back(newBB);
+
+        for (ValueToValueMapTy::iterator VI = VMap.begin(), VE = VMap.end();
+             VI != VE; ++VI) {
+            lastValueMap[VI->first] = VI->second;
+        }
+
+        remapInstructionsInBlocks(newlyGeneratedBlock, lastValueMap);
+    }
+
+    // refine branch instructions
+    for (int i = 0; i < secondNewBlocks.size() - 1; ++i) {
+        secondNewBlocks[i]->getTerminator()->setOperand(0, secondNewBlocks[i + 1]);
+    }
+
+    //the last latch of first set of copies  should branch to the first block of the new set of block copies
+    lastLatch->getTerminator()->eraseFromParent();
+    BranchInst::Create(secondNewBlocks.front(), lastLatch);
+
+    // new latch copy should branch to loop header
+    newLatch = secondNewBlocks.back();
+    auto brInstr = newLatch->getTerminator();
+    for (int i = 0; i < brInstr->getNumOperands(); ++i) {
+        if (isa<BasicBlock>(brInstr->getOperand(i)) &&
+            L->contains(dyn_cast<BasicBlock>(brInstr->getOperand(i)))) {  // it's then block
+
+            brInstr->setOperand(i, L->getHeader());
+        }
+    }
+
+    // update phi node predecessor in the header
+    auto *phiNode = dyn_cast<PHINode>(&L->getHeader()->getInstList().front());
+    for (int i = 0; i < phiNode->getNumIncomingValues(); ++i) {
+        if (phiNode->getIncomingBlock(i) == preHeader) {
+            phiNode->setIncomingBlock(i, newLatch);
+        }
+    }
+
+
+    llvm::outs() << "-----------------------------------------------------------------\n";
+
+}
+
+void SVE_Permute::doPermutation(Value *firstPredicates, Value *secondPredicates, Value *firstVector,
+                                Value *secondVector) {
+
     LLVMContext &context = L->getHeader()->getContext();
     IRBuilder<> builder(context);
-    BasicBlock *firstDecisionBlock = BasicBlock::Create(context, "decision.1", L->getHeader()->getParent(),
+    BasicBlock *permuteBlock = BasicBlock::Create(context, "permute", L->getHeader()->getParent(),
+                                                  targetedBlock);
+    BasicBlock *laneGatheringBlock = BasicBlock::Create(context, "lane.gather", L->getHeader()->getParent(),
                                                         targetedBlock);
-    BasicBlock *firstPredsFormingBlock = BasicBlock::Create(context, "preds.1", L->getHeader()->getParent(),
-                                                            targetedBlock);
-    BasicBlock *secondDecisionBlock = BasicBlock::Create(context, "decision.2", L->getHeader()->getParent(),
-                                                         targetedBlock);
-    BasicBlock *secondPredsFormingBlock = BasicBlock::Create(context, "preds.2", L->getHeader()->getParent(),
-                                                             targetedBlock);
-    //create a block as the predecessor of the header
-    BasicBlock *headerPredecessor = BasicBlock::Create(context, "headerPredecessor", L->getHeader()->getParent(),
-                                                       L->getHeader());
-    llvm::BranchInst::Create(L->getHeader(), headerPredecessor); // branch directly to header
 
-
-    // update latch terminator
-    auto *branchTerminator = dyn_cast<BranchInst>(newLatch->getTerminator());
-    for (int i = 0; i < branchTerminator->getNumOperands(); ++i) {
-        if (branchTerminator->getOperand(i) == targetedBlock) {
-            branchTerminator->setOperand(i, firstDecisionBlock);
+    // make targetedBlock's pred branch to permuteBlock instead of targetedBlock
+    auto *brInstr = dyn_cast<BranchInst>(targetedBlock->getSinglePredecessor()->getTerminator());
+    for (int i = 0; i < brInstr->getNumOperands(); ++i) {
+        if (brInstr->getOperand(i) == targetedBlock) {
+            brInstr->setOperand(i, permuteBlock);
             break;
         }
     }
 
 
-    // fill first decision block
-    builder.SetInsertPoint(firstDecisionBlock);
-    auto *constZero = llvm::ConstantInt::get(inductionVariable->getType(), 0);
-    Value *firstCond = builder.CreateICmpEQ(inductionVariable, constZero);
-    llvm::BranchInst::Create(firstPredsFormingBlock, secondDecisionBlock, firstCond,
-                             firstDecisionBlock);
+    // create temporary terminator
+    BranchInst::Create(targetedBlock, permuteBlock);
 
-    // fill first predForming block
-    *firstPredicates = formPredicateVector(firstPredsFormingBlock);
-    llvm::BranchInst::Create(headerPredecessor, firstPredsFormingBlock); // branch to headerPredecessor
+    Instruction *insertAt = permuteBlock->getTerminator();
 
+    CallInst *allTruePredicates = createAllTruePredicates(insertAt);
 
-    // fill second decision block
-    builder.SetInsertPoint(secondDecisionBlock);
-    auto *constVLength = llvm::ConstantInt::get(inductionVariable->getType(), vectorizationFactor);
-    Value *secondCond = builder.CreateICmpEQ(inductionVariable, constVLength);
-    llvm::BranchInst::Create(secondPredsFormingBlock, targetedBlock, secondCond,
-                             secondDecisionBlock);
+    //insert instructions to check if there are enough active lanes
+    builder.SetInsertPoint(permuteBlock->getTerminator());
+    auto *numOfFirstActives = dyn_cast<Value>(createCntpInstruction(insertAt, firstPredicates, allTruePredicates));
+    auto *numOfSecondActives = dyn_cast<Value>(createCntpInstruction(insertAt, secondPredicates, allTruePredicates));
+    Value *addResult = builder.CreateAdd(numOfFirstActives, numOfSecondActives);
+    auto *constVecFactor = llvm::ConstantInt::get(addResult->getType(), vectorizationFactor);
+    Value *condition = builder.CreateICmpUGE(addResult, constVecFactor);
 
-    // fill second predForming block
-    *secondPredicates = formPredicateVector(secondPredsFormingBlock);
-    llvm::BranchInst::Create(headerPredecessor, secondPredsFormingBlock); // branch  to headerPredecessor
-
-    // set targetedBlock to branch to new headerPredecessor instead of header
-    auto *targetedBlockTerminator = dyn_cast<BranchInst>(targetedBlock->getTerminator());
-    targetedBlockTerminator->setOperand(0, headerPredecessor);
-
-    //update phiNode
-    auto *phiNode = dyn_cast<PHINode>(inductionVariable);
-    Value *updateValue = phiNode->getIncomingValueForBlock(targetedBlock);
-    phiNode->removeIncomingValue(targetedBlock);
-    phiNode->addIncoming(updateValue, headerPredecessor);
+    //change permute block terminator to conditional branch
+    permuteBlock->getTerminator()->eraseFromParent();
+    BranchInst::Create(targetedBlock, laneGatheringBlock, condition, permuteBlock);
 
 
-    L->addBasicBlockToLoop(firstDecisionBlock, *LI);
-    L->addBasicBlockToLoop(firstPredsFormingBlock, *LI);
-    L->addBasicBlockToLoop(secondDecisionBlock, *LI);
-    L->addBasicBlockToLoop(secondPredsFormingBlock, *LI);
-    L->addBasicBlockToLoop(headerPredecessor, *LI);
+    //lane gathering block should branch to headerPredecessor
+    BranchInst::Create(headerPredecessor, laneGatheringBlock);
 
+    L->addBasicBlockToLoop(permuteBlock, *LI);
+    L->addBasicBlockToLoop(laneGatheringBlock, *LI);
 }
 
 
@@ -501,10 +595,10 @@ Value *SVE_Permute::formPredicateVector(BasicBlock *insertAt) {
 
     builder.SetInsertPoint(insertAt);
 
-    VectorType *returnType = VectorType::get(Type::getInt1Ty(context), vectorizationFactor, true);
+    VectorType *type = VectorType::get(Type::getInt1Ty(context), vectorizationFactor, true);
 
     Type *int1Ty = Type::getInt1Ty(context);
-    Value *predicateHolder = UndefValue::get(returnType);
+    Value *predicateHolder = UndefValue::get(type);
 
     for (int i = 0; i < vectorizationFactor; ++i) {
         Constant *index = Constant::getIntegerValue(int1Ty, llvm::APInt(1, i));
@@ -541,6 +635,10 @@ SVE_Permute::SVE_Permute(Loop *l, int factor, LoopInfo *loopInfo, BasicBlock *la
     predicates = preds;
     targetedBlock = findTargetedBB();
 }
+
+
+
+
 
 
 

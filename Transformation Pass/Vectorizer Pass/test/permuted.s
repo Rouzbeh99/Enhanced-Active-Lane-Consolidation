@@ -16,7 +16,7 @@ foo:                                    // @foo
 	//DEBUG_VALUE: i <- 0
 	.loc	0 6 5 prologue_end              // test.c:6:5
 	cmp	w3, #1
-	b.lt	.LBB0_6
+	b.lt	.LBB0_2
 .Ltmp0:
 // %bb.1:                               // %for.body.preheader
 	//DEBUG_VALUE: i <- 0
@@ -24,71 +24,60 @@ foo:                                    // @foo
 	//DEBUG_VALUE: foo:c <- $x2
 	//DEBUG_VALUE: foo:b <- $x1
 	//DEBUG_VALUE: foo:a <- $x0
-	.loc	0 6 23 is_stmt 0                // test.c:6:23
+	//DEBUG_VALUE: i <- undef
+	cmp	w3, #8
+	b.ne	.LBB0_3
+.Ltmp1:
+.LBB0_2:                                // %for.cond.cleanup
+	//DEBUG_VALUE: foo:n <- $w3
+	//DEBUG_VALUE: foo:c <- $x2
+	//DEBUG_VALUE: foo:b <- $x1
+	//DEBUG_VALUE: foo:a <- $x0
+	.loc	0 11 1                          // test.c:11:1
+	ret
+.Ltmp2:
+.LBB0_3:                                // %for.body.preheader1
+	//DEBUG_VALUE: foo:n <- $w3
+	//DEBUG_VALUE: foo:c <- $x2
+	//DEBUG_VALUE: foo:b <- $x1
+	//DEBUG_VALUE: foo:a <- $x0
+	.loc	0 0 0 is_stmt 0                 // test.c:0:0
 	mov	w8, w3
 	mov	x9, xzr
-.Ltmp1:
-	.loc	0 6 5                           // test.c:6:5
-	sub	x8, x8, #7
-.Ltmp2:
-.LBB0_2:                                // %for.body
+	.loc	0 6 5 is_stmt 1                 // test.c:6:5
+	sub	x8, x8, #5
+.Ltmp3:
+	//DEBUG_VALUE: i <- undef
+	cmp	x8, x9
+	b.eq	.LBB0_2
+.Ltmp4:
+.LBB0_4:                                // %if.then
                                         // =>This Inner Loop Header: Depth=1
 	//DEBUG_VALUE: foo:n <- $w3
 	//DEBUG_VALUE: foo:c <- $x2
 	//DEBUG_VALUE: foo:b <- $x1
 	//DEBUG_VALUE: foo:a <- $x0
-	//DEBUG_VALUE: i <- undef
-	cmp	x8, x9
-	b.eq	.LBB0_6
-.Ltmp3:
-// %bb.3:                               // %decision.1
-                                        //   in Loop: Header=BB0_2 Depth=1
-	//DEBUG_VALUE: foo:n <- $w3
-	//DEBUG_VALUE: foo:c <- $x2
-	//DEBUG_VALUE: foo:b <- $x1
-	//DEBUG_VALUE: foo:a <- $x0
-	.loc	0 0 5                           // test.c:0:5
-	mov	x10, x9
-	add	x9, x9, #4
-.Ltmp4:
-	//DEBUG_VALUE: i <- $x9
-	cmp	x10, #4
-	b.eq	.LBB0_2
+	.loc	0 8 20                          // test.c:8:20
+	lsl	x10, x9, #2
 .Ltmp5:
-// %bb.4:                               // %decision.1
-                                        //   in Loop: Header=BB0_2 Depth=1
-	//DEBUG_VALUE: i <- $x9
-	//DEBUG_VALUE: foo:n <- $w3
-	//DEBUG_VALUE: foo:c <- $x2
-	//DEBUG_VALUE: foo:b <- $x1
-	//DEBUG_VALUE: foo:a <- $x0
-	cbz	x10, .LBB0_2
+	.loc	0 0 0 is_stmt 0                 // test.c:0:0
+	add	x9, x9, #3
 .Ltmp6:
-// %bb.5:                               // %if.then
-                                        //   in Loop: Header=BB0_2 Depth=1
 	//DEBUG_VALUE: i <- $x9
-	//DEBUG_VALUE: foo:n <- $w3
-	//DEBUG_VALUE: foo:c <- $x2
-	//DEBUG_VALUE: foo:b <- $x1
-	//DEBUG_VALUE: foo:a <- $x0
-	.loc	0 8 20 is_stmt 1                // test.c:8:20
-	lsl	x10, x10, #2
+	.loc	0 8 20                          // test.c:8:20
 	ldr	w11, [x0, x10]
-	.loc	0 8 27 is_stmt 0                // test.c:8:27
+	.loc	0 8 27                          // test.c:8:27
 	ldr	w12, [x1, x10]
 	.loc	0 8 25                          // test.c:8:25
 	mul	w11, w12, w11
 	.loc	0 8 18                          // test.c:8:18
 	str	w11, [x2, x10]
-	b	.LBB0_2
 .Ltmp7:
-.LBB0_6:                                // %for.cond.cleanup
-	//DEBUG_VALUE: foo:n <- $w3
-	//DEBUG_VALUE: foo:c <- $x2
-	//DEBUG_VALUE: foo:b <- $x1
-	//DEBUG_VALUE: foo:a <- $x0
-	.loc	0 11 1 is_stmt 1                // test.c:11:1
-	ret
+	//DEBUG_VALUE: i <- undef
+	.loc	0 6 5 is_stmt 1                 // test.c:6:5
+	cmp	x8, x9
+	b.ne	.LBB0_4
+	b	.LBB0_2
 .Ltmp8:
 .Lfunc_end0:
 	.size	foo, .Lfunc_end0-foo
@@ -272,13 +261,13 @@ main:                                   // @main
 .Ldebug_loc0:
 	.byte	4                               // DW_LLE_offset_pair
 	.uleb128 .Lfunc_begin0-.Lfunc_begin0    //   starting offset
-	.uleb128 .Ltmp2-.Lfunc_begin0           //   ending offset
+	.uleb128 .Ltmp0-.Lfunc_begin0           //   ending offset
 	.byte	3                               // Loc expr size
 	.byte	17                              // DW_OP_consts
 	.byte	0                               // 0
 	.byte	159                             // DW_OP_stack_value
 	.byte	4                               // DW_LLE_offset_pair
-	.uleb128 .Ltmp4-.Lfunc_begin0           //   starting offset
+	.uleb128 .Ltmp6-.Lfunc_begin0           //   starting offset
 	.uleb128 .Ltmp7-.Lfunc_begin0           //   ending offset
 	.byte	1                               // Loc expr size
 	.byte	89                              // DW_OP_reg9
@@ -331,6 +320,8 @@ main:                                   // @main
 	.byte	6                               // DW_FORM_data4
 	.byte	115                             // DW_AT_addr_base
 	.byte	23                              // DW_FORM_sec_offset
+	.byte	116                             // DW_AT_rnglists_base
+	.byte	23                              // DW_FORM_sec_offset
 	.ascii	"\214\001"                      // DW_AT_loclists_base
 	.byte	23                              // DW_FORM_sec_offset
 	.byte	0                               // EOM(1)
@@ -362,10 +353,8 @@ main:                                   // @main
 	.byte	4                               // Abbreviation Code
 	.byte	11                              // DW_TAG_lexical_block
 	.byte	1                               // DW_CHILDREN_yes
-	.byte	17                              // DW_AT_low_pc
-	.byte	27                              // DW_FORM_addrx
-	.byte	18                              // DW_AT_high_pc
-	.byte	6                               // DW_FORM_data4
+	.byte	85                              // DW_AT_ranges
+	.byte	35                              // DW_FORM_rnglistx
 	.byte	0                               // EOM(1)
 	.byte	0                               // EOM(2)
 	.byte	5                               // Abbreviation Code
@@ -531,6 +520,15 @@ main:                                   // @main
 	.byte	0                               // EOM(1)
 	.byte	0                               // EOM(2)
 	.byte	18                              // Abbreviation Code
+	.byte	11                              // DW_TAG_lexical_block
+	.byte	1                               // DW_CHILDREN_yes
+	.byte	17                              // DW_AT_low_pc
+	.byte	27                              // DW_FORM_addrx
+	.byte	18                              // DW_AT_high_pc
+	.byte	6                               // DW_FORM_data4
+	.byte	0                               // EOM(1)
+	.byte	0                               // EOM(2)
+	.byte	19                              // Abbreviation Code
 	.byte	52                              // DW_TAG_variable
 	.byte	0                               // DW_CHILDREN_no
 	.byte	2                               // DW_AT_location
@@ -539,7 +537,7 @@ main:                                   // @main
 	.byte	19                              // DW_FORM_ref4
 	.byte	0                               // EOM(1)
 	.byte	0                               // EOM(2)
-	.byte	19                              // Abbreviation Code
+	.byte	20                              // Abbreviation Code
 	.byte	52                              // DW_TAG_variable
 	.byte	0                               // DW_CHILDREN_no
 	.byte	2                               // DW_AT_location
@@ -554,14 +552,14 @@ main:                                   // @main
 	.byte	19                              // DW_FORM_ref4
 	.byte	0                               // EOM(1)
 	.byte	0                               // EOM(2)
-	.byte	20                              // Abbreviation Code
+	.byte	21                              // Abbreviation Code
 	.byte	1                               // DW_TAG_array_type
 	.byte	1                               // DW_CHILDREN_yes
 	.byte	73                              // DW_AT_type
 	.byte	19                              // DW_FORM_ref4
 	.byte	0                               // EOM(1)
 	.byte	0                               // EOM(2)
-	.byte	21                              // Abbreviation Code
+	.byte	22                              // Abbreviation Code
 	.byte	33                              // DW_TAG_subrange_type
 	.byte	0                               // DW_CHILDREN_no
 	.byte	73                              // DW_AT_type
@@ -570,7 +568,7 @@ main:                                   // @main
 	.byte	11                              // DW_FORM_data1
 	.byte	0                               // EOM(1)
 	.byte	0                               // EOM(2)
-	.byte	22                              // Abbreviation Code
+	.byte	23                              // Abbreviation Code
 	.byte	36                              // DW_TAG_base_type
 	.byte	0                               // DW_CHILDREN_no
 	.byte	3                               // DW_AT_name
@@ -600,33 +598,33 @@ main:                                   // @main
 	.byte	0                               // DW_AT_low_pc
 	.word	.Lfunc_end1-.Lfunc_begin0       // DW_AT_high_pc
 	.word	.Laddr_table_base0              // DW_AT_addr_base
+	.word	.Lrnglists_table_base0          // DW_AT_rnglists_base
 	.word	.Lloclists_table_base0          // DW_AT_loclists_base
-	.byte	2                               // Abbrev [2] 0x27:0x36 DW_TAG_subprogram
+	.byte	2                               // Abbrev [2] 0x2b:0x32 DW_TAG_subprogram
 	.byte	0                               // DW_AT_low_pc
 	.word	.Lfunc_end0-.Lfunc_begin0       // DW_AT_high_pc
 	.byte	1                               // DW_AT_frame_base
 	.byte	111
                                         // DW_AT_call_all_calls
 	.word	93                              // DW_AT_abstract_origin
-	.byte	3                               // Abbrev [3] 0x33:0x7 DW_TAG_formal_parameter
+	.byte	3                               // Abbrev [3] 0x37:0x7 DW_TAG_formal_parameter
 	.byte	1                               // DW_AT_location
 	.byte	80
 	.word	97                              // DW_AT_abstract_origin
-	.byte	3                               // Abbrev [3] 0x3a:0x7 DW_TAG_formal_parameter
+	.byte	3                               // Abbrev [3] 0x3e:0x7 DW_TAG_formal_parameter
 	.byte	1                               // DW_AT_location
 	.byte	81
 	.word	105                             // DW_AT_abstract_origin
-	.byte	3                               // Abbrev [3] 0x41:0x7 DW_TAG_formal_parameter
+	.byte	3                               // Abbrev [3] 0x45:0x7 DW_TAG_formal_parameter
 	.byte	1                               // DW_AT_location
 	.byte	82
 	.word	113                             // DW_AT_abstract_origin
-	.byte	3                               // Abbrev [3] 0x48:0x7 DW_TAG_formal_parameter
+	.byte	3                               // Abbrev [3] 0x4c:0x7 DW_TAG_formal_parameter
 	.byte	1                               // DW_AT_location
 	.byte	83
 	.word	121                             // DW_AT_abstract_origin
-	.byte	4                               // Abbrev [4] 0x4f:0xd DW_TAG_lexical_block
-	.byte	0                               // DW_AT_low_pc
-	.word	.Ltmp7-.Lfunc_begin0            // DW_AT_high_pc
+	.byte	4                               // Abbrev [4] 0x53:0x9 DW_TAG_lexical_block
+	.byte	0                               // DW_AT_ranges
 	.byte	5                               // Abbrev [5] 0x55:0x6 DW_TAG_variable
 	.byte	0                               // DW_AT_location
 	.word	130                             // DW_AT_abstract_origin
@@ -724,19 +722,19 @@ main:                                   // @main
 	.byte	17                              // Abbrev [17] 0xe1:0x6 DW_TAG_formal_parameter
 	.byte	8                               // DW_AT_const_value
 	.word	121                             // DW_AT_abstract_origin
-	.byte	4                               // Abbrev [4] 0xe7:0xe DW_TAG_lexical_block
+	.byte	18                              // Abbrev [18] 0xe7:0xe DW_TAG_lexical_block
 	.byte	2                               // DW_AT_low_pc
 	.word	.Ltmp14-.Ltmp10                 // DW_AT_high_pc
-	.byte	18                              // Abbrev [18] 0xed:0x7 DW_TAG_variable
+	.byte	19                              // Abbrev [19] 0xed:0x7 DW_TAG_variable
 	.byte	1                               // DW_AT_location
 	.byte	88
 	.word	130                             // DW_AT_abstract_origin
 	.byte	0                               // End Of Children Mark
 	.byte	0                               // End Of Children Mark
-	.byte	4                               // Abbrev [4] 0xf6:0x10 DW_TAG_lexical_block
+	.byte	18                              // Abbrev [18] 0xf6:0x10 DW_TAG_lexical_block
 	.byte	3                               // DW_AT_low_pc
 	.word	.Ltmp18-.Ltmp15                 // DW_AT_high_pc
-	.byte	19                              // Abbrev [19] 0xfc:0x9 DW_TAG_variable
+	.byte	20                              // Abbrev [20] 0xfc:0x9 DW_TAG_variable
 	.byte	1                               // DW_AT_location
 	.byte	9                               // DW_AT_name
 	.byte	0                               // DW_AT_decl_file
@@ -744,18 +742,36 @@ main:                                   // @main
 	.word	150                             // DW_AT_type
 	.byte	0                               // End Of Children Mark
 	.byte	0                               // End Of Children Mark
-	.byte	20                              // Abbrev [20] 0x107:0xc DW_TAG_array_type
+	.byte	21                              // Abbrev [21] 0x107:0xc DW_TAG_array_type
 	.word	150                             // DW_AT_type
-	.byte	21                              // Abbrev [21] 0x10c:0x6 DW_TAG_subrange_type
+	.byte	22                              // Abbrev [22] 0x10c:0x6 DW_TAG_subrange_type
 	.word	275                             // DW_AT_type
 	.byte	8                               // DW_AT_count
 	.byte	0                               // End Of Children Mark
-	.byte	22                              // Abbrev [22] 0x113:0x4 DW_TAG_base_type
+	.byte	23                              // Abbrev [23] 0x113:0x4 DW_TAG_base_type
 	.byte	11                              // DW_AT_name
 	.byte	8                               // DW_AT_byte_size
 	.byte	7                               // DW_AT_encoding
 	.byte	0                               // End Of Children Mark
 .Ldebug_info_end0:
+	.section	.debug_rnglists,"",@progbits
+	.word	.Ldebug_list_header_end1-.Ldebug_list_header_start1 // Length
+.Ldebug_list_header_start1:
+	.hword	5                               // Version
+	.byte	8                               // Address size
+	.byte	0                               // Segment selector size
+	.word	1                               // Offset entry count
+.Lrnglists_table_base0:
+	.word	.Ldebug_ranges0-.Lrnglists_table_base0
+.Ldebug_ranges0:
+	.byte	4                               // DW_RLE_offset_pair
+	.uleb128 .Lfunc_begin0-.Lfunc_begin0    //   starting offset
+	.uleb128 .Ltmp1-.Lfunc_begin0           //   ending offset
+	.byte	4                               // DW_RLE_offset_pair
+	.uleb128 .Ltmp2-.Lfunc_begin0           //   starting offset
+	.uleb128 .Ltmp8-.Lfunc_begin0           //   ending offset
+	.byte	0                               // DW_RLE_end_of_list
+.Ldebug_list_header_end1:
 	.section	.debug_str_offsets,"",@progbits
 	.word	52                              // Length of String Offsets Set
 	.hword	5
