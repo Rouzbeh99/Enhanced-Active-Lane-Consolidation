@@ -4,7 +4,7 @@
 
 #include "SVE_Permute.h"
 
-
+////// How to use permuted vectors ?????????????????????????????????????????????
 void SVE_Permute::doTransformation() {
 
 
@@ -29,10 +29,15 @@ void SVE_Permute::doTransformation() {
     formInitialPredicateVectors(inductionVar, &uniformVectorPredicates, &remainingVectorPredicates, &uniformVector,
                                 &remainingVector);
 
-//    doPermutation(uniformVectorPredicates, remainingVectorPredicates, uniformVector, remainingVector);
+    BasicBlock *linearizedBlock = doPermutation(uniformVectorPredicates, remainingVectorPredicates, uniformVector,
+                                                remainingVector);
 
-//    Instruction *insertionPoint = newLatch->getTerminator();
-//    insertPermutationLogic(insertionPoint, z0, z1, p0, p1);
+    std::vector<BasicBlock *> blocks;
+    blocks.push_back(targetedBlock);
+    fillLinearizedBlock(linearizedBlock, blocks);
+
+    CallInst *allTruePredicates = createAllTruePredicates(targetedBlock->getTerminator());
+    makeBlockVectorized(targetedBlock, allTruePredicates);
 
 
 }
@@ -377,7 +382,7 @@ SVE_Permute::formInitialPredicateVectors(Value *inductionVariable, Value **first
     ConstantInt *constVFactor = llvm::ConstantInt::get(Type::getInt32Ty(context), vectorizationFactor, true);
 
     (*firstVector) = createIndexInstruction(lastLatch->getTerminator(), constZero, constOne);
-    (*secondPredicates) = createIndexInstruction(lastLatch->getTerminator(), constVFactor, constOne);
+    (*secondVector) = createIndexInstruction(lastLatch->getTerminator(), constVFactor, constOne);
 
 }
 
@@ -525,53 +530,216 @@ BasicBlock *SVE_Permute::duplicateBlocksForInitialPredicateGeneration(Value *ind
     return secondNewBlocks.back();
 }
 
-void SVE_Permute::doPermutation(Value *firstPredicates, Value *secondPredicates, Value *firstVector,
-                                Value *secondVector) {
+BasicBlock *SVE_Permute::doPermutation(Value *firstPredicates, Value *secondPredicates, Value *firstVector,
+                                       Value *secondVector) {
 
     LLVMContext &context = L->getHeader()->getContext();
     IRBuilder<> builder(context);
-    BasicBlock *permuteBlock = BasicBlock::Create(context, "permute", L->getHeader()->getParent(),
-                                                  targetedBlock);
+    BasicBlock *permuteDecision = BasicBlock::Create(context, "permute.decision", L->getHeader()->getParent(),
+                                                     targetedBlock);
     BasicBlock *laneGatheringBlock = BasicBlock::Create(context, "lane.gather", L->getHeader()->getParent(),
                                                         targetedBlock);
+    BasicBlock *linearizedBlock = BasicBlock::Create(context, "linearized", L->getHeader()->getParent(),
+                                                     targetedBlock);
+
 
     // make targetedBlock's pred branch to permuteBlock instead of targetedBlock
     auto *brInstr = dyn_cast<BranchInst>(targetedBlock->getSinglePredecessor()->getTerminator());
     for (int i = 0; i < brInstr->getNumOperands(); ++i) {
         if (brInstr->getOperand(i) == targetedBlock) {
-            brInstr->setOperand(i, permuteBlock);
+            brInstr->setOperand(i, permuteDecision);
             break;
         }
     }
 
 
     // create temporary terminator
-    BranchInst::Create(targetedBlock, permuteBlock);
+    BranchInst::Create(targetedBlock, permuteDecision);
 
-    Instruction *insertAt = permuteBlock->getTerminator();
+    Instruction *insertAt = permuteDecision->getTerminator();
 
     CallInst *allTruePredicates = createAllTruePredicates(insertAt);
 
     //insert instructions to check if there are enough active lanes
-    builder.SetInsertPoint(permuteBlock->getTerminator());
+    builder.SetInsertPoint(permuteDecision->getTerminator());
     auto *numOfFirstActives = dyn_cast<Value>(createCntpInstruction(insertAt, firstPredicates, allTruePredicates));
     auto *numOfSecondActives = dyn_cast<Value>(createCntpInstruction(insertAt, secondPredicates, allTruePredicates));
     Value *addResult = builder.CreateAdd(numOfFirstActives, numOfSecondActives);
     auto *constVecFactor = llvm::ConstantInt::get(addResult->getType(), vectorizationFactor);
     Value *condition = builder.CreateICmpUGE(addResult, constVecFactor);
 
-    //change permute block terminator to conditional branch
-    permuteBlock->getTerminator()->eraseFromParent();
-    BranchInst::Create(targetedBlock, laneGatheringBlock, condition, permuteBlock);
 
 
-    //lane gathering block should branch to headerPredecessor
-    BranchInst::Create(headerPredecessor, laneGatheringBlock);
+    //change permute decision block terminator to conditional branch
+    permuteDecision->getTerminator()->eraseFromParent();
+    BranchInst::Create(laneGatheringBlock, linearizedBlock, condition, permuteDecision);
 
-    L->addBasicBlockToLoop(permuteBlock, *LI);
+    // linearized block should branch to where targeted block branches to
+    BranchInst::Create(targetedBlock->getSingleSuccessor(), linearizedBlock);
+
+    // laneGathering block should branch to targeted block
+    BranchInst::Create(targetedBlock, laneGatheringBlock);
+
+    /**
+     * Results will be in:
+     *  -permutedZ0
+     *  -permutedZ1
+     *  -permutedPredicates
+     */
+    insertPermutationLogic(laneGatheringBlock->getTerminator(), firstVector, secondVector, firstPredicates,
+                           secondPredicates);
+
+
+    L->addBasicBlockToLoop(permuteDecision, *LI);
     L->addBasicBlockToLoop(laneGatheringBlock, *LI);
+    L->addBasicBlockToLoop(linearizedBlock, *LI);
+
+    return linearizedBlock;
 }
 
+
+void SVE_Permute::makeBlockVectorized(BasicBlock *block, Value *predicateVector) {
+
+    Instruction *insertionPoint = block->getTerminator();
+
+    std::map<Value *, Value *> vMap;
+
+    // Should be remove in FILO manner to prevent removing a value that is used in following lines
+    std::stack<Instruction *> toBeRemoved;
+
+    // TODO: Is there any case we could have PHI?
+    // TODO: Complete the list
+    // TODO: handle binary operation for doubles
+    for (auto &instr: targetedBlock->getInstList()) {
+        if (isa<GEPOperator>(instr)) {
+            continue;
+        } else if (isa<StoreInst>(instr)) {
+            auto storeInstr = dyn_cast<StoreInst>(&instr);
+            // it's the value to be stored
+            Value *firstOp = nullptr;
+            if (vMap.count(storeInstr->getOperand(0))) {
+                firstOp = vMap[storeInstr->getOperand(0)];
+            } else {
+                // TODO: can this happen?
+            }
+            auto ptr = dyn_cast<GEPOperator>(instr.getOperand(1));
+            createStoreInstruction(insertionPoint, firstOp, ptr, predicateVector);
+            toBeRemoved.push(&instr);
+        } else if (isa<LoadInst>(instr)) {
+            auto loadInstr = dyn_cast<LoadInst>(&instr);
+
+            auto ptr = dyn_cast<GEPOperator>(instr.getOperand(0));
+            CallInst *loadedData = createLoadInstruction(insertionPoint, ptr, predicateVector);
+            vMap[&instr] = loadedData;
+            toBeRemoved.push(&instr);
+        } else if (isa<BinaryOperator>(instr)) {
+            if (isa<MulOperator>(instr)) {
+                Value *firstOp = nullptr;
+                Value *secondOp = nullptr;
+                if (vMap.count(instr.getOperand(0))) {
+                    firstOp = vMap[instr.getOperand(0)];
+                } else {
+                    //TODO: ?????
+                }
+
+                if (vMap.count(instr.getOperand(1))) {
+                    secondOp = vMap[instr.getOperand(1)];
+                } else {
+                    //TODO: ?????
+                }
+                auto intrinsic = Intrinsic::aarch64_sve_mul;
+                CallInst *multResult = createArithmeticInstruction(insertionPoint, intrinsic, firstOp, secondOp,
+                                                                   predicateVector);
+                vMap[&instr] = multResult;
+                toBeRemoved.push(&instr);
+            }
+        }
+    }
+
+    while (!toBeRemoved.empty()) {
+        toBeRemoved.top()->eraseFromParent();
+        toBeRemoved.pop();
+    }
+}
+
+CallInst *SVE_Permute::createLoadInstruction(Instruction *insertionPoint, GEPOperator *ptr, Value *predicatedVector) {
+
+    LLVMContext &context = L->getHeader()->getContext();
+    IRBuilder<> builder(context);
+    builder.SetInsertPoint(insertionPoint);
+
+    auto intrinsic = Intrinsic::aarch64_sve_ld1;
+    VectorType *returnType = VectorType::get(Type::getInt32Ty(context), vectorizationFactor, true);
+    Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, returnType);
+
+
+    std::vector<Value *> arguments;
+    arguments.push_back(predicatedVector);
+    arguments.push_back(ptr);
+
+    return builder.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
+
+
+}
+
+void SVE_Permute::createStoreInstruction(Instruction *insertionPoint, Value *elementsVector, GEPOperator *ptr,
+                                         Value *predicatedVector) {
+    LLVMContext &context = L->getHeader()->getContext();
+    IRBuilder<> builder(context);
+    builder.SetInsertPoint(insertionPoint);
+
+    auto intrinsic = Intrinsic::aarch64_sve_st1;
+
+
+    VectorType *returnType = VectorType::get(Type::getInt32Ty(context), vectorizationFactor, true);
+    Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, returnType);
+
+
+    std::vector<Value *> arguments;
+    arguments.push_back(elementsVector);
+    arguments.push_back(predicatedVector);
+    arguments.push_back(ptr);
+
+
+    builder.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
+}
+
+// TODO: handle double types by changing return type and operands
+CallInst *
+SVE_Permute::createArithmeticInstruction(Instruction *insertionPoint, unsigned int intrinsic, Value *firstOp,
+                                         Value *secondOp, Value *predicatedVector) {
+    LLVMContext &context = L->getHeader()->getContext();
+    IRBuilder<> builder(context);
+    builder.SetInsertPoint(insertionPoint);
+
+    VectorType *returnType = VectorType::get(Type::getInt32Ty(context), vectorizationFactor, true);
+    Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, returnType);
+
+//    intrinsicFunction->print(outs());
+
+    std::vector<Value *> arguments;
+    arguments.push_back(predicatedVector);
+    arguments.push_back(firstOp);
+    arguments.push_back(secondOp);
+
+    return builder.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
+}
+
+void SVE_Permute::fillLinearizedBlock(BasicBlock *linearizedBlock, const std::vector<BasicBlock *> &blocks) {
+    llvm::ValueToValueMapTy vMap;
+
+    for (auto BB: blocks) {
+        for (auto &instr: BB->getInstList()) {
+            if (&instr == BB->getTerminator()) {
+                break;
+            }
+            Instruction *clonedInstr = instr.clone();
+            clonedInstr->insertBefore(linearizedBlock->getTerminator());
+            vMap[&instr] = clonedInstr;
+            llvm::RemapInstruction(clonedInstr, vMap, RF_NoModuleLevelChanges | RF_IgnoreMissingLocals);
+        }
+    }
+}
 
 BasicBlock *SVE_Permute::findTargetedBB() {
     BasicBlock *lastLatchBlock = getLastHeaderCopy()->getNextNode();
@@ -635,6 +803,11 @@ SVE_Permute::SVE_Permute(Loop *l, int factor, LoopInfo *loopInfo, BasicBlock *la
     predicates = preds;
     targetedBlock = findTargetedBB();
 }
+
+
+
+
+
 
 
 

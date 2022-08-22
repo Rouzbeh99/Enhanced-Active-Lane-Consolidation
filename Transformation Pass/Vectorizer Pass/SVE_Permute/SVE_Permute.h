@@ -13,6 +13,8 @@
 #include "llvm/IR/ValueMap.h"
 #include "llvm/Transforms/Utils/Cloning.h"
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
+#include "stack"
+#include "map"
 
 
 #ifndef SVE_PERMUTE_SVE_PERMUTE_H
@@ -31,7 +33,6 @@ private:
     LoopInfo *LI;
     BasicBlock *newLatch;
     std::vector<Value *> predicates;
-    BasicBlock *headerPredecessor;
 
     Value *permutedZ0;
     Value *permutedZ1;
@@ -58,7 +59,7 @@ private:
     void insertPermutationLogic(Instruction *insertionPoint, Value *z0, Value *z1, Value *p0, Value *p1);
 
 private:
-    void doPermutation(Value *firstPredicates, Value *secondPredicates, Value *firstVector, Value *secondVector);
+    BasicBlock* doPermutation(Value *firstPredicates, Value *secondPredicates, Value *firstVector, Value *secondVector);
 
 private:
     BasicBlock *findTargetedBB();
@@ -116,8 +117,26 @@ private:
     Value *createSubInstruction(Instruction *insertionPoint, Value *firstOp, Value *secondOp);
 
 private:
+    void makeBlockVectorized(BasicBlock *block,  Value* predicateVector);
+
+    //blocks contain scalar code
+private:
+    void fillLinearizedBlock(BasicBlock *linearizedBlock, const std::vector<BasicBlock *>& blocks);
+
+private:
     void refineLoopTripCount();
 
+private:
+    CallInst *createLoadInstruction(Instruction *insertionPoint, GEPOperator *ptr, Value *predicatedVector);
+
+private:
+    void createStoreInstruction(Instruction *insertionPoint, Value *elementsVector, GEPOperator *ptr,
+                                Value *predicatedVector);
+
+private:
+    CallInst *
+    createArithmeticInstruction(Instruction *insertionPoint, unsigned int intrinsic, Value *firstOp, Value *secondOp,
+                                Value *predicatedVector);
 };
 
 

@@ -10,7 +10,7 @@ void Unroller::doUnrolling(int unrollFactor) {
 
     BasicBlock *latch = L->getLoopLatch();
 
-    BasicBlock *thenBlock = findAndRefineThenBlock(header, latch);
+    BasicBlock *thenBlock = findTargetedBlock(header, latch);
 
 
     checkCondition(header);
@@ -21,7 +21,7 @@ void Unroller::doUnrolling(int unrollFactor) {
     predicates = *resultedPredicates;
 
 
-    refineCFG(newBlocks, header, latch, thenBlock, L);
+    refineCFG(newBlocks, header, latch, thenBlock);
 
     removeRedundantInstructions(latch, unrollFactor);
 
@@ -164,9 +164,9 @@ std::vector<Value *> *Unroller::findPredicates(BasicBlock *initialLatch, int unr
 }
 
 void
-Unroller::refineCFG(std::vector<BasicBlock *> *newBlocks, BasicBlock *header, BasicBlock *latch, BasicBlock *thenBlock,
-                    Loop *L) {
-    // header should branch to latch
+Unroller::refineCFG(std::vector<BasicBlock *> *newBlocks, BasicBlock *header, BasicBlock *latch,
+                    BasicBlock *thenBlock) {
+    // header should branch to prev latch
     header->getTerminator()->eraseFromParent();
     for (auto succ: successors(header)) {
         succ->removePredecessor(header);
@@ -222,7 +222,7 @@ Unroller::refineCFG(std::vector<BasicBlock *> *newBlocks, BasicBlock *header, Ba
                     Value *label = branchInstr->getOperand(i);
                     auto *block = dyn_cast<BasicBlock>(label);
                     if (block == header) {
-                        // make it point to the first block after loop header instead of prev header
+                        // make it point to the first block after loop header instead of header
                         branchInstr->setOperand(i, dyn_cast<Value>(thenBlock));
                     }
                 }
@@ -232,14 +232,20 @@ Unroller::refineCFG(std::vector<BasicBlock *> *newBlocks, BasicBlock *header, Ba
 
     }
 
+    // create a new latch which only jumps to header
+    auto *newGeneratedLatch = BasicBlock::Create(L->getHeader()->getContext(), "new.latch",
+                                                 L->getHeader()->getParent());
+    BranchInst::Create(header, newGeneratedLatch);
 
-    // Finally, blocks (then blocks) that used to branch to latch should now branch to header
+
+    // Finally, blocks (then blocks) that used to branch to latch should now branch to new generated latch
     for (auto BB: predecessors(latch)) {
         if (BB == header || !L->contains(BB)) {
             continue;
         }
-        BB->getTerminator()->replaceSuccessorWith(latch, header);
+        BB->getTerminator()->replaceSuccessorWith(latch, newGeneratedLatch);
     }
+    L->addBasicBlockToLoop(newGeneratedLatch, *LI);
 
     // add phi node in the beginning of the header block
     PHINode *phiNode = llvm::PHINode::Create(llvm::IntegerType::getInt64Ty(header->getContext()), 2);
@@ -263,21 +269,13 @@ Unroller::refineCFG(std::vector<BasicBlock *> *newBlocks, BasicBlock *header, Ba
     //TODO: remapping should be applied to other blocks as well
 }
 
-BasicBlock *Unroller::findAndRefineThenBlock(BasicBlock *header, BasicBlock *latch) {
+BasicBlock *Unroller::findTargetedBlock(BasicBlock *header, BasicBlock *latch) {
     BasicBlock *thenBlock;
     for (auto BB: successors(header)) {
         if (BB != latch) {
             thenBlock = BB;
         }
     }
-
-    for (auto succ: successors(thenBlock)) {
-        succ->removePredecessor(thenBlock);
-    }
-
-    thenBlock->getTerminator()->eraseFromParent();
-    llvm::BranchInst::Create(header, thenBlock);
-
 
     return thenBlock;
 }

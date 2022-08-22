@@ -41,44 +41,115 @@ foo:                                    // @foo
 	//DEBUG_VALUE: foo:c <- $x2
 	//DEBUG_VALUE: foo:b <- $x1
 	//DEBUG_VALUE: foo:a <- $x0
-	.loc	0 0 0 is_stmt 0                 // test.c:0:0
-	mov	w8, w3
+	.loc	0 0 1 is_stmt 0                 // test.c:0:1
+	mov	w11, #1
+	mov	w10, wzr
+	ptrue	p0.s
+	mov	w12, #2
+	mov	x8, xzr
 	mov	x9, xzr
-	.loc	0 6 5 is_stmt 1                 // test.c:6:5
-	sub	x8, x8, #7
+	fmov	s0, w11
+	mov	z1.s, w11
+	mov	z2.s, w12
+	mov	w12, #3
 .Ltmp3:
-	//DEBUG_VALUE: i <- undef
-	cmp	x8, x9
-	b.eq	.LBB0_2
+	//DEBUG_VALUE: i <- $x12
+	and	z0.s, z0.s, #0x1
+	cmpne	p1.s, p0/z, z0.s, #0
+	index	z0.s, #0, #1
+	cmpeq	p2.s, p0/z, z0.s, z1.s
+	mov	z1.s, p1/z, #1                  // =0x1
+	mov	z1.s, p2/m, w10
+	cmpeq	p2.s, p0/z, z0.s, z2.s
+	and	z1.s, z1.s, #0x1
 .Ltmp4:
-.LBB0_4:                                // %if.then
+	.loc	0 6 5 is_stmt 1                 // test.c:6:5
+	mov	z2.s, w12
+	cmpne	p1.s, p0/z, z1.s, #0
+	mov	z1.s, p1/z, #1                  // =0x1
+	mov	z1.s, p2/m, w11
+	and	z1.s, z1.s, #0x1
+	cmpne	p1.s, p0/z, z1.s, #0
+	mov	z1.s, p1/z, #1                  // =0x1
+	cmpeq	p1.s, p0/z, z0.s, z2.s
+	mov	z1.s, p1/m, w10
+	mov	w10, w3
+	and	z1.s, z1.s, #0x1
+	sub	x10, x10, #7
+	cmpne	p1.s, p0/z, z1.s, #0
+	ptrue	p0.s, vl4
+	cntp	x11, p0, p1.s
+	add	x11, x11, x11
+	b	.LBB0_6
+.Ltmp5:
+.LBB0_4:                                // %lane.gather
+                                        //   in Loop: Header=BB0_6 Depth=1
+	//DEBUG_VALUE: foo:n <- $w3
+	//DEBUG_VALUE: foo:c <- $x2
+	//DEBUG_VALUE: foo:b <- $x1
+	//DEBUG_VALUE: foo:a <- $x0
+	.loc	0 8 27                          // test.c:8:27
+	add	x12, x0, x8
+	.loc	0 8 13 is_stmt 0                // test.c:8:13
+	add	x13, x1, x8
+	.loc	0 9 9 is_stmt 1                 // test.c:9:9
+	ld1w	{ z0.s }, p0/z, [x12]
+	ld1w	{ z1.s }, p0/z, [x13]
+	add	x12, x2, x8
+	mul	z1.s, p0/m, z1.s, z0.s
+	st1w	{ z1.s }, p0, [x12]
+.Ltmp6:
+.LBB0_5:                                // %for.body.backedge
+                                        //   in Loop: Header=BB0_6 Depth=1
+	//DEBUG_VALUE: foo:n <- $w3
+	//DEBUG_VALUE: foo:c <- $x2
+	//DEBUG_VALUE: foo:b <- $x1
+	//DEBUG_VALUE: foo:a <- $x0
+	.loc	0 0 9 is_stmt 0                 // test.c:0:9
+	add	x9, x9, #4
+.Ltmp7:
+	//DEBUG_VALUE: i <- $x9
+	add	x8, x8, #16
+.Ltmp8:
+.LBB0_6:                                // %for.body
                                         // =>This Inner Loop Header: Depth=1
 	//DEBUG_VALUE: foo:n <- $w3
 	//DEBUG_VALUE: foo:c <- $x2
 	//DEBUG_VALUE: foo:b <- $x1
 	//DEBUG_VALUE: foo:a <- $x0
-	.loc	0 8 20                          // test.c:8:20
-	lsl	x10, x9, #2
-.Ltmp5:
-	.loc	0 0 0 is_stmt 0                 // test.c:0:0
-	add	x9, x9, #4
-.Ltmp6:
-	//DEBUG_VALUE: i <- $x9
-	.loc	0 8 20                          // test.c:8:20
-	ldr	w11, [x0, x10]
-	.loc	0 8 27                          // test.c:8:27
-	ldr	w12, [x1, x10]
-	.loc	0 8 25                          // test.c:8:25
-	mul	w11, w12, w11
-	.loc	0 8 18                          // test.c:8:18
-	str	w11, [x2, x10]
-.Ltmp7:
 	//DEBUG_VALUE: i <- undef
 	.loc	0 6 5 is_stmt 1                 // test.c:6:5
-	cmp	x8, x9
-	b.ne	.LBB0_4
-	b	.LBB0_2
-.Ltmp8:
+	cmp	x10, x9
+	b.eq	.LBB0_2
+.Ltmp9:
+// %bb.7:                               // %permute.decision
+                                        //   in Loop: Header=BB0_6 Depth=1
+	//DEBUG_VALUE: foo:n <- $w3
+	//DEBUG_VALUE: foo:c <- $x2
+	//DEBUG_VALUE: foo:b <- $x1
+	//DEBUG_VALUE: foo:a <- $x0
+	//DEBUG_VALUE: i <- undef
+	.loc	0 0 5 is_stmt 0                 // test.c:0:5
+	cmp	x11, #4
+	b.hs	.LBB0_4
+.Ltmp10:
+// %bb.8:                               // %linearized
+                                        //   in Loop: Header=BB0_6 Depth=1
+	//DEBUG_VALUE: foo:n <- $w3
+	//DEBUG_VALUE: foo:c <- $x2
+	//DEBUG_VALUE: foo:b <- $x1
+	//DEBUG_VALUE: foo:a <- $x0
+	.loc	0 8 20 is_stmt 1                // test.c:8:20
+	lsl	x12, x9, #2
+	ldr	w13, [x0, x12]
+	.loc	0 8 27 is_stmt 0                // test.c:8:27
+	ldr	w14, [x1, x12]
+	.loc	0 8 25                          // test.c:8:25
+	mul	w13, w14, w13
+	.loc	0 8 18                          // test.c:8:18
+	str	w13, [x2, x12]
+	b	.LBB0_5
+.Ltmp11:
 .Lfunc_end0:
 	.size	foo, .Lfunc_end0-foo
 	.cfi_endproc
@@ -88,7 +159,7 @@ foo:                                    // @foo
 	.type	main,@function
 main:                                   // @main
 .Lfunc_begin1:
-	.loc	0 13 0                          // test.c:13:0
+	.loc	0 13 0 is_stmt 1                // test.c:13:0
 	.cfi_startproc
 // %bb.0:                               // %entry
 	sub	sp, sp, #80
@@ -103,7 +174,7 @@ main:                                   // @main
 	.cfi_offset w21, -32
 	.cfi_offset w30, -40
 	.cfi_offset w29, -48
-.Ltmp9:
+.Ltmp12:
 	//DEBUG_VALUE: main:n <- 8
 	.loc	0 17 9 prologue_end             // test.c:17:9
 	movi	v0.2d, #0000000000000000
@@ -120,7 +191,7 @@ main:                                   // @main
 	//DEBUG_VALUE: foo:n <- 8
 	//DEBUG_VALUE: foo:c <- $sp
 	b	.LBB1_2
-.Ltmp10:
+.Ltmp13:
 .LBB1_1:                                // %for.inc.i
                                         //   in Loop: Header=BB1_2 Depth=1
 	//DEBUG_VALUE: i <- $x8
@@ -129,12 +200,12 @@ main:                                   // @main
 	//DEBUG_VALUE: main:n <- 8
 	.loc	0 6 28                          // test.c:6:28
 	add	x8, x8, #1
-.Ltmp11:
+.Ltmp14:
 	//DEBUG_VALUE: i <- $x8
 	.loc	0 6 5 is_stmt 0                 // test.c:6:5
 	cmp	x8, #8
 	b.eq	.LBB1_4
-.Ltmp12:
+.Ltmp15:
 .LBB1_2:                                // %for.body.i
                                         // =>This Inner Loop Header: Depth=1
 	//DEBUG_VALUE: foo:c <- $sp
@@ -143,7 +214,7 @@ main:                                   // @main
 	//DEBUG_VALUE: i <- $x8
 	.loc	0 7 13 is_stmt 1                // test.c:7:13
 	tbz	w8, #0, .LBB1_1
-.Ltmp13:
+.Ltmp16:
 // %bb.3:                               // %if.then.i
                                         //   in Loop: Header=BB1_2 Depth=1
 	//DEBUG_VALUE: i <- $x8
@@ -160,7 +231,7 @@ main:                                   // @main
 	.loc	0 8 18                          // test.c:8:18
 	str	w13, [x9, x12]
 	b	.LBB1_1
-.Ltmp14:
+.Ltmp17:
 .LBB1_4:                                // %for.body.preheader
 	//DEBUG_VALUE: i <- $x8
 	//DEBUG_VALUE: foo:c <- $sp
@@ -171,7 +242,7 @@ main:                                   // @main
 	mov	x21, sp
 	adrp	x19, .L.str
 	add	x19, x19, :lo12:.L.str
-.Ltmp15:
+.Ltmp18:
 .LBB1_5:                                // %for.body
                                         // =>This Inner Loop Header: Depth=1
 	//DEBUG_VALUE: main:n <- 8
@@ -181,21 +252,21 @@ main:                                   // @main
 	.loc	0 22 9 is_stmt 0                // test.c:22:9
 	mov	x0, x19
 	bl	printf
-.Ltmp16:
+.Ltmp19:
 	//DEBUG_VALUE: i <- [DW_OP_consts 4, DW_OP_div, DW_OP_consts 1, DW_OP_plus, DW_OP_stack_value] $x20
 	.loc	0 21 23 is_stmt 1               // test.c:21:23
 	add	x20, x20, #4
-.Ltmp17:
+.Ltmp20:
 	.loc	0 21 5 is_stmt 0                // test.c:21:5
 	cmp	x20, #32
 	b.ne	.LBB1_5
-.Ltmp18:
+.Ltmp21:
 // %bb.6:                               // %for.cond.cleanup
 	//DEBUG_VALUE: main:n <- 8
 	.loc	0 24 5 is_stmt 1                // test.c:24:5
 	mov	w0, #10
 	bl	putchar
-.Ltmp19:
+.Ltmp22:
 	.loc	0 25 5                          // test.c:25:5
 	mov	w0, wzr
 	.cfi_def_cfa wsp, 80
@@ -210,7 +281,7 @@ main:                                   // @main
 	.cfi_restore w30
 	.cfi_restore w29
 	ret
-.Ltmp20:
+.Ltmp23:
 .Lfunc_end1:
 	.size	main, .Lfunc_end1-main
 	.cfi_endproc
@@ -267,15 +338,20 @@ main:                                   // @main
 	.byte	0                               // 0
 	.byte	159                             // DW_OP_stack_value
 	.byte	4                               // DW_LLE_offset_pair
-	.uleb128 .Ltmp6-.Lfunc_begin0           //   starting offset
-	.uleb128 .Ltmp7-.Lfunc_begin0           //   ending offset
+	.uleb128 .Ltmp3-.Lfunc_begin0           //   starting offset
+	.uleb128 .Ltmp5-.Lfunc_begin0           //   ending offset
+	.byte	1                               // Loc expr size
+	.byte	92                              // DW_OP_reg12
+	.byte	4                               // DW_LLE_offset_pair
+	.uleb128 .Ltmp7-.Lfunc_begin0           //   starting offset
+	.uleb128 .Ltmp8-.Lfunc_begin0           //   ending offset
 	.byte	1                               // Loc expr size
 	.byte	89                              // DW_OP_reg9
 	.byte	0                               // DW_LLE_end_of_list
 .Ldebug_loc1:
 	.byte	4                               // DW_LLE_offset_pair
-	.uleb128 .Ltmp15-.Lfunc_begin0          //   starting offset
-	.uleb128 .Ltmp16-.Lfunc_begin0          //   ending offset
+	.uleb128 .Ltmp18-.Lfunc_begin0          //   starting offset
+	.uleb128 .Ltmp19-.Lfunc_begin0          //   ending offset
 	.byte	6                               // Loc expr size
 	.byte	132                             // DW_OP_breg20
 	.byte	0                               // 0
@@ -284,8 +360,8 @@ main:                                   // @main
 	.byte	27                              // DW_OP_div
 	.byte	159                             // DW_OP_stack_value
 	.byte	4                               // DW_LLE_offset_pair
-	.uleb128 .Ltmp16-.Lfunc_begin0          //   starting offset
-	.uleb128 .Ltmp17-.Lfunc_begin0          //   ending offset
+	.uleb128 .Ltmp19-.Lfunc_begin0          //   starting offset
+	.uleb128 .Ltmp20-.Lfunc_begin0          //   ending offset
 	.byte	9                               // Loc expr size
 	.byte	132                             // DW_OP_breg20
 	.byte	0                               // 0
@@ -711,7 +787,7 @@ main:                                   // @main
 	.byte	16                              // Abbrev [16] 0xcd:0x29 DW_TAG_inlined_subroutine
 	.word	93                              // DW_AT_abstract_origin
 	.byte	2                               // DW_AT_low_pc
-	.word	.Ltmp14-.Ltmp10                 // DW_AT_high_pc
+	.word	.Ltmp17-.Ltmp13                 // DW_AT_high_pc
 	.byte	0                               // DW_AT_call_file
 	.byte	19                              // DW_AT_call_line
 	.byte	5                               // DW_AT_call_column
@@ -724,7 +800,7 @@ main:                                   // @main
 	.word	121                             // DW_AT_abstract_origin
 	.byte	18                              // Abbrev [18] 0xe7:0xe DW_TAG_lexical_block
 	.byte	2                               // DW_AT_low_pc
-	.word	.Ltmp14-.Ltmp10                 // DW_AT_high_pc
+	.word	.Ltmp17-.Ltmp13                 // DW_AT_high_pc
 	.byte	19                              // Abbrev [19] 0xed:0x7 DW_TAG_variable
 	.byte	1                               // DW_AT_location
 	.byte	88
@@ -733,7 +809,7 @@ main:                                   // @main
 	.byte	0                               // End Of Children Mark
 	.byte	18                              // Abbrev [18] 0xf6:0x10 DW_TAG_lexical_block
 	.byte	3                               // DW_AT_low_pc
-	.word	.Ltmp18-.Ltmp15                 // DW_AT_high_pc
+	.word	.Ltmp21-.Ltmp18                 // DW_AT_high_pc
 	.byte	20                              // Abbrev [20] 0xfc:0x9 DW_TAG_variable
 	.byte	1                               // DW_AT_location
 	.byte	9                               // DW_AT_name
@@ -768,8 +844,8 @@ main:                                   // @main
 	.uleb128 .Lfunc_begin0-.Lfunc_begin0    //   starting offset
 	.uleb128 .Ltmp1-.Lfunc_begin0           //   ending offset
 	.byte	4                               // DW_RLE_offset_pair
-	.uleb128 .Ltmp2-.Lfunc_begin0           //   starting offset
-	.uleb128 .Ltmp8-.Lfunc_begin0           //   ending offset
+	.uleb128 .Ltmp4-.Lfunc_begin0           //   starting offset
+	.uleb128 .Ltmp11-.Lfunc_begin0          //   ending offset
 	.byte	0                               // DW_RLE_end_of_list
 .Ldebug_list_header_end1:
 	.section	.debug_str_offsets,"",@progbits
@@ -824,8 +900,8 @@ main:                                   // @main
 .Laddr_table_base0:
 	.xword	.Lfunc_begin0
 	.xword	.Lfunc_begin1
-	.xword	.Ltmp10
-	.xword	.Ltmp15
+	.xword	.Ltmp13
+	.xword	.Ltmp18
 .Ldebug_addr_end0:
 	.ident	"clang version 15.0.0 (https://www.github.com/llvm/llvm-project.git 61baf2ffa7071944c00a0642fdb9ff77d9cff0da)"
 	.section	".note.GNU-stack","",@progbits

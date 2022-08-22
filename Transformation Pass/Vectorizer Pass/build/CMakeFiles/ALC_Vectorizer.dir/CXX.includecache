@@ -51,6 +51,10 @@ llvm/Transforms/Utils/Cloning.h
 /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/SVE_Permute/llvm/Transforms/Utils/Cloning.h
 llvm/Transforms/Utils/BasicBlockUtils.h
 /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/SVE_Permute/llvm/Transforms/Utils/BasicBlockUtils.h
+stack
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/SVE_Permute/stack
+map
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/SVE_Permute/map
 
 /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/SVE_Vectorizer/SVE_Vectorizer.h
 llvm/Analysis/LoopInfo.h

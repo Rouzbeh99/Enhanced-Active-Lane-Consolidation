@@ -45,11 +45,10 @@ private:
     std::vector<Value *> *findPredicates(BasicBlock *initialLatch, int unrollFactor);
 
 private:
-    void refineCFG(std::vector<BasicBlock *> *newBlocks, BasicBlock *header, BasicBlock *latch, BasicBlock *thenBlock,
-                   Loop *L);
+    void refineCFG(std::vector<BasicBlock *> *newBlocks, BasicBlock *header, BasicBlock *latch, BasicBlock *thenBlock);
 
 private:
-    BasicBlock *findAndRefineThenBlock(BasicBlock *header, BasicBlock *latch);
+    BasicBlock *findTargetedBlock(BasicBlock *header, BasicBlock *latch);
 
 private:
     Value *findInductionVariableInLatch(BasicBlock *latch);
