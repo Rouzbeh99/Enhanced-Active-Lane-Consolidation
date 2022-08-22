@@ -16,15 +16,18 @@ void SVE_Permute::doTransformation() {
 
     refineLoopTripCount();
 
+    VectorType *vecType1 = VectorType::get(Type::getInt1Ty(context), vectorizationFactor, true);
+    VectorType *vecType32 = VectorType::get(Type::getInt32Ty(context), vectorizationFactor, true);
 
-    Value *uniformVector = nullptr;
-    Value *remainingVector = nullptr;
 
-    Value *uniformVectorPredicates = nullptr;
-    Value *remainingVectorPredicates = nullptr;
+    Value *uniformVector = UndefValue::get(vecType32);
+    Value *remainingVector = UndefValue::get(vecType32);
 
-    formInitialVectors(inductionVar, &uniformVectorPredicates, &remainingVectorPredicates, &uniformVector,
-                       &remainingVector);
+    Value *uniformVectorPredicates = UndefValue::get(vecType1);
+    Value *remainingVectorPredicates = UndefValue::get(vecType1);
+
+    formInitialPredicateVectors(inductionVar, &uniformVectorPredicates, &remainingVectorPredicates, &uniformVector,
+                                &remainingVector);
 
 //    doPermutation(uniformVectorPredicates, remainingVectorPredicates, uniformVector, remainingVector);
 
@@ -330,61 +333,57 @@ void SVE_Permute::refineLoopTripCount() {
 
 }
 
-/** make two blocks after the new latch each for initializing predicate vectors
- *
- *  before:
- *             header
- *                .   \
- *                .     \
- *                .      \
- *                .       \
- *                .        \
- *             newLatch    /
- *               |       /
- *               |      /
- *               |     /
- *              body /
- *
- *
- *
- *   After:
- *
- *          header
- *             .    \
- *             .       \
- *             .          \
- *             .             \
- *             .                \
- *           newLatch              \
- *             |                      \
- *             |                         \
- *             |                            \
- *        firstDecision                        \
- *           /       \                            \
- *          /         \                              \
- *         /           \                                \
- *  firstPredForm       secondDecision                     \
- *   \                           /   \                     /
- *      \                      /      \                   /
- *         \                  /         \                /
- *                          /         secondPredForm   /
- *             \           /            /            /
- *               \       /           /             /
- *                 \    /         /              /
- *                              /              /
- *                  headerPredecessor --------
- *
- *
- *
- *
- * @param initialValue
- */
+
 void
+SVE_Permute::formInitialPredicateVectors(Value *inductionVariable, Value **firstPredicates, Value **secondPredicates,
+                                         Value **firstVector, Value **secondVector) {
+
+    BasicBlock *lastLatch = duplicateBlocksForInitialPredicateGeneration(inductionVariable);
 
 
-SVE_Permute::formInitialVectors(Value *inductionVariable, Value **firstPredicates, Value **secondPredicates,
-                                Value **firstVector, Value **secondVector) {
+    LLVMContext &context = L->getHeader()->getContext();
+    IRBuilder<> builder(context);
+    builder.SetInsertPoint(lastLatch->getTerminator());
 
+
+
+    // find first generated header copy
+    BasicBlock *BB = lastLatch;
+    for (int i = 0; i < 4 * vectorizationFactor - 1; ++i) {
+        BB = BB->getPrevNode();
+    }
+
+
+    // forming first predicate vector
+    for (int i = 0; i < vectorizationFactor; ++i) {
+        /// heuristic: the predicate is the condition for a conditional branch that was replaced with
+        /// a unconditional one so it should come before the existing branch
+        Instruction *condInstruction = BB->getTerminator()->getPrevNonDebugInstruction();
+        (*firstPredicates) = builder.CreateInsertElement((*firstPredicates), condInstruction, i);
+        BB = BB->getNextNode()->getNextNode();
+    }
+
+    //forming second predicate vector
+    for (int i = 0; i < vectorizationFactor; ++i) {
+        /// heuristic: the predicate is the condition for a conditional branch that was replaced with
+        /// a unconditional one so it should come before the existing branch
+        Instruction *condInstruction = BB->getTerminator()->getPrevNonDebugInstruction();
+        (*secondPredicates) = builder.CreateInsertElement((*secondPredicates), condInstruction, i);
+        BB = BB->getNextNode()->getNextNode();
+    }
+
+    ConstantInt *constZero = llvm::ConstantInt::get(Type::getInt32Ty(context), 0, true);
+    ConstantInt *constOne = llvm::ConstantInt::get(Type::getInt32Ty(context), 1, true);
+    ConstantInt *constVFactor = llvm::ConstantInt::get(Type::getInt32Ty(context), vectorizationFactor, true);
+
+    (*firstVector) = createIndexInstruction(lastLatch->getTerminator(), constZero, constOne);
+    (*secondPredicates) = createIndexInstruction(lastLatch->getTerminator(), constVFactor, constOne);
+
+}
+
+
+// TODO: makes loop preHeader invalid
+BasicBlock *SVE_Permute::duplicateBlocksForInitialPredicateGeneration(Value *inductionVariable) {
     // gather header and latch copy blocks
 
     std::vector<BasicBlock *> initialBlocks;
@@ -444,7 +443,7 @@ SVE_Permute::formInitialVectors(Value *inductionVariable, Value **firstPredicate
         remapInstructionsInBlocks(newlyGeneratedBlock, lastValueMap);
     }
 
-    // refine branch instructions
+//    // refine branch instructions
     for (int i = 0; i < firstNewBlocks.size() - 1; ++i) {
         firstNewBlocks[i]->getTerminator()->setOperand(0, firstNewBlocks[i + 1]);
     }
@@ -454,12 +453,15 @@ SVE_Permute::formInitialVectors(Value *inductionVariable, Value **firstPredicate
 
 
     // keep last block
-    BasicBlock *lastLatch = firstNewBlocks.back();
+    BasicBlock *lastLatchInFirstCopies = firstNewBlocks.back();
+
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// Second predicates
 
     // should find the last value of induction variable to be used in the next block
     //TODO: find a way to detect it
-    auto *lastValueForInductionVar = dyn_cast<Value>(lastLatch->getFirstNonPHI());
+    auto *lastValueForInductionVar = dyn_cast<Value>(lastLatchInFirstCopies->getFirstNonPHI());
 
     std::vector<BasicBlock *> secondNewBlocks;
 
@@ -498,8 +500,8 @@ SVE_Permute::formInitialVectors(Value *inductionVariable, Value **firstPredicate
     }
 
     //the last latch of first set of copies  should branch to the first block of the new set of block copies
-    lastLatch->getTerminator()->eraseFromParent();
-    BranchInst::Create(secondNewBlocks.front(), lastLatch);
+    lastLatchInFirstCopies->getTerminator()->eraseFromParent();
+    BranchInst::Create(secondNewBlocks.front(), lastLatchInFirstCopies);
 
     // new latch copy should branch to loop header
     newLatch = secondNewBlocks.back();
@@ -520,9 +522,7 @@ SVE_Permute::formInitialVectors(Value *inductionVariable, Value **firstPredicate
         }
     }
 
-
-    llvm::outs() << "-----------------------------------------------------------------\n";
-
+    return secondNewBlocks.back();
 }
 
 void SVE_Permute::doPermutation(Value *firstPredicates, Value *secondPredicates, Value *firstVector,
@@ -635,6 +635,8 @@ SVE_Permute::SVE_Permute(Loop *l, int factor, LoopInfo *loopInfo, BasicBlock *la
     predicates = preds;
     targetedBlock = findTargetedBB();
 }
+
+
 
 
 

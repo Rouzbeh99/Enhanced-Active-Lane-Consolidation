@@ -156,7 +156,6 @@ std::vector<Value *> *Unroller::findPredicates(BasicBlock *initialLatch, int unr
         } else {
             // TODO: raise error
         }
-
     }
 
 

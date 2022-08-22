@@ -25,7 +25,7 @@ foo:                                    // @foo
 	//DEBUG_VALUE: foo:b <- $x1
 	//DEBUG_VALUE: foo:a <- $x0
 	//DEBUG_VALUE: i <- undef
-	cmp	w3, #8
+	cmp	w3, #11
 	b.ne	.LBB0_3
 .Ltmp1:
 .LBB0_2:                                // %for.cond.cleanup
@@ -45,7 +45,7 @@ foo:                                    // @foo
 	mov	w8, w3
 	mov	x9, xzr
 	.loc	0 6 5 is_stmt 1                 // test.c:6:5
-	sub	x8, x8, #5
+	sub	x8, x8, #7
 .Ltmp3:
 	//DEBUG_VALUE: i <- undef
 	cmp	x8, x9
@@ -61,7 +61,7 @@ foo:                                    // @foo
 	lsl	x10, x9, #2
 .Ltmp5:
 	.loc	0 0 0 is_stmt 0                 // test.c:0:0
-	add	x9, x9, #3
+	add	x9, x9, #4
 .Ltmp6:
 	//DEBUG_VALUE: i <- $x9
 	.loc	0 8 20                          // test.c:8:20

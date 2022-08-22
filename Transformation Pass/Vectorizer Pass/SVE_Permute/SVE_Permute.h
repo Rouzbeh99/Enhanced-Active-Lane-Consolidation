@@ -31,7 +31,7 @@ private:
     LoopInfo *LI;
     BasicBlock *newLatch;
     std::vector<Value *> predicates;
-    BasicBlock* headerPredecessor;
+    BasicBlock *headerPredecessor;
 
     Value *permutedZ0;
     Value *permutedZ1;
@@ -48,13 +48,17 @@ public:
     void doTransformation();
 
 private:
-    void formInitialVectors(Value *inductionVariable, Value **firstPredicates, Value **secondPredicates, Value** firstVector, Value** secondVector);
+    void formInitialPredicateVectors(Value *inductionVariable, Value **firstPredicates, Value **secondPredicates,
+                                     Value **firstVector, Value **secondVector);
+    // returns last generated latch
+private:
+    BasicBlock *duplicateBlocksForInitialPredicateGeneration(Value *inductionVariable);
 
 private:
     void insertPermutationLogic(Instruction *insertionPoint, Value *z0, Value *z1, Value *p0, Value *p1);
 
 private:
-    void doPermutation(Value *firstPredicates, Value *secondPredicates, Value* firstVector, Value* secondVector);
+    void doPermutation(Value *firstPredicates, Value *secondPredicates, Value *firstVector, Value *secondVector);
 
 private:
     BasicBlock *findTargetedBB();

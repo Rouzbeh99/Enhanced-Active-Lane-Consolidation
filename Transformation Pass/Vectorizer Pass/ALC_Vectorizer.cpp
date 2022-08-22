@@ -21,6 +21,8 @@ namespace {
 
     void printLoop(Loop *L);
 
+    void printBeforeLoopBlocks(Loop *L);
+
 
 
 
@@ -45,7 +47,7 @@ namespace {
 
         BasicBlock *initialLatch = L->getLoopLatch();
 
-        int factor = 3;
+        int factor = 4;
 
         auto *unroller = new Unroller(L, &LI);
         unroller->doUnrolling(factor);
@@ -59,8 +61,9 @@ namespace {
 
         sve_permute->doTransformation();
 
-
+//        printBeforeLoopBlocks(L);
         printLoop(L);
+
 
         //return (llvm::PreservedAnalyses::all());
         return llvm::PreservedAnalyses::none();
@@ -69,10 +72,14 @@ namespace {
 
     void printLoop(Loop *L) {
 
-//        for (auto BB: L->getBlocks()) {
-//            BB->print(outs());
-//        }
-//        llvm::outs() << "\n";
+        for (auto BB: L->getBlocks()) {
+            BB->print(outs());
+        }
+        llvm::outs() << "\n";
+
+    }
+
+    void printBeforeLoopBlocks(Loop *L) {
         for (auto &BB: L->getHeader()->getParent()->getBasicBlockList()) {
             if (L->contains(&BB)) {
                 continue;
