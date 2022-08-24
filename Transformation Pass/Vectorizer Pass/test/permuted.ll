@@ -189,10 +189,12 @@ if.then:                                          ; preds = %lane.gather
   %arrayidx3 = getelementptr inbounds i32, ptr %b, i64 %12, !dbg !47
   %arrayidx5 = getelementptr inbounds i32, ptr %c, i64 %12, !dbg !49
   %50 = call <vscale x 4 x i1> @llvm.aarch64.sve.ptrue.nxv4i1(i32 4), !dbg !51
-  %51 = call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.nxv4i32(<vscale x 4 x i1> %50, ptr %arrayidx), !dbg !51
-  %52 = call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.nxv4i32(<vscale x 4 x i1> %50, ptr %arrayidx3), !dbg !51
+  %51 = call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.gather.sxtw.index.nxv4i32(<vscale x 4 x i1> %50, ptr %arrayidx, <vscale x 4 x i32> %27), !dbg !51
+  %52 = call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.gather.sxtw.index.nxv4i32(<vscale x 4 x i1> %50, ptr %arrayidx3, <vscale x 4 x i32> %27), !dbg !51
   %53 = call <vscale x 4 x i32> @llvm.aarch64.sve.mul.nxv4i32(<vscale x 4 x i1> %50, <vscale x 4 x i32> %52, <vscale x 4 x i32> %51), !dbg !51
-  call void @llvm.aarch64.sve.st1.nxv4i32(<vscale x 4 x i32> %53, <vscale x 4 x i1> %50, ptr %arrayidx5), !dbg !51
+  call void @llvm.aarch64.sve.st1.scatter.sxtw.nxv4i32(<vscale x 4 x i32> %53, <vscale x 4 x i1> %50, ptr %arrayidx5, <vscale x 4 x i32> %27), !dbg !51
+  %54 = zext <vscale x 4 x i32> %27 to <vscale x 4 x i64>, !dbg !51
+  call void @llvm.aarch64.sve.st1.scatter.sxtw.nxv4i32(<vscale x 4 x i32> %27, <vscale x 4 x i1> %50, ptr %arrayidx5, <vscale x 4 x i32> %27), !dbg !51
   br label %new.latch, !dbg !51
 
 for.inc:                                          ; preds = %for.body
@@ -231,8 +233,8 @@ for.body.headerCopy.1.2.3:                        ; preds = %for.inc.latchCopy.1
 for.inc.latchCopy.1.2.3:                          ; preds = %for.body.headerCopy.1.2.3
   %indvars.iv.next.latchCopy.1.2.3 = add nuw nsw i64 %indvars.iv.next.latchCopy.1.2, 1, !dbg !35
   call void @llvm.dbg.value(metadata i64 %indvars.iv.next.latchCopy.1.2.3, metadata !25, metadata !DIExpression()), !dbg !28
-  %54 = sub i64 %wide.trip.count, 3, !dbg !29
-  %exitcond.not.latchCopy.1.2.3 = icmp eq i64 %indvars.iv.next.latchCopy.1.2.3, %54, !dbg !29
+  %55 = sub i64 %wide.trip.count, 3, !dbg !29
+  %exitcond.not.latchCopy.1.2.3 = icmp eq i64 %indvars.iv.next.latchCopy.1.2.3, %55, !dbg !29
   br i1 %exitcond.not.latchCopy.1.2.3, label %for.cond.cleanup.loopexit, label %permute.decision, !dbg !31, !llvm.loop !36
 
 new.latch:                                        ; preds = %linearized, %if.then
@@ -255,7 +257,7 @@ entry:
   call void @llvm.dbg.value(metadata i32 8, metadata !56, metadata !DIExpression()), !dbg !65
   call void @llvm.dbg.declare(metadata ptr @__const.main.a, metadata !57, metadata !DIExpression()), !dbg !66
   call void @llvm.dbg.declare(metadata ptr @__const.main.b, metadata !61, metadata !DIExpression()), !dbg !67
-  call void @llvm.lifetime.start.p0(i64 32, ptr nonnull %c) #10, !dbg !68
+  call void @llvm.lifetime.start.p0(i64 32, ptr nonnull %c) #11, !dbg !68
   call void @llvm.dbg.declare(metadata ptr %c, metadata !62, metadata !DIExpression()), !dbg !69
   call void @llvm.memset.p0.i64(ptr noundef nonnull align 4 dereferenceable(32) %c, i8 0, i64 32, i1 false), !dbg !69
   tail call void @llvm.experimental.noalias.scope.decl(metadata !70), !dbg !73
@@ -296,7 +298,7 @@ for.body.preheader:                               ; preds = %for.inc.i
 
 for.cond.cleanup:                                 ; preds = %for.body
   %putchar = tail call i32 @putchar(i32 10), !dbg !98
-  call void @llvm.lifetime.end.p0(i64 32, ptr nonnull %c) #10, !dbg !99
+  call void @llvm.lifetime.end.p0(i64 32, ptr nonnull %c) #11, !dbg !99
   ret i32 0, !dbg !100
 
 for.body:                                         ; preds = %for.body.preheader, %for.body
@@ -348,13 +350,13 @@ declare <vscale x 4 x i32> @llvm.aarch64.sve.splice.nxv4i32(<vscale x 4 x i1>, <
 declare <vscale x 4 x i32> @llvm.aarch64.sve.sel.nxv4i32(<vscale x 4 x i1>, <vscale x 4 x i32>, <vscale x 4 x i32>) #8
 
 ; Function Attrs: argmemonly nocallback nofree nosync nounwind readonly willreturn
-declare <vscale x 4 x i32> @llvm.aarch64.sve.ld1.nxv4i32(<vscale x 4 x i1>, ptr) #9
+declare <vscale x 4 x i32> @llvm.aarch64.sve.ld1.gather.sxtw.index.nxv4i32(<vscale x 4 x i1>, ptr, <vscale x 4 x i32>) #9
 
 ; Function Attrs: nocallback nofree nosync nounwind readnone willreturn
 declare <vscale x 4 x i32> @llvm.aarch64.sve.mul.nxv4i32(<vscale x 4 x i1>, <vscale x 4 x i32>, <vscale x 4 x i32>) #8
 
-; Function Attrs: argmemonly nocallback nofree nosync nounwind willreturn
-declare void @llvm.aarch64.sve.st1.nxv4i32(<vscale x 4 x i32>, <vscale x 4 x i1>, ptr nocapture) #2
+; Function Attrs: argmemonly nocallback nofree nosync nounwind willreturn writeonly
+declare void @llvm.aarch64.sve.st1.scatter.sxtw.nxv4i32(<vscale x 4 x i32>, <vscale x 4 x i1>, ptr, <vscale x 4 x i32>) #10
 
 attributes #0 = { argmemonly nofree norecurse nosync nounwind uwtable "frame-pointer"="non-leaf" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="generic" "target-features"="+neon,+v8a" }
 attributes #1 = { nocallback nofree nosync nounwind readnone speculatable willreturn }
@@ -366,7 +368,8 @@ attributes #6 = { nofree nounwind }
 attributes #7 = { inaccessiblememonly nocallback nofree nosync nounwind willreturn }
 attributes #8 = { nocallback nofree nosync nounwind readnone willreturn }
 attributes #9 = { argmemonly nocallback nofree nosync nounwind readonly willreturn }
-attributes #10 = { nounwind }
+attributes #10 = { argmemonly nocallback nofree nosync nounwind willreturn writeonly }
+attributes #11 = { nounwind }
 
 !llvm.dbg.cu = !{!0}
 !llvm.module.flags = !{!2, !3, !4, !5, !6, !7, !8, !9, !10, !11, !12}

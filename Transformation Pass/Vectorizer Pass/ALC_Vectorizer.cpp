@@ -30,6 +30,8 @@ namespace {
 // alc_vectorizer implementation
 //-----------------------------------------------------------------------------
 
+
+
     PreservedAnalyses alc_vectorizer::run(Loop &loop, LoopAnalysisManager &AM,
                                           LoopStandardAnalysisResults &AR, LPMUpdater &U) {
         Loop *L = &loop;

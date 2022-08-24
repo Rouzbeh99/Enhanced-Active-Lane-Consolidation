@@ -34,9 +34,6 @@ private:
     BasicBlock *newLatch;
     std::vector<Value *> predicates;
 
-    Value *permutedZ0;
-    Value *permutedZ1;
-    Value *permutedPredicates;
 
 
 public:
@@ -56,10 +53,13 @@ private:
     BasicBlock *duplicateBlocksForInitialPredicateGeneration(Value *inductionVariable);
 
 private:
-    void insertPermutationLogic(Instruction *insertionPoint, Value *z0, Value *z1, Value *p0, Value *p1);
+    void
+    insertPermutationLogic(Instruction *insertAt, Value *z0, Value *z1, Value *p0, Value *p1, Value **permutedZ0,
+                           Value **permutedZ1, Value **permutedPredicates);
 
 private:
-    BasicBlock* doPermutation(Value *firstPredicates, Value *secondPredicates, Value *firstVector, Value *secondVector);
+    BasicBlock *doPermutation(Value *firstPredicates, Value *secondPredicates, Value *firstVector, Value *secondVector, Value **permutedZ0,
+                              Value **permutedZ1, Value **permutedPredicates);
 
 private:
     BasicBlock *findTargetedBB();
@@ -117,21 +117,21 @@ private:
     Value *createSubInstruction(Instruction *insertionPoint, Value *firstOp, Value *secondOp);
 
 private:
-    void makeBlockVectorized(BasicBlock *block,  Value* predicateVector);
+    void makeBlockVectorized(BasicBlock *block, Value *predicateVector, Value* indices);
 
     //blocks contain scalar code
 private:
-    void fillLinearizedBlock(BasicBlock *linearizedBlock, const std::vector<BasicBlock *>& blocks);
+    void fillLinearizedBlock(BasicBlock *linearizedBlock, const std::vector<BasicBlock *> &blocks);
 
 private:
     void refineLoopTripCount();
 
 private:
-    CallInst *createLoadInstruction(Instruction *insertionPoint, GEPOperator *ptr, Value *predicatedVector);
+    CallInst *createGatherLoadInstruction(Instruction *insertionPoint, GEPOperator *ptr, Value *predicatedVector, Value* indices);
 
 private:
-    void createStoreInstruction(Instruction *insertionPoint, Value *elementsVector, GEPOperator *ptr,
-                                Value *predicatedVector);
+    void createScatterStoreInstruction(Instruction *insertionPoint, Value *elementsVector, GEPOperator *ptr,
+                                       Value *predicatedVector, Value* indices);
 
 private:
     CallInst *
