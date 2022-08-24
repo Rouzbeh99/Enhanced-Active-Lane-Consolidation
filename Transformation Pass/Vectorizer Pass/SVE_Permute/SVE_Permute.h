@@ -35,7 +35,6 @@ private:
     std::vector<Value *> predicates;
 
 
-
 public:
     SVE_Permute(Loop *l, int vectorizationFactor, LoopInfo *LI, BasicBlock *newLatch,
                 std::vector<Value *> predicateVector);
@@ -58,14 +57,18 @@ private:
                            Value **permutedZ1, Value **permutedPredicates);
 
 private:
-    BasicBlock *doPermutation(Value *firstPredicates, Value *secondPredicates, Value *firstVector, Value *secondVector, Value **permutedZ0,
+    BasicBlock *doPermutation(Value *firstPredicates, Value *secondPredicates, Value *firstVector, Value *secondVector,
+                              Value **permutedZ0,
                               Value **permutedZ1, Value **permutedPredicates);
 
 private:
     BasicBlock *findTargetedBB();
 
 private:
-    Value *formPredicateVector(BasicBlock *insertAt);
+    void updateVectors(BasicBlock *insertAt, Value **indicesVector, Value **predicateVector, Value *inductionVariable);
+
+private:
+    void insertPhiNodsForVector(Value *updatedValue, Value* initialValue, BasicBlock* linearizedBlock);
 
 private:
     BasicBlock *getLastHeaderCopy();
@@ -117,7 +120,7 @@ private:
     Value *createSubInstruction(Instruction *insertionPoint, Value *firstOp, Value *secondOp);
 
 private:
-    void makeBlockVectorized(BasicBlock *block, Value *predicateVector, Value* indices);
+    void makeBlockVectorized(BasicBlock *block, Value *predicateVector, Value *indices);
 
     //blocks contain scalar code
 private:
@@ -127,11 +130,12 @@ private:
     void refineLoopTripCount();
 
 private:
-    CallInst *createGatherLoadInstruction(Instruction *insertionPoint, GEPOperator *ptr, Value *predicatedVector, Value* indices);
+    CallInst *
+    createGatherLoadInstruction(Instruction *insertionPoint, GEPOperator *ptr, Value *predicatedVector, Value *indices);
 
 private:
     void createScatterStoreInstruction(Instruction *insertionPoint, Value *elementsVector, GEPOperator *ptr,
-                                       Value *predicatedVector, Value* indices);
+                                       Value *predicatedVector, Value *indices);
 
 private:
     CallInst *

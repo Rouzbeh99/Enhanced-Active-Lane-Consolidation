@@ -38,5 +38,8 @@ cd ../test
 $LLVM_BUILD_DIR/bin/clang -g -O3 -target aarch64-none-linux-gnu -fno-vectorize -fno-slp-vectorize -fno-unroll-loops -S -emit-llvm $1 -o test.ll
 $LLVM_BUILD_DIR/bin/opt -S -load-pass-plugin ../build/ALC_Vectorizer.so -passes="alc-vectorizer" test.ll -o permuted.ll
 
+opt --disable-output -dot-cfg --cfg-dot-filename-prefix=cfg permuted.ll
+dot -Tpdf cfg.foo.dot -o cfg.pdf
+
 $LLVM_BUILD_DIR/bin/llc -mtriple=aarch64-linux-gnu  -mattr=sve,sve2 -filetype=asm permuted.ll -o permuted.s
 

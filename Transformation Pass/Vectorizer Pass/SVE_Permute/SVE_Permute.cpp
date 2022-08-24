@@ -5,6 +5,7 @@
 #include "SVE_Permute.h"
 
 // TODO: analysis path should exclude cases like c[j] = a[i] + b[i + 1]  in other words, memory access of the operands and result should be the same
+// TODO: llc does not work on 64 bit elements!!!
 
 void SVE_Permute::doTransformation() {
 
@@ -18,19 +19,24 @@ void SVE_Permute::doTransformation() {
     refineLoopTripCount();
 
     VectorType *vecType1 = VectorType::get(Type::getInt1Ty(context), vectorizationFactor, true);
-    VectorType *vecType64 = VectorType::get(Type::getInt32Ty(context), vectorizationFactor, true);
+    VectorType *vecType32 = VectorType::get(Type::getInt32Ty(context), vectorizationFactor, true);
 
 
-    Value *initialUniformVector = UndefValue::get(vecType64);
-    Value *initialRemainingVector = UndefValue::get(vecType64);
+    Value *initialUniformVector = UndefValue::get(vecType32);
+    Value *initialRemainingVector = UndefValue::get(vecType32);
 
     Value *initialUniformVectorPredicates = UndefValue::get(vecType1);
     Value *initialRemainingVectorPredicates = UndefValue::get(vecType1);
 
-    Value *permutedUniformVector = UndefValue::get(vecType64);
-    Value *permutedRemainingVector = UndefValue::get(vecType64);
+    Value *permutedUniformVector = UndefValue::get(vecType32);
+    Value *permutedRemainingVector = UndefValue::get(vecType32);
 
     Value *permutedPredicates = UndefValue::get(vecType1);
+
+    Value *updatedUniformVector = UndefValue::get(vecType32);
+    Value *updatedRemainingVector = UndefValue::get(vecType32);
+    Value *updatedUniformVectorPredicates = UndefValue::get(vecType1);
+    Value *updatedRemainingVectorPredicates = UndefValue::get(vecType1);
 
 
     formInitialPredicateVectors(inductionVar, &initialUniformVectorPredicates, &initialRemainingVectorPredicates,
@@ -44,12 +50,19 @@ void SVE_Permute::doTransformation() {
                                                 &permutedPredicates);
 
     std::vector<BasicBlock *> blocks;
-    blocks.push_back(targetedBlock);
+//   blocks.push_back(targetedBlock);
     fillLinearizedBlock(linearizedBlock, blocks);
 
     CallInst *allTruePredicates = createAllTruePredicates(targetedBlock->getTerminator());
     makeBlockVectorized(targetedBlock, allTruePredicates, permutedUniformVector);
+    // update the permutedUniformVector
+    updateVectors(targetedBlock, &updatedUniformVector, &updatedRemainingVectorPredicates, inductionVar);
 
+    // adding phi nodes for vectors
+    insertPhiNodsForVector(updatedUniformVector, initialUniformVector, linearizedBlock);
+
+    ///// WHAT about the remaining vector???
+//    insertPhiNodsForVector(updatedRemainingVectorPredicates, initialRemainingVector, linearizedBlock);
 
 }
 
@@ -697,7 +710,6 @@ SVE_Permute::createGatherLoadInstruction(Instruction *insertionPoint, GEPOperato
     Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, type);
 
 
-
     std::vector<Value *> arguments;
     arguments.push_back(predicatedVector);
     arguments.push_back(ptr);
@@ -787,12 +799,14 @@ BasicBlock *SVE_Permute::findTargetedBB() {
     return nullptr;
 }
 
-Value *SVE_Permute::formPredicateVector(BasicBlock *insertAt) {
+void SVE_Permute::updateVectors(BasicBlock *insertAt, Value **indicesVector, Value **predicateVector,
+                                Value *inductionVariable) {
 
+    // updating predicate
     LLVMContext &context = L->getHeader()->getContext();
     IRBuilder<> builder(context);
 
-    builder.SetInsertPoint(insertAt);
+    builder.SetInsertPoint(insertAt->getTerminator());
 
     VectorType *type = VectorType::get(Type::getInt1Ty(context), vectorizationFactor, true);
 
@@ -804,9 +818,85 @@ Value *SVE_Permute::formPredicateVector(BasicBlock *insertAt) {
         predicateHolder = builder.CreateInsertElement(predicateHolder, predicates[i], index);
     }
 
-    return predicateHolder;
+    *predicateVector = predicateHolder;
+
+    // updating indices
+    Constant *constOne = llvm::ConstantInt::get(Type::getInt32Ty(context), 1, true);
+    Value *castedIndVar = builder.CreateIntCast(inductionVariable, Type::getInt32Ty(context), false);
+    *indicesVector = createIndexInstruction(insertAt->getTerminator(), castedIndVar, constOne);
+
 
 }
+
+void SVE_Permute::insertPhiNodsForVector(Value *updatedValue, Value *initialValue,
+                                         BasicBlock *linearizedBlock) {
+    // there should be one phi in the latch which is the joint point for linearized path and vectorized path
+    Instruction *insertAt = L->getLoopLatch()->getTerminator();
+    PHINode *latchPhi = PHINode::Create(updatedValue->getType(), 2);
+    latchPhi->insertBefore(insertAt);
+    latchPhi->addIncoming(updatedValue, targetedBlock);
+    latchPhi->addIncoming(initialValue, linearizedBlock);   // to be change, should get the value of header phi
+
+    // then there should be another phi in the loop header
+    insertAt = L->getHeader()->getFirstNonPHI();
+    PHINode *headerPhi = PHINode::Create(updatedValue->getType(), 2);
+    headerPhi->insertBefore(insertAt);
+    headerPhi->addIncoming(latchPhi, L->getLoopLatch());
+
+    // get the other predecessor of header
+    BasicBlock *pred = nullptr;
+    for (auto BB: predecessors(L->getHeader())) {
+        if (BB != L->getLoopLatch()) {
+            pred = BB;
+        }
+    }
+    headerPhi->addIncoming(initialValue, pred);
+
+
+    // replace all usages of initialValues inside the loop with the header phi value
+    std::map<Instruction *, int> toBeChanged;
+    auto *instr = dyn_cast<Instruction>(initialValue);
+    for (auto user: instr->users()) {
+
+        auto *userInstr = dyn_cast<Instruction>(user);
+        if (!L->contains(userInstr)) {
+            continue;
+        }
+        if (isa<PHINode>(userInstr)) {
+            continue;
+        }
+        for (int i = 0; i < userInstr->getNumOperands(); ++i) {
+            if (userInstr->getOperand(i) == initialValue) {
+                toBeChanged.insert({userInstr, i});
+            }
+        }
+    }
+
+    // do the same for the updatedValue
+    instr = dyn_cast<Instruction>(updatedValue);
+    for (auto user: instr->users()) {
+        auto *userInstr = dyn_cast<Instruction>(user);
+        if (!L->contains(userInstr)) {
+            continue;
+        }
+        if (isa<PHINode>(userInstr)) {
+            continue;
+        }
+        for (int i = 0; i < userInstr->getNumOperands(); ++i) {
+            if (userInstr->getOperand(i) == updatedValue) {
+                toBeChanged.insert({userInstr, i});
+            }
+        }
+    }
+    for (auto pair: toBeChanged) {
+        pair.first->setOperand(pair.second, headerPhi);
+    }
+
+
+    //Finally, update phiNode in the latch to get value from header phi
+    latchPhi->setIncomingValueForBlock(linearizedBlock, headerPhi);
+}
+
 
 BasicBlock *SVE_Permute::getLastHeaderCopy() {
     BasicBlock *BB = L->getHeader();
@@ -834,6 +924,9 @@ SVE_Permute::SVE_Permute(Loop *l, int factor, LoopInfo *loopInfo, BasicBlock *la
     predicates = preds;
     targetedBlock = findTargetedBB();
 }
+
+
+
 
 
 

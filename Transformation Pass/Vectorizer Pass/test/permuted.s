@@ -42,121 +42,114 @@ foo:                                    // @foo
 	//DEBUG_VALUE: foo:b <- $x1
 	//DEBUG_VALUE: foo:a <- $x0
 	.loc	0 0 1 is_stmt 0                 // test.c:0:1
-	mov	w11, #1
-	mov	w10, wzr
+	mov	w10, #1
+	mov	w9, wzr
 	ptrue	p0.s
-	index	z2.s, #0, #1
-	mov	w12, #2
+	index	z0.s, #0, #1
+	mov	w11, #2
 	mov	x8, xzr
-	fmov	s0, w11
-	mov	z1.s, w11
-	cmpeq	p2.s, p0/z, z2.s, z1.s
-	mov	x9, xzr
-	mov	z1.s, w12
-	mov	w12, #3
+	fmov	s1, w10
+	mov	z2.s, w10
+	cmpeq	p2.s, p0/z, z0.s, z2.s
 .Ltmp3:
-	//DEBUG_VALUE: i <- $x12
-	and	z0.s, z0.s, #0x1
-	cmpne	p1.s, p0/z, z0.s, #0
-	mov	z0.s, p1/z, #1                  // =0x1
-	mov	z0.s, p2/m, w10
-	cmpeq	p2.s, p0/z, z2.s, z1.s
-	and	z0.s, z0.s, #0x1
-	cmpne	p1.s, p0/z, z0.s, #0
-	mov	z0.s, p1/z, #1                  // =0x1
-	mov	z0.s, p2/m, w11
-	mov	w11, w3
-	and	z0.s, z0.s, #0x1
-.Ltmp4:
 	.loc	0 6 5 is_stmt 1                 // test.c:6:5
-	sub	x11, x11, #7
-	cmpne	p1.s, p0/z, z0.s, #0
-	mov	z0.s, w12
-	mov	z1.s, p1/z, #1                  // =0x1
-	cmpeq	p1.s, p0/z, z2.s, z0.s
-	mov	z1.s, p1/m, w10
+	sub	x13, x0, #16
+	mov	z2.s, w11
+	mov	w11, #3
+.Ltmp4:
+	//DEBUG_VALUE: i <- $x11
+	.loc	0 0 5 is_stmt 0                 // test.c:0:5
 	and	z1.s, z1.s, #0x1
 	cmpne	p1.s, p0/z, z1.s, #0
-	ptrue	p0.s, vl4
-	cntp	x10, p0, p1.s
-	compact	z0.s, p1, z2.s
-	add	x12, x10, x10
+	mov	z1.s, p1/z, #1                  // =0x1
+	mov	z1.s, p2/m, w9
+	cmpeq	p2.s, p0/z, z0.s, z2.s
+	and	z1.s, z1.s, #0x1
+	.loc	0 6 5                           // test.c:6:5
+	mov	z2.s, w11
+	cmpne	p1.s, p0/z, z1.s, #0
+	sub	x11, x1, #16
 .Ltmp5:
-	add	z2.s, z2.s, #4                  // =0x4
-	compact	z1.s, p1, z2.s
-	b	.LBB0_6
-.Ltmp6:
-.LBB0_4:                                // %lane.gather
-                                        //   in Loop: Header=BB0_6 Depth=1
-	//DEBUG_VALUE: foo:n <- $w3
-	//DEBUG_VALUE: foo:c <- $x2
-	//DEBUG_VALUE: foo:b <- $x1
-	//DEBUG_VALUE: foo:a <- $x0
-	.loc	0 8 27                          // test.c:8:27
-	add	x13, x0, x8
-	.loc	0 8 13 is_stmt 0                // test.c:8:13
-	add	x14, x1, x8
+	.loc	0 0 5                           // test.c:0:5
+	mov	z1.s, p1/z, #1                  // =0x1
+	mov	z1.s, p2/m, w10
+	.loc	0 6 5                           // test.c:6:5
+	cmpeq	p2.s, p0/z, z0.s, z2.s
+	and	z1.s, z1.s, #0x1
 	mov	z2.d, z0.d
-	whilelt	p1.s, xzr, x10
-	splice	z2.s, p1, z2.s, z1.s
-	.loc	0 9 9 is_stmt 1                 // test.c:9:9
-	ld1w	{ z3.s }, p0/z, [x13, z2.s, sxtw #2]
-	ld1w	{ z4.s }, p0/z, [x14, z2.s, sxtw #2]
-	add	x13, x2, x8
-	mul	z4.s, p0/m, z4.s, z3.s
-	st1w	{ z4.s }, p0, [x13, z2.s, sxtw]
-	st1w	{ z2.s }, p0, [x13, z2.s, sxtw]
+	cmpne	p1.s, p0/z, z1.s, #0
+	mov	w10, w3
+	mov	z1.s, p1/z, #1                  // =0x1
+	ptrue	p1.s, vl4
+	mov	z1.s, p2/m, w9
+	add	z2.s, z2.s, #4                  // =0x4
+	and	z1.s, z1.s, #0x1
+	sub	x9, x10, #7
+	cmpne	p0.s, p0/z, z1.s, #0
+	sub	x10, x2, #16
+	cntp	x12, p1, p0.s
+	compact	z1.s, p0, z2.s
+	add	x14, x12, x12
+.Ltmp6:
+.LBB0_4:                                // %for.body.outer
+                                        // =>This Loop Header: Depth=1
+                                        //     Child Loop BB0_5 Depth 2
+	//DEBUG_VALUE: foo:n <- $w3
+	//DEBUG_VALUE: foo:c <- $x2
+	//DEBUG_VALUE: foo:b <- $x1
+	//DEBUG_VALUE: foo:a <- $x0
+	lsl	x17, x8, #2
+	add	x15, x10, x17
+	add	x16, x11, x17
+	add	x17, x13, x17
 .Ltmp7:
-.LBB0_5:                                // %for.body.backedge
-                                        //   in Loop: Header=BB0_6 Depth=1
-	//DEBUG_VALUE: foo:n <- $w3
-	//DEBUG_VALUE: foo:c <- $x2
-	//DEBUG_VALUE: foo:b <- $x1
-	//DEBUG_VALUE: foo:a <- $x0
-	.loc	0 0 9 is_stmt 0                 // test.c:0:9
-	add	x9, x9, #4
-.Ltmp8:
-	//DEBUG_VALUE: i <- $x9
-	add	x8, x8, #16
-.Ltmp9:
-.LBB0_6:                                // %for.body
-                                        // =>This Inner Loop Header: Depth=1
+.LBB0_5:                                // %for.body
+                                        //   Parent Loop BB0_4 Depth=1
+                                        // =>  This Inner Loop Header: Depth=2
 	//DEBUG_VALUE: foo:n <- $w3
 	//DEBUG_VALUE: foo:c <- $x2
 	//DEBUG_VALUE: foo:b <- $x1
 	//DEBUG_VALUE: foo:a <- $x0
 	//DEBUG_VALUE: i <- undef
-	.loc	0 6 5 is_stmt 1                 // test.c:6:5
-	cmp	x11, x9
+	cmp	x9, x8
 	b.eq	.LBB0_2
+.Ltmp8:
+// %bb.6:                               // %permute.decision
+                                        //   in Loop: Header=BB0_5 Depth=2
+	//DEBUG_VALUE: foo:n <- $w3
+	//DEBUG_VALUE: foo:c <- $x2
+	//DEBUG_VALUE: foo:b <- $x1
+	//DEBUG_VALUE: foo:a <- $x0
+	.loc	0 0 5                           // test.c:0:5
+	add	x8, x8, #4
+.Ltmp9:
+	//DEBUG_VALUE: i <- $x8
+	add	x15, x15, #16
+	add	x16, x16, #16
+	add	x17, x17, #16
+	cmp	x14, #4
+	b.lo	.LBB0_5
 .Ltmp10:
-// %bb.7:                               // %permute.decision
-                                        //   in Loop: Header=BB0_6 Depth=1
+// %bb.7:                               // %lane.gather
+                                        //   in Loop: Header=BB0_4 Depth=1
+	//DEBUG_VALUE: i <- $x8
 	//DEBUG_VALUE: foo:n <- $w3
 	//DEBUG_VALUE: foo:c <- $x2
 	//DEBUG_VALUE: foo:b <- $x1
 	//DEBUG_VALUE: foo:a <- $x0
-	//DEBUG_VALUE: i <- undef
-	.loc	0 0 5 is_stmt 0                 // test.c:0:5
-	cmp	x12, #4
-	b.hs	.LBB0_4
+	compact	z0.s, p0, z0.s
+	whilelt	p2.s, xzr, x12
+	splice	z0.s, p2, z0.s, z1.s
 .Ltmp11:
-// %bb.8:                               // %linearized
-                                        //   in Loop: Header=BB0_6 Depth=1
-	//DEBUG_VALUE: foo:n <- $w3
-	//DEBUG_VALUE: foo:c <- $x2
-	//DEBUG_VALUE: foo:b <- $x1
-	//DEBUG_VALUE: foo:a <- $x0
-	.loc	0 8 20 is_stmt 1                // test.c:8:20
-	lsl	x13, x9, #2
-	ldr	w14, [x0, x13]
-	.loc	0 8 27 is_stmt 0                // test.c:8:27
-	ldr	w15, [x1, x13]
-	.loc	0 8 25                          // test.c:8:25
-	mul	w14, w15, w14
-	.loc	0 8 18                          // test.c:8:18
-	str	w14, [x2, x13]
-	b	.LBB0_5
+	.loc	0 9 9 is_stmt 1                 // test.c:9:9
+	ld1w	{ z2.s }, p1/z, [x17, z0.s, sxtw #2]
+	ld1w	{ z3.s }, p1/z, [x16, z0.s, sxtw #2]
+	sub	w16, w8, #4
+	mul	z3.s, p1/m, z3.s, z2.s
+	st1w	{ z3.s }, p1, [x15, z0.s, sxtw]
+	st1w	{ z0.s }, p1, [x15, z0.s, sxtw]
+	index	z0.s, w16, #1
+	b	.LBB0_4
 .Ltmp12:
 .Lfunc_end0:
 	.size	foo, .Lfunc_end0-foo
@@ -167,7 +160,7 @@ foo:                                    // @foo
 	.type	main,@function
 main:                                   // @main
 .Lfunc_begin1:
-	.loc	0 13 0 is_stmt 1                // test.c:13:0
+	.loc	0 13 0                          // test.c:13:0
 	.cfi_startproc
 // %bb.0:                               // %entry
 	sub	sp, sp, #80
@@ -346,15 +339,15 @@ main:                                   // @main
 	.byte	0                               // 0
 	.byte	159                             // DW_OP_stack_value
 	.byte	4                               // DW_LLE_offset_pair
-	.uleb128 .Ltmp3-.Lfunc_begin0           //   starting offset
+	.uleb128 .Ltmp4-.Lfunc_begin0           //   starting offset
 	.uleb128 .Ltmp5-.Lfunc_begin0           //   ending offset
 	.byte	1                               // Loc expr size
-	.byte	92                              // DW_OP_reg12
+	.byte	91                              // DW_OP_reg11
 	.byte	4                               // DW_LLE_offset_pair
-	.uleb128 .Ltmp8-.Lfunc_begin0           //   starting offset
-	.uleb128 .Ltmp9-.Lfunc_begin0           //   ending offset
+	.uleb128 .Ltmp9-.Lfunc_begin0           //   starting offset
+	.uleb128 .Lfunc_end0-.Lfunc_begin0      //   ending offset
 	.byte	1                               // Loc expr size
-	.byte	89                              // DW_OP_reg9
+	.byte	88                              // DW_OP_reg8
 	.byte	0                               // DW_LLE_end_of_list
 .Ldebug_loc1:
 	.byte	4                               // DW_LLE_offset_pair
@@ -852,7 +845,7 @@ main:                                   // @main
 	.uleb128 .Lfunc_begin0-.Lfunc_begin0    //   starting offset
 	.uleb128 .Ltmp1-.Lfunc_begin0           //   ending offset
 	.byte	4                               // DW_RLE_offset_pair
-	.uleb128 .Ltmp4-.Lfunc_begin0           //   starting offset
+	.uleb128 .Ltmp3-.Lfunc_begin0           //   starting offset
 	.uleb128 .Ltmp12-.Lfunc_begin0          //   ending offset
 	.byte	0                               // DW_RLE_end_of_list
 .Ldebug_list_header_end1:
