@@ -49,20 +49,40 @@ void SVE_Permute::doTransformation() {
                                                 &permutedRemainingVector,
                                                 &permutedPredicates);
 
+
+    // filling linearized path, should come before vectorizing targeted path
     std::vector<BasicBlock *> blocks;
-//   blocks.push_back(targetedBlock);
+    blocks.push_back(targetedBlock);
     fillLinearizedBlock(linearizedBlock, blocks);
 
+    //constructing targeted path
     CallInst *allTruePredicates = createAllTruePredicates(targetedBlock->getTerminator());
     makeBlockVectorized(targetedBlock, allTruePredicates, permutedUniformVector);
-    // update the permutedUniformVector
-    updateVectors(targetedBlock, &updatedUniformVector, &updatedRemainingVectorPredicates, inductionVar);
+    // update uniform vectors
+    updateVectors(targetedBlock, &updatedUniformVector, &updatedUniformVectorPredicates, inductionVar);
+    // adding phi nodes
+    insertPhiNodsForVector(updatedUniformVector, initialUniformVector, targetedBlock, linearizedBlock);
+    insertPhiNodsForVector(updatedUniformVectorPredicates, initialUniformVectorPredicates, targetedBlock,
+                           linearizedBlock);
 
-    // adding phi nodes for vectors
-    insertPhiNodsForVector(updatedUniformVector, initialUniformVector, linearizedBlock);
 
-    ///// WHAT about the remaining vector???
-//    insertPhiNodsForVector(updatedRemainingVectorPredicates, initialRemainingVector, linearizedBlock);
+    // constructing linearized path
+
+    // active lanes in remaining block should be executed
+    makeBlockVectorized(linearizedBlock, permutedPredicates, permutedRemainingVector);
+    // update remaining vectors
+    updateVectors(linearizedBlock, &updatedRemainingVector, &updatedRemainingVectorPredicates, inductionVar);
+
+    // adding phi nodes
+    insertPhiNodsForVector(updatedRemainingVector, initialRemainingVector, linearizedBlock, targetedBlock);
+    PHINode *latchPhi = insertPhiNodsForVector(updatedRemainingVectorPredicates, initialRemainingVectorPredicates,
+                                               linearizedBlock,
+                                               targetedBlock);
+
+    ///NOTE: if we go to targeted block, permutation logic will change remaining predicated, 
+    /// so it will become invalid and we should use permuted predicates. we fix this in here
+    latchPhi->setIncomingValueForBlock(targetedBlock, permutedPredicates);
+
 
 }
 
@@ -828,14 +848,15 @@ void SVE_Permute::updateVectors(BasicBlock *insertAt, Value **indicesVector, Val
 
 }
 
-void SVE_Permute::insertPhiNodsForVector(Value *updatedValue, Value *initialValue,
-                                         BasicBlock *linearizedBlock) {
+PHINode *SVE_Permute::insertPhiNodsForVector(Value *updatedValue, Value *initialValue,
+                                             BasicBlock *mainPath, BasicBlock *otherPath) {
+
     // there should be one phi in the latch which is the joint point for linearized path and vectorized path
     Instruction *insertAt = L->getLoopLatch()->getTerminator();
     PHINode *latchPhi = PHINode::Create(updatedValue->getType(), 2);
     latchPhi->insertBefore(insertAt);
-    latchPhi->addIncoming(updatedValue, targetedBlock);
-    latchPhi->addIncoming(initialValue, linearizedBlock);   // to be change, should get the value of header phi
+    latchPhi->addIncoming(updatedValue, mainPath);
+    latchPhi->addIncoming(initialValue, otherPath);   // to be change, should get the value of header phi
 
     // then there should be another phi in the loop header
     insertAt = L->getHeader()->getFirstNonPHI();
@@ -894,7 +915,9 @@ void SVE_Permute::insertPhiNodsForVector(Value *updatedValue, Value *initialValu
 
 
     //Finally, update phiNode in the latch to get value from header phi
-    latchPhi->setIncomingValueForBlock(linearizedBlock, headerPhi);
+    latchPhi->setIncomingValueForBlock(otherPath, headerPhi);
+
+    return latchPhi;
 }
 
 

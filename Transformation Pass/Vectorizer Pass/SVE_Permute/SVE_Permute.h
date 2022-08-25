@@ -67,8 +67,9 @@ private:
 private:
     void updateVectors(BasicBlock *insertAt, Value **indicesVector, Value **predicateVector, Value *inductionVariable);
 
+    //returns latch phi node
 private:
-    void insertPhiNodsForVector(Value *updatedValue, Value* initialValue, BasicBlock* linearizedBlock);
+    PHINode* insertPhiNodsForVector(Value *updatedValue, Value* initialValue, BasicBlock* mainPath, BasicBlock* otherPath);
 
 private:
     BasicBlock *getLastHeaderCopy();
