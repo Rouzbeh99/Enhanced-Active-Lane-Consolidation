@@ -48,6 +48,9 @@ private:
     void refineCFG(std::vector<BasicBlock *> *newBlocks, BasicBlock *header, BasicBlock *latch, BasicBlock *thenBlock);
 
 private:
+    void mergeUnrolledBlocks(BasicBlock *header, BasicBlock *prevLatch, std::vector<BasicBlock *> *newBlocks);
+
+private:
     BasicBlock *findTargetedBlock(BasicBlock *header, BasicBlock *latch);
 
 private:

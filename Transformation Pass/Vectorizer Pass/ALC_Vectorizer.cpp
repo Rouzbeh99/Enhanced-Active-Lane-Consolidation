@@ -54,11 +54,12 @@ namespace {
         auto *unroller = new Unroller(L, &LI);
         unroller->doUnrolling(factor);
 
+
+
 //        auto *sve_vectorizer = new SVE_Vectorizer(L, factor, unroller->getPredicates());
 //        sve_vectorizer->doVectorization();
 
         auto *sve_permute = new SVE_Permute(L, factor, &LI, unroller->getNewLatch(), unroller->getPredicates());
-
         sve_permute->doTransformation();
 
 //        printBeforeLoopBlocks(L);

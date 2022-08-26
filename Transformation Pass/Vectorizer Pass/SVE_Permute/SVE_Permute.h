@@ -47,10 +47,11 @@ public:
 private:
     void formInitialPredicateVectors(Value *inductionVariable, Value **firstPredicates, Value **secondPredicates,
                                      Value **firstVector, Value **secondVector);
-    // returns last generated latch
+    // returns last generated block
 private:
-    BasicBlock *duplicateBlocksForInitialPredicateGeneration(Value *inductionVariable);
-
+    BasicBlock* duplicateBlocksForInitialPredicateGeneration(Value *inductionVariable,
+                                                       std::vector<Value *> *firstInitialPredicates,
+                                                       std::vector<Value *> *secondInitialPredicates);
 private:
     void
     insertPermutationLogic(Instruction *insertAt, Value *z0, Value *z1, Value *p0, Value *p1, Value **permutedZ0,
@@ -69,10 +70,9 @@ private:
 
     //returns latch phi node
 private:
-    PHINode* insertPhiNodsForVector(Value *updatedValue, Value* initialValue, BasicBlock* mainPath, BasicBlock* otherPath);
+    PHINode *
+    insertPhiNodsForVector(Value *updatedValue, Value *initialValue, BasicBlock *mainPath, BasicBlock *otherPath);
 
-private:
-    BasicBlock *getLastHeaderCopy();
 
 private:
 

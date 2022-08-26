@@ -41,6 +41,7 @@ public:
 
    void doVectorization();
 
+private:
     BasicBlock *getTargetedBB() const;
 
 private:
@@ -63,9 +64,6 @@ private:
 
     BasicBlock *findTargetedBB();
 
-private:
-
-    BasicBlock *getLastHeaderCopy() const;
 
 private:
 

@@ -128,27 +128,16 @@ CallInst *SVE_Vectorizer::createAllTruePredicates() {
     return builder.CreateCall(intrinsicFunction, constantInt);
 }
 
-BasicBlock *SVE_Vectorizer::getLastHeaderCopy() const {
-    BasicBlock *BB = L->getHeader();
-    for (int i = 0; i < 2 * vectorizationFactor - 1; ++i) {
-        BB = BB->getNextNode();
-    }
-
-    return BB;
-}
 
 BasicBlock *SVE_Vectorizer::findTargetedBB() {
-    BasicBlock *lastLatchBlock = getLastHeaderCopy()->getNextNode();
+    // TODO: make a complete analysis
 
-    // it has two successors, exiting block and then block. we find then block 
-    for (auto BB: successors(lastLatchBlock)) {
-
-        // only then block belongs to the loop
-        if (L->contains(BB)) {
-            return BB;
+    for (auto succ: successors(L->getHeader())) {
+        if (succ != L->getLoopLatch()) {
+            return succ;
         }
     }
-    // TODO: raise error
+
     return nullptr;
 }
 

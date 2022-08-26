@@ -20,244 +20,156 @@ entry:
 
 for.body.preheader:                               ; preds = %entry
   %wide.trip.count = zext i32 %n to i64, !dbg !29
-  br label %for.body.init.1, !dbg !31
+  br label %for.body.init.1
 
 for.body.init.1:                                  ; preds = %for.body.preheader
   call void @llvm.dbg.value(metadata i64 0, metadata !25, metadata !DIExpression()), !dbg !28
   %rem15.init.1 = and i64 0, 1, !dbg !32
   %cmp1.not.init.1 = icmp eq i64 %rem15.init.1, 0, !dbg !32
-  br label %for.inc.init.1
-
-for.inc.init.1:                                   ; preds = %for.body.init.1
   %indvars.iv.next.init.1 = add nuw nsw i64 0, 1, !dbg !35
-  call void @llvm.dbg.value(metadata i64 %indvars.iv.next.init.1, metadata !25, metadata !DIExpression()), !dbg !28
-  br label %for.body.headerCopy.1.init.1
-
-for.body.headerCopy.1.init.1:                     ; preds = %for.inc.init.1
-  call void @llvm.dbg.value(metadata i64 %indvars.iv.next.init.1, metadata !25, metadata !DIExpression()), !dbg !28
   %rem15.headerCopy.1.init.1 = and i64 %indvars.iv.next.init.1, 1, !dbg !32
   %cmp1.not.headerCopy.1.init.1 = icmp eq i64 %rem15.headerCopy.1.init.1, 0, !dbg !32
-  br label %for.inc.latchCopy.1.init.1
-
-for.inc.latchCopy.1.init.1:                       ; preds = %for.body.headerCopy.1.init.1
   %indvars.iv.next.latchCopy.1.init.1 = add nuw nsw i64 %indvars.iv.next.init.1, 1, !dbg !35
-  call void @llvm.dbg.value(metadata i64 %indvars.iv.next.latchCopy.1.init.1, metadata !25, metadata !DIExpression()), !dbg !28
-  br label %for.body.headerCopy.1.2.init.1
-
-for.body.headerCopy.1.2.init.1:                   ; preds = %for.inc.latchCopy.1.init.1
-  call void @llvm.dbg.value(metadata i64 %indvars.iv.next.latchCopy.1.init.1, metadata !25, metadata !DIExpression()), !dbg !28
   %rem15.headerCopy.1.2.init.1 = and i64 %indvars.iv.next.latchCopy.1.init.1, 1, !dbg !32
   %cmp1.not.headerCopy.1.2.init.1 = icmp eq i64 %rem15.headerCopy.1.2.init.1, 0, !dbg !32
-  br label %for.inc.latchCopy.1.2.init.1
-
-for.inc.latchCopy.1.2.init.1:                     ; preds = %for.body.headerCopy.1.2.init.1
   %indvars.iv.next.latchCopy.1.2.init.1 = add nuw nsw i64 %indvars.iv.next.latchCopy.1.init.1, 1, !dbg !35
-  call void @llvm.dbg.value(metadata i64 %indvars.iv.next.latchCopy.1.2.init.1, metadata !25, metadata !DIExpression()), !dbg !28
-  br label %for.body.headerCopy.1.2.3.init.1
-
-for.body.headerCopy.1.2.3.init.1:                 ; preds = %for.inc.latchCopy.1.2.init.1
-  call void @llvm.dbg.value(metadata i64 %indvars.iv.next.latchCopy.1.2.init.1, metadata !25, metadata !DIExpression()), !dbg !28
   %rem15.headerCopy.1.2.3.init.1 = and i64 %indvars.iv.next.latchCopy.1.2.init.1, 1, !dbg !32
   %cmp1.not.headerCopy.1.2.3.init.1 = icmp eq i64 %rem15.headerCopy.1.2.3.init.1, 0, !dbg !32
-  br label %for.inc.latchCopy.1.2.3.init.1
-
-for.inc.latchCopy.1.2.3.init.1:                   ; preds = %for.body.headerCopy.1.2.3.init.1
   %indvars.iv.next.latchCopy.1.2.3.init.1 = add nuw nsw i64 %indvars.iv.next.latchCopy.1.2.init.1, 1, !dbg !35
-  call void @llvm.dbg.value(metadata i64 %indvars.iv.next.latchCopy.1.2.3.init.1, metadata !25, metadata !DIExpression()), !dbg !28
-  %0 = sub i64 %wide.trip.count, 3, !dbg !29
-  %exitcond.not.latchCopy.1.2.3.init.1 = icmp eq i64 %indvars.iv.next.latchCopy.1.2.3.init.1, %0, !dbg !29
   br label %for.body.init.2
 
-for.body.init.2:                                  ; preds = %for.inc.latchCopy.1.2.3.init.1
+for.body.init.2:                                  ; preds = %for.body.init.1
   call void @llvm.dbg.value(metadata i64 0, metadata !25, metadata !DIExpression()), !dbg !28
   %rem15.init.2 = and i64 %indvars.iv.next.latchCopy.1.2.3.init.1, 1, !dbg !32
   %cmp1.not.init.2 = icmp eq i64 %rem15.init.2, 0, !dbg !32
-  br label %for.inc.init.2
-
-for.inc.init.2:                                   ; preds = %for.body.init.2
   %indvars.iv.next.init.2 = add nuw nsw i64 %indvars.iv.next.latchCopy.1.2.3.init.1, 1, !dbg !35
-  call void @llvm.dbg.value(metadata i64 %indvars.iv.next.init.2, metadata !25, metadata !DIExpression()), !dbg !28
-  br label %for.body.headerCopy.1.init.2
-
-for.body.headerCopy.1.init.2:                     ; preds = %for.inc.init.2
-  call void @llvm.dbg.value(metadata i64 %indvars.iv.next.init.2, metadata !25, metadata !DIExpression()), !dbg !28
   %rem15.headerCopy.1.init.2 = and i64 %indvars.iv.next.init.2, 1, !dbg !32
   %cmp1.not.headerCopy.1.init.2 = icmp eq i64 %rem15.headerCopy.1.init.2, 0, !dbg !32
-  br label %for.inc.latchCopy.1.init.2
-
-for.inc.latchCopy.1.init.2:                       ; preds = %for.body.headerCopy.1.init.2
   %indvars.iv.next.latchCopy.1.init.2 = add nuw nsw i64 %indvars.iv.next.init.2, 1, !dbg !35
-  call void @llvm.dbg.value(metadata i64 %indvars.iv.next.latchCopy.1.init.2, metadata !25, metadata !DIExpression()), !dbg !28
-  br label %for.body.headerCopy.1.2.init.2
-
-for.body.headerCopy.1.2.init.2:                   ; preds = %for.inc.latchCopy.1.init.2
-  call void @llvm.dbg.value(metadata i64 %indvars.iv.next.latchCopy.1.init.2, metadata !25, metadata !DIExpression()), !dbg !28
   %rem15.headerCopy.1.2.init.2 = and i64 %indvars.iv.next.latchCopy.1.init.2, 1, !dbg !32
   %cmp1.not.headerCopy.1.2.init.2 = icmp eq i64 %rem15.headerCopy.1.2.init.2, 0, !dbg !32
-  br label %for.inc.latchCopy.1.2.init.2
-
-for.inc.latchCopy.1.2.init.2:                     ; preds = %for.body.headerCopy.1.2.init.2
   %indvars.iv.next.latchCopy.1.2.init.2 = add nuw nsw i64 %indvars.iv.next.latchCopy.1.init.2, 1, !dbg !35
-  call void @llvm.dbg.value(metadata i64 %indvars.iv.next.latchCopy.1.2.init.2, metadata !25, metadata !DIExpression()), !dbg !28
-  br label %for.body.headerCopy.1.2.3.init.2
-
-for.body.headerCopy.1.2.3.init.2:                 ; preds = %for.inc.latchCopy.1.2.init.2
-  call void @llvm.dbg.value(metadata i64 %indvars.iv.next.latchCopy.1.2.init.2, metadata !25, metadata !DIExpression()), !dbg !28
   %rem15.headerCopy.1.2.3.init.2 = and i64 %indvars.iv.next.latchCopy.1.2.init.2, 1, !dbg !32
   %cmp1.not.headerCopy.1.2.3.init.2 = icmp eq i64 %rem15.headerCopy.1.2.3.init.2, 0, !dbg !32
-  br label %for.inc.latchCopy.1.2.3.init.2
-
-for.inc.latchCopy.1.2.3.init.2:                   ; preds = %for.body.headerCopy.1.2.3.init.2
   %indvars.iv.next.latchCopy.1.2.3.init.2 = add nuw nsw i64 %indvars.iv.next.latchCopy.1.2.init.2, 1, !dbg !35
-  call void @llvm.dbg.value(metadata i64 %indvars.iv.next.latchCopy.1.2.3.init.2, metadata !25, metadata !DIExpression()), !dbg !28
-  %1 = sub i64 %wide.trip.count, 3, !dbg !29
-  %exitcond.not.latchCopy.1.2.3.init.2 = icmp eq i64 %indvars.iv.next.latchCopy.1.2.3.init.2, %1, !dbg !29
-  %2 = insertelement <vscale x 4 x i1> undef, i1 %cmp1.not.init.1, i64 0, !dbg !31
-  %3 = insertelement <vscale x 4 x i1> %2, i1 %cmp1.not.headerCopy.1.init.1, i64 1, !dbg !31
-  %4 = insertelement <vscale x 4 x i1> %3, i1 %cmp1.not.headerCopy.1.2.init.1, i64 2, !dbg !31
-  %5 = insertelement <vscale x 4 x i1> %4, i1 %cmp1.not.headerCopy.1.2.3.init.1, i64 3, !dbg !31
-  %6 = insertelement <vscale x 4 x i1> undef, i1 %cmp1.not.init.2, i64 0, !dbg !31
-  %7 = insertelement <vscale x 4 x i1> %6, i1 %cmp1.not.headerCopy.1.init.2, i64 1, !dbg !31
-  %8 = insertelement <vscale x 4 x i1> %7, i1 %cmp1.not.headerCopy.1.2.init.2, i64 2, !dbg !31
-  %9 = insertelement <vscale x 4 x i1> %8, i1 %cmp1.not.headerCopy.1.2.3.init.2, i64 3, !dbg !31
-  %10 = call <vscale x 4 x i32> @llvm.aarch64.sve.index.nxv4i32(i32 0, i32 1), !dbg !31
-  %11 = call <vscale x 4 x i32> @llvm.aarch64.sve.index.nxv4i32(i32 4, i32 1), !dbg !31
-  br i1 %exitcond.not.latchCopy.1.2.3.init.2, label %for.cond.cleanup.loopexit, label %for.body, !dbg !31, !llvm.loop !36
+  %0 = insertelement <vscale x 4 x i1> undef, i1 %cmp1.not.init.1, i64 0
+  %1 = insertelement <vscale x 4 x i1> %0, i1 %cmp1.not.headerCopy.1.init.1, i64 1
+  %2 = insertelement <vscale x 4 x i1> %1, i1 %cmp1.not.headerCopy.1.2.init.1, i64 2
+  %3 = insertelement <vscale x 4 x i1> %2, i1 %cmp1.not.headerCopy.1.2.3.init.1, i64 3
+  %4 = insertelement <vscale x 4 x i1> undef, i1 %cmp1.not.init.2, i64 0
+  %5 = insertelement <vscale x 4 x i1> %4, i1 %cmp1.not.headerCopy.1.init.2, i64 1
+  %6 = insertelement <vscale x 4 x i1> %5, i1 %cmp1.not.headerCopy.1.2.init.2, i64 2
+  %7 = insertelement <vscale x 4 x i1> %6, i1 %cmp1.not.headerCopy.1.2.3.init.2, i64 3
+  %8 = call <vscale x 4 x i32> @llvm.aarch64.sve.index.nxv4i32(i32 0, i32 1)
+  %9 = call <vscale x 4 x i32> @llvm.aarch64.sve.index.nxv4i32(i32 4, i32 1)
+  br label %for.body
 
-for.cond.cleanup.loopexit:                        ; preds = %for.inc.latchCopy.1.2.3.init.2, %for.inc.latchCopy.1.2.3
-  br label %for.cond.cleanup, !dbg !40
+for.cond.cleanup.loopexit:                        ; preds = %for.body
+  br label %for.cond.cleanup, !dbg !36
 
 for.cond.cleanup:                                 ; preds = %for.cond.cleanup.loopexit, %entry
-  ret void, !dbg !40
+  ret void, !dbg !36
 
-for.body:                                         ; preds = %for.inc.latchCopy.1.2.3.init.2, %new.latch
-  %12 = phi i64 [ %indvars.iv.next.latchCopy.1.2.3, %new.latch ], [ 0, %for.inc.latchCopy.1.2.3.init.2 ]
-  %13 = phi <vscale x 4 x i32> [ %72, %new.latch ], [ %10, %for.inc.latchCopy.1.2.3.init.2 ]
-  %14 = phi <vscale x 4 x i1> [ %73, %new.latch ], [ %5, %for.inc.latchCopy.1.2.3.init.2 ]
-  %15 = phi <vscale x 4 x i32> [ %74, %new.latch ], [ %11, %for.inc.latchCopy.1.2.3.init.2 ]
-  %16 = phi <vscale x 4 x i1> [ %75, %new.latch ], [ %9, %for.inc.latchCopy.1.2.3.init.2 ]
+for.body:                                         ; preds = %for.body.init.2, %new.latch
+  %10 = phi i64 [ %indvars.iv.next.latchCopy.1.2.3, %new.latch ], [ 0, %for.body.init.2 ]
+  %11 = phi <vscale x 4 x i32> [ %70, %new.latch ], [ %8, %for.body.init.2 ]
+  %12 = phi <vscale x 4 x i1> [ %71, %new.latch ], [ %3, %for.body.init.2 ]
+  %13 = phi <vscale x 4 x i32> [ %72, %new.latch ], [ %9, %for.body.init.2 ]
+  %14 = phi <vscale x 4 x i1> [ %73, %new.latch ], [ %7, %for.body.init.2 ]
   call void @llvm.dbg.value(metadata i64 0, metadata !25, metadata !DIExpression()), !dbg !28
-  %rem15 = and i64 %12, 1, !dbg !32
+  %rem15 = and i64 %10, 1, !dbg !32
   %cmp1.not = icmp eq i64 %rem15, 0, !dbg !32
-  br label %for.inc
+  %indvars.iv.next = add nuw nsw i64 %10, 1, !dbg !35
+  %rem15.headerCopy.1 = and i64 %indvars.iv.next, 1, !dbg !32
+  %cmp1.not.headerCopy.1 = icmp eq i64 %rem15.headerCopy.1, 0, !dbg !32
+  %indvars.iv.next.latchCopy.1 = add nuw nsw i64 %indvars.iv.next, 1, !dbg !35
+  %rem15.headerCopy.1.2 = and i64 %indvars.iv.next.latchCopy.1, 1, !dbg !32
+  %cmp1.not.headerCopy.1.2 = icmp eq i64 %rem15.headerCopy.1.2, 0, !dbg !32
+  %indvars.iv.next.latchCopy.1.2 = add nuw nsw i64 %indvars.iv.next.latchCopy.1, 1, !dbg !35
+  %rem15.headerCopy.1.2.3 = and i64 %indvars.iv.next.latchCopy.1.2, 1, !dbg !32
+  %cmp1.not.headerCopy.1.2.3 = icmp eq i64 %rem15.headerCopy.1.2.3, 0, !dbg !32
+  %indvars.iv.next.latchCopy.1.2.3 = add nuw nsw i64 %indvars.iv.next.latchCopy.1.2, 1, !dbg !35
+  %15 = sub i64 %wide.trip.count, 3, !dbg !29
+  %exitcond.not.latchCopy.1.2.3 = icmp eq i64 %indvars.iv.next.latchCopy.1.2.3, %15, !dbg !29
+  br i1 %exitcond.not.latchCopy.1.2.3, label %for.cond.cleanup.loopexit, label %permute.decision, !dbg !31, !llvm.loop !37
 
-permute.decision:                                 ; preds = %for.inc.latchCopy.1.2.3
-  %17 = call <vscale x 4 x i1> @llvm.aarch64.sve.ptrue.nxv4i1(i32 4)
-  %18 = call i64 @llvm.aarch64.sve.cntp.nxv4i1(<vscale x 4 x i1> %17, <vscale x 4 x i1> %14)
-  %19 = call i64 @llvm.aarch64.sve.cntp.nxv4i1(<vscale x 4 x i1> %17, <vscale x 4 x i1> %16)
-  %20 = add i64 %18, %19
-  %21 = icmp uge i64 %20, 4
-  br i1 %21, label %lane.gather, label %linearized
+permute.decision:                                 ; preds = %for.body
+  %16 = call <vscale x 4 x i1> @llvm.aarch64.sve.ptrue.nxv4i1(i32 4)
+  %17 = call i64 @llvm.aarch64.sve.cntp.nxv4i1(<vscale x 4 x i1> %16, <vscale x 4 x i1> %12)
+  %18 = call i64 @llvm.aarch64.sve.cntp.nxv4i1(<vscale x 4 x i1> %16, <vscale x 4 x i1> %14)
+  %19 = add i64 %17, %18
+  %20 = icmp uge i64 %19, 4
+  br i1 %20, label %lane.gather, label %linearized
 
 lane.gather:                                      ; preds = %permute.decision
-  %22 = call <vscale x 4 x i1> @llvm.aarch64.sve.ptrue.nxv4i1(i32 4)
+  %21 = call <vscale x 4 x i1> @llvm.aarch64.sve.ptrue.nxv4i1(i32 4)
+  %22 = call <vscale x 4 x i32> @llvm.aarch64.sve.compact.nxv4i32(<vscale x 4 x i1> %12, <vscale x 4 x i32> %11)
   %23 = call <vscale x 4 x i32> @llvm.aarch64.sve.compact.nxv4i32(<vscale x 4 x i1> %14, <vscale x 4 x i32> %13)
-  %24 = call <vscale x 4 x i32> @llvm.aarch64.sve.compact.nxv4i32(<vscale x 4 x i1> %16, <vscale x 4 x i32> %15)
+  %24 = xor <vscale x 4 x i1> %12, shufflevector (<vscale x 4 x i1> insertelement (<vscale x 4 x i1> poison, i1 true, i32 0), <vscale x 4 x i1> poison, <vscale x 4 x i32> zeroinitializer)
   %25 = xor <vscale x 4 x i1> %14, shufflevector (<vscale x 4 x i1> insertelement (<vscale x 4 x i1> poison, i1 true, i32 0), <vscale x 4 x i1> poison, <vscale x 4 x i32> zeroinitializer)
-  %26 = xor <vscale x 4 x i1> %16, shufflevector (<vscale x 4 x i1> insertelement (<vscale x 4 x i1> poison, i1 true, i32 0), <vscale x 4 x i1> poison, <vscale x 4 x i32> zeroinitializer)
+  %26 = call <vscale x 4 x i32> @llvm.aarch64.sve.compact.nxv4i32(<vscale x 4 x i1> %24, <vscale x 4 x i32> %11)
   %27 = call <vscale x 4 x i32> @llvm.aarch64.sve.compact.nxv4i32(<vscale x 4 x i1> %25, <vscale x 4 x i32> %13)
-  %28 = call <vscale x 4 x i32> @llvm.aarch64.sve.compact.nxv4i32(<vscale x 4 x i1> %26, <vscale x 4 x i32> %15)
-  %29 = call i64 @llvm.aarch64.sve.cntp.nxv4i1(<vscale x 4 x i1> %22, <vscale x 4 x i1> %14)
-  %30 = call <vscale x 4 x i1> @llvm.aarch64.sve.whilelt.nxv4i1.i64(i64 0, i64 %29)
-  %31 = call <vscale x 4 x i32> @llvm.aarch64.sve.splice.nxv4i32(<vscale x 4 x i1> %30, <vscale x 4 x i32> %23, <vscale x 4 x i32> %24)
-  %32 = call i64 @llvm.aarch64.sve.cntp.nxv4i1(<vscale x 4 x i1> %22, <vscale x 4 x i1> %16)
-  %33 = call <vscale x 4 x i1> @llvm.aarch64.sve.whilelt.nxv4i1.i64(i64 0, i64 %32)
-  %34 = call <vscale x 4 x i32> @llvm.aarch64.sve.splice.nxv4i32(<vscale x 4 x i1> %33, <vscale x 4 x i32> %24, <vscale x 4 x i32> %28)
-  %35 = call i64 @llvm.aarch64.sve.cntp.nxv4i1(<vscale x 4 x i1> %22, <vscale x 4 x i1> %25)
-  %36 = call <vscale x 4 x i1> @llvm.aarch64.sve.whilelt.nxv4i1.i64(i64 0, i64 %35)
-  %37 = call <vscale x 4 x i32> @llvm.aarch64.sve.sel.nxv4i32(<vscale x 4 x i1> %36, <vscale x 4 x i32> %27, <vscale x 4 x i32> %34)
-  %38 = xor <vscale x 4 x i1> %36, shufflevector (<vscale x 4 x i1> insertelement (<vscale x 4 x i1> poison, i1 true, i32 0), <vscale x 4 x i1> poison, <vscale x 4 x i32> zeroinitializer)
-  %39 = call i64 @llvm.aarch64.sve.cntp.nxv4i1(<vscale x 4 x i1> %22, <vscale x 4 x i1> %36)
-  %40 = sub i64 %32, %35
-  %41 = add i64 %40, %39
-  %42 = call <vscale x 4 x i1> @llvm.aarch64.sve.whilelt.nxv4i1.i64(i64 0, i64 %41)
-  %43 = xor <vscale x 4 x i1> %42, shufflevector (<vscale x 4 x i1> insertelement (<vscale x 4 x i1> poison, i1 true, i32 0), <vscale x 4 x i1> poison, <vscale x 4 x i32> zeroinitializer)
-  %44 = and <vscale x 4 x i1> %38, %42
-  %45 = and <vscale x 4 x i1> %38, %42
-  %46 = and <vscale x 4 x i1> %45, %43
-  %47 = or <vscale x 4 x i1> %44, %46
+  %28 = call i64 @llvm.aarch64.sve.cntp.nxv4i1(<vscale x 4 x i1> %21, <vscale x 4 x i1> %12)
+  %29 = call <vscale x 4 x i1> @llvm.aarch64.sve.whilelt.nxv4i1.i64(i64 0, i64 %28)
+  %30 = call <vscale x 4 x i32> @llvm.aarch64.sve.splice.nxv4i32(<vscale x 4 x i1> %29, <vscale x 4 x i32> %22, <vscale x 4 x i32> %23)
+  %31 = call i64 @llvm.aarch64.sve.cntp.nxv4i1(<vscale x 4 x i1> %21, <vscale x 4 x i1> %14)
+  %32 = call <vscale x 4 x i1> @llvm.aarch64.sve.whilelt.nxv4i1.i64(i64 0, i64 %31)
+  %33 = call <vscale x 4 x i32> @llvm.aarch64.sve.splice.nxv4i32(<vscale x 4 x i1> %32, <vscale x 4 x i32> %23, <vscale x 4 x i32> %27)
+  %34 = call i64 @llvm.aarch64.sve.cntp.nxv4i1(<vscale x 4 x i1> %21, <vscale x 4 x i1> %24)
+  %35 = call <vscale x 4 x i1> @llvm.aarch64.sve.whilelt.nxv4i1.i64(i64 0, i64 %34)
+  %36 = call <vscale x 4 x i32> @llvm.aarch64.sve.sel.nxv4i32(<vscale x 4 x i1> %35, <vscale x 4 x i32> %26, <vscale x 4 x i32> %33)
+  %37 = xor <vscale x 4 x i1> %35, shufflevector (<vscale x 4 x i1> insertelement (<vscale x 4 x i1> poison, i1 true, i32 0), <vscale x 4 x i1> poison, <vscale x 4 x i32> zeroinitializer)
+  %38 = call i64 @llvm.aarch64.sve.cntp.nxv4i1(<vscale x 4 x i1> %21, <vscale x 4 x i1> %35)
+  %39 = sub i64 %31, %34
+  %40 = add i64 %39, %38
+  %41 = call <vscale x 4 x i1> @llvm.aarch64.sve.whilelt.nxv4i1.i64(i64 0, i64 %40)
+  %42 = xor <vscale x 4 x i1> %41, shufflevector (<vscale x 4 x i1> insertelement (<vscale x 4 x i1> poison, i1 true, i32 0), <vscale x 4 x i1> poison, <vscale x 4 x i32> zeroinitializer)
+  %43 = and <vscale x 4 x i1> %37, %41
+  %44 = and <vscale x 4 x i1> %37, %41
+  %45 = and <vscale x 4 x i1> %44, %42
+  %46 = or <vscale x 4 x i1> %43, %45
   br label %if.then
 
 linearized:                                       ; preds = %permute.decision
-  %48 = getelementptr inbounds i32, ptr %a, i64 %12, !dbg !41
-  %49 = load i32, ptr %48, align 4, !dbg !41, !tbaa !43
-  %50 = getelementptr inbounds i32, ptr %b, i64 %12, !dbg !47
-  %51 = load i32, ptr %50, align 4, !dbg !47, !tbaa !43
-  %52 = mul nsw i32 %51, %49, !dbg !48
-  %53 = getelementptr inbounds i32, ptr %c, i64 %12, !dbg !49
-  store i32 %52, ptr %53, align 4, !dbg !50, !tbaa !43
-  %54 = insertelement <vscale x 4 x i1> undef, i1 %cmp1.not, i1 false
-  %55 = insertelement <vscale x 4 x i1> %54, i1 %cmp1.not.headerCopy.1, i1 true
-  %56 = insertelement <vscale x 4 x i1> %55, i1 %cmp1.not.headerCopy.1.2, i1 false
-  %57 = insertelement <vscale x 4 x i1> %56, i1 %cmp1.not.headerCopy.1.2.3, i1 true
-  %58 = trunc i64 %12 to i32
-  %59 = call <vscale x 4 x i32> @llvm.aarch64.sve.index.nxv4i32(i32 %58, i32 1)
+  %47 = getelementptr inbounds i32, ptr %a, i64 %10, !dbg !41
+  %48 = load i32, ptr %47, align 4, !dbg !41, !tbaa !43
+  %49 = getelementptr inbounds i32, ptr %b, i64 %10, !dbg !47
+  %50 = load i32, ptr %49, align 4, !dbg !47, !tbaa !43
+  %51 = mul nsw i32 %50, %48, !dbg !48
+  %52 = getelementptr inbounds i32, ptr %c, i64 %10, !dbg !49
+  store i32 %51, ptr %52, align 4, !dbg !50, !tbaa !43
+  %53 = insertelement <vscale x 4 x i1> undef, i1 %cmp1.not, i1 false
+  %54 = insertelement <vscale x 4 x i1> %53, i1 %cmp1.not.headerCopy.1, i1 true
+  %55 = insertelement <vscale x 4 x i1> %54, i1 %cmp1.not.headerCopy.1.2, i1 false
+  %56 = insertelement <vscale x 4 x i1> %55, i1 %cmp1.not.headerCopy.1.2.3, i1 true
+  %57 = trunc i64 %10 to i32
+  %58 = call <vscale x 4 x i32> @llvm.aarch64.sve.index.nxv4i32(i32 %57, i32 1)
   br label %new.latch
 
 if.then:                                          ; preds = %lane.gather
-  %arrayidx = getelementptr inbounds i32, ptr %a, i64 %12, !dbg !41
-  %arrayidx3 = getelementptr inbounds i32, ptr %b, i64 %12, !dbg !47
-  %arrayidx5 = getelementptr inbounds i32, ptr %c, i64 %12, !dbg !49
-  %60 = call <vscale x 4 x i1> @llvm.aarch64.sve.ptrue.nxv4i1(i32 4), !dbg !51
-  %61 = call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.gather.sxtw.index.nxv4i32(<vscale x 4 x i1> %60, ptr %arrayidx, <vscale x 4 x i32> %31), !dbg !51
-  %62 = call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.gather.sxtw.index.nxv4i32(<vscale x 4 x i1> %60, ptr %arrayidx3, <vscale x 4 x i32> %31), !dbg !51
-  %63 = call <vscale x 4 x i32> @llvm.aarch64.sve.mul.nxv4i32(<vscale x 4 x i1> %60, <vscale x 4 x i32> %62, <vscale x 4 x i32> %61), !dbg !51
-  call void @llvm.aarch64.sve.st1.scatter.sxtw.nxv4i32(<vscale x 4 x i32> %63, <vscale x 4 x i1> %60, ptr %arrayidx5, <vscale x 4 x i32> %31), !dbg !51
-  %64 = zext <vscale x 4 x i32> %31 to <vscale x 4 x i64>, !dbg !51
-  call void @llvm.aarch64.sve.st1.scatter.sxtw.nxv4i32(<vscale x 4 x i32> %31, <vscale x 4 x i1> %60, ptr %arrayidx5, <vscale x 4 x i32> %31), !dbg !51
-  %65 = insertelement <vscale x 4 x i1> undef, i1 %cmp1.not, i1 false, !dbg !51
-  %66 = insertelement <vscale x 4 x i1> %65, i1 %cmp1.not.headerCopy.1, i1 true, !dbg !51
-  %67 = insertelement <vscale x 4 x i1> %66, i1 %cmp1.not.headerCopy.1.2, i1 false, !dbg !51
-  %68 = insertelement <vscale x 4 x i1> %67, i1 %cmp1.not.headerCopy.1.2.3, i1 true, !dbg !51
-  %69 = trunc i64 %12 to i32, !dbg !51
-  %70 = call <vscale x 4 x i32> @llvm.aarch64.sve.index.nxv4i32(i32 %69, i32 1), !dbg !51
+  %arrayidx = getelementptr inbounds i32, ptr %a, i64 %10, !dbg !41
+  %arrayidx3 = getelementptr inbounds i32, ptr %b, i64 %10, !dbg !47
+  %arrayidx5 = getelementptr inbounds i32, ptr %c, i64 %10, !dbg !49
+  %59 = call <vscale x 4 x i1> @llvm.aarch64.sve.ptrue.nxv4i1(i32 4), !dbg !51
+  %60 = call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.gather.sxtw.index.nxv4i32(<vscale x 4 x i1> %59, ptr %arrayidx, <vscale x 4 x i32> %30), !dbg !51
+  %61 = call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.gather.sxtw.index.nxv4i32(<vscale x 4 x i1> %59, ptr %arrayidx3, <vscale x 4 x i32> %30), !dbg !51
+  %62 = call <vscale x 4 x i32> @llvm.aarch64.sve.mul.nxv4i32(<vscale x 4 x i1> %59, <vscale x 4 x i32> %61, <vscale x 4 x i32> %60), !dbg !51
+  call void @llvm.aarch64.sve.st1.scatter.sxtw.nxv4i32(<vscale x 4 x i32> %62, <vscale x 4 x i1> %59, ptr %arrayidx5, <vscale x 4 x i32> %30), !dbg !51
+  %63 = zext <vscale x 4 x i32> %30 to <vscale x 4 x i64>, !dbg !51
+  call void @llvm.aarch64.sve.st1.scatter.sxtw.nxv4i32(<vscale x 4 x i32> %30, <vscale x 4 x i1> %59, ptr %arrayidx5, <vscale x 4 x i32> %30), !dbg !51
+  %64 = insertelement <vscale x 4 x i1> undef, i1 %cmp1.not, i1 false, !dbg !51
+  %65 = insertelement <vscale x 4 x i1> %64, i1 %cmp1.not.headerCopy.1, i1 true, !dbg !51
+  %66 = insertelement <vscale x 4 x i1> %65, i1 %cmp1.not.headerCopy.1.2, i1 false, !dbg !51
+  %67 = insertelement <vscale x 4 x i1> %66, i1 %cmp1.not.headerCopy.1.2.3, i1 true, !dbg !51
+  %68 = trunc i64 %10 to i32, !dbg !51
+  %69 = call <vscale x 4 x i32> @llvm.aarch64.sve.index.nxv4i32(i32 %68, i32 1), !dbg !51
   br label %new.latch, !dbg !51
 
-for.inc:                                          ; preds = %for.body
-  %indvars.iv.next = add nuw nsw i64 %12, 1, !dbg !35
-  call void @llvm.dbg.value(metadata i64 %indvars.iv.next, metadata !25, metadata !DIExpression()), !dbg !28
-  br label %for.body.headerCopy.1
-
-for.body.headerCopy.1:                            ; preds = %for.inc
-  call void @llvm.dbg.value(metadata i64 %indvars.iv.next, metadata !25, metadata !DIExpression()), !dbg !28
-  %rem15.headerCopy.1 = and i64 %indvars.iv.next, 1, !dbg !32
-  %cmp1.not.headerCopy.1 = icmp eq i64 %rem15.headerCopy.1, 0, !dbg !32
-  br label %for.inc.latchCopy.1
-
-for.inc.latchCopy.1:                              ; preds = %for.body.headerCopy.1
-  %indvars.iv.next.latchCopy.1 = add nuw nsw i64 %indvars.iv.next, 1, !dbg !35
-  call void @llvm.dbg.value(metadata i64 %indvars.iv.next.latchCopy.1, metadata !25, metadata !DIExpression()), !dbg !28
-  br label %for.body.headerCopy.1.2
-
-for.body.headerCopy.1.2:                          ; preds = %for.inc.latchCopy.1
-  call void @llvm.dbg.value(metadata i64 %indvars.iv.next.latchCopy.1, metadata !25, metadata !DIExpression()), !dbg !28
-  %rem15.headerCopy.1.2 = and i64 %indvars.iv.next.latchCopy.1, 1, !dbg !32
-  %cmp1.not.headerCopy.1.2 = icmp eq i64 %rem15.headerCopy.1.2, 0, !dbg !32
-  br label %for.inc.latchCopy.1.2
-
-for.inc.latchCopy.1.2:                            ; preds = %for.body.headerCopy.1.2
-  %indvars.iv.next.latchCopy.1.2 = add nuw nsw i64 %indvars.iv.next.latchCopy.1, 1, !dbg !35
-  call void @llvm.dbg.value(metadata i64 %indvars.iv.next.latchCopy.1.2, metadata !25, metadata !DIExpression()), !dbg !28
-  br label %for.body.headerCopy.1.2.3
-
-for.body.headerCopy.1.2.3:                        ; preds = %for.inc.latchCopy.1.2
-  call void @llvm.dbg.value(metadata i64 %indvars.iv.next.latchCopy.1.2, metadata !25, metadata !DIExpression()), !dbg !28
-  %rem15.headerCopy.1.2.3 = and i64 %indvars.iv.next.latchCopy.1.2, 1, !dbg !32
-  %cmp1.not.headerCopy.1.2.3 = icmp eq i64 %rem15.headerCopy.1.2.3, 0, !dbg !32
-  br label %for.inc.latchCopy.1.2.3
-
-for.inc.latchCopy.1.2.3:                          ; preds = %for.body.headerCopy.1.2.3
-  %indvars.iv.next.latchCopy.1.2.3 = add nuw nsw i64 %indvars.iv.next.latchCopy.1.2, 1, !dbg !35
-  call void @llvm.dbg.value(metadata i64 %indvars.iv.next.latchCopy.1.2.3, metadata !25, metadata !DIExpression()), !dbg !28
-  %71 = sub i64 %wide.trip.count, 3, !dbg !29
-  %exitcond.not.latchCopy.1.2.3 = icmp eq i64 %indvars.iv.next.latchCopy.1.2.3, %71, !dbg !29
-  br i1 %exitcond.not.latchCopy.1.2.3, label %for.cond.cleanup.loopexit, label %permute.decision, !dbg !31, !llvm.loop !36
-
 new.latch:                                        ; preds = %linearized, %if.then
-  %72 = phi <vscale x 4 x i32> [ %70, %if.then ], [ %13, %linearized ]
-  %73 = phi <vscale x 4 x i1> [ %68, %if.then ], [ %14, %linearized ]
-  %74 = phi <vscale x 4 x i32> [ %59, %linearized ], [ %15, %if.then ]
-  %75 = phi <vscale x 4 x i1> [ %57, %linearized ], [ %47, %if.then ]
+  %70 = phi <vscale x 4 x i32> [ %69, %if.then ], [ %11, %linearized ]
+  %71 = phi <vscale x 4 x i1> [ %67, %if.then ], [ %12, %linearized ]
+  %72 = phi <vscale x 4 x i32> [ %58, %linearized ], [ %13, %if.then ]
+  %73 = phi <vscale x 4 x i1> [ %56, %linearized ], [ %46, %if.then ]
   br label %for.body
 }
 
@@ -431,11 +343,11 @@ attributes #11 = { nounwind }
 !33 = distinct !DILexicalBlock(scope: !34, file: !1, line: 7, column: 13)
 !34 = distinct !DILexicalBlock(scope: !30, file: !1, line: 6, column: 33)
 !35 = !DILocation(line: 6, column: 28, scope: !30)
-!36 = distinct !{!36, !31, !37, !38, !39}
-!37 = !DILocation(line: 10, column: 5, scope: !26)
-!38 = !{!"llvm.loop.mustprogress"}
-!39 = !{!"llvm.loop.unroll.disable"}
-!40 = !DILocation(line: 11, column: 1, scope: !14)
+!36 = !DILocation(line: 11, column: 1, scope: !14)
+!37 = distinct !{!37, !31, !38, !39, !40}
+!38 = !DILocation(line: 10, column: 5, scope: !26)
+!39 = !{!"llvm.loop.mustprogress"}
+!40 = !{!"llvm.loop.unroll.disable"}
 !41 = !DILocation(line: 8, column: 20, scope: !42)
 !42 = distinct !DILexicalBlock(scope: !33, file: !1, line: 7, column: 25)
 !43 = !{!44, !44, i64 0}
@@ -490,7 +402,7 @@ attributes #11 = { nounwind }
 !92 = !DILocation(line: 9, column: 9, scope: !42, inlinedAt: !79)
 !93 = !DILocation(line: 6, column: 28, scope: !30, inlinedAt: !79)
 !94 = !DILocation(line: 6, column: 23, scope: !30, inlinedAt: !79)
-!95 = distinct !{!95, !81, !96, !38, !39}
+!95 = distinct !{!95, !81, !96, !39, !40}
 !96 = !DILocation(line: 10, column: 5, scope: !26, inlinedAt: !79)
 !97 = !DILocation(line: 21, column: 5, scope: !64)
 !98 = !DILocation(line: 24, column: 5, scope: !52)
@@ -503,5 +415,5 @@ attributes #11 = { nounwind }
 !105 = !DILocation(line: 22, column: 9, scope: !103)
 !106 = !DILocation(line: 21, column: 28, scope: !104)
 !107 = !DILocation(line: 21, column: 23, scope: !104)
-!108 = distinct !{!108, !97, !109, !38, !39}
+!108 = distinct !{!108, !97, !109, !39, !40}
 !109 = !DILocation(line: 23, column: 5, scope: !64)

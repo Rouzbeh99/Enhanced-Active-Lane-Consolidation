@@ -25,6 +25,9 @@ void Unroller::doUnrolling(int unrollFactor) {
 
     removeRedundantInstructions(latch, unrollFactor);
 
+    mergeUnrolledBlocks(header, latch, newBlocks);
+
+
 }
 
 // TODO: Should be moved to analysis pass
@@ -128,7 +131,6 @@ std::vector<BasicBlock *> *Unroller::replicateBlocks(BasicBlock *header, BasicBl
 
     }
 
-    newLatch = newBlocks->back();
 
     return newBlocks;
 }
@@ -235,6 +237,7 @@ Unroller::refineCFG(std::vector<BasicBlock *> *newBlocks, BasicBlock *header, Ba
     // create a new latch which only jumps to header
     auto *newGeneratedLatch = BasicBlock::Create(L->getHeader()->getContext(), "new.latch",
                                                  L->getHeader()->getParent());
+    newLatch = newGeneratedLatch;
     BranchInst::Create(header, newGeneratedLatch);
 
 
@@ -267,6 +270,44 @@ Unroller::refineCFG(std::vector<BasicBlock *> *newBlocks, BasicBlock *header, Ba
     mapNewPhiNodeInstructions(latch, inductionVariableUsers, phiNode);
     mapNewPhiNodeInstructions(thenBlock, inductionVariableUsers, phiNode);
     //TODO: remapping should be applied to other blocks as well
+}
+
+void Unroller::mergeUnrolledBlocks(BasicBlock *header, BasicBlock *prevLatch, std::vector<BasicBlock *> *newBlocks) {
+
+    // push latch to the vector to apply the same logic on all blocks
+    newBlocks->insert(newBlocks->begin(), prevLatch);
+
+    //push all instructions of other blocks to header except for terminators
+    for (auto block: *newBlocks) {
+
+        Instruction *instr = block->getFirstNonPHI();
+        while (instr != block->getTerminator()) {
+            // remove debug instructions
+            if (isa<DbgInfoIntrinsic>(instr)) {
+                instr = instr->getNextNode();
+                continue;
+            }
+            Instruction *toBeMoved = instr;
+            instr = instr->getNextNode();
+            toBeMoved->moveBefore(header->getTerminator());
+        }
+    }
+
+    //header terminator should be replaced with last latch terminator
+    Instruction *lastLatchTerminator = newBlocks->back()->getTerminator();
+    lastLatchTerminator->moveBefore(header->getTerminator());
+
+    //remove header prev terminator
+    header->getTerminator()->eraseFromParent();
+
+
+    // remove all unrolled blocks, should start from prev latch since the blocks to be removed should have no predecessors
+    for (auto &block: *newBlocks) {
+        block->eraseFromParent();
+        LI->removeBlock(block);
+    }
+
+
 }
 
 BasicBlock *Unroller::findTargetedBlock(BasicBlock *header, BasicBlock *latch) {
@@ -347,6 +388,7 @@ const std::vector<Value *> &Unroller::getPredicates() const {
 BasicBlock *Unroller::getNewLatch() const {
     return newLatch;
 }
+
 
 
 
