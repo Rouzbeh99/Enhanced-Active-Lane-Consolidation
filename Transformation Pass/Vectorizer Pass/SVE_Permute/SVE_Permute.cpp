@@ -51,11 +51,15 @@ void SVE_Permute::doTransformation() {
                                                 &permutedRemainingVector,
                                                 &permutedPredicates);
 
+    // make a copy of targeted block so that we don't need to keep track of when it is vectorized
+    BasicBlock *copiedTargetedBlock = makeTemporaryCopyOfTheBlock(targetedBlock);
 
-    // filling linearized path, should come before vectorizing targeted path
+    // filling linearized path
+    // for the case of having only one if statement, it only updates the remaining vector, since we know that when we reach there,
+    // all elements in remaining vector is inactive
     std::vector<BasicBlock *> blocks;
-    blocks.push_back(targetedBlock);
-    fillLinearizedBlock(linearizedBlock, blocks);
+    fillBlock(linearizedBlock, blocks);
+
 
     //constructing targeted path
     CallInst *allTruePredicates = createAllTruePredicates(targetedBlock->getTerminator());
@@ -72,8 +76,8 @@ void SVE_Permute::doTransformation() {
 
     // constructing linearized path
 
-    // active lanes in remaining block should be executed
-    makeBlockVectorized(linearizedBlock, permutedPredicates, permutedRemainingVector);
+//    makeBlockVectorized(linearizedBlock, permutedPredicates, permutedRemainingVector);
+
     // update remaining vectors
     updateVectors(linearizedBlock, &updatedRemainingVector, &updatedRemainingVectorPredicates, inductionVar);
 
@@ -155,6 +159,54 @@ void SVE_Permute::doTransformation() {
      *
      */
 
+
+    // We need to add linearized code after loop to execute active elements that has not been executed
+    // both in uniform and remaining vectors, so we will have two epilogue blocks
+
+
+    BasicBlock *epilogueBlock1;
+
+    // insert in the block coming immediately after header
+    // TODO: make sure the block only contains a single branch
+    for (auto BB: successors(L->getHeader())) {
+        if (!L->contains(BB)) {
+            epilogueBlock1 = BB;
+            break;
+        }
+    }
+
+    epilogueBlock1->setName("epilogueBlock1");
+
+    // create second block
+    BasicBlock *epilogueBlock2 = BasicBlock::Create(context, "epilogueBlock2", L->getHeader()->getParent(),
+                                                    epilogueBlock1->getSingleSuccessor());
+
+    // correct cfg edges
+    BranchInst::Create(epilogueBlock1->getSingleSuccessor(), epilogueBlock2);
+    epilogueBlock1->getTerminator()->eraseFromParent();
+    BranchInst::Create(epilogueBlock2, epilogueBlock1);
+
+    std::vector<BasicBlock *> blocksToBeCopied;
+    blocksToBeCopied.push_back(copiedTargetedBlock);
+    fillBlock(epilogueBlock1, blocksToBeCopied);
+    fillBlock(epilogueBlock2, blocksToBeCopied);
+
+
+    // to get index and predicate vector, we kno that there are exactly 5 phi nodes in the header, 1 for induction var
+    // 2 for uniform vector and its predicate and 2 for uniform one
+
+    // TODO: find a better way to find vectors in header
+    Instruction &inductionVarPhi = L->getHeader()->getInstList().front();
+    Instruction *uniformVecPhi = inductionVarPhi.getNextNode();
+    Instruction *uniformPredPhi = uniformVecPhi->getNextNode();
+    Instruction *remainingVecPhi = uniformPredPhi->getNextNode();
+    Instruction *remainingPredPhi = remainingVecPhi->getNextNode();
+
+    // vectorize with uniform vector elements
+    makeBlockVectorized(epilogueBlock1, uniformPredPhi, uniformVecPhi);
+    makeBlockVectorized(epilogueBlock2, remainingPredPhi, remainingVecPhi);
+
+    copiedTargetedBlock->eraseFromParent();
 
 }
 
@@ -685,16 +737,22 @@ void SVE_Permute::makeBlockVectorized(BasicBlock *block, Value *predicateVector,
 
     Instruction *insertionPoint = block->getTerminator();
 
+    predicateVector->print(outs());
+    llvm::outs() << "\n";
+
 
     std::map<Value *, Value *> vMap;
 
     // Should be remove in FILO manner to prevent removing a value that is used in following lines
     std::stack<Instruction *> toBeRemoved;
 
+
     // TODO: Is there any case we could have PHI?
     // TODO: Complete the list
     // TODO: handle binary operation for doubles
-    for (auto &instr: targetedBlock->getInstList()) {
+    // TODO: exclude newly generated instruction from iteration
+    for (auto &instr: block->getInstList()) {
+
         if (isa<GEPOperator>(instr)) {
             continue;
         } else if (isa<StoreInst>(instr)) {
@@ -752,6 +810,7 @@ void SVE_Permute::makeBlockVectorized(BasicBlock *block, Value *predicateVector,
         toBeRemoved.top()->eraseFromParent();
         toBeRemoved.pop();
     }
+
 }
 
 CallInst *
@@ -820,7 +879,7 @@ SVE_Permute::createArithmeticInstruction(Instruction *insertionPoint, unsigned i
     return builder.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
 }
 
-void SVE_Permute::fillLinearizedBlock(BasicBlock *linearizedBlock, const std::vector<BasicBlock *> &blocks) {
+void SVE_Permute::fillBlock(BasicBlock *blockToBeFilled, const std::vector<BasicBlock *> &blocks) {
     llvm::ValueToValueMapTy vMap;
     std::vector<llvm::Instruction *> new_instructions;
 
@@ -830,7 +889,7 @@ void SVE_Permute::fillLinearizedBlock(BasicBlock *linearizedBlock, const std::ve
                 break;
             }
             Instruction *clonedInstr = instr.clone();
-            clonedInstr->insertBefore(linearizedBlock->getTerminator());
+            clonedInstr->insertBefore(blockToBeFilled->getTerminator());
             vMap[&instr] = clonedInstr;
             new_instructions.push_back(clonedInstr);
 
@@ -956,6 +1015,15 @@ PHINode *SVE_Permute::insertPhiNodsForVector(Value *updatedValue, Value *initial
     return latchPhi;
 }
 
+
+BasicBlock *SVE_Permute::makeTemporaryCopyOfTheBlock(BasicBlock *block) {
+    ValueToValueMapTy VMap;
+    BasicBlock *clonedBlock = CloneBasicBlock(block, VMap, "tempCopy", L->getHeader()->getParent());
+    SmallVector<BasicBlock *, 1> newBlocks;
+    newBlocks.push_back(clonedBlock);
+    remapInstructionsInBlocks(newBlocks, VMap);
+    return clonedBlock;
+}
 
 SVE_Permute::SVE_Permute(Loop *l, int factor, LoopInfo *loopInfo, BasicBlock *latch, std::vector<Value *> preds)
         : L(l),

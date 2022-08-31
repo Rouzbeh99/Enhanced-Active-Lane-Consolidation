@@ -23,6 +23,8 @@ namespace {
 
     void printBeforeLoopBlocks(Loop *L);
 
+    void printAllBlocks(Loop *L);
+
 
 
 
@@ -62,8 +64,9 @@ namespace {
         auto *sve_permute = new SVE_Permute(L, factor, &LI, unroller->getNewLatch(), unroller->getPredicates());
         sve_permute->doTransformation();
 
+        printAllBlocks(L);
 //        printBeforeLoopBlocks(L);
-        printLoop(L);
+//        printLoop(L);
 
 
         //return (llvm::PreservedAnalyses::all());
@@ -79,6 +82,16 @@ namespace {
         llvm::outs() << "\n";
 
     }
+
+    void printAllBlocks(Loop *L) {
+
+        for (auto &BB: L->getHeader()->getParent()->getBasicBlockList()) {
+            BB.print(outs());
+        }
+        llvm::outs() << "\n";
+
+    }
+
 
     void printBeforeLoopBlocks(Loop *L) {
         for (auto &BB: L->getHeader()->getParent()->getBasicBlockList()) {

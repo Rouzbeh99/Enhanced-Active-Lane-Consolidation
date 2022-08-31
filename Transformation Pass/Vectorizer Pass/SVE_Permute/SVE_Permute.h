@@ -125,10 +125,13 @@ private:
 
     //blocks contain scalar code
 private:
-    void fillLinearizedBlock(BasicBlock *linearizedBlock, const std::vector<BasicBlock *> &blocks);
+    void fillBlock(BasicBlock *blockToBeFilled, const std::vector<BasicBlock *> &blocks);
 
 private:
     void refineLoopTripCount();
+
+private:
+    BasicBlock* makeTemporaryCopyOfTheBlock(BasicBlock* block);
 
 private:
     CallInst *
