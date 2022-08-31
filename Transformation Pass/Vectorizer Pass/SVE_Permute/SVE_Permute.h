@@ -128,7 +128,10 @@ private:
     void fillBlock(BasicBlock *blockToBeFilled, const std::vector<BasicBlock *> &blocks);
 
 private:
-    void refineLoopTripCount();
+    void refineLoopConditionCheck();
+
+private:
+    void setInitialValueForInductionVariable();
 
 private:
     BasicBlock* makeTemporaryCopyOfTheBlock(BasicBlock* block);

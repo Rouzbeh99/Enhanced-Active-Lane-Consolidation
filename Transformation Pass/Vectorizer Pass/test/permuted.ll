@@ -92,7 +92,7 @@ for.cond.cleanup:                                 ; preds = %epilogueBlock2, %en
   ret void, !dbg !40
 
 for.body:                                         ; preds = %for.body.init.2, %new.latch
-  %24 = phi i64 [ %indvars.iv.next.latchCopy.1.2.3, %new.latch ], [ 0, %for.body.init.2 ]
+  %24 = phi i64 [ %indvars.iv.next.latchCopy.1.2.3, %new.latch ], [ 8, %for.body.init.2 ]
   %25 = phi <vscale x 4 x i32> [ %78, %new.latch ], [ %8, %for.body.init.2 ]
   %26 = phi <vscale x 4 x i1> [ %79, %new.latch ], [ %3, %for.body.init.2 ]
   %27 = phi <vscale x 4 x i32> [ %80, %new.latch ], [ %9, %for.body.init.2 ]
@@ -110,9 +110,8 @@ for.body:                                         ; preds = %for.body.init.2, %n
   %rem15.headerCopy.1.2.3 = and i64 %indvars.iv.next.latchCopy.1.2, 1, !dbg !32
   %cmp1.not.headerCopy.1.2.3 = icmp eq i64 %rem15.headerCopy.1.2.3, 0, !dbg !32
   %indvars.iv.next.latchCopy.1.2.3 = add nuw nsw i64 %indvars.iv.next.latchCopy.1.2, 1, !dbg !35
-  %29 = sub i64 %wide.trip.count, 3, !dbg !29
-  %exitcond.not.latchCopy.1.2.3 = icmp eq i64 %indvars.iv.next.latchCopy.1.2.3, %29, !dbg !29
-  br i1 %exitcond.not.latchCopy.1.2.3, label %epilogueBlock1, label %permute.decision, !dbg !31, !llvm.loop !41
+  %29 = icmp uge i64 %indvars.iv.next.latchCopy.1.2.3, %wide.trip.count, !dbg !29
+  br i1 %29, label %epilogueBlock1, label %permute.decision, !dbg !31, !llvm.loop !41
 
 permute.decision:                                 ; preds = %for.body
   %30 = call <vscale x 4 x i1> @llvm.aarch64.sve.ptrue.nxv4i1(i32 4)

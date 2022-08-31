@@ -42,8 +42,9 @@ void SVE_Permute::doTransformation() {
     formInitialPredicateVectors(inductionVar, &initialUniformVectorPredicates, &initialRemainingVectorPredicates,
                                 &initialUniformVector,
                                 &initialRemainingVector);
+    setInitialValueForInductionVariable();
 
-    refineLoopTripCount();
+    refineLoopConditionCheck();
 
     BasicBlock *linearizedBlock = doPermutation(initialUniformVectorPredicates, initialRemainingVectorPredicates,
                                                 initialUniformVector,
@@ -483,31 +484,53 @@ Value *SVE_Permute::createSubInstruction(Instruction *insertionPoint, Value *fir
 }
 
 
-void SVE_Permute::refineLoopTripCount() {
+void SVE_Permute::setInitialValueForInductionVariable() {
+    Instruction &firstInstr = L->getHeader()->getInstList().front();
+    auto *phiNode = dyn_cast<PHINode>(&firstInstr);
+    for (auto pred: predecessors(L->getHeader())) {
+        if (!L->contains(pred)) {
+            Constant *initialValue = llvm::ConstantInt::get(phiNode->getType(), 2 * vectorizationFactor);
+            phiNode->setIncomingValueForBlock(pred, initialValue);
+        }
+    }
+}
+
+
+void SVE_Permute::refineLoopConditionCheck() {
     auto *brInstr = dyn_cast<BranchInst>(L->getHeader()->getTerminator());
-    auto *conditionInstruction = dyn_cast<Instruction>(brInstr->getCondition());
+    auto *oldConditionInstruction = dyn_cast<Instruction>(brInstr->getCondition());
 
 
-    // set new trip count to  n - (VLength - 1)
+
     LLVMContext &context = L->getHeader()->getContext();
     IRBuilder<> builder(context);
-    builder.SetInsertPoint(conditionInstruction);
+    builder.SetInsertPoint(oldConditionInstruction);
 
-    Value *prevTripCount;
-    int index;
+    Value *tripCount;
+    Value *inductionVar;
     // find trip count
-    for (int i = 0; i < conditionInstruction->getNumOperands(); ++i) {
-        auto *instr = dyn_cast<Instruction>(conditionInstruction->getOperand(i));
+    for (int i = 0; i < oldConditionInstruction->getNumOperands(); ++i) {
+        auto *instr = dyn_cast<Instruction>(oldConditionInstruction->getOperand(i));
         // it should have been calculated in preHeader
         if (instr->getParent() != L->getHeader()) {
-            index = i;
-            prevTripCount = dyn_cast<Value>(instr);
+            tripCount = dyn_cast<Value>(instr);
+        } else {
+            inductionVar = oldConditionInstruction->getOperand(i);
         }
     }
 
-    auto *constValue = llvm::ConstantInt::get(prevTripCount->getType(), vectorizationFactor - 1);
-    Value *newTripCount = createSubInstruction(conditionInstruction, prevTripCount, constValue);
-    conditionInstruction->setOperand(index, newTripCount);
+//    auto *constValue = llvm::ConstantInt::get(prevTripCount->getType(), vectorizationFactor - 1);
+//      // set new trip count to  n - (VLength - 1)
+//    Value *newTripCount = createSubInstruction(oldConditionInstruction, prevTripCount, constValue);
+    
+    // refine condition instruction
+    // TODO: how to find proper compare instruction?
+    Value *newCondition = builder.CreateICmpUGE(inductionVar, tripCount);
+    brInstr->setCondition(newCondition);
+    oldConditionInstruction->eraseFromParent();
+
+    // TODO: check to jump to correct blocks based on condition
+
 
 }
 
@@ -546,7 +569,6 @@ SVE_Permute::formInitialPredicateVectors(Value *inductionVariable, Value **first
     (*secondVector) = createIndexInstruction(lastCopiedBlock->getTerminator(), constVFactor, constOne);
 
 }
-
 
 // TODO: makes loop preHeader invalid
 BasicBlock *SVE_Permute::duplicateBlocksForInitialPredicateGeneration(Value *inductionVariable,
@@ -667,6 +689,7 @@ BasicBlock *SVE_Permute::duplicateBlocksForInitialPredicateGeneration(Value *ind
 
 }
 
+
 BasicBlock *SVE_Permute::doPermutation(Value *firstPredicates, Value *secondPredicates, Value *firstVector,
                                        Value *secondVector, Value **permutedZ0,
                                        Value **permutedZ1, Value **permutedPredicates) {
@@ -731,7 +754,6 @@ BasicBlock *SVE_Permute::doPermutation(Value *firstPredicates, Value *secondPred
 
     return linearizedBlock;
 }
-
 
 void SVE_Permute::makeBlockVectorized(BasicBlock *block, Value *predicateVector, Value *indices) {
 
@@ -943,6 +965,7 @@ void SVE_Permute::updateVectors(BasicBlock *insertAt, Value **indicesVector, Val
 
 }
 
+
 PHINode *SVE_Permute::insertPhiNodsForVector(Value *updatedValue, Value *initialValue,
                                              BasicBlock *mainPath, BasicBlock *otherPath) {
 
@@ -1014,7 +1037,6 @@ PHINode *SVE_Permute::insertPhiNodsForVector(Value *updatedValue, Value *initial
 
     return latchPhi;
 }
-
 
 BasicBlock *SVE_Permute::makeTemporaryCopyOfTheBlock(BasicBlock *block) {
     ValueToValueMapTy VMap;
