@@ -15,7 +15,7 @@ set(CMAKE_CXX_TARGET_INCLUDE_PATH
   "../include"
   "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass}/Unroller"
   "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass}/SVE_Vectorizer"
-  "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass}/SVE_Permute"
+  "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass}/SVE_ALC"
   "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass}/IntrinsicCallGenerator"
   )
 

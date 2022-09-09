@@ -6,7 +6,7 @@
 #include "Unroller/Unroller.h"
 #include "SVE_Vectorizer/SVE_Vectorizer.h"
 #include "llvm/Analysis/LoopAnalysisManager.h"
-#include "SVE_Permute/SVE_Permute.h"
+#include "SVE_ALC/SVE_ALC.h"
 
 using namespace llvm;
 
@@ -60,7 +60,7 @@ namespace {
 //        auto *sve_vectorizer = new SVE_Vectorizer(L, factor, unroller->getPredicates());
 //        sve_vectorizer->doVectorization();
 
-        auto *sve_permute = new SVE_Permute(L, factor, &LI, unroller->getNewLatch(), unroller->getPredicates());
+        auto *sve_permute = new SVE_ALC(L, factor, &LI, unroller->getNewLatch(), unroller->getPredicates());
         sve_permute->doTransformation();
 
         printAllBlocks(L);

@@ -18,9 +18,7 @@ cmake -DCMAKE_VERBOSE_MAKEFILE=ON \
   ../
 make
 
-
-
-cd ../../SVE_Permute/build
+cd ../../SVE_ALC/build
 cmake -DCMAKE_VERBOSE_MAKEFILE=ON \
   -DLLVM_DIR=$LLVM_BUILD_DIR/lib/cmake/llvm \
   -DCMAKE_C_COMPILER=$LLVM_BUILD_DIR/bin/clang \

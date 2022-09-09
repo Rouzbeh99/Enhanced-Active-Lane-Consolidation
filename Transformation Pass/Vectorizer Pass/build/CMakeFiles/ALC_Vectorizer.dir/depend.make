@@ -3,7 +3,7 @@
 
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: ../ALC_Vectorizer.cpp
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: ../IntrinsicCallGenerator/IntrinsicCallGenerator.h
-CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: ../SVE_Permute/SVE_Permute.h
+CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: ../SVE_ALC/SVE_ALC.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: ../SVE_Vectorizer/SVE_Vectorizer.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: ../Unroller/Unroller.h
 CMakeFiles/ALC_Vectorizer.dir/ALC_Vectorizer.cpp.o: /home/rouzbeh/Graduate/LLVM/llvm-project/build/include/llvm/Config/abi-breaking.h
