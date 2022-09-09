@@ -14,6 +14,7 @@
 #include "llvm/IR/ValueMap.h"
 #include "llvm/Transforms/Utils/Cloning.h"
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
+#include "../IntrinsicCallGenerator/IntrinsicCallGenerator.h"
 #include "map"
 
 using namespace llvm;
@@ -22,6 +23,7 @@ class SVE_Vectorizer {
 public:
     Loop *L;
     Value *predicateVector;
+    IntrinsicCallGenerator *intrinsicCallGenerator;
     BasicBlock *targetedBB;
     Instruction *insertionPoint;
     std::vector<Value *> predicates;
@@ -39,7 +41,7 @@ private:
 
 public:
 
-   void doVectorization();
+    void doVectorization();
 
 private:
     BasicBlock *getTargetedBB() const;
@@ -48,26 +50,10 @@ private:
 
     Value *formPredicateVector();
 
-private:
-
-    CallInst *createAllTruePredicates();
-
-private:
-
-    CallInst *loadElements(GEPOperator *ptr);
-
-private:
-
-    void storeElements(Value *elementsVector, GEPOperator *ptr);
 
 private:
 
     BasicBlock *findTargetedBB();
-
-
-private:
-
-    CallInst *insertArithmeticOrLogicalInstruction(Intrinsic::ID intrinsic, Value *firstOp, Value *secondOp);
 
 
 };

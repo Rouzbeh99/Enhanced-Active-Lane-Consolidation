@@ -6,6 +6,7 @@
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/IntrinsicInst.h"
 #include "llvm/IR/IntrinsicsAArch64.h"
+#include "llvm/IR/IntrinsicsAArch64.h"
 #include "llvm/Passes/PassPlugin.h"
 #include "llvm/Passes/PassBuilder.h"
 #include "llvm/IR/PassManager.h"
@@ -13,6 +14,7 @@
 #include "llvm/IR/ValueMap.h"
 #include "llvm/Transforms/Utils/Cloning.h"
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
+#include "../IntrinsicCallGenerator/IntrinsicCallGenerator.h"
 #include "stack"
 #include "map"
 
@@ -27,6 +29,7 @@ class SVE_Permute {
 private:
 
     Loop *L;
+    IntrinsicCallGenerator *intrinsicCallGenerator;
     Module *module;
     int vectorizationFactor;
     BasicBlock *targetedBlock;
@@ -49,9 +52,10 @@ private:
                                      Value **firstVector, Value **secondVector);
     // returns last generated block
 private:
-    BasicBlock* duplicateBlocksForInitialPredicateGeneration(Value *inductionVariable,
-                                                       std::vector<Value *> *firstInitialPredicates,
-                                                       std::vector<Value *> *secondInitialPredicates);
+    BasicBlock *duplicateBlocksForInitialPredicateGeneration(Value *inductionVariable,
+                                                             std::vector<Value *> *firstInitialPredicates,
+                                                             std::vector<Value *> *secondInitialPredicates);
+
 private:
     void
     insertPermutationLogic(Instruction *insertAt, Value *z0, Value *z1, Value *p0, Value *p1, Value **permutedZ0,
@@ -75,52 +79,6 @@ private:
 
 
 private:
-
-    CallInst *createAllTruePredicates(Instruction *insertionPoint);
-
-private:
-
-    CallInst *createCompactInstruction(Instruction *insertionPoint, Value *toBeCompacted, Value *predicatedVector);
-
-private:
-
-    Value *createNotInstruction(Instruction *insertionPoint, Value *elements);
-
-private:
-
-    Value *createANDInstruction(Instruction *insertionPoint, ArrayRef<Value *> elements);
-
-private:
-
-    Value *createORInstruction(Instruction *insertionPoint, ArrayRef<Value *> elements);
-
-private:
-
-    CallInst *createCntpInstruction(Instruction *insertionPoint, Value *elements, Value *predicatedVector);
-
-private:
-
-    CallInst *createWhileltInstruction(Instruction *insertionPoint, Value *firstOp, Value *secondOp);
-
-private:
-
-    CallInst *
-    createSpliceInstruction(Instruction *insertionPoint, Value *firstOp, Value *secondOp, Value *predicatedVector);
-
-private:
-    CallInst *
-    createSelInstruction(Instruction *insertionPoint, Value *firstOp, Value *secondOp, Value *predicatedVector);
-
-public:
-    CallInst *createIndexInstruction(Instruction *insertionPoint, Value *firstOp, Value *secondOp);
-
-private:
-    Value *createAddInstruction(Instruction *insertionPoint, Value *firstOp, Value *secondOp);
-
-private:
-    Value *createSubInstruction(Instruction *insertionPoint, Value *firstOp, Value *secondOp);
-
-private:
     void makeBlockVectorized(BasicBlock *block, Value *predicateVector, Value *indices);
 
     //blocks contain scalar code
@@ -134,20 +92,8 @@ private:
     void setInitialValueForInductionVariable();
 
 private:
-    BasicBlock* makeTemporaryCopyOfTheBlock(BasicBlock* block);
+    BasicBlock *makeTemporaryCopyOfTheBlock(BasicBlock *block);
 
-private:
-    CallInst *
-    createGatherLoadInstruction(Instruction *insertionPoint, GEPOperator *ptr, Value *predicatedVector, Value *indices);
-
-private:
-    void createScatterStoreInstruction(Instruction *insertionPoint, Value *elementsVector, GEPOperator *ptr,
-                                       Value *predicatedVector, Value *indices);
-
-private:
-    CallInst *
-    createArithmeticInstruction(Instruction *insertionPoint, unsigned int intrinsic, Value *firstOp, Value *secondOp,
-                                Value *predicatedVector);
 };
 
 

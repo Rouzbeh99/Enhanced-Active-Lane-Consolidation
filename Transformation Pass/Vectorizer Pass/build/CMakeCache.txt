@@ -18,7 +18,7 @@
 ALC_Vectorizer_BINARY_DIR:STATIC=/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/build
 
 //Dependencies for the target
-ALC_Vectorizer_LIB_DEPENDS:STATIC=general;LLVMUnroller;general;LLVMSVE_Vectorizer;general;LLVMSVE_Permute;
+ALC_Vectorizer_LIB_DEPENDS:STATIC=general;LLVMUnroller;general;LLVMSVE_Vectorizer;general;LLVMSVE_Permute;general;LLVMIntrinsicCallGenerator;
 
 //Value Computed by CMake
 ALC_Vectorizer_SOURCE_DIR:STATIC=/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass

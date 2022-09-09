@@ -6,6 +6,36 @@
 
 #IncludeRegexTransform: 
 
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/IntrinsicCallGenerator/IntrinsicCallGenerator.h
+llvm/Analysis/LoopInfo.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/IntrinsicCallGenerator/llvm/Analysis/LoopInfo.h
+llvm/IR/BasicBlock.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/IntrinsicCallGenerator/llvm/IR/BasicBlock.h
+llvm/IR/IRBuilder.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/IntrinsicCallGenerator/llvm/IR/IRBuilder.h
+llvm/IR/IntrinsicInst.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/IntrinsicCallGenerator/llvm/IR/IntrinsicInst.h
+llvm/IR/IntrinsicsAArch64.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/IntrinsicCallGenerator/llvm/IR/IntrinsicsAArch64.h
+llvm/Passes/PassPlugin.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/IntrinsicCallGenerator/llvm/Passes/PassPlugin.h
+llvm/Passes/PassBuilder.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/IntrinsicCallGenerator/llvm/Passes/PassBuilder.h
+llvm/IR/PassManager.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/IntrinsicCallGenerator/llvm/IR/PassManager.h
+llvm/Pass.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/IntrinsicCallGenerator/llvm/Pass.h
+llvm/IR/ValueMap.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/IntrinsicCallGenerator/llvm/IR/ValueMap.h
+llvm/Transforms/Utils/Cloning.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/IntrinsicCallGenerator/llvm/Transforms/Utils/Cloning.h
+llvm/Transforms/Utils/BasicBlockUtils.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/IntrinsicCallGenerator/llvm/Transforms/Utils/BasicBlockUtils.h
+stack
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/IntrinsicCallGenerator/stack
+map
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/IntrinsicCallGenerator/map
+
 /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/SVE_Vectorizer/SVE_Vectorizer.cpp
 SVE_Vectorizer.h
 /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/SVE_Vectorizer/SVE_Vectorizer.h
@@ -39,6 +69,8 @@ llvm/Transforms/Utils/Cloning.h
 /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/SVE_Vectorizer/llvm/Transforms/Utils/Cloning.h
 llvm/Transforms/Utils/BasicBlockUtils.h
 /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/SVE_Vectorizer/llvm/Transforms/Utils/BasicBlockUtils.h
+../IntrinsicCallGenerator/IntrinsicCallGenerator.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/IntrinsicCallGenerator/IntrinsicCallGenerator.h
 map
 /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/SVE_Vectorizer/map
 

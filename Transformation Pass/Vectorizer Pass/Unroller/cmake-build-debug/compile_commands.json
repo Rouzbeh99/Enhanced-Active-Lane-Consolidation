@@ -1,7 +1,0 @@
-[
-{
-  "directory": "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/Unroller/cmake-build-debug",
-  "command": "/usr/bin/c++ -I/usr/lib/llvm-10/include -I\"/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/Unroller/include\" -g -fPIC   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS  -fno-exceptions -o CMakeFiles/libLLVMUnroller.dir/Unroller.cpp.o -c \"/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/Unroller/Unroller.cpp\"",
-  "file": "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/Unroller/Unroller.cpp"
-}
-]

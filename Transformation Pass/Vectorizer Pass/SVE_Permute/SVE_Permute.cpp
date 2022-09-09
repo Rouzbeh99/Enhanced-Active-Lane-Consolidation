@@ -63,7 +63,7 @@ void SVE_Permute::doTransformation() {
 
 
     //constructing targeted path
-    CallInst *allTruePredicates = createAllTruePredicates(targetedBlock->getTerminator());
+    CallInst *allTruePredicates = intrinsicCallGenerator->createAllTruePredicates(targetedBlock->getTerminator());
     makeBlockVectorized(targetedBlock, allTruePredicates, permutedUniformVector);
 
 
@@ -221,265 +221,67 @@ void SVE_Permute::insertPermutationLogic(Instruction *insertAt, Value *z0, Value
 
     ConstantInt *constZero = llvm::ConstantInt::get(int64Type, 0);
 
-    CallInst *allTruePredicates = createAllTruePredicates(insertAt);
+    CallInst *allTruePredicates = intrinsicCallGenerator->createAllTruePredicates(insertAt);
 
 
     // gather active lanes
-    CallInst *z2 = createCompactInstruction(insertAt, z0, p0);
-    CallInst *z3 = createCompactInstruction(insertAt, z1, p1);
+    CallInst *z2 = intrinsicCallGenerator->createCompactInstruction(insertAt, z0, p0);
+    CallInst *z3 = intrinsicCallGenerator->createCompactInstruction(insertAt, z1, p1);
 
 
 
     //gather inactive lanes
-    Value *p2 = createNotInstruction(insertAt, p0);
-    Value *p3 = createNotInstruction(insertAt, p1);
+    Value *p2 = intrinsicCallGenerator->createNotInstruction(insertAt, p0);
+    Value *p3 = intrinsicCallGenerator->createNotInstruction(insertAt, p1);
 
-    CallInst *z4 = createCompactInstruction(insertAt, z0, p2);
-    CallInst *z5 = createCompactInstruction(insertAt, z1, p3);
+    CallInst *z4 = intrinsicCallGenerator->createCompactInstruction(insertAt, z0, p2);
+    CallInst *z5 = intrinsicCallGenerator->createCompactInstruction(insertAt, z1, p3);
 
 
 
     // gathering all active lanes to z0
-    auto x0 = dyn_cast<Value>(createCntpInstruction(insertAt, p0, allTruePredicates));
+    auto x0 = dyn_cast<Value>(intrinsicCallGenerator->createCntpInstruction(insertAt, p0, allTruePredicates));
 
-    CallInst *p4 = createWhileltInstruction(insertAt, constZero, x0);
+    CallInst *p4 = intrinsicCallGenerator->createWhileltInstruction(insertAt, constZero, x0);
 
 
-    *permutedZ0 = createSpliceInstruction(insertAt, z2, z3, p4);
+    *permutedZ0 = intrinsicCallGenerator->createSpliceInstruction(insertAt, z2, z3, p4);
 
     //gather others to z1
-    auto x1 = dyn_cast<Value>(createCntpInstruction(insertAt, p1, allTruePredicates));
-    auto p5 = createWhileltInstruction(insertAt, constZero, x1);
-    z2 = createSpliceInstruction(insertAt, z3, z5, p5); // contains active ... inactive
-    CallInst *x2 = createCntpInstruction(insertAt, p2, allTruePredicates);
-    p2 = createWhileltInstruction(insertAt, constZero, x2);
+    auto x1 = dyn_cast<Value>(intrinsicCallGenerator->createCntpInstruction(insertAt, p1, allTruePredicates));
+    auto p5 = intrinsicCallGenerator->createWhileltInstruction(insertAt, constZero, x1);
+    z2 = intrinsicCallGenerator->createSpliceInstruction(insertAt, z3, z5, p5); // contains active ... inactive
+    CallInst *x2 = intrinsicCallGenerator->createCntpInstruction(insertAt, p2, allTruePredicates);
+    p2 = intrinsicCallGenerator->createWhileltInstruction(insertAt, constZero, x2);
 
-    *permutedZ1 = createSelInstruction(insertAt, z4, z2, p2);
+    *permutedZ1 = intrinsicCallGenerator->createSelInstruction(insertAt, z4, z2, p2);
 
     //find result predicate
-    p1 = createNotInstruction(insertAt, p2);
-    CallInst *x3 = createCntpInstruction(insertAt, p2, allTruePredicates);
+    p1 = intrinsicCallGenerator->createNotInstruction(insertAt, p2);
+    CallInst *x3 = intrinsicCallGenerator->createCntpInstruction(insertAt, p2, allTruePredicates);
 
-    Value *numOfActivesInResult = createAddInstruction(insertAt, createSubInstruction(insertAt, x1, x2), x3);
+    Value *numOfActivesInResult = intrinsicCallGenerator->createAddInstruction(insertAt, intrinsicCallGenerator->createSubInstruction(insertAt, x1, x2), x3);
 
-    p2 = createWhileltInstruction(insertAt, constZero, numOfActivesInResult);
-    auto p6 = createNotInstruction(insertAt, p2);
+    p2 = intrinsicCallGenerator->createWhileltInstruction(insertAt, constZero, numOfActivesInResult);
+    auto p6 = intrinsicCallGenerator->createNotInstruction(insertAt, p2);
 
     std::vector<Value *> firstAndOperands;
     firstAndOperands.push_back(p1);
     firstAndOperands.push_back(p2);       // !p6 = p2
-    Value *firstAnd = createANDInstruction(insertAt, ArrayRef<Value *>(firstAndOperands));
+    Value *firstAnd = intrinsicCallGenerator->createANDInstruction(insertAt, ArrayRef<Value *>(firstAndOperands));
 
     std::vector<Value *> secondAndOperands;
     secondAndOperands.push_back(p1);
     secondAndOperands.push_back(p2);
     secondAndOperands.push_back(p6);
-    Value *secondAnd = createANDInstruction(insertAt, ArrayRef<Value *>(secondAndOperands));
+    Value *secondAnd = intrinsicCallGenerator->createANDInstruction(insertAt, ArrayRef<Value *>(secondAndOperands));
 
     std::vector<Value *> orOperands;
     orOperands.push_back(firstAnd);
     orOperands.push_back(secondAnd);
 
-    *permutedPredicates = createORInstruction(insertAt, ArrayRef<Value *>(orOperands));
+    *permutedPredicates = intrinsicCallGenerator->createORInstruction(insertAt, ArrayRef<Value *>(orOperands));
 
-
-}
-
-
-CallInst *SVE_Permute::createAllTruePredicates(Instruction *insertionPoint) {
-
-    LLVMContext &context = L->getHeader()->getContext();
-    IRBuilder<> builder(context);
-    builder.SetInsertPoint(
-            insertionPoint);// append to the end of block, before terminator
-
-    auto intrinsic = Intrinsic::aarch64_sve_ptrue;
-    VectorType *type = VectorType::get(Type::getInt1Ty(context), vectorizationFactor, true);
-    Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, type);
-    llvm::Type *i32_type = llvm::IntegerType::getInt32Ty(context);
-    llvm::Constant *constantInt = llvm::ConstantInt::get(i32_type, vectorizationFactor, true);
-    return builder.CreateCall(intrinsicFunction, constantInt);
-}
-
-
-CallInst *
-SVE_Permute::createCompactInstruction(Instruction *insertionPoint, Value *toBeCompacted, Value *predicatedVector) {
-
-    LLVMContext &context = L->getHeader()->getContext();
-    IRBuilder<> builder(context);
-    builder.SetInsertPoint(insertionPoint);
-
-
-    auto intrinsic = Intrinsic::aarch64_sve_compact;
-
-    VectorType *type = VectorType::get(Type::getInt32Ty(context), vectorizationFactor, true);
-    Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, type);
-
-    std::vector<Value *> arguments;
-    arguments.push_back(predicatedVector);
-    arguments.push_back(toBeCompacted);
-
-
-    return builder.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
-}
-
-Value *SVE_Permute::createNotInstruction(Instruction *insertionPoint, Value *elements) {
-    LLVMContext &context = L->getHeader()->getContext();
-    IRBuilder<> builder(context);
-    builder.SetInsertPoint(
-            insertionPoint);// append to the end of block, before terminator
-
-    return builder.CreateNot(elements);
-}
-
-CallInst *SVE_Permute::createCntpInstruction(Instruction *insertionPoint, Value *elements, Value *predicatedVector) {
-
-    LLVMContext &context = L->getHeader()->getContext();
-    IRBuilder<> builder(context);
-    builder.SetInsertPoint(insertionPoint);
-
-    auto intrinsic = Intrinsic::aarch64_sve_cntp;
-
-    VectorType *type = VectorType::get(Type::getInt1Ty(context), vectorizationFactor, true);
-    Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, type);
-
-
-    std::vector<Value *> arguments;
-
-    arguments.push_back(predicatedVector);
-    arguments.push_back(elements);
-
-    return builder.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
-}
-
-
-CallInst *SVE_Permute::createWhileltInstruction(Instruction *insertionPoint, Value *firstOp, Value *secondOp) {
-
-    LLVMContext &context = L->getHeader()->getContext();
-    IRBuilder<> builder(context);
-    builder.SetInsertPoint(insertionPoint);
-
-    auto intrinsic = Intrinsic::aarch64_sve_whilelt;
-
-    VectorType *type = VectorType::get(Type::getInt1Ty(context), vectorizationFactor, true);
-    std::vector<Type *> types;
-
-    types.push_back(type);
-    types.push_back(Type::getInt64Ty(context));
-
-    Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, ArrayRef<Type *>(types));
-
-    std::vector<Value *> arguments;
-
-    arguments.push_back(firstOp);
-    arguments.push_back(secondOp);
-
-    return builder.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
-}
-
-CallInst *SVE_Permute::createSpliceInstruction(Instruction *insertionPoint, Value *firstOp, Value *secondOp,
-                                               Value *predicatedVector) {
-
-
-    LLVMContext &context = L->getHeader()->getContext();
-    IRBuilder<> builder(context);
-    builder.SetInsertPoint(insertionPoint);
-
-    auto intrinsic = Intrinsic::aarch64_sve_splice;
-
-    VectorType *type = VectorType::get(Type::getInt32Ty(context), vectorizationFactor, true);
-
-    Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, type);
-
-    std::vector<Value *> arguments;
-
-    arguments.push_back(predicatedVector);
-    arguments.push_back(firstOp);
-    arguments.push_back(secondOp);
-
-    return builder.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
-
-}
-
-CallInst *SVE_Permute::createSelInstruction(Instruction *insertionPoint, Value *firstOp, Value *secondOp,
-                                            Value *predicatedVector) {
-    LLVMContext &context = L->getHeader()->getContext();
-    IRBuilder<> builder(context);
-    builder.SetInsertPoint(insertionPoint);
-
-    auto intrinsic = Intrinsic::aarch64_sve_sel;
-
-    VectorType *type = VectorType::get(Type::getInt32Ty(context), vectorizationFactor, true);
-
-    Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, type);
-
-    std::vector<Value *> arguments;
-
-    arguments.push_back(predicatedVector);
-    arguments.push_back(firstOp);
-    arguments.push_back(secondOp);
-
-    return builder.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
-
-}
-
-Value *SVE_Permute::createORInstruction(Instruction *insertionPoint, ArrayRef<Value *> elements) {
-    LLVMContext &context = L->getHeader()->getContext();
-    IRBuilder<> builder(context);
-    builder.SetInsertPoint(insertionPoint);// append to the end of block, before terminator
-
-    return builder.CreateOr(elements);
-}
-
-Value *SVE_Permute::createANDInstruction(Instruction *insertionPoint, ArrayRef<Value *> elements) {
-    LLVMContext &context = L->getHeader()->getContext();
-    IRBuilder<> builder(context);
-    builder.SetInsertPoint(insertionPoint);// append to the end of block, before terminator
-
-    return builder.CreateAnd(elements);
-}
-
-CallInst *SVE_Permute::createIndexInstruction(Instruction *insertionPoint, Value *firstOp, Value *secondOp) {
-    LLVMContext &context = L->getHeader()->getContext();
-    IRBuilder<> builder(context);
-
-
-    builder.SetInsertPoint(insertionPoint);
-
-
-    auto intrinsic = Intrinsic::aarch64_sve_index;
-
-
-    VectorType *type = VectorType::get(Type::getInt32Ty(context), vectorizationFactor, true);
-
-    Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, type);
-
-    std::vector<Value *> arguments;
-
-    arguments.push_back(firstOp);
-    arguments.push_back(secondOp);
-
-    return builder.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
-}
-
-
-Value *SVE_Permute::createAddInstruction(Instruction *insertionPoint, Value *firstOp, Value *secondOp) {
-    LLVMContext &context = L->getHeader()->getContext();
-    IRBuilder<> builder(context);
-    builder.SetInsertPoint(insertionPoint);
-
-
-    return builder.CreateAdd(firstOp, secondOp);
-
-
-}
-
-Value *SVE_Permute::createSubInstruction(Instruction *insertionPoint, Value *firstOp, Value *secondOp) {
-    LLVMContext &context = L->getHeader()->getContext();
-    IRBuilder<> builder(context);
-    builder.SetInsertPoint(insertionPoint);
-
-    return builder.CreateSub(firstOp, secondOp);
 
 }
 
@@ -501,7 +303,6 @@ void SVE_Permute::refineLoopConditionCheck() {
     auto *oldConditionInstruction = dyn_cast<Instruction>(brInstr->getCondition());
 
 
-
     LLVMContext &context = L->getHeader()->getContext();
     IRBuilder<> builder(context);
     builder.SetInsertPoint(oldConditionInstruction);
@@ -521,8 +322,8 @@ void SVE_Permute::refineLoopConditionCheck() {
 
 //    auto *constValue = llvm::ConstantInt::get(prevTripCount->getType(), vectorizationFactor - 1);
 //      // set new trip count to  n - (VLength - 1)
-//    Value *newTripCount = createSubInstruction(oldConditionInstruction, prevTripCount, constValue);
-    
+//    Value *newTripCount = intrinsicCallGenerator->createSubInstruction(oldConditionInstruction, prevTripCount, constValue);
+
     // refine condition instruction
     // TODO: how to find proper compare instruction?
     Value *newCondition = builder.CreateICmpUGE(inductionVar, tripCount);
@@ -565,8 +366,8 @@ SVE_Permute::formInitialPredicateVectors(Value *inductionVariable, Value **first
     ConstantInt *constOne = llvm::ConstantInt::get(Type::getInt32Ty(context), 1, true);
     ConstantInt *constVFactor = llvm::ConstantInt::get(Type::getInt32Ty(context), vectorizationFactor, true);
 
-    (*firstVector) = createIndexInstruction(lastCopiedBlock->getTerminator(), constZero, constOne);
-    (*secondVector) = createIndexInstruction(lastCopiedBlock->getTerminator(), constVFactor, constOne);
+    (*firstVector) = intrinsicCallGenerator->createIndexInstruction(lastCopiedBlock->getTerminator(), constZero, constOne);
+    (*secondVector) = intrinsicCallGenerator->createIndexInstruction(lastCopiedBlock->getTerminator(), constVFactor, constOne);
 
 }
 
@@ -721,12 +522,12 @@ BasicBlock *SVE_Permute::doPermutation(Value *firstPredicates, Value *secondPred
 
     Instruction *insertAt = permuteDecision->getTerminator();
 
-    CallInst *allTruePredicates = createAllTruePredicates(insertAt);
+    CallInst *allTruePredicates = intrinsicCallGenerator->createAllTruePredicates(insertAt);
 
     //insert instructions to check if there are enough active lanes
     builder.SetInsertPoint(permuteDecision->getTerminator());
-    auto *numOfFirstActives = dyn_cast<Value>(createCntpInstruction(insertAt, firstPredicates, allTruePredicates));
-    auto *numOfSecondActives = dyn_cast<Value>(createCntpInstruction(insertAt, secondPredicates, allTruePredicates));
+    auto *numOfFirstActives = dyn_cast<Value>(intrinsicCallGenerator->createCntpInstruction(insertAt, firstPredicates, allTruePredicates));
+    auto *numOfSecondActives = dyn_cast<Value>(intrinsicCallGenerator->createCntpInstruction(insertAt, secondPredicates, allTruePredicates));
     Value *addResult = builder.CreateAdd(numOfFirstActives, numOfSecondActives);
     auto *constVecFactor = llvm::ConstantInt::get(addResult->getType(), vectorizationFactor);
     Value *condition = builder.CreateICmpUGE(addResult, constVecFactor);
@@ -787,7 +588,7 @@ void SVE_Permute::makeBlockVectorized(BasicBlock *block, Value *predicateVector,
                 // TODO: can this happen?
             }
             auto ptr = dyn_cast<GEPOperator>(instr.getOperand(1));
-            createScatterStoreInstruction(insertionPoint, firstOp, ptr, predicateVector, indices);
+            intrinsicCallGenerator->createScatterStoreInstruction(insertionPoint, firstOp, ptr, predicateVector, indices);
             toBeRemoved.push(&instr);
 
             ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -796,12 +597,12 @@ void SVE_Permute::makeBlockVectorized(BasicBlock *block, Value *predicateVector,
             builder.SetInsertPoint(insertionPoint);
             VectorType *vecInt64Type = VectorType::get(Type::getInt64Ty(context), vectorizationFactor, true);
             Value *extendedIndices = builder.CreateZExt(indices, vecInt64Type);
-            createScatterStoreInstruction(insertionPoint, indices, ptr, predicateVector, indices);
+            intrinsicCallGenerator->createScatterStoreInstruction(insertionPoint, indices, ptr, predicateVector, indices);
             ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
         } else if (isa<LoadInst>(instr)) {
             auto ptr = dyn_cast<GEPOperator>(instr.getOperand(0));
-            CallInst *loadedData = createGatherLoadInstruction(insertionPoint, ptr, predicateVector, indices);
+            CallInst *loadedData = intrinsicCallGenerator->createGatherLoadInstruction(insertionPoint, ptr, predicateVector, indices);
             vMap[&instr] = loadedData;
             toBeRemoved.push(&instr);
         } else if (isa<BinaryOperator>(instr)) {
@@ -820,7 +621,7 @@ void SVE_Permute::makeBlockVectorized(BasicBlock *block, Value *predicateVector,
                     //TODO: ?????
                 }
                 auto intrinsic = Intrinsic::aarch64_sve_mul;
-                CallInst *multResult = createArithmeticInstruction(insertionPoint, intrinsic, firstOp, secondOp,
+                CallInst *multResult = intrinsicCallGenerator->createArithmeticInstruction(insertionPoint, intrinsic, firstOp, secondOp,
                                                                    predicateVector);
                 vMap[&instr] = multResult;
                 toBeRemoved.push(&instr);
@@ -835,71 +636,6 @@ void SVE_Permute::makeBlockVectorized(BasicBlock *block, Value *predicateVector,
 
 }
 
-CallInst *
-SVE_Permute::createGatherLoadInstruction(Instruction *insertionPoint, GEPOperator *ptr, Value *predicatedVector,
-                                         Value *indices) {
-
-    LLVMContext &context = L->getHeader()->getContext();
-    IRBuilder<> builder(context);
-    builder.SetInsertPoint(insertionPoint);
-
-    auto intrinsic = Intrinsic::aarch64_sve_ld1_gather_sxtw_index;
-
-
-    VectorType *type = VectorType::get(Type::getInt32Ty(context), vectorizationFactor, true);
-    Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, type);
-
-
-    std::vector<Value *> arguments;
-    arguments.push_back(predicatedVector);
-    arguments.push_back(ptr);
-    arguments.push_back(indices);
-
-
-    return builder.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
-
-
-}
-
-void SVE_Permute::createScatterStoreInstruction(Instruction *insertionPoint, Value *elementsVector, GEPOperator *ptr,
-                                                Value *predicatedVector, Value *indices) {
-    LLVMContext &context = L->getHeader()->getContext();
-    IRBuilder<> builder(context);
-    builder.SetInsertPoint(insertionPoint);
-
-
-    auto intrinsic = Intrinsic::aarch64_sve_st1_scatter_sxtw;
-
-    Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, elementsVector->getType());
-
-    std::vector<Value *> arguments;
-    arguments.push_back(elementsVector);
-    arguments.push_back(predicatedVector);
-    arguments.push_back(ptr);
-    arguments.push_back(indices);
-
-    builder.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
-}
-
-// TODO: handle double types by changing return type and operands
-CallInst *
-SVE_Permute::createArithmeticInstruction(Instruction *insertionPoint, unsigned int intrinsic, Value *firstOp,
-                                         Value *secondOp, Value *predicatedVector) {
-    LLVMContext &context = L->getHeader()->getContext();
-    IRBuilder<> builder(context);
-    builder.SetInsertPoint(insertionPoint);
-
-    VectorType *type = VectorType::get(Type::getInt32Ty(context), vectorizationFactor, true);
-    Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, type);
-
-
-    std::vector<Value *> arguments;
-    arguments.push_back(predicatedVector);
-    arguments.push_back(firstOp);
-    arguments.push_back(secondOp);
-
-    return builder.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
-}
 
 void SVE_Permute::fillBlock(BasicBlock *blockToBeFilled, const std::vector<BasicBlock *> &blocks) {
     llvm::ValueToValueMapTy vMap;
@@ -960,7 +696,7 @@ void SVE_Permute::updateVectors(BasicBlock *insertAt, Value **indicesVector, Val
     // updating indices
     Constant *constOne = llvm::ConstantInt::get(Type::getInt32Ty(context), 1, true);
     Value *castedIndVar = builder.CreateIntCast(inductionVariable, Type::getInt32Ty(context), false);
-    *indicesVector = createIndexInstruction(insertAt->getTerminator(), castedIndVar, constOne);
+    *indicesVector = intrinsicCallGenerator->createIndexInstruction(insertAt->getTerminator(), castedIndVar, constOne);
 
 
 }
@@ -1056,6 +792,7 @@ SVE_Permute::SVE_Permute(Loop *l, int factor, LoopInfo *loopInfo, BasicBlock *la
                   latch),
           predicates(preds) {
     L = l;
+    intrinsicCallGenerator = new IntrinsicCallGenerator(l, vectorizationFactor);
     vectorizationFactor = factor;
     module = L->getBlocks().front()->getParent()->getParent();
     LI = loopInfo;
