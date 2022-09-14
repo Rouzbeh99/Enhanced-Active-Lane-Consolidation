@@ -560,9 +560,6 @@ void SVE_ALC::makeBlockVectorized(BasicBlock *block, Value *predicateVector, Val
 
     Instruction *insertionPoint = block->getTerminator();
 
-    predicateVector->print(outs());
-    llvm::outs() << "\n";
-
 
     std::map<Value *, Value *> vMap;
 

@@ -63,7 +63,7 @@ namespace {
         auto *sve_permute = new SVE_ALC(L, factor, &LI, unroller->getNewLatch(), unroller->getPredicates());
         sve_permute->doTransformation();
 
-        printAllBlocks(L);
+//        printAllBlocks(L);
 //        printBeforeLoopBlocks(L);
 //        printLoop(L);
 
