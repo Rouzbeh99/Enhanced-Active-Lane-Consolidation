@@ -192,18 +192,18 @@ declare void @llvm.dbg.declare(metadata, metadata, metadata) #1
 ; Function Attrs: nounwind uwtable
 define dso_local i32 @main() local_unnamed_addr #0 !dbg !50 {
 entry:
-  call void @llvm.dbg.value(metadata i32 65536, metadata !54, metadata !DIExpression()), !dbg !76
-  %vla30 = alloca [65536 x i32], align 4, !dbg !77
-  call void @llvm.dbg.value(metadata i64 65536, metadata !55, metadata !DIExpression()), !dbg !76
+  call void @llvm.dbg.value(metadata i32 524288, metadata !54, metadata !DIExpression()), !dbg !76
+  %vla30 = alloca [524288 x i32], align 4, !dbg !77
+  call void @llvm.dbg.value(metadata i64 524288, metadata !55, metadata !DIExpression()), !dbg !76
   call void @llvm.dbg.declare(metadata ptr %vla30, metadata !57, metadata !DIExpression()), !dbg !78
-  %vla131 = alloca [65536 x i32], align 4, !dbg !79
-  call void @llvm.dbg.value(metadata i64 65536, metadata !61, metadata !DIExpression()), !dbg !76
+  %vla131 = alloca [524288 x i32], align 4, !dbg !79
+  call void @llvm.dbg.value(metadata i64 524288, metadata !61, metadata !DIExpression()), !dbg !76
   call void @llvm.dbg.declare(metadata ptr %vla131, metadata !62, metadata !DIExpression()), !dbg !80
-  %vla232 = alloca [65536 x i32], align 4, !dbg !81
-  call void @llvm.dbg.value(metadata i64 65536, metadata !66, metadata !DIExpression()), !dbg !76
+  %vla232 = alloca [524288 x i32], align 4, !dbg !81
+  call void @llvm.dbg.value(metadata i64 524288, metadata !66, metadata !DIExpression()), !dbg !76
   call void @llvm.dbg.declare(metadata ptr %vla232, metadata !67, metadata !DIExpression()), !dbg !82
   call void @llvm.dbg.value(metadata i32 0, metadata !71, metadata !DIExpression()), !dbg !83
-  call void @llvm.memset.p0.i64(ptr noundef nonnull align 4 dereferenceable(262144) %vla232, i8 0, i64 262144, i1 false), !dbg !84, !tbaa !87
+  call void @llvm.memset.p0.i64(ptr noundef nonnull align 4 dereferenceable(2097152) %vla232, i8 0, i64 2097152, i1 false), !dbg !84, !tbaa !87
   br label %for.body, !dbg !91
 
 for.cond.cleanup:                                 ; preds = %for.body
@@ -213,7 +213,7 @@ for.cond.cleanup:                                 ; preds = %for.body
   call void @llvm.dbg.value(metadata ptr %vla30, metadata !21, metadata !DIExpression()) #8, !dbg !100
   call void @llvm.dbg.value(metadata ptr %vla131, metadata !22, metadata !DIExpression()) #8, !dbg !100
   call void @llvm.dbg.value(metadata ptr %vla232, metadata !23, metadata !DIExpression()) #8, !dbg !100
-  call void @llvm.dbg.value(metadata i32 65536, metadata !24, metadata !DIExpression()) #8, !dbg !100
+  call void @llvm.dbg.value(metadata i32 524288, metadata !24, metadata !DIExpression()) #8, !dbg !100
   tail call void asm sideeffect "dmb sy\0A\09orr x3,x3,x3\0A", "~{memory}"() #8, !dbg !102, !noalias !103, !srcloc !29
   call void @llvm.dbg.value(metadata i32 0, metadata !25, metadata !DIExpression()) #8, !dbg !104
   br label %for.body.i, !dbg !105
@@ -238,7 +238,7 @@ if.then.i:                                        ; preds = %for.body.i
 for.inc.i:                                        ; preds = %if.then.i, %for.body.i
   %indvars.iv.next.i = add nuw nsw i64 %indvars.iv.i, 1, !dbg !117
   call void @llvm.dbg.value(metadata i64 %indvars.iv.next.i, metadata !25, metadata !DIExpression()) #8, !dbg !104
-  %exitcond.not.i = icmp eq i64 %indvars.iv.next.i, 65536, !dbg !118
+  %exitcond.not.i = icmp eq i64 %indvars.iv.next.i, 524288, !dbg !118
   br i1 %exitcond.not.i, label %foo.exit, label %for.body.i, !dbg !105, !llvm.loop !119
 
 foo.exit:                                         ; preds = %for.inc.i
@@ -257,7 +257,7 @@ for.body:                                         ; preds = %for.body, %entry
   store i32 2, ptr %arrayidx4, align 4, !dbg !127, !tbaa !87
   %indvars.iv.next = add nuw nsw i64 %indvars.iv, 1, !dbg !128
   call void @llvm.dbg.value(metadata i64 %indvars.iv.next, metadata !71, metadata !DIExpression()), !dbg !83
-  %exitcond.not = icmp eq i64 %indvars.iv.next, 65536, !dbg !129
+  %exitcond.not = icmp eq i64 %indvars.iv.next, 524288, !dbg !129
   br i1 %exitcond.not, label %for.cond.cleanup, label %for.body, !dbg !91, !llvm.loop !130
 
 for.cond.cleanup10:                               ; preds = %for.body11
@@ -276,7 +276,7 @@ for.body11:                                       ; preds = %for.body11, %foo.ex
   call void @llvm.dbg.value(metadata i32 %add, metadata !73, metadata !DIExpression()), !dbg !76
   %indvars.iv.next38 = add nuw nsw i64 %indvars.iv37, 1, !dbg !138
   call void @llvm.dbg.value(metadata i64 %indvars.iv.next38, metadata !74, metadata !DIExpression()), !dbg !122
-  %exitcond40.not = icmp eq i64 %indvars.iv.next38, 65536, !dbg !139
+  %exitcond40.not = icmp eq i64 %indvars.iv.next38, 524288, !dbg !139
   br i1 %exitcond40.not, label %for.cond.cleanup10, label %for.body11, !dbg !123, !llvm.loop !140
 }
 
@@ -337,7 +337,7 @@ attributes #8 = { nounwind }
 !llvm.ident = !{!13}
 
 !0 = distinct !DICompileUnit(language: DW_LANG_C99, file: !1, producer: "clang version 15.0.0 (https://www.github.com/llvm/llvm-project.git 61baf2ffa7071944c00a0642fdb9ff77d9cff0da)", isOptimized: true, runtimeVersion: 0, emissionKind: FullDebug, splitDebugInlining: false, nameTableKind: None)
-!1 = !DIFile(filename: "test.c", directory: "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/test", checksumkind: CSK_MD5, checksum: "80370368bb9d4b2f4cbb84d3723dffc2")
+!1 = !DIFile(filename: "test.c", directory: "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/test", checksumkind: CSK_MD5, checksum: "5104aabe3236f9394557d494c86db801")
 !2 = !{i32 7, !"Dwarf Version", i32 5}
 !3 = !{i32 2, !"Debug Info Version", i32 3}
 !4 = !{i32 1, !"wchar_size", i32 4}

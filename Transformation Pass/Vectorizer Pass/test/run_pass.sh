@@ -49,5 +49,7 @@ $LLVM_BUILD_DIR/bin/opt -S -load-pass-plugin ../build/ALC_Vectorizer.so -passes=
 opt --disable-output -dot-cfg --cfg-dot-filename-prefix=cfg ALC_Applied.ll
 dot -Tpdf cfg.foo.dot -o cfg.pdf
 
-$LLVM_BUILD_DIR/bin/llc -mtriple=aarch64-linux-gnu -mattr=sve,sve2 -filetype=obj ALC_Applied.ll -o ALC_Applied.o
-$LLVM_BUILD_DIR/bin/llc -mtriple=aarch64-linux-gnu -mattr=sve,sve2 -filetype=obj compiled_with_O3.ll -o compiled_with_O3.o
+$LLVM_BUILD_DIR/bin/llc -O3  -mtriple=aarch64-linux-gnu -mattr=sve,sve2 -mcpu=cortex-a710 -filetype=obj ALC_Applied.ll -o ALC_Applied.o
+$LLVM_BUILD_DIR/bin/llc -O3  -mtriple=aarch64-linux-gnu -mattr=sve,sve2 -mcpu=cortex-a710 -filetype=obj compiled_with_O3.ll -o compiled_with_O3.o
+$LLVM_BUILD_DIR/bin/llc -O3  -mtriple=aarch64-linux-gnu -mattr=sve,sve2 -mcpu=cortex-a710 -filetype=asm ALC_Applied.ll -o ALC_Applied.s
+$LLVM_BUILD_DIR/bin/llc -O3  -mtriple=aarch64-linux-gnu -mattr=sve,sve2 -mcpu=cortex-a710 -filetype=asm compiled_with_O3.ll -o compiled_with_O3.s
