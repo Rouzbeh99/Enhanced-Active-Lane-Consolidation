@@ -53,3 +53,4 @@ $LLVM_BUILD_DIR/bin/llc -O3  -mtriple=aarch64-linux-gnu -mattr=sve,sve2 -mcpu=co
 $LLVM_BUILD_DIR/bin/llc -O3  -mtriple=aarch64-linux-gnu -mattr=sve,sve2 -mcpu=cortex-a710 -filetype=obj compiled_with_O3.ll -o compiled_with_O3.o
 $LLVM_BUILD_DIR/bin/llc -O3  -mtriple=aarch64-linux-gnu -mattr=sve,sve2 -mcpu=cortex-a710 -filetype=asm ALC_Applied.ll -o ALC_Applied.s
 $LLVM_BUILD_DIR/bin/llc -O3  -mtriple=aarch64-linux-gnu -mattr=sve,sve2 -mcpu=cortex-a710 -filetype=asm compiled_with_O3.ll -o compiled_with_O3.s
+
