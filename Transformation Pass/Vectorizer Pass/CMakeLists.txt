@@ -6,7 +6,7 @@ project(ALC_Vectorizer)
 find_package(LLVM REQUIRED CONFIG)
 list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
 include(AddLLVM)
-include_directories(${LLVM_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}}/Unroller ${CMAKE_SOURCE_DIR}}/SVE_Vectorizer ${CMAKE_SOURCE_DIR}}/SVE_ALC ${CMAKE_SOURCE_DIR}}/IntrinsicCallGenerator)
+include_directories(${LLVM_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}}/Unroller ${CMAKE_SOURCE_DIR}}/SVE_Vectorizer ${CMAKE_SOURCE_DIR}}/SVE_ALC ${CMAKE_SOURCE_DIR}}/IntrinsicCallGenerator )
 add_definitions(${LLVM_DEFINITIONS})
 
 link_directories(${CMAKE_SOURCE_DIR}/Unroller/build)
