@@ -5,8 +5,10 @@ project(Test_Generator)
 find_package(LLVM REQUIRED CONFIG)
 list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
 include(AddLLVM)
-include_directories(${LLVM_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/include)
+include_directories(${LLVM_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/include )
 add_definitions(${LLVM_DEFINITIONS})
+
+
 
 # Export compile commands db.
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -17,4 +19,4 @@ set(srcs
 )
 
 # Create the MyLoopPass library.
-llvm_add_library(Test_Generator MODULE ${srcs})
+llvm_add_library(Test_Generator MODULE ${srcs} )

@@ -1,4 +1,4 @@
-; ModuleID = 'testCase.c'
+; ModuleID = 'compiled.ll'
 source_filename = "testCase.c"
 target datalayout = "e-m:e-i8:8:32-i16:16:32-i64:64-i128:128-n32:64-S128"
 target triple = "aarch64-unknown-linux-gnu"
@@ -15,7 +15,7 @@ entry:
   call void @llvm.dbg.value(metadata i32 0, metadata !26, metadata !DIExpression()), !dbg !33
   br label %for.body, !dbg !34
 
-for.body:                                         ; preds = %entry, %for.body
+for.body:                                         ; preds = %for.body, %entry
   %indvars.iv = phi i64 [ 0, %entry ], [ %indvars.iv.next, %for.body ]
   call void @llvm.dbg.value(metadata i64 %indvars.iv, metadata !26, metadata !DIExpression()), !dbg !33
   %0 = mul nuw nsw i64 %indvars.iv, %indvars.iv, !dbg !35
@@ -30,7 +30,7 @@ for.body:                                         ; preds = %entry, %for.body
 for.cond.cleanup4:                                ; preds = %for.body5
   ret i32 0, !dbg !50
 
-for.body5:                                        ; preds = %for.body, %for.body5
+for.body5:                                        ; preds = %for.body5, %for.body
   %indvars.iv24 = phi i64 [ %indvars.iv.next25, %for.body5 ], [ 0, %for.body ]
   call void @llvm.dbg.value(metadata i64 %indvars.iv24, metadata !28, metadata !DIExpression()), !dbg !51
   %arrayidx7 = getelementptr inbounds i32, ptr %vla19, i64 %indvars.iv24, !dbg !52
@@ -42,19 +42,23 @@ for.body5:                                        ; preds = %for.body, %for.body
   br i1 %exitcond27.not, label %for.cond.cleanup4, label %for.body5, !dbg !58, !llvm.loop !59
 }
 
-; Function Attrs: mustprogress nocallback nofree nosync nounwind readnone speculatable willreturn
+; Function Attrs: nocallback nofree nosync nounwind readnone speculatable willreturn
 declare void @llvm.dbg.declare(metadata, metadata, metadata) #1
 
 ; Function Attrs: nofree nounwind
 declare noundef i32 @printf(ptr nocapture noundef readonly, ...) local_unnamed_addr #2
 
 ; Function Attrs: nocallback nofree nosync nounwind readnone speculatable willreturn
-declare void @llvm.dbg.value(metadata, metadata, metadata) #3
+declare void @llvm.dbg.value(metadata, metadata, metadata) #1
+
+define ptr @foo(ptr %0, ptr %1) {
+func.body:
+  ret ptr %0
+}
 
 attributes #0 = { nofree nounwind uwtable "frame-pointer"="non-leaf" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="generic" "target-features"="+neon,+v8a" }
-attributes #1 = { mustprogress nocallback nofree nosync nounwind readnone speculatable willreturn }
+attributes #1 = { nocallback nofree nosync nounwind readnone speculatable willreturn }
 attributes #2 = { nofree nounwind "frame-pointer"="non-leaf" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="generic" "target-features"="+neon,+v8a" }
-attributes #3 = { nocallback nofree nosync nounwind readnone speculatable willreturn }
 
 !llvm.dbg.cu = !{!0}
 !llvm.module.flags = !{!2, !3, !4, !5, !6, !7, !8, !9, !10, !11, !12}

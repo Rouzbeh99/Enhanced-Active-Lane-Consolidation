@@ -16,16 +16,38 @@
 #define DEBUG_TYPE "generate-test"
 using namespace llvm;
 
+
 namespace {
 
+
     struct Test_Generator : public PassInfoMixin<Test_Generator> {
-        PreservedAnalyses run(Function &F, FunctionAnalysisManager &FM) {
-            llvm::outs() << "Hello \n";
+
+
+        PreservedAnalyses run(Module &M, llvm::ModuleAnalysisManager &MAM) {
+            Function *function = createNewFunction(&M, "foo");
+            fillFunction(function);
+            function->print(outs());
 
             return PreservedAnalyses::none();
         }
+
+        Function *createNewFunction(Module *M, const std::string &name);
+
+        void fillFunction(Function *function);
     };
 
+}
+
+Function *Test_Generator::createNewFunction(Module *M, const std::string &name) {
+    std::vector<Type *> args(2, Type::getInt32PtrTy(M->getContext()));
+    FunctionType *FT = FunctionType::get(Type::getInt32PtrTy(M->getContext()), args, false);
+    Function *function = Function::Create(FT, Function::ExternalLinkage, name, M);
+    return function;
+}
+
+void Test_Generator::fillFunction(Function *function) {
+    BasicBlock *funcBody = BasicBlock::Create(function->getContext(), "func.body", function);
+    ReturnInst::Create(function->getContext(), function->getArg(0), funcBody);
 }
 
 // registering the pass to new PM
@@ -36,10 +58,10 @@ llvmGetPassPluginInfo() {
             LLVM_PLUGIN_API_VERSION, "generate-test", "v0.1",
             [](PassBuilder &PB) {
                 PB.registerPipelineParsingCallback(
-                        [](StringRef Name, FunctionPassManager &FPM,
+                        [](StringRef Name, ModulePassManager &MPM,
                            ArrayRef<PassBuilder::PipelineElement>) {
                             if (Name == "generate-test") {
-                                FPM.addPass(Test_Generator());
+                                MPM.addPass(Test_Generator());
                                 return true;
                             }
                             return false;

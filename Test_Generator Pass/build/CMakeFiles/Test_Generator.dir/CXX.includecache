@@ -13,8 +13,6 @@ llvm/Support/raw_ostream.h
 /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Test_Generator Pass/llvm/Support/raw_ostream.h
 llvm/Analysis/LoopPass.h
 /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Test_Generator Pass/llvm/Analysis/LoopPass.h
-llvm/Analysis/LoopInfo.h
-/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Test_Generator Pass/llvm/Analysis/LoopInfo.h
 llvm/Analysis/DependenceAnalysis.h
 /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Test_Generator Pass/llvm/Analysis/DependenceAnalysis.h
 llvm/Analysis/LoopAccessAnalysis.h
