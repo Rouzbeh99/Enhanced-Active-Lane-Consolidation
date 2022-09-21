@@ -260,7 +260,9 @@ void SVE_ALC::insertPermutationLogic(Instruction *insertAt, Value *z0, Value *z1
     p1 = intrinsicCallGenerator->createNotInstruction(insertAt, p2);
     CallInst *x3 = intrinsicCallGenerator->createCntpInstruction(insertAt, p2, allTruePredicates);
 
-    Value *numOfActivesInResult = intrinsicCallGenerator->createAddInstruction(insertAt, intrinsicCallGenerator->createSubInstruction(insertAt, x1, x2), x3);
+    Value *numOfActivesInResult = intrinsicCallGenerator->createAddInstruction(insertAt,
+                                                                               intrinsicCallGenerator->createSubInstruction(
+                                                                                       insertAt, x1, x2), x3);
 
     p2 = intrinsicCallGenerator->createWhileltInstruction(insertAt, constZero, numOfActivesInResult);
     auto p6 = intrinsicCallGenerator->createNotInstruction(insertAt, p2);
@@ -366,8 +368,10 @@ SVE_ALC::formInitialPredicateVectors(Value *inductionVariable, Value **firstPred
     ConstantInt *constOne = llvm::ConstantInt::get(Type::getInt32Ty(context), 1, true);
     ConstantInt *constVFactor = llvm::ConstantInt::get(Type::getInt32Ty(context), vectorizationFactor, true);
 
-    (*firstVector) = intrinsicCallGenerator->createIndexInstruction(lastCopiedBlock->getTerminator(), constZero, constOne);
-    (*secondVector) = intrinsicCallGenerator->createIndexInstruction(lastCopiedBlock->getTerminator(), constVFactor, constOne);
+    (*firstVector) = intrinsicCallGenerator->createIndexInstruction(lastCopiedBlock->getTerminator(), constZero,
+                                                                    constOne);
+    (*secondVector) = intrinsicCallGenerator->createIndexInstruction(lastCopiedBlock->getTerminator(), constVFactor,
+                                                                     constOne);
 
 }
 
@@ -526,8 +530,10 @@ BasicBlock *SVE_ALC::doPermutation(Value *firstPredicates, Value *secondPredicat
 
     //insert instructions to check if there are enough active lanes
     builder.SetInsertPoint(permuteDecision->getTerminator());
-    auto *numOfFirstActives = dyn_cast<Value>(intrinsicCallGenerator->createCntpInstruction(insertAt, firstPredicates, allTruePredicates));
-    auto *numOfSecondActives = dyn_cast<Value>(intrinsicCallGenerator->createCntpInstruction(insertAt, secondPredicates, allTruePredicates));
+    auto *numOfFirstActives = dyn_cast<Value>(
+            intrinsicCallGenerator->createCntpInstruction(insertAt, firstPredicates, allTruePredicates));
+    auto *numOfSecondActives = dyn_cast<Value>(
+            intrinsicCallGenerator->createCntpInstruction(insertAt, secondPredicates, allTruePredicates));
     Value *addResult = builder.CreateAdd(numOfFirstActives, numOfSecondActives);
     auto *constVecFactor = llvm::ConstantInt::get(addResult->getType(), vectorizationFactor);
     Value *condition = builder.CreateICmpUGE(addResult, constVecFactor);
@@ -585,7 +591,8 @@ void SVE_ALC::makeBlockVectorized(BasicBlock *block, Value *predicateVector, Val
                 // TODO: can this happen?
             }
             auto ptr = dyn_cast<GEPOperator>(instr.getOperand(1));
-            intrinsicCallGenerator->createScatterStoreInstruction(insertionPoint, firstOp, ptr, predicateVector, indices);
+            intrinsicCallGenerator->createScatterStoreInstruction(insertionPoint, firstOp, ptr, predicateVector,
+                                                                  indices);
             toBeRemoved.push(&instr);
 
             ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -594,12 +601,14 @@ void SVE_ALC::makeBlockVectorized(BasicBlock *block, Value *predicateVector, Val
             builder.SetInsertPoint(insertionPoint);
             VectorType *vecInt64Type = VectorType::get(Type::getInt64Ty(context), vectorizationFactor, true);
             Value *extendedIndices = builder.CreateZExt(indices, vecInt64Type);
-            intrinsicCallGenerator->createScatterStoreInstruction(insertionPoint, indices, ptr, predicateVector, indices);
+            intrinsicCallGenerator->createScatterStoreInstruction(insertionPoint, indices, ptr, predicateVector,
+                                                                  indices);
             ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
         } else if (isa<LoadInst>(instr)) {
             auto ptr = dyn_cast<GEPOperator>(instr.getOperand(0));
-            CallInst *loadedData = intrinsicCallGenerator->createGatherLoadInstruction(insertionPoint, ptr, predicateVector, indices);
+            CallInst *loadedData = intrinsicCallGenerator->createGatherLoadInstruction(insertionPoint, ptr,
+                                                                                       predicateVector, indices);
             vMap[&instr] = loadedData;
             toBeRemoved.push(&instr);
         } else if (isa<BinaryOperator>(instr)) {
@@ -618,8 +627,9 @@ void SVE_ALC::makeBlockVectorized(BasicBlock *block, Value *predicateVector, Val
                     //TODO: ?????
                 }
                 auto intrinsic = Intrinsic::aarch64_sve_mul;
-                CallInst *multResult = intrinsicCallGenerator->createArithmeticInstruction(insertionPoint, intrinsic, firstOp, secondOp,
-                                                                   predicateVector);
+                CallInst *multResult = intrinsicCallGenerator->createArithmeticInstruction(insertionPoint, intrinsic,
+                                                                                           firstOp, secondOp,
+                                                                                           predicateVector);
                 vMap[&instr] = multResult;
                 toBeRemoved.push(&instr);
             }
@@ -789,7 +799,7 @@ SVE_ALC::SVE_ALC(Loop *l, int factor, LoopInfo *loopInfo, BasicBlock *latch, std
                   latch),
           predicates(preds) {
     L = l;
-    intrinsicCallGenerator = new IntrinsicCallGenerator(l, vectorizationFactor);
+    intrinsicCallGenerator = new IntrinsicCallGenerator(vectorizationFactor, l->getHeader()->getModule());
     vectorizationFactor = factor;
     module = L->getBlocks().front()->getParent()->getParent();
     LI = loopInfo;

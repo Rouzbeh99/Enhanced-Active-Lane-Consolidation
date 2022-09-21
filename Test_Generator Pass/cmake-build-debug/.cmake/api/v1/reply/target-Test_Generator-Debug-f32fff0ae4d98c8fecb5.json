@@ -12,6 +12,7 @@
 		[
 			"add_library",
 			"llvm_add_library",
+			"link_directories",
 			"target_link_libraries",
 			"include_directories"
 		],
@@ -28,7 +29,7 @@
 			{
 				"command" : 1,
 				"file" : 1,
-				"line" : 22,
+				"line" : 24,
 				"parent" : 0
 			},
 			{
@@ -39,12 +40,18 @@
 			},
 			{
 				"command" : 2,
+				"file" : 1,
+				"line" : 12,
+				"parent" : 0
+			},
+			{
+				"command" : 3,
 				"file" : 0,
 				"line" : 611,
 				"parent" : 1
 			},
 			{
-				"command" : 3,
+				"command" : 4,
 				"file" : 1,
 				"line" : 8,
 				"parent" : 0
@@ -66,12 +73,16 @@
 			"includes" : 
 			[
 				{
-					"backtrace" : 4,
+					"backtrace" : 5,
 					"path" : "/usr/lib/llvm-10/include"
 				},
 				{
-					"backtrace" : 4,
+					"backtrace" : 5,
 					"path" : "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Test_Generator Pass/include"
+				},
+				{
+					"backtrace" : 5,
+					"path" : "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/IntrinsicCallGenerator"
 				}
 			],
 			"language" : "CXX",
@@ -87,15 +98,20 @@
 		"commandFragments" : 
 		[
 			{
-				"fragment" : "-Wl,-rpath-link,  -Wl,-O3 -Wl,--gc-sections",
+				"fragment" : "-Wl,-O3 -Wl,--gc-sections",
 				"role" : "flags"
 			},
 			{
-				"fragment" : "-Wl,-rpath,\"\\$$ORIGIN/../lib:/usr/lib/llvm-10/lib\"",
+				"backtrace" : 3,
+				"fragment" : "-L\"/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/IntrinsicCallGenerator/build\"",
+				"role" : "libraryPath"
+			},
+			{
+				"fragment" : "-Wl,-rpath,\"/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/IntrinsicCallGenerator/build:/usr/lib/llvm-10/lib\"",
 				"role" : "libraries"
 			},
 			{
-				"backtrace" : 3,
+				"backtrace" : 4,
 				"fragment" : "/usr/lib/llvm-10/lib/libLLVM-10.so.1",
 				"role" : "libraries"
 			}

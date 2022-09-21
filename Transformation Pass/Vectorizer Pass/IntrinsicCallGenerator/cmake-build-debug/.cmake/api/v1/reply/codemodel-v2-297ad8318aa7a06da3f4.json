@@ -1,0 +1,88 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Debug-3b3432e629c98fce181c.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.8"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "IntrinsicCallGenerator",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "install-libLLVMIntrinsicCallGenerator::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-install-libLLVMIntrinsicCallGenerator-Debug-9c1d51a3d8d5f6bc2d54.json",
+					"name" : "install-libLLVMIntrinsicCallGenerator",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "install-libLLVMIntrinsicCallGenerator-stripped::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-install-libLLVMIntrinsicCallGenerator-stripped-Debug-043c04853925e25262c0.json",
+					"name" : "install-libLLVMIntrinsicCallGenerator-stripped",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "intrinsics_gen::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-intrinsics_gen-Debug-f8a7f851a77813ec20dc.json",
+					"name" : "intrinsics_gen",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "libLLVMIntrinsicCallGenerator::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-libLLVMIntrinsicCallGenerator-Debug-894accf281fab70ba57b.json",
+					"name" : "libLLVMIntrinsicCallGenerator",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/IntrinsicCallGenerator/cmake-build-debug",
+		"source" : "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/IntrinsicCallGenerator"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 4
+	}
+}
