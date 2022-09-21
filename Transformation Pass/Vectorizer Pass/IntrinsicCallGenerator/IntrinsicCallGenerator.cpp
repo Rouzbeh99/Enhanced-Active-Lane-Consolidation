@@ -3,7 +3,7 @@
 
 CallInst *IntrinsicCallGenerator::createAllTruePredicates(Instruction *insertionPoint) {
 
-    LLVMContext &context = L->getHeader()->getContext();
+    LLVMContext &context = module->getContext();
     IRBuilder<> builder(context);
     builder.SetInsertPoint(
             insertionPoint);// append to the end of block, before terminator
@@ -21,7 +21,7 @@ CallInst *
 IntrinsicCallGenerator::createCompactInstruction(Instruction *insertionPoint, Value *toBeCompacted,
                                                  Value *predicatedVector) {
 
-    LLVMContext &context = L->getHeader()->getContext();
+    LLVMContext &context = module->getContext();
     IRBuilder<> builder(context);
     builder.SetInsertPoint(insertionPoint);
 
@@ -40,7 +40,7 @@ IntrinsicCallGenerator::createCompactInstruction(Instruction *insertionPoint, Va
 }
 
 Value *IntrinsicCallGenerator::createNotInstruction(Instruction *insertionPoint, Value *elements) {
-    LLVMContext &context = L->getHeader()->getContext();
+    LLVMContext &context = module->getContext();
     IRBuilder<> builder(context);
     builder.SetInsertPoint(
             insertionPoint);// append to the end of block, before terminator
@@ -51,7 +51,7 @@ Value *IntrinsicCallGenerator::createNotInstruction(Instruction *insertionPoint,
 CallInst *
 IntrinsicCallGenerator::createCntpInstruction(Instruction *insertionPoint, Value *elements, Value *predicatedVector) {
 
-    LLVMContext &context = L->getHeader()->getContext();
+    LLVMContext &context = module->getContext();
     IRBuilder<> builder(context);
     builder.SetInsertPoint(insertionPoint);
 
@@ -73,7 +73,7 @@ IntrinsicCallGenerator::createCntpInstruction(Instruction *insertionPoint, Value
 CallInst *
 IntrinsicCallGenerator::createWhileltInstruction(Instruction *insertionPoint, Value *firstOp, Value *secondOp) {
 
-    LLVMContext &context = L->getHeader()->getContext();
+    LLVMContext &context = module->getContext();
     IRBuilder<> builder(context);
     builder.SetInsertPoint(insertionPoint);
 
@@ -99,7 +99,7 @@ CallInst *IntrinsicCallGenerator::createSpliceInstruction(Instruction *insertion
                                                           Value *predicatedVector) {
 
 
-    LLVMContext &context = L->getHeader()->getContext();
+    LLVMContext &context = module->getContext();
     IRBuilder<> builder(context);
     builder.SetInsertPoint(insertionPoint);
 
@@ -121,7 +121,7 @@ CallInst *IntrinsicCallGenerator::createSpliceInstruction(Instruction *insertion
 
 CallInst *IntrinsicCallGenerator::createSelInstruction(Instruction *insertionPoint, Value *firstOp, Value *secondOp,
                                                        Value *predicatedVector) {
-    LLVMContext &context = L->getHeader()->getContext();
+    LLVMContext &context = module->getContext();
     IRBuilder<> builder(context);
     builder.SetInsertPoint(insertionPoint);
 
@@ -142,7 +142,7 @@ CallInst *IntrinsicCallGenerator::createSelInstruction(Instruction *insertionPoi
 }
 
 Value *IntrinsicCallGenerator::createORInstruction(Instruction *insertionPoint, ArrayRef<Value *> elements) {
-    LLVMContext &context = L->getHeader()->getContext();
+    LLVMContext &context = module->getContext();
     IRBuilder<> builder(context);
     builder.SetInsertPoint(insertionPoint);// append to the end of block, before terminator
 
@@ -150,7 +150,7 @@ Value *IntrinsicCallGenerator::createORInstruction(Instruction *insertionPoint, 
 }
 
 Value *IntrinsicCallGenerator::createANDInstruction(Instruction *insertionPoint, ArrayRef<Value *> elements) {
-    LLVMContext &context = L->getHeader()->getContext();
+    LLVMContext &context = module->getContext();
     IRBuilder<> builder(context);
     builder.SetInsertPoint(insertionPoint);// append to the end of block, before terminator
 
@@ -158,7 +158,7 @@ Value *IntrinsicCallGenerator::createANDInstruction(Instruction *insertionPoint,
 }
 
 CallInst *IntrinsicCallGenerator::createIndexInstruction(Instruction *insertionPoint, Value *firstOp, Value *secondOp) {
-    LLVMContext &context = L->getHeader()->getContext();
+    LLVMContext &context = module->getContext();
     IRBuilder<> builder(context);
 
 
@@ -182,7 +182,7 @@ CallInst *IntrinsicCallGenerator::createIndexInstruction(Instruction *insertionP
 
 
 Value *IntrinsicCallGenerator::createAddInstruction(Instruction *insertionPoint, Value *firstOp, Value *secondOp) {
-    LLVMContext &context = L->getHeader()->getContext();
+    LLVMContext &context = module->getContext();
     IRBuilder<> builder(context);
     builder.SetInsertPoint(insertionPoint);
 
@@ -193,7 +193,7 @@ Value *IntrinsicCallGenerator::createAddInstruction(Instruction *insertionPoint,
 }
 
 Value *IntrinsicCallGenerator::createSubInstruction(Instruction *insertionPoint, Value *firstOp, Value *secondOp) {
-    LLVMContext &context = L->getHeader()->getContext();
+    LLVMContext &context = module->getContext();
     IRBuilder<> builder(context);
     builder.SetInsertPoint(insertionPoint);
 
@@ -202,11 +202,11 @@ Value *IntrinsicCallGenerator::createSubInstruction(Instruction *insertionPoint,
 }
 
 CallInst *
-IntrinsicCallGenerator::createGatherLoadInstruction(Instruction *insertionPoint, GEPOperator *ptr,
+IntrinsicCallGenerator::createGatherLoadInstruction(Instruction *insertionPoint, Value *ptr,
                                                     Value *predicatedVector,
                                                     Value *indices) {
 
-    LLVMContext &context = L->getHeader()->getContext();
+    LLVMContext &context = module->getContext();
     IRBuilder<> builder(context);
     builder.SetInsertPoint(insertionPoint);
 
@@ -225,15 +225,14 @@ IntrinsicCallGenerator::createGatherLoadInstruction(Instruction *insertionPoint,
 
     return builder.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
 
-
 }
 
 
 CallInst *
-IntrinsicCallGenerator::createLoadInstruction(Instruction *insertionPoint, GEPOperator *ptr,
-                                                    Value *predicatedVector) {
+IntrinsicCallGenerator::createLoadInstruction(Instruction *insertionPoint, Value *ptr,
+                                              Value *predicatedVector) {
 
-    LLVMContext &context = L->getHeader()->getContext();
+    LLVMContext &context = module->getContext();
     IRBuilder<> builder(context);
     builder.SetInsertPoint(insertionPoint);
 
@@ -250,14 +249,13 @@ IntrinsicCallGenerator::createLoadInstruction(Instruction *insertionPoint, GEPOp
 
     return builder.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
 
-
 }
 
 
 void IntrinsicCallGenerator::createScatterStoreInstruction(Instruction *insertionPoint, Value *elementsVector,
-                                                           GEPOperator *ptr,
+                                                           Value *ptr,
                                                            Value *predicatedVector, Value *indices) {
-    LLVMContext &context = L->getHeader()->getContext();
+    LLVMContext &context = module->getContext();
     IRBuilder<> builder(context);
     builder.SetInsertPoint(insertionPoint);
 
@@ -276,9 +274,9 @@ void IntrinsicCallGenerator::createScatterStoreInstruction(Instruction *insertio
 }
 
 void IntrinsicCallGenerator::createStoreInstruction(Instruction *insertionPoint, Value *elementsVector,
-                                                    GEPOperator *ptr,
+                                                    Value *ptr,
                                                     Value *predicatedVector) {
-    LLVMContext &context = L->getHeader()->getContext();
+    LLVMContext &context = module->getContext();
     IRBuilder<> builder(context);
     builder.SetInsertPoint(insertionPoint);
 
@@ -298,7 +296,7 @@ void IntrinsicCallGenerator::createStoreInstruction(Instruction *insertionPoint,
 CallInst *
 IntrinsicCallGenerator::createArithmeticInstruction(Instruction *insertionPoint, unsigned int intrinsic, Value *firstOp,
                                                     Value *secondOp, Value *predicatedVector) {
-    LLVMContext &context = L->getHeader()->getContext();
+    LLVMContext &context = module->getContext();
     IRBuilder<> builder(context);
     builder.SetInsertPoint(insertionPoint);
 
@@ -314,9 +312,8 @@ IntrinsicCallGenerator::createArithmeticInstruction(Instruction *insertionPoint,
     return builder.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
 }
 
-IntrinsicCallGenerator::IntrinsicCallGenerator(Loop *l, int vectorizationFactor) : L(l), vectorizationFactor(
-        vectorizationFactor) {
-    module = L->getHeader()->getModule();
+IntrinsicCallGenerator::IntrinsicCallGenerator(int vectorizationFactor, Module *module1) : vectorizationFactor(
+        vectorizationFactor), module(module1) {
 }
 
 

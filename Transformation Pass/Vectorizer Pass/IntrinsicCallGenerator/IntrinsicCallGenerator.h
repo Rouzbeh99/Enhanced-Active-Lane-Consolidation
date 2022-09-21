@@ -25,11 +25,10 @@ using namespace llvm;
 class IntrinsicCallGenerator {
 
 private:
-    Loop *L;
     int vectorizationFactor;
     Module *module;
 public:
-    IntrinsicCallGenerator(Loop *l, int vectorizationFactor);
+    IntrinsicCallGenerator(int vectorizationFactor, Module *module1);
 
 public:
 
@@ -59,15 +58,15 @@ public:
 
     Value *createSubInstruction(Instruction *insertionPoint, Value *firstOp, Value *secondOp);
 
-    CallInst *createGatherLoadInstruction(Instruction *insertionPoint, GEPOperator *ptr, Value *predicatedVector,
+    CallInst *createGatherLoadInstruction(Instruction *insertionPoint, Value *ptr, Value *predicatedVector,
                                           Value *indices);
 
-    CallInst *createLoadInstruction(Instruction *insertionPoint, GEPOperator *ptr, Value *predicatedVector);
+    CallInst *createLoadInstruction(Instruction *insertionPoint, Value *ptr, Value *predicatedVector);
 
-    void createScatterStoreInstruction(Instruction *insertionPoint, Value *elementsVector, GEPOperator *ptr,
+    void createScatterStoreInstruction(Instruction *insertionPoint, Value *elementsVector, Value *ptr,
                                        Value *predicatedVector, Value *indices);
 
-    void createStoreInstruction(Instruction *insertionPoint, Value *elementsVector, GEPOperator *ptr,
+    void createStoreInstruction(Instruction *insertionPoint, Value *elementsVector, Value *ptr,
                                 Value *predicatedVector);
 
     CallInst *createArithmeticInstruction(Instruction *insertionPoint, unsigned int intrinsic, Value *firstOp,

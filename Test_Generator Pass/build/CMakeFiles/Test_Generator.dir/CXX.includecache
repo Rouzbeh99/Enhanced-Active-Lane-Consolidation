@@ -13,20 +13,54 @@ llvm/Support/raw_ostream.h
 /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Test_Generator Pass/llvm/Support/raw_ostream.h
 llvm/Analysis/LoopPass.h
 /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Test_Generator Pass/llvm/Analysis/LoopPass.h
-llvm/Analysis/DependenceAnalysis.h
-/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Test_Generator Pass/llvm/Analysis/DependenceAnalysis.h
-llvm/Analysis/LoopAccessAnalysis.h
-/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Test_Generator Pass/llvm/Analysis/LoopAccessAnalysis.h
 llvm/Passes/PassBuilder.h
 /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Test_Generator Pass/llvm/Passes/PassBuilder.h
 llvm/Passes/PassPlugin.h
 /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Test_Generator Pass/llvm/Passes/PassPlugin.h
+llvm/IR/BasicBlock.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Test_Generator Pass/llvm/IR/BasicBlock.h
+llvm/IR/IRBuilder.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Test_Generator Pass/llvm/IR/IRBuilder.h
+llvm/IR/IntrinsicInst.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Test_Generator Pass/llvm/IR/IntrinsicInst.h
 llvm/IR/PassManager.h
 /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Test_Generator Pass/llvm/IR/PassManager.h
 llvm/Analysis/OptimizationRemarkEmitter.h
 /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Test_Generator Pass/llvm/Analysis/OptimizationRemarkEmitter.h
 llvm/Transforms/Vectorize/LoopVectorizationLegality.h
 /home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Test_Generator Pass/llvm/Transforms/Vectorize/LoopVectorizationLegality.h
+../IntrinsicCallGenerator/IntrinsicCallGenerator.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/IntrinsicCallGenerator/IntrinsicCallGenerator.h
+
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/IntrinsicCallGenerator/IntrinsicCallGenerator.h
+llvm/Analysis/LoopInfo.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/IntrinsicCallGenerator/llvm/Analysis/LoopInfo.h
+llvm/IR/BasicBlock.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/IntrinsicCallGenerator/llvm/IR/BasicBlock.h
+llvm/IR/IRBuilder.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/IntrinsicCallGenerator/llvm/IR/IRBuilder.h
+llvm/IR/IntrinsicInst.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/IntrinsicCallGenerator/llvm/IR/IntrinsicInst.h
+llvm/IR/IntrinsicsAArch64.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/IntrinsicCallGenerator/llvm/IR/IntrinsicsAArch64.h
+llvm/Passes/PassPlugin.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/IntrinsicCallGenerator/llvm/Passes/PassPlugin.h
+llvm/Passes/PassBuilder.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/IntrinsicCallGenerator/llvm/Passes/PassBuilder.h
+llvm/IR/PassManager.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/IntrinsicCallGenerator/llvm/IR/PassManager.h
+llvm/Pass.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/IntrinsicCallGenerator/llvm/Pass.h
+llvm/IR/ValueMap.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/IntrinsicCallGenerator/llvm/IR/ValueMap.h
+llvm/Transforms/Utils/Cloning.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/IntrinsicCallGenerator/llvm/Transforms/Utils/Cloning.h
+llvm/Transforms/Utils/BasicBlockUtils.h
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/IntrinsicCallGenerator/llvm/Transforms/Utils/BasicBlockUtils.h
+stack
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/IntrinsicCallGenerator/stack
+map
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/IntrinsicCallGenerator/map
 
 /home/rouzbeh/Graduate/LLVM/llvm-project/build/include/llvm/Config/abi-breaking.h
 
@@ -35,6 +69,8 @@ llvm/Transforms/Vectorize/LoopVectorizationLegality.h
 /home/rouzbeh/Graduate/LLVM/llvm-project/build/include/llvm/IR/Attributes.inc
 
 /home/rouzbeh/Graduate/LLVM/llvm-project/build/include/llvm/IR/IntrinsicEnums.inc
+
+/home/rouzbeh/Graduate/LLVM/llvm-project/build/include/llvm/IR/IntrinsicsAArch64.h
 
 /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm-c/DataTypes.h
 inttypes.h
@@ -250,6 +286,24 @@ initializer_list
 iterator
 -
 utility
+-
+
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/ADT/DepthFirstIterator.h
+llvm/ADT/GraphTraits.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/ADT/llvm/ADT/GraphTraits.h
+llvm/ADT/None.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/ADT/llvm/ADT/None.h
+llvm/ADT/Optional.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/ADT/llvm/ADT/Optional.h
+llvm/ADT/SmallPtrSet.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/ADT/llvm/ADT/SmallPtrSet.h
+llvm/ADT/iterator_range.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/ADT/llvm/ADT/iterator_range.h
+iterator
+-
+utility
+-
+vector
 -
 
 /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/ADT/EpochTracker.h
@@ -520,28 +574,6 @@ cassert
 iterator
 -
 vector
--
-
-/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/ADT/SmallBitVector.h
-llvm/ADT/BitVector.h
-/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/ADT/llvm/ADT/BitVector.h
-llvm/ADT/iterator_range.h
-/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/ADT/llvm/ADT/iterator_range.h
-llvm/Support/MathExtras.h
-/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/ADT/llvm/Support/MathExtras.h
-algorithm
--
-cassert
--
-climits
--
-cstddef
--
-cstdint
--
-limits
--
-utility
 -
 
 /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/ADT/SmallPtrSet.h
@@ -818,6 +850,24 @@ iterator
 utility
 -
 
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Analysis/AssumptionCache.h
+llvm/ADT/ArrayRef.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Analysis/llvm/ADT/ArrayRef.h
+llvm/ADT/DenseMap.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Analysis/llvm/ADT/DenseMap.h
+llvm/ADT/DenseMapInfo.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Analysis/llvm/ADT/DenseMapInfo.h
+llvm/ADT/SmallVector.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Analysis/llvm/ADT/SmallVector.h
+llvm/IR/PassManager.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Analysis/llvm/IR/PassManager.h
+llvm/IR/ValueHandle.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Analysis/llvm/IR/ValueHandle.h
+llvm/Pass.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Analysis/llvm/Pass.h
+memory
+-
+
 /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Analysis/BlockFrequencyInfo.h
 llvm/ADT/Optional.h
 /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Analysis/llvm/ADT/Optional.h
@@ -855,16 +905,6 @@ llvm/Pass.h
 /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Analysis/llvm/Pass.h
 vector
 -
-
-/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Analysis/DependenceAnalysis.h
-llvm/ADT/SmallBitVector.h
-/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Analysis/llvm/ADT/SmallBitVector.h
-llvm/IR/Instructions.h
-/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Analysis/llvm/IR/Instructions.h
-llvm/IR/PassManager.h
-/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Analysis/llvm/IR/PassManager.h
-llvm/Pass.h
-/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Analysis/llvm/Pass.h
 
 /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Analysis/IVDescriptors.h
 llvm/ADT/MapVector.h
@@ -1224,6 +1264,18 @@ llvm/IR/Value.h
 llvm/Support/Casting.h
 /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/Support/Casting.h
 
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/ConstantFolder.h
+llvm/ADT/ArrayRef.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/ADT/ArrayRef.h
+llvm/ADT/STLExtras.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/ADT/STLExtras.h
+llvm/IR/Constants.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/IR/Constants.h
+llvm/IR/IRBuilderFolder.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/IR/IRBuilderFolder.h
+llvm/IR/Instruction.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/IR/Instruction.h
+
 /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/ConstantRange.h
 llvm/ADT/APInt.h
 /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/ADT/APInt.h
@@ -1420,6 +1472,54 @@ iterator
 string
 -
 
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/Dominators.h
+llvm/ADT/APInt.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/ADT/APInt.h
+llvm/ADT/ArrayRef.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/ADT/ArrayRef.h
+llvm/ADT/DenseMap.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/ADT/DenseMap.h
+llvm/ADT/DenseMapInfo.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/ADT/DenseMapInfo.h
+llvm/ADT/DepthFirstIterator.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/ADT/DepthFirstIterator.h
+llvm/ADT/Hashing.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/ADT/Hashing.h
+llvm/ADT/PointerIntPair.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/ADT/PointerIntPair.h
+llvm/ADT/SmallVector.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/ADT/SmallVector.h
+llvm/ADT/Twine.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/ADT/Twine.h
+llvm/ADT/ilist_iterator.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/ADT/ilist_iterator.h
+llvm/ADT/iterator_range.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/ADT/iterator_range.h
+llvm/IR/BasicBlock.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/IR/BasicBlock.h
+llvm/IR/CFG.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/IR/CFG.h
+llvm/IR/PassManager.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/IR/PassManager.h
+llvm/IR/Use.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/IR/Use.h
+llvm/Pass.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/Pass.h
+llvm/Support/CFGDiff.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/Support/CFGDiff.h
+llvm/Support/CFGUpdate.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/Support/CFGUpdate.h
+llvm/Support/GenericDomTree.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/Support/GenericDomTree.h
+llvm/Support/GenericDomTreeConstruction.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/Support/GenericDomTreeConstruction.h
+algorithm
+-
+utility
+-
+vector
+-
+
 /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/FMF.h
 llvm/Support/raw_ostream.h
 /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/Support/raw_ostream.h
@@ -1549,6 +1649,82 @@ cassert
 -
 cstddef
 -
+
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/IRBuilder.h
+llvm-c/Types.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm-c/Types.h
+llvm/ADT/ArrayRef.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/ADT/ArrayRef.h
+llvm/ADT/None.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/ADT/None.h
+llvm/ADT/STLExtras.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/ADT/STLExtras.h
+llvm/ADT/StringRef.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/ADT/StringRef.h
+llvm/ADT/Twine.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/ADT/Twine.h
+llvm/IR/BasicBlock.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/IR/BasicBlock.h
+llvm/IR/Constant.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/IR/Constant.h
+llvm/IR/ConstantFolder.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/IR/ConstantFolder.h
+llvm/IR/Constants.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/IR/Constants.h
+llvm/IR/DataLayout.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/IR/DataLayout.h
+llvm/IR/DebugLoc.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/IR/DebugLoc.h
+llvm/IR/DerivedTypes.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/IR/DerivedTypes.h
+llvm/IR/FPEnv.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/IR/FPEnv.h
+llvm/IR/Function.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/IR/Function.h
+llvm/IR/GlobalVariable.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/IR/GlobalVariable.h
+llvm/IR/InstrTypes.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/IR/InstrTypes.h
+llvm/IR/Instruction.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/IR/Instruction.h
+llvm/IR/Instructions.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/IR/Instructions.h
+llvm/IR/Intrinsics.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/IR/Intrinsics.h
+llvm/IR/LLVMContext.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/IR/LLVMContext.h
+llvm/IR/Module.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/IR/Module.h
+llvm/IR/Operator.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/IR/Operator.h
+llvm/IR/Type.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/IR/Type.h
+llvm/IR/Value.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/IR/Value.h
+llvm/IR/ValueHandle.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/IR/ValueHandle.h
+llvm/Support/AtomicOrdering.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/Support/AtomicOrdering.h
+llvm/Support/CBindingWrapping.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/Support/CBindingWrapping.h
+llvm/Support/Casting.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/Support/Casting.h
+cassert
+-
+cstdint
+-
+functional
+-
+utility
+-
+
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/IRBuilderFolder.h
+llvm/ADT/ArrayRef.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/ADT/ArrayRef.h
+llvm/IR/InstrTypes.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/IR/InstrTypes.h
+llvm/IR/Instruction.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/IR/Instruction.h
 
 /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/InstrTypes.h
 llvm/ADT/ArrayRef.h
@@ -1889,6 +2065,28 @@ vector
 /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/OperandTraits.h
 llvm/IR/User.h
 /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/IR/User.h
+
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/Operator.h
+llvm/ADT/MapVector.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/ADT/MapVector.h
+llvm/ADT/None.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/ADT/None.h
+llvm/ADT/Optional.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/ADT/Optional.h
+llvm/IR/Constants.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/IR/Constants.h
+llvm/IR/FMF.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/IR/FMF.h
+llvm/IR/Instruction.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/IR/Instruction.h
+llvm/IR/Type.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/IR/Type.h
+llvm/IR/Value.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/IR/Value.h
+llvm/Support/Casting.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/llvm/Support/Casting.h
+cstddef
+-
 
 /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/IR/PassInstrumentation.h
 llvm/ADT/Any.h
@@ -2276,6 +2474,38 @@ llvm-c/Types.h
 llvm/Support/Casting.h
 /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/llvm/Support/Casting.h
 
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/CFGDiff.h
+llvm/ADT/GraphTraits.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/llvm/ADT/GraphTraits.h
+llvm/ADT/iterator.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/llvm/ADT/iterator.h
+llvm/ADT/iterator_range.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/llvm/ADT/iterator_range.h
+llvm/Support/CFGUpdate.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/llvm/Support/CFGUpdate.h
+llvm/Support/type_traits.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/llvm/Support/type_traits.h
+cassert
+-
+cstddef
+-
+iterator
+-
+
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/CFGUpdate.h
+llvm/ADT/ArrayRef.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/llvm/ADT/ArrayRef.h
+llvm/ADT/DenseMap.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/llvm/ADT/DenseMap.h
+llvm/ADT/PointerIntPair.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/llvm/ADT/PointerIntPair.h
+llvm/Support/Compiler.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/llvm/Support/Compiler.h
+llvm/Support/Debug.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/llvm/Support/Debug.h
+llvm/Support/raw_ostream.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/llvm/Support/raw_ostream.h
+
 /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/Casting.h
 llvm/Support/Compiler.h
 /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/llvm/Support/Compiler.h
@@ -2458,6 +2688,56 @@ cstdio
 tuple
 -
 utility
+-
+
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/GenericDomTree.h
+llvm/ADT/DenseMap.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/llvm/ADT/DenseMap.h
+llvm/ADT/GraphTraits.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/llvm/ADT/GraphTraits.h
+llvm/ADT/STLExtras.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/llvm/ADT/STLExtras.h
+llvm/ADT/SmallPtrSet.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/llvm/ADT/SmallPtrSet.h
+llvm/ADT/SmallVector.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/llvm/ADT/SmallVector.h
+llvm/Support/CFGDiff.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/llvm/Support/CFGDiff.h
+llvm/Support/CFGUpdate.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/llvm/Support/CFGUpdate.h
+llvm/Support/raw_ostream.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/llvm/Support/raw_ostream.h
+algorithm
+-
+cassert
+-
+cstddef
+-
+iterator
+-
+memory
+-
+type_traits
+-
+utility
+-
+
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/GenericDomTreeConstruction.h
+llvm/ADT/ArrayRef.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/llvm/ADT/ArrayRef.h
+llvm/ADT/DenseSet.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/llvm/ADT/DenseSet.h
+llvm/ADT/DepthFirstIterator.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/llvm/ADT/DepthFirstIterator.h
+llvm/ADT/PointerIntPair.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/llvm/ADT/PointerIntPair.h
+llvm/ADT/SmallPtrSet.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/llvm/ADT/SmallPtrSet.h
+llvm/Support/Debug.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/llvm/Support/Debug.h
+llvm/Support/GenericDomTree.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/llvm/Support/GenericDomTree.h
+queue
 -
 
 /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Support/MD5.h
@@ -2760,6 +3040,38 @@ llvm/Transforms/Utils/LoopSimplify.h
 llvm/Transforms/Utils/LoopUtils.h
 /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Scalar/llvm/Transforms/Utils/LoopUtils.h
 memory
+-
+
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Utils/BasicBlockUtils.h
+llvm/ADT/ArrayRef.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Utils/llvm/ADT/ArrayRef.h
+llvm/ADT/SetVector.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Utils/llvm/ADT/SetVector.h
+llvm/IR/BasicBlock.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Utils/llvm/IR/BasicBlock.h
+llvm/IR/Dominators.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Utils/llvm/IR/Dominators.h
+cassert
+-
+
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Utils/Cloning.h
+llvm/ADT/SmallVector.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Utils/llvm/ADT/SmallVector.h
+llvm/ADT/Twine.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Utils/llvm/ADT/Twine.h
+llvm/Analysis/AssumptionCache.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Utils/llvm/Analysis/AssumptionCache.h
+llvm/Analysis/InlineCost.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Utils/llvm/Analysis/InlineCost.h
+llvm/IR/ValueHandle.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Utils/llvm/IR/ValueHandle.h
+llvm/Transforms/Utils/ValueMapper.h
+/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Utils/llvm/Transforms/Utils/ValueMapper.h
+functional
+-
+memory
+-
+vector
 -
 
 /home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include/llvm/Transforms/Utils/LCSSA.h

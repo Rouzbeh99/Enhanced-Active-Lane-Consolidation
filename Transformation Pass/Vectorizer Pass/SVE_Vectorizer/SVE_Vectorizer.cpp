@@ -22,7 +22,7 @@ SVE_Vectorizer::SVE_Vectorizer(Loop *l, int vectorizationFactor, std::vector<Val
 
     insertionPoint = targetedBB->getTerminator();
     predicateVector = formPredicateVector();
-    intrinsicCallGenerator = new IntrinsicCallGenerator(l, vectorizationFactor);
+    intrinsicCallGenerator = new IntrinsicCallGenerator(vectorizationFactor, l->getHeader()->getModule());
 }
 
 

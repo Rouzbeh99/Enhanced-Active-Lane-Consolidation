@@ -262,6 +262,9 @@ Terminfo_LIBRARIES:FILEPATH=/usr/lib/x86_64-linux-gnu/libtinfo.so
 //Value Computed by CMake
 Test_Generator_BINARY_DIR:STATIC=/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Test_Generator Pass/build
 
+//Dependencies for the target
+Test_Generator_LIB_DEPENDS:STATIC=general;LLVMIntrinsicCallGenerator;
+
 //Value Computed by CMake
 Test_Generator_SOURCE_DIR:STATIC=/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Test_Generator Pass
 

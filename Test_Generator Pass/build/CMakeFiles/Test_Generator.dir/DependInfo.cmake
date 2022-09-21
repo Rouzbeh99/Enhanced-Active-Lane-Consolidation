@@ -13,6 +13,7 @@ set(CMAKE_CXX_TARGET_INCLUDE_PATH
   "/home/rouzbeh/Graduate/LLVM/llvm-project/llvm/include"
   "/home/rouzbeh/Graduate/LLVM/llvm-project/build/include"
   "../include"
+  "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/IntrinsicCallGenerator"
   )
 
 # Targets to which this target links.
