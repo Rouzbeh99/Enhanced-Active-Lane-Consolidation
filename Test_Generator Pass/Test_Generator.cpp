@@ -31,7 +31,6 @@ namespace {
             Function *function = M.getFunction("foo");
             removeAllInstructionsFromFunction(function);
 
-            fillFunction(function);
             formVectorsFromArrays(function, &M);
 
 
@@ -40,8 +39,6 @@ namespace {
         }
 
         void removeAllInstructionsFromFunction(Function *function);
-
-        void fillFunction(Function *function);
 
         void formVectorsFromArrays(Function *function, Module *module);
 
@@ -63,11 +60,6 @@ void Test_Generator::removeAllInstructionsFromFunction(Function *function) {
         instructionStack.top()->eraseFromParent();
         instructionStack.pop();
     }
-}
-
-void Test_Generator::fillFunction(Function *function) {
-    BasicBlock *funcBody = BasicBlock::Create(function->getContext(), "func.body", function);
-    ReturnInst::Create(function->getContext(), funcBody);
 }
 
 void Test_Generator::formVectorsFromArrays(Function *function, Module *module) {
