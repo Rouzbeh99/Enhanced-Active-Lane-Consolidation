@@ -3,4 +3,4 @@ project(IR_Example)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(IR_Example "raw code.cpp")
+add_executable(IR_Example "raw-code.cpp")
