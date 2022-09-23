@@ -1,4 +1,0 @@
-/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Test_Generator Pass/cmake-build-debug/CMakeFiles/intrinsics_gen.dir
-/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Test_Generator Pass/cmake-build-debug/CMakeFiles/Test_Generator.dir
-/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Test_Generator Pass/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Test_Generator Pass/cmake-build-debug/CMakeFiles/rebuild_cache.dir

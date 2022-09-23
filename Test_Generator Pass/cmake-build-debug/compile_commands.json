@@ -1,7 +1,0 @@
-[
-{
-  "directory": "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Test_Generator Pass/cmake-build-debug",
-  "command": "/usr/bin/c++ -I/usr/lib/llvm-10/include -I\"/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Test_Generator Pass/include\" -I\"/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/Vectorizer Pass/IntrinsicCallGenerator\" -g -fPIC   -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS  -fno-exceptions -o CMakeFiles/Test_Generator.dir/Test_Generator.cpp.o -c \"/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Test_Generator Pass/Test_Generator.cpp\"",
-  "file": "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Test_Generator Pass/Test_Generator.cpp"
-}
-]
