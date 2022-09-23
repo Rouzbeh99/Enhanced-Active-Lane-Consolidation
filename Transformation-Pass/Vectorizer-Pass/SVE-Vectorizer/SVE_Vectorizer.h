@@ -22,45 +22,38 @@ using namespace llvm;
 class SVE_Vectorizer {
 public:
     Loop *L;
-    Value *predicateVector;
     IntrinsicCallGenerator *intrinsicCallGenerator;
-    BasicBlock *targetedBB;
-    Instruction *insertionPoint;
-    std::vector<Value *> predicates;
     int vectorizationFactor;
-
-    SVE_Vectorizer(Loop *l, int vectorizationFactor, std::vector<Value *> predicates);
-
-    Value *getPredicateVector() const;
-
-    Instruction *getInsertionPoint() const;
 
 private:
     Module *module;
 
 
 public:
-
     void doVectorization();
 
 private:
-    BasicBlock *getTargetedBB() const;
+    void vectorizeBlock(BasicBlock *block, Value *predicateVector);
 
 private:
-
-    Value *formPredicateVector();
-
+    bool is_a_condition_block(BasicBlock *block);
 
 private:
+    void refinePreheader(BasicBlock *remainingIterationsBlock);
 
-    BasicBlock *findTargetedBB();
+private:
+    BasicBlock* createBlockForRemainingIterations();
+
+private:
+    Instruction *getTripCountInPreheader(BasicBlock *preheader);
+
+public:
+    SVE_Vectorizer(Loop *l, int vectorizationFactor);
+
+
 
 
 };
-
-BasicBlock *SVE_Vectorizer::getTargetedBB() const {
-    return targetedBB;
-}
 
 
 #endif //ALC_VECTORIZER_SVE_VECTORIZER_H

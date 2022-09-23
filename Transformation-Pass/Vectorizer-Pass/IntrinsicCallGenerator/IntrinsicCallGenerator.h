@@ -72,6 +72,8 @@ public:
     CallInst *createArithmeticInstruction(Instruction *insertionPoint, unsigned int intrinsic, Value *firstOp,
                                           Value *secondOp, Value *predicatedVector);
 
+    CallInst* createCallToVscale64Intrinsic(Instruction *insertionPoint);
+
 };
 
 #endif

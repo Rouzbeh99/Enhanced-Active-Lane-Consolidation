@@ -312,6 +312,19 @@ IntrinsicCallGenerator::createArithmeticInstruction(Instruction *insertionPoint,
     return builder.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
 }
 
+CallInst *IntrinsicCallGenerator::createCallToVscale64Intrinsic(Instruction *insertionPoint) {
+    LLVMContext &context = module->getContext();
+    IRBuilder<> builder(context);
+    builder.SetInsertPoint(insertionPoint);
+
+    auto intrinsic = Intrinsic::vscale;
+
+    auto type = Type::getInt64Ty(context);
+    Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, type);
+
+    return builder.CreateCall(intrinsicFunction);
+}
+
 IntrinsicCallGenerator::IntrinsicCallGenerator(int vectorizationFactor, Module *module1) : vectorizationFactor(
         vectorizationFactor), module(module1) {
 }

@@ -53,12 +53,14 @@ namespace {
 
         int factor = 4;
 
-        auto *unroller = new Unroller(L, &LI);
-        unroller->doUnrolling(factor);
+//        auto *unroller = new Unroller(L, &LI);
+//        unroller->doUnrolling(factor);
+//
+//        auto *sve_permute = new SVE_ALC(L, factor, &LI, unroller->getNewLatch(), unroller->getPredicates());
+//        sve_permute->doTransformation();
 
-        auto *sve_permute = new SVE_ALC(L, factor, &LI, unroller->getNewLatch(), unroller->getPredicates());
-        sve_permute->doTransformation();
-
+        auto *sve_vectorizer = new SVE_Vectorizer(L, factor);
+        sve_vectorizer->doVectorization();
 
 
         return llvm::PreservedAnalyses::none();
