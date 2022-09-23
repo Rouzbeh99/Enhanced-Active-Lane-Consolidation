@@ -1,3 +1,0 @@
-/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/IR Example/cmake-build-debug/CMakeFiles/IR_Example.dir
-/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/IR Example/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation Pass/IR Example/cmake-build-debug/CMakeFiles/rebuild_cache.dir
