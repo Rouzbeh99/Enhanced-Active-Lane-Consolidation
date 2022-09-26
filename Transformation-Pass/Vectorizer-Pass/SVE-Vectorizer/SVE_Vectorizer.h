@@ -43,13 +43,22 @@ private:
     void refinePreheader(BasicBlock *preVecBlock, BasicBlock *preHeaderForRemaining);
 
 private:
-    BasicBlock *createPreVectorizationBlock();
+    BasicBlock *createPreVectorizationBlock(BasicBlock *vectorizaingBlock);
 
 private:
     Instruction *getTripCountInPreheader(BasicBlock *preheader);
 
 private:
     BasicBlock *createPreheaderForRemainingIterations();
+
+private:
+    std::vector<Value *> *fillPreVecBlock(BasicBlock *preVecBlock, BasicBlock *preheader, BasicBlock *vectorizingBlock);
+
+private:
+    BasicBlock *createVectorizingBlock();
+
+private:
+    void fillVectorizingBlock(BasicBlock *vectorizingBlock, BasicBlock *preVec, Type *indexVarType, std::vector<Value*>* values);
 
 public:
     SVE_Vectorizer(Loop *l, int vectorizationFactor, LoopInfo *LI);

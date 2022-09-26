@@ -21,16 +21,16 @@ for.body.preheader:                               ; preds = %entry
   %0 = call i64 @llvm.vscale.i64(), !dbg !31
   %1 = shl i64 %0, 2, !dbg !31
   %2 = icmp uge i64 %wide.trip.count, %1, !dbg !31
-  br i1 %2, label %Pre.Vectorization, label %Preheadr.for.remaining.iterations, !dbg !31
+  br i1 %2, label %Pre.Vectorization, label %Preheader.for.remaining.iterations, !dbg !31
 
-for.cond.cleanup.loopexit:                        ; preds = %Pre.Vectorization, %for.inc
+for.cond.cleanup.loopexit:                        ; preds = %for.inc
   br label %for.cond.cleanup, !dbg !32
 
 for.cond.cleanup:                                 ; preds = %for.cond.cleanup.loopexit, %entry
   ret void, !dbg !32
 
-for.body:                                         ; preds = %Preheadr.for.remaining.iterations, %for.inc
-  %indvars.iv = phi i64 [ %indvars.iv.next, %for.inc ], [ %5, %Preheadr.for.remaining.iterations ]
+for.body:                                         ; preds = %Preheader.for.remaining.iterations, %for.inc
+  %indvars.iv = phi i64 [ %indvars.iv.next, %for.inc ], [ %10, %Preheader.for.remaining.iterations ]
   call void @llvm.dbg.value(metadata i64 %indvars.iv, metadata !25, metadata !DIExpression()), !dbg !28
   %rem15 = and i64 %indvars.iv, 1, !dbg !33
   %cmp1.not = icmp eq i64 %rem15, 0, !dbg !33
@@ -47,10 +47,18 @@ if.then:                                          ; preds = %for.body
   br label %for.inc, !dbg !47
 
 Pre.Vectorization:                                ; preds = %for.body.preheader
-  br label %for.cond.cleanup.loopexit
+  %5 = call <vscale x 4 x i64> @llvm.experimental.stepvector.nxv4i64()
+  %6 = call i64 @llvm.vscale.i64()
+  %7 = shl i64 %6, 2
+  br label %vectorizing.block
 
-Preheadr.for.remaining.iterations:                ; preds = %for.body.preheader
-  %5 = phi i64 [ 0, %for.body.preheader ]
+vectorizing.block:                                ; preds = %Pre.Vectorization, %vectorizing.block
+  %8 = phi i64 [ 0, %Pre.Vectorization ], [ %8, %vectorizing.block ]
+  %9 = phi <vscale x 4 x i64> [ %5, %Pre.Vectorization ], [ %9, %vectorizing.block ]
+  br label %vectorizing.block
+
+Preheader.for.remaining.iterations:               ; preds = %for.body.preheader
+  %10 = phi i64 [ 0, %for.body.preheader ]
   br label %for.body
 
 for.inc:                                          ; preds = %if.then, %for.body
@@ -164,6 +172,9 @@ declare void @llvm.memset.p0.i64(ptr nocapture writeonly, i8, i64, i1 immarg) #5
 
 ; Function Attrs: nocallback nofree nosync nounwind readnone willreturn
 declare i64 @llvm.vscale.i64() #6
+
+; Function Attrs: nocallback nofree nosync nounwind readnone willreturn
+declare <vscale x 4 x i64> @llvm.experimental.stepvector.nxv4i64() #6
 
 attributes #0 = { argmemonly nofree norecurse nosync nounwind uwtable "frame-pointer"="non-leaf" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="generic" "target-features"="+neon,+v8a" }
 attributes #1 = { nocallback nofree nosync nounwind readnone speculatable willreturn }

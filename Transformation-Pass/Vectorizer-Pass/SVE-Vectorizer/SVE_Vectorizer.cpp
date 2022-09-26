@@ -34,19 +34,27 @@
  *
  */
 
-// TODO: We assume loop trip count is a multiple on VFactor, make it work for other cases
 // TODO: What if trip count is NOT a multiple of vscale * VFactor ???
 
 void SVE_Vectorizer::doVectorization() {
+    BasicBlock *preheader = L->getLoopPreheader();
+    Type *inductionVarType = L->getCanonicalInductionVariable()->getType();
 
+    // create vectorizingBlock
+    BasicBlock *vectorizaingBlock = createVectorizingBlock();
 
     // form a block for the case where there are not enough iterations
-    BasicBlock *preVectorizationBlock = createPreVectorizationBlock();
+    BasicBlock *preVectorizationBlock = createPreVectorizationBlock(vectorizaingBlock);
 
     BasicBlock *preHeaderForRemaining = createPreheaderForRemainingIterations();
 
     // in preheader, check if there are enough iterations for a vector
     refinePreheader(preVectorizationBlock, preHeaderForRemaining);
+
+
+    auto *values = fillPreVecBlock(preVectorizationBlock, preheader, vectorizaingBlock);
+    fillVectorizingBlock(vectorizaingBlock, preVectorizationBlock, inductionVarType, values);
+
 
 }
 
@@ -137,7 +145,7 @@ void SVE_Vectorizer::refinePreheader(BasicBlock *preVecBlock, BasicBlock *preHea
     auto tripCount = dyn_cast<Value>(getTripCountInPreheader(preheader));
 
     //get current vscale
-    CallInst *vscale = intrinsicCallGenerator->createCallToVscale64Intrinsic(insertionPoint);
+    CallInst *vscale = intrinsicCallGenerator->createVscale64Intrinsic(insertionPoint);
 
     // check if there are iterations
     ConstantInt *shiftOp = llvm::ConstantInt::get(Type::getInt64Ty(preheader->getContext()),
@@ -170,14 +178,14 @@ Instruction *SVE_Vectorizer::getTripCountInPreheader(BasicBlock *preheader) {
 }
 
 // TODO: complete implementation
-BasicBlock *SVE_Vectorizer::createPreVectorizationBlock() {
+BasicBlock *SVE_Vectorizer::createPreVectorizationBlock(BasicBlock *vectorizaingBlock) {
     BasicBlock *block = BasicBlock::Create(L->getHeader()->getContext(), "Pre.Vectorization",
                                            L->getHeader()->getParent(),
-                                           L->getLoopLatch());
+                                           vectorizaingBlock);
 
 
     // for now, it branches to exiting block
-    BranchInst::Create(L->getExitBlock(), block);
+    BranchInst::Create(vectorizaingBlock, block);
 
     L->addBasicBlockToLoop(block, *LI);
 
@@ -209,6 +217,83 @@ BasicBlock *SVE_Vectorizer::createPreheaderForRemainingIterations() {
     headerPHi->removeIncomingValue(L->getLoopPreheader(), false);
 
     return block;
+}
+
+BasicBlock *SVE_Vectorizer::createVectorizingBlock() {
+    BasicBlock *block = BasicBlock::Create(L->getHeader()->getContext(), "vectorizing.block",
+                                           L->getHeader()->getParent(),
+                                           L->getLoopLatch());
+
+    // temporary terminator
+    BranchInst::Create(block, block);
+
+    L->addBasicBlockToLoop(block, *LI);
+    return block;
+}
+
+std::vector<Value *> *
+SVE_Vectorizer::fillPreVecBlock(BasicBlock *preVecBlock, BasicBlock *preheader, BasicBlock *vectorizingBlock) {
+
+    auto *results = new std::vector<Value *>;
+
+    Instruction *insertionPoint = preVecBlock->getTerminator();
+    IRBuilder<> builder(preheader->getContext());
+    builder.SetInsertPoint(insertionPoint);
+
+
+    // create step vector
+    CallInst *stepVec = intrinsicCallGenerator->createStepVector64Intrinsic(insertionPoint);
+
+    // create the value by which the index should be increased
+    //TODO: we assume indices are added by one, make it work for other cases as well
+    //should be added by vscale * VFactor * 1  ----> vscale shl log(VFactor)
+
+    CallInst *vscale = intrinsicCallGenerator->createVscale64Intrinsic(insertionPoint);
+    ConstantInt *shiftOp = llvm::ConstantInt::get(Type::getInt64Ty(preheader->getContext()),
+                                                  int(log2(vectorizationFactor)));
+    Value *updateValue = builder.CreateShl(vscale, shiftOp);
+
+    // create vector by which step vector should be updated
+
+
+    results->push_back(stepVec);
+    results->push_back(updateValue);
+
+    return results;
+}
+
+void SVE_Vectorizer::fillVectorizingBlock(BasicBlock *vectorizingBlock, BasicBlock *preVec, Type *indexVarType,
+                                          std::vector<Value *> *values) {
+
+    Instruction *insertionPoint = vectorizingBlock->getTerminator();
+    IRBuilder<> builder(vectorizingBlock->getContext());
+    builder.SetInsertPoint(insertionPoint);
+
+    // create phi node for loop index
+    Constant *contZero = llvm::ConstantInt::get(indexVarType, 0);
+    PHINode *indexVarPHI = PHINode::Create(indexVarType, 2, "", insertionPoint);
+    indexVarPHI->addIncoming(contZero, preVec);
+
+
+    // create phi for step vector
+    Value *&stepVecInPrevBlock = (*values[)0];
+    PHINode *stepVecPhi = PHINode::Create(stepVecInPrevBlock->getType(), 2, "", insertionPoint);
+    stepVecPhi->addIncoming(stepVecInPrevBlock, preVec);
+    stepVecPhi->addIncoming(stepVecPhi, vectorizingBlock);  // TODO: should be replaced with updated value
+
+    //// header and then bodies, vectorized /////
+
+
+
+    // update index and step vector
+    Value *addOp = (*values)[1];
+    Value *updatedIndex = builder.CreateAdd(addOp, indexVarPHI);
+    indexVarPHI->addIncoming(indexVarPHI, vectorizingBlock);
+
+    //updated stepvector
+
+
+
 }
 
 SVE_Vectorizer::SVE_Vectorizer(Loop *l, int vectorizationFactor, LoopInfo *li) : L(l), vectorizationFactor(
