@@ -9,7 +9,7 @@
 #include <stack>
 
 /**
- *  Assumption: Inpout IR for loop body is in following form
+ *  Assumption: Input IR for loop body is in following form
  *
  *                          decision
  *                            /   \
@@ -39,11 +39,14 @@
 
 void SVE_Vectorizer::doVectorization() {
 
+
     // form a block for the case where there are not enough iterations
-    BasicBlock *remainingIterationsBlock = createBlockForRemainingIterations();
+    BasicBlock *preVectorizationBlock = createPreVectorizationBlock();
+
+    BasicBlock *preHeaderForRemaining = createPreheaderForRemainingIterations();
 
     // in preheader, check if there are enough iterations for a vector
-    refinePreheader(remainingIterationsBlock);
+    refinePreheader(preVectorizationBlock, preHeaderForRemaining);
 
 }
 
@@ -124,7 +127,7 @@ bool SVE_Vectorizer::is_a_condition_block(BasicBlock *block) {
     return brInstr->isConditional();
 }
 
-void SVE_Vectorizer::refinePreheader(BasicBlock *remainingIterationsBlock) {
+void SVE_Vectorizer::refinePreheader(BasicBlock *preVecBlock, BasicBlock *preHeaderForRemaining) {
 
     BasicBlock *preheader = L->getLoopPreheader();
     Instruction *insertionPoint = preheader->getTerminator();
@@ -143,13 +146,14 @@ void SVE_Vectorizer::refinePreheader(BasicBlock *remainingIterationsBlock) {
     Value *condition = builder.CreateICmpUGE(tripCount, shiftValue); // if true, there are enough iterations
 
     // if true must jump to the previous destination of preheader
-    auto *ifTrueDestination = dyn_cast<BasicBlock>(dyn_cast<BranchInst>(preheader->getTerminator())->getOperand(
+    auto *remainingIterationsBlock = dyn_cast<BasicBlock>(dyn_cast<BranchInst>(preheader->getTerminator())->getOperand(
             0));   // TODO: what if it's conditional??
 
-    builder.CreateCondBr(condition, ifTrueDestination, remainingIterationsBlock);
+    builder.CreateCondBr(condition, preVecBlock, preHeaderForRemaining);
 
     // remove previous terminator
     preheader->getTerminator()->eraseFromParent();
+
 
 }
 
@@ -166,18 +170,49 @@ Instruction *SVE_Vectorizer::getTripCountInPreheader(BasicBlock *preheader) {
 }
 
 // TODO: complete implementation
-BasicBlock *SVE_Vectorizer::createBlockForRemainingIterations() {
-    BasicBlock *block = BasicBlock::Create(L->getHeader()->getContext(), "remaining.iterations",
+BasicBlock *SVE_Vectorizer::createPreVectorizationBlock() {
+    BasicBlock *block = BasicBlock::Create(L->getHeader()->getContext(), "Pre.Vectorization",
                                            L->getHeader()->getParent(),
                                            L->getLoopLatch());
+
 
     // for now, it branches to exiting block
     BranchInst::Create(L->getExitBlock(), block);
 
+    L->addBasicBlockToLoop(block, *LI);
+
     return block;
 }
 
-SVE_Vectorizer::SVE_Vectorizer(Loop *l, int vectorizationFactor) : L(l), vectorizationFactor(vectorizationFactor) {
+// only contains a phi instruction for induction variable
+BasicBlock *SVE_Vectorizer::createPreheaderForRemainingIterations() {
+    BasicBlock *block = BasicBlock::Create(L->getHeader()->getContext(), "Preheader.for.remaining.iterations",
+                                           L->getHeader()->getParent(),
+                                           L->getLoopLatch());
+    // branch to loop header
+    BranchInst::Create(L->getHeader(), block);
+
+    //add to loop
+    L->addBasicBlockToLoop(block, *LI);
+
+    auto *headerPHi = dyn_cast<PHINode>(
+            &L->getHeader()->getInstList().front()); // TODO: what if there are other phi nodes?
+
+    //add PHI Node
+    PHINode *inductionVar = PHINode::Create(headerPHi->getType(), 2, "", block->getTerminator());
+    Constant *contZero = llvm::ConstantInt::get(headerPHi->getType(), 0);
+    inductionVar->addIncoming(contZero, L->getLoopPreheader());
+
+
+    // refine phi Node in the header associated with induction var
+    headerPHi->addIncoming(inductionVar, block);
+    headerPHi->removeIncomingValue(L->getLoopPreheader(), false);
+
+    return block;
+}
+
+SVE_Vectorizer::SVE_Vectorizer(Loop *l, int vectorizationFactor, LoopInfo *li) : L(l), vectorizationFactor(
+        vectorizationFactor), LI(li) {
     module = l->getHeader()->getModule();
     intrinsicCallGenerator = new IntrinsicCallGenerator(vectorizationFactor, module);
 }

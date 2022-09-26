@@ -24,6 +24,7 @@ public:
     Loop *L;
     IntrinsicCallGenerator *intrinsicCallGenerator;
     int vectorizationFactor;
+    LoopInfo *LI;
 
 private:
     Module *module;
@@ -39,18 +40,19 @@ private:
     bool is_a_condition_block(BasicBlock *block);
 
 private:
-    void refinePreheader(BasicBlock *remainingIterationsBlock);
+    void refinePreheader(BasicBlock *preVecBlock, BasicBlock *preHeaderForRemaining);
 
 private:
-    BasicBlock* createBlockForRemainingIterations();
+    BasicBlock *createPreVectorizationBlock();
 
 private:
     Instruction *getTripCountInPreheader(BasicBlock *preheader);
 
+private:
+    BasicBlock *createPreheaderForRemainingIterations();
+
 public:
-    SVE_Vectorizer(Loop *l, int vectorizationFactor);
-
-
+    SVE_Vectorizer(Loop *l, int vectorizationFactor, LoopInfo *LI);
 
 
 };
