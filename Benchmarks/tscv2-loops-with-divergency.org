@@ -1,0 +1,163 @@
+* TODO [#A] s124 - vec+vscale
+* TODO [#A] s161 - not-vec
+
+  tsvc.c:723:9: remark: loop not vectorized: could not determine number of loop
+  iterations [-Rpass-analysis=sve-loop-vectorize]
+
+  tsvc.c:723:9: remark: loop not vectorized: value that could not be identified
+  as reduction is used outside the loop [-Rpass-analysis=loop-vectorize]
+
+  tsvc.c:723:9: remark: loop not vectorized: could not determine number of loop
+  iterations [-Rpass-analysis=loop-vectorize]
+
+* TODO [#A] s1161 - not-vec
+
+  tsvc.c:752:9: remark: loop not vectorized: cannot identify array bounds
+  [-Rpass-analysis=sve-loop-vectorize]
+
+  tsvc.c:752:9: remark: loop not vectorized: Unknown array bounds
+  [-Rpass-analysis=sve-loop-vectorize]
+
+* TODO [#A] s253 - vec+vscale
+* TODO [#A] s258 - not-vec
+
+  tsvc.c:1626:9: remark: loop not vectorized: value that could not be identified
+  as reduction is used outside the loop [-Rpass-analysis=sve-loop-vectorize]
+
+* TODO [#A] s271 - vec+vscale
+* TODO [#A] s272 - vec+vscale
+* TODO [#A] s273 - vec+vscale
+* TODO [#A] s274 - vec+vscale
+* TODO [#A] s275 - not-vect
+
+  tsvc.c:1783:32: remark: loop not vectorized: value that could not be
+  identified as reduction is used outside the loop
+  [-Rpass-analysis=sve-loop-vectorize]
+
+* TODO [#A] s276 - vec+vscale
+* TODO [#A] s278 - vec+vscale
+* TODO [#A] s1279 - vec+vscale
+* TODO [#A] s2711 - vec+vscale
+* TODO [#A] s2712 - vec+vscale
+* TODO [#A] s3111 - not-vec
+
+  tsvc.c:2612:9: remark: loop not vectorized: value that could not be identified
+  as reduction is used outside the loop [-Rpass-analysis=sve-loop-vectorize]
+
+* TODO [#A] s441 - vec+vscale
+* TODO [#A] s442 - vec+vscale
+* TODO [#A] s443 - vec+vscale
+* TODO [#A] vif - vec+vscale
+* TODO [#B] s162 - vec+vscale
+* TODO [#B] s277 - not-vec
+
+  tsvc.c:1854:9: remark: loop not vectorized: could not determine number of loop
+  iterations [-Rpass-analysis=sve-loop-vectorize]
+
+  tsvc.c:1854:9: remark: loop not vectorized: value that could not be identified
+  as reduction is used outside the loop [-Rpass-analysis=loop-vectorize]
+
+* TODO [#B] s279 - vec+vscale
+* TODO [#B] s341 - not-vec
+
+  tsvc.c:2820:9: remark: loop not vectorized: cannot find a loop invariant
+  stride for value [-Rpass-analysis=sve-loop-vectorize]
+
+  tsvc.c:2820:9: remark: loop not vectorized: value that could not be identified
+  as reduction is used outside the loop [-Rpass-analysis=loop-vectorize]
+
+* TODO [#B] s342 - not-vec
+
+  tsvc.c:2848:9: remark: loop not vectorized: cannot find a loop invariant
+  stride for value [-Rpass-analysis=sve-loop-vectorize]
+
+  tsvc.c:2848:9: remark: loop not vectorized: value that could not be identified
+  as reduction is used outside the loop [-Rpass-analysis=loop-vectorize]
+
+* TODO [#B] s343 - not-vec
+
+  tsvc.c:2877:13: remark: loop not vectorized: cannot find a loop invariant
+  stride for value [-Rpass-analysis=sve-loop-vectorize]
+
+  tsvc.c:2877:13: remark: loop not vectorized: value that could not be
+  identified as reduction is used outside the loop
+  [-Rpass-analysis=loop-vectorize]
+
+* TODO [#B] s482 - not-vec
+
+  tsvc.c:3395:9: remark: loop not vectorized: could not determine number of loop
+  iterations [-Rpass-analysis=sve-loop-vectorize]
+
+* TODO [#C] s123 - not-vec
+
+  tsvc.c:428:9: remark: loop not vectorized: cannot find a loop invariant stride
+  for value [-Rpass-analysis=sve-loop-vectorize]
+
+  tsvc.c:428:9: remark: loop not vectorized: value that could not be identified
+     as reduction is used outside the loop [-Rpass-analysis=loop-vectorize]
+
+  tsvc.c:428:9: remark: loop not vectorized: cannot identify array bounds
+     [-Rpass-analysis=loop-vectorize]
+
+* TODO [#C] s2710 - vec+vscale
+* TODO [#C] s481 - not-vec
+
+  tsvc.c:3369:9: remark: loop not vectorized: loop control flow is not
+  understood by vectorizer [-Rpass-analysis=sve-loop-vectorize]
+
+  tsvc.c:3369:9: remark: loop not vectorized: could not determine number of loop
+  iterations [-Rpass-analysis=loop-vectorize]
+
+
+
+* s314 - not-vec
+
+  tsvc.c:2370:9: remark: loop not vectorized: value that could not be identified
+  as reduction is used outside the loop [-Rpass-analysis=sve-loop-vectorize]
+
+* s315 - not-vec
+
+  tsvc.c:2401:9: remark: loop not vectorized: cannot find a loop invariant
+  stride for value [-Rpass-analysis=sve-loop-vectorize]
+* s316 - not-vec
+
+  tsvc.c:2429:9: remark: loop not vectorized: value that could not be identified
+  as reduction is used outside the loop [-Rpass-analysis=sve-loop-vectorize]
+* s318 - not-vec
+
+  tsvc.c:2487:9: remark: loop not vectorized: value that could not be identified
+  as reduction is used outside the loop [-Rpass-analysis=sve-loop-vectorize]
+* s3110 - not-vec
+
+  tsvc.c:2550:13: remark: loop not vectorized: cannot find a loop invariant
+  stride for value [-Rpass-analysis=sve-loop-vectorize]
+
+  tsvc.c:2550:13: remark: loop not vectorized: value that could not be
+  identified as reduction is used outside the loop
+  [-Rpass-analysis=loop-vectorize]
+* s13110 - not-vec
+
+  tsvc.c:2582:13: remark: loop not vectorized: cannot find a loop invariant
+  stride for value [-Rpass-analysis=sve-loop-vectorize]
+
+  tsvc.c:2582:13: remark: loop not vectorized: value that could not be
+  identified as reduction is used outside the loop
+  [-Rpass-analysis=loop-vectorize]
+* s3113 - not-vec
+
+  tsvc.c:2663:9: remark: loop not vectorized: value that could not be identified
+  as reduction is used outside the loop [-Rpass-analysis=sve-loop-vectorize]
+* s331 - not-vec
+
+  tsvc.c:2757:9: remark: loop not vectorized: cannot find a loop invariant
+  stride for value [-Rpass-analysis=sve-loop-vectorize]
+
+  tsvc.c:2757:9: remark: loop not vectorized: value that could not be identified
+  as reduction is used outside the loop [-Rpass-analysis=loop-vectorize]
+* s332 - not-vec
+
+  tsvc.c:2789:9: remark: loop not vectorized: loop control flow is not
+  understood by vectorizer [-Rpass-analysis=sve-loop-vectorize]
+
+  tsvc.c:2789:9: remark: loop not vectorized: could not determine number of loop
+  iterations [-Rpass-analysis=loop-vectorize]
