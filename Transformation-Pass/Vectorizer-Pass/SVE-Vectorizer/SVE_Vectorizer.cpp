@@ -37,24 +37,26 @@
 // TODO: What if trip count is NOT a multiple of vscale * VFactor ???
 
 void SVE_Vectorizer::doVectorization() {
+
     BasicBlock *preheader = L->getLoopPreheader();
-    Type *inductionVarType = L->getCanonicalInductionVariable()->getType();
+    PHINode *inductionVar = L->getCanonicalInductionVariable();
+    Type *inductionVarType = inductionVar->getType();
+
 
     // create vectorizingBlock
-    BasicBlock *vectorizaingBlock = createVectorizingBlock();
+    BasicBlock *vectorizingBlock = createVectorizingBlock();
 
     // form a block for the case where there are not enough iterations
-    BasicBlock *preVectorizationBlock = createPreVectorizationBlock(vectorizaingBlock);
+    BasicBlock *preVectorizationBlock = createPreVectorizationBlock(vectorizingBlock);
 
     BasicBlock *preHeaderForRemaining = createPreheaderForRemainingIterations();
 
     // in preheader, check if there are enough iterations for a vector
     refinePreheader(preVectorizationBlock, preHeaderForRemaining);
 
-
-    auto *values = fillPreVecBlock(preVectorizationBlock, preheader, vectorizaingBlock);
-    fillVectorizingBlock(vectorizaingBlock, preVectorizationBlock, inductionVarType, values);
-
+    auto *values = fillPreVecBlock(preVectorizationBlock, preheader, vectorizingBlock);
+    fillVectorizingBlock(vectorizingBlock, preVectorizationBlock, inductionVarType, values,
+                         dyn_cast<Value>(inductionVar));
 
 }
 
@@ -178,14 +180,14 @@ Instruction *SVE_Vectorizer::getTripCountInPreheader(BasicBlock *preheader) {
 }
 
 // TODO: complete implementation
-BasicBlock *SVE_Vectorizer::createPreVectorizationBlock(BasicBlock *vectorizaingBlock) {
+BasicBlock *SVE_Vectorizer::createPreVectorizationBlock(BasicBlock *vectorizingBlock) {
     BasicBlock *block = BasicBlock::Create(L->getHeader()->getContext(), "Pre.Vectorization",
                                            L->getHeader()->getParent(),
-                                           vectorizaingBlock);
+                                           vectorizingBlock);
 
 
     // for now, it branches to exiting block
-    BranchInst::Create(vectorizaingBlock, block);
+    BranchInst::Create(vectorizingBlock, block);
 
     L->addBasicBlockToLoop(block, *LI);
 
@@ -251,19 +253,21 @@ SVE_Vectorizer::fillPreVecBlock(BasicBlock *preVecBlock, BasicBlock *preheader, 
     CallInst *vscale = intrinsicCallGenerator->createVscale64Intrinsic(insertionPoint);
     ConstantInt *shiftOp = llvm::ConstantInt::get(Type::getInt64Ty(preheader->getContext()),
                                                   int(log2(vectorizationFactor)));
-    Value *updateValue = builder.CreateShl(vscale, shiftOp);
+    Value *indexUpdateValue = builder.CreateShl(vscale, shiftOp);
 
     // create vector by which step vector should be updated
-
+    Value *stepVecUpdateValues = createVectorOfConstants(indexUpdateValue, insertionPoint, "stepVector.update.values");
 
     results->push_back(stepVec);
-    results->push_back(updateValue);
+    results->push_back(indexUpdateValue);
+    results->push_back(stepVecUpdateValues);
 
     return results;
 }
 
 void SVE_Vectorizer::fillVectorizingBlock(BasicBlock *vectorizingBlock, BasicBlock *preVec, Type *indexVarType,
-                                          std::vector<Value *> *values) {
+                                          std::vector<Value *> *initialValues,
+                                          Value *inductionVar) {
 
     Instruction *insertionPoint = vectorizingBlock->getTerminator();
     IRBuilder<> builder(vectorizingBlock->getContext());
@@ -276,24 +280,239 @@ void SVE_Vectorizer::fillVectorizingBlock(BasicBlock *vectorizingBlock, BasicBlo
 
 
     // create phi for step vector
-    Value *&stepVecInPrevBlock = (*values[)0];
+    Value *&stepVecInPrevBlock = (*initialValues)[0];
     PHINode *stepVecPhi = PHINode::Create(stepVecInPrevBlock->getType(), 2, "", insertionPoint);
     stepVecPhi->addIncoming(stepVecInPrevBlock, preVec);
-    stepVecPhi->addIncoming(stepVecPhi, vectorizingBlock);  // TODO: should be replaced with updated value
-
-    //// header and then bodies, vectorized /////
 
 
+    //// vectorizing header and then bodies /////
 
-    // update index and step vector
-    Value *addOp = (*values)[1];
+    // predicates come from header (decision block)
+    formPredicateVector(insertionPoint, L->getHeader(), vectorizingBlock, stepVecPhi, inductionVar);
+
+
+
+    // update index 
+    Value *addOp = (*initialValues)[1];
     Value *updatedIndex = builder.CreateAdd(addOp, indexVarPHI);
-    indexVarPHI->addIncoming(indexVarPHI, vectorizingBlock);
+    indexVarPHI->addIncoming(updatedIndex, vectorizingBlock);
 
-    //updated stepvector
+    //updated step vector
+    Value *stepVecUpdateValues = (*initialValues)[2];
+    Value *updatedStepVec = builder.CreateAdd(stepVecPhi, stepVecUpdateValues);
+    stepVecPhi->addIncoming(updatedStepVec, vectorizingBlock);
+
+}
+
+// TODO: Assumption: there is 1 (for inductionVar) or 0 PHI nodes in the decision block
+// TODO: Isn't it the case that limits ALC which Ehsan mentioned(dependency between blocks)?
+
+Value *
+SVE_Vectorizer::formPredicateVector(Instruction *insertionPoint, BasicBlock *decisionBlock,
+                                    BasicBlock *vectorizingBlock, PHINode *stepVecPhi, Value *inductionVar) {
+    IRBuilder<> builder(decisionBlock->getContext());
+    builder.SetInsertPoint(insertionPoint);
+
+    // first copy instruction into vectorizing Block, then vectorize them
+    llvm::ValueToValueMapTy vMap;
+    std::vector<Instruction *> clonedInstructions;
+
+    for (auto &instr: decisionBlock->getInstList()) {
+        if (&instr == decisionBlock->getTerminator()) {
+            break;
+        }
+        if (isa<PHINode>(&instr)) {
+            continue;
+        }
+        if (isa<DbgInfoIntrinsic>(&instr)) {
+            continue;
+        }
+
+        Instruction *clonedInstr = instr.clone();
+        clonedInstr->insertBefore(vectorizingBlock->getTerminator());
+        vMap[&instr] = clonedInstr;
+        clonedInstructions.push_back(clonedInstr);
+
+        for (auto &cloned_instr: clonedInstructions) {
+            llvm::RemapInstruction(cloned_instr, vMap, RF_NoModuleLevelChanges | RF_IgnoreMissingLocals);
+        }
+
+    }
+    vectorizeInstructions_nonePredicated(&clonedInstructions, vectorizingBlock, stepVecPhi, inductionVar);
+    return nullptr;
+}
 
 
+void SVE_Vectorizer::vectorizeInstructions_nonePredicated(std::vector<Instruction *> *instructions, BasicBlock *block,
+                                                          Value *stepVector, Value *inductionVar) {
+    Instruction *insertionPoint = block->getTerminator();
+    IRBuilder<> builder(block->getContext());
+    builder.SetInsertPoint(insertionPoint);
 
+
+    std::map<Value *, Value *> vMap;
+    // Should be remove in FILO manner to prevent removing a value that is used in following lines
+    std::stack<Instruction *> toBeRemoved;
+
+    // TODO: Complete the list
+    for (auto instr: *instructions) {
+
+        if (isa<GEPOperator>(instr)) {
+            continue;
+        } else if (isa<StoreInst>(instr)) {
+            auto storeInstr = dyn_cast<StoreInst>(instr);
+            // it's the value to be stored
+            Value *firstOp = nullptr;
+            if (vMap.count(storeInstr->getOperand(0))) {
+                firstOp = vMap[storeInstr->getOperand(0)];
+            } else if (storeInstr->getOperand(0)->getName() == inductionVar->getName()) {
+                firstOp = stepVector;
+            } else {
+                // it's constant
+                auto *constValue = dyn_cast<Constant>(storeInstr->getOperand(0));
+                firstOp = createVectorOfConstants(constValue, insertionPoint, "store.values");
+                // TODO: is there any other case ?
+            }
+            auto ptr = dyn_cast<GEPOperator>(instr->getOperand(1));
+            builder.CreateStore(firstOp, ptr);
+            toBeRemoved.push(instr);
+        } else if (isa<LoadInst>(instr)) {
+
+            auto ptr = dyn_cast<GEPOperator>(instr->getOperand(0));
+            LoadInst *loadedData = builder.CreateLoad(instr->getType(), ptr);
+            vMap[instr] = loadedData;
+            toBeRemoved.push(instr);
+        } else if (isa<BinaryOperator>(instr) || isa<ICmpInst>(instr)) { // TODO: ICmp is not binary????
+            llvm::outs() << "\n";
+
+            Value *firstOp = nullptr;
+            Value *secondOp = nullptr;
+            if (vMap.count(instr->getOperand(0))) {
+                firstOp = vMap[instr->getOperand(0)];
+            } else if (instr->getOperand(0)->getName() == inductionVar->getName()) {  // TODO: is it safe?
+                firstOp = stepVector;
+            } else {
+                auto *constValue = dyn_cast<Constant>(instr->getOperand(0));
+                firstOp = createVectorOfConstants(constValue, insertionPoint, "first.operand");
+            }
+
+            if (vMap.count(instr->getOperand(1))) {
+                secondOp = vMap[instr->getOperand(1)];
+            } else if (instr->getOperand(1)->getName() == inductionVar->getName()) {
+                secondOp = stepVector;
+            } else {
+                auto *constValue = dyn_cast<Constant>(instr->getOperand(1));
+                secondOp = createVectorOfConstants(constValue, insertionPoint, "second.operand");
+            }
+
+            Value *result = nullptr;
+            switch (instr->getOpcode()) {
+                case Instruction::Add:
+                    result = builder.CreateAdd(firstOp, secondOp);
+                    break;
+                case Instruction::Mul:
+                    result = builder.CreateMul(firstOp, secondOp);
+                    break;
+                case Instruction::URem:
+                    result = builder.CreateURem(firstOp, secondOp);
+                    break;
+                case Instruction::And:
+                    result = builder.CreateAnd(firstOp, secondOp);
+                    break;
+                case Instruction::ICmp: {
+                    switch (dyn_cast<ICmpInst>(instr)->getPredicate()) {
+                        // TODO: handle other cases
+                        case CmpInst::FCMP_FALSE:
+                            break;
+                        case CmpInst::FCMP_OEQ:
+                            break;
+                        case CmpInst::FCMP_OGT:
+                            break;
+                        case CmpInst::FCMP_OGE:
+                            break;
+                        case CmpInst::FCMP_OLT:
+                            break;
+                        case CmpInst::FCMP_OLE:
+                            break;
+                        case CmpInst::FCMP_ONE:
+                            break;
+                        case CmpInst::FCMP_ORD:
+                            break;
+                        case CmpInst::FCMP_UNO:
+                            break;
+                        case CmpInst::FCMP_UEQ:
+                            break;
+                        case CmpInst::FCMP_UGT:
+                            break;
+                        case CmpInst::FCMP_UGE:
+                            break;
+                        case CmpInst::FCMP_ULT:
+                            break;
+                        case CmpInst::FCMP_ULE:
+                            break;
+                        case CmpInst::FCMP_UNE:
+                            break;
+                        case CmpInst::FCMP_TRUE:
+                            break;
+                        case CmpInst::BAD_FCMP_PREDICATE:
+                            break;
+                        case CmpInst::ICMP_EQ:
+                            result = builder.CreateICmpEQ(firstOp, secondOp);
+                            break;
+                        case CmpInst::ICMP_NE:
+                            break;
+                        case CmpInst::ICMP_UGT:
+                            break;
+                        case CmpInst::ICMP_UGE:
+                            break;
+                        case CmpInst::ICMP_ULT:
+                            break;
+                        case CmpInst::ICMP_ULE:
+                            break;
+                        case CmpInst::ICMP_SGT:
+                            break;
+                        case CmpInst::ICMP_SGE:
+                            break;
+                        case CmpInst::ICMP_SLT:
+                            break;
+                        case CmpInst::ICMP_SLE:
+                            break;
+                        case CmpInst::BAD_ICMP_PREDICATE:
+                            break;
+                    }
+                }
+
+            }
+
+            vMap[instr] = result;
+            toBeRemoved.push(instr);
+
+
+        }
+    }
+
+
+    while (!toBeRemoved.empty()) {
+        toBeRemoved.top()->eraseFromParent();
+        toBeRemoved.pop();
+    }
+
+
+}
+
+Value *SVE_Vectorizer::createVectorOfConstants(Value *value, Instruction *insertionPoint, std::string name) {
+
+    IRBuilder<> builder(insertionPoint->getContext());
+    builder.SetInsertPoint(insertionPoint);
+
+    auto *vecType = VectorType::get(value->getType(), vectorizationFactor, true);
+    auto poisonVec = PoisonValue::get(vecType);
+    u_int64_t indexZero = 0;
+    Value *splatInsert = builder.CreateInsertElement(poisonVec, value, indexZero);
+
+    ConstantAggregateZero *zeroInitializer = ConstantAggregateZero::get(vecType);
+
+    return builder.CreateShuffleVector(splatInsert, poisonVec, zeroInitializer, name);
 }
 
 SVE_Vectorizer::SVE_Vectorizer(Loop *l, int vectorizationFactor, LoopInfo *li) : L(l), vectorizationFactor(
@@ -301,3 +520,6 @@ SVE_Vectorizer::SVE_Vectorizer(Loop *l, int vectorizationFactor, LoopInfo *li) :
     module = l->getHeader()->getModule();
     intrinsicCallGenerator = new IntrinsicCallGenerator(vectorizationFactor, module);
 }
+
+
+

@@ -30,7 +30,7 @@ for.cond.cleanup:                                 ; preds = %for.cond.cleanup.lo
   ret void, !dbg !32
 
 for.body:                                         ; preds = %Preheader.for.remaining.iterations, %for.inc
-  %indvars.iv = phi i64 [ %indvars.iv.next, %for.inc ], [ %10, %Preheader.for.remaining.iterations ]
+  %indvars.iv = phi i64 [ %indvars.iv.next, %for.inc ], [ %15, %Preheader.for.remaining.iterations ]
   call void @llvm.dbg.value(metadata i64 %indvars.iv, metadata !25, metadata !DIExpression()), !dbg !28
   %rem15 = and i64 %indvars.iv, 1, !dbg !33
   %cmp1.not = icmp eq i64 %rem15, 0, !dbg !33
@@ -50,15 +50,21 @@ Pre.Vectorization:                                ; preds = %for.body.preheader
   %5 = call <vscale x 4 x i64> @llvm.experimental.stepvector.nxv4i64()
   %6 = call i64 @llvm.vscale.i64()
   %7 = shl i64 %6, 2
+  %8 = insertelement <vscale x 4 x i64> poison, i64 %7, i64 0
+  %stepVector.update.values = shufflevector <vscale x 4 x i64> %8, <vscale x 4 x i64> poison, <vscale x 4 x i32> zeroinitializer
   br label %vectorizing.block
 
 vectorizing.block:                                ; preds = %Pre.Vectorization, %vectorizing.block
-  %8 = phi i64 [ 0, %Pre.Vectorization ], [ %8, %vectorizing.block ]
-  %9 = phi <vscale x 4 x i64> [ %5, %Pre.Vectorization ], [ %9, %vectorizing.block ]
+  %9 = phi i64 [ 0, %Pre.Vectorization ], [ %13, %vectorizing.block ]
+  %10 = phi <vscale x 4 x i64> [ %5, %Pre.Vectorization ], [ %14, %vectorizing.block ]
+  %11 = and <vscale x 4 x i64> %10, shufflevector (<vscale x 4 x i64> insertelement (<vscale x 4 x i64> poison, i64 1, i64 0), <vscale x 4 x i64> poison, <vscale x 4 x i32> zeroinitializer)
+  %12 = icmp eq <vscale x 4 x i64> %11, zeroinitializer
+  %13 = add i64 %7, %9
+  %14 = add <vscale x 4 x i64> %10, %stepVector.update.values
   br label %vectorizing.block
 
 Preheader.for.remaining.iterations:               ; preds = %for.body.preheader
-  %10 = phi i64 [ 0, %for.body.preheader ]
+  %15 = phi i64 [ 0, %for.body.preheader ]
   br label %for.body
 
 for.inc:                                          ; preds = %if.then, %for.body

@@ -14,6 +14,7 @@
 #include "llvm/IR/ValueMap.h"
 #include "llvm/Transforms/Utils/Cloning.h"
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
+#include "llvm/IR/Constants.h"
 #include "../IntrinsicCallGenerator/IntrinsicCallGenerator.h"
 #include "map"
 
@@ -43,7 +44,7 @@ private:
     void refinePreheader(BasicBlock *preVecBlock, BasicBlock *preHeaderForRemaining);
 
 private:
-    BasicBlock *createPreVectorizationBlock(BasicBlock *vectorizaingBlock);
+    BasicBlock *createPreVectorizationBlock(BasicBlock *vectorizingBlock);
 
 private:
     Instruction *getTripCountInPreheader(BasicBlock *preheader);
@@ -58,7 +59,19 @@ private:
     BasicBlock *createVectorizingBlock();
 
 private:
-    void fillVectorizingBlock(BasicBlock *vectorizingBlock, BasicBlock *preVec, Type *indexVarType, std::vector<Value*>* values);
+    Value *formPredicateVector(Instruction *insertionPoint, BasicBlock *decisionBlock, BasicBlock *vectorizingBlock,
+                               PHINode *InductionVec, Value *inductionVar);
+
+private:
+    void fillVectorizingBlock(BasicBlock *vectorizingBlock, BasicBlock *preVec, Type *indexVarType,
+                              std::vector<Value *> *initialValues, Value* inductionVar);
+
+private:
+    Value* createVectorOfConstants(Value* value, Instruction* insertionPoint, std::string name);
+
+private:
+    void vectorizeInstructions_nonePredicated(std::vector<Instruction *> *instructions, BasicBlock *block,
+                                              Value *stepVector, Value *inductionVar);
 
 public:
     SVE_Vectorizer(Loop *l, int vectorizationFactor, LoopInfo *LI);
