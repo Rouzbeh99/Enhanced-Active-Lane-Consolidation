@@ -35,9 +35,6 @@ public:
     void doVectorization();
 
 private:
-    void vectorizeBlock(BasicBlock *block, Value *predicateVector);
-
-private:
     bool is_a_condition_block(BasicBlock *block);
 
 private:
@@ -60,18 +57,38 @@ private:
 
 private:
     Value *formPredicateVector(Instruction *insertionPoint, BasicBlock *decisionBlock, BasicBlock *vectorizingBlock,
-                               PHINode *InductionVec, Value *inductionVar);
+                               PHINode *stepVec, Value *inductionVar, Value *indexVar);
 
 private:
-    void fillVectorizingBlock(BasicBlock *vectorizingBlock, BasicBlock *preVec, Type *indexVarType,
-                              std::vector<Value *> *initialValues, Value* inductionVar);
+    void vectorizeTargetedBlockInstructions(BasicBlock *vectorizingBlock, BasicBlock *targetedBlock, PHINode *stepVec,
+                                            Value *inductionVar, Value *indexVar, Value *predicates);
 
 private:
-    Value* createVectorOfConstants(Value* value, Instruction* insertionPoint, std::string name);
+    void
+    fillVectorizingBlock(BasicBlock *vectorizingBlock, BasicBlock *preVec, BasicBlock *preheaderForRemainingIterations,
+                         BasicBlock *exitBlock, BasicBlock *middleBlock,
+                         Type *indexVarType,
+                         std::vector<Value *> *initialValues, Value *inductionVar);
+
+private:
+    void fillMiddleBlock(BasicBlock *middleBlock, BasicBlock *preheader, BasicBlock *exitBlock, Value *remResult);
+
+private:
+    Value *createVectorOfConstants(Value *value, Instruction *insertionPoint, std::string name);
 
 private:
     void vectorizeInstructions_nonePredicated(std::vector<Instruction *> *instructions, BasicBlock *block,
-                                              Value *stepVector, Value *inductionVar);
+                                              Value *stepVector, Value *inductionVar, Value *indexVar);
+
+private:
+    void vectorizeInstructions_Predicated(std::vector<Instruction *> *instructions, BasicBlock *block,
+                                          Value *stepVector, Value *inductionVar, Value *indexVar, Value *predicates);
+
+private:
+    void refinePreHeaderForRemaining(BasicBlock *preHeaderForRemaining, BasicBlock *middleBlock, Value* value);
+
+private:
+    BasicBlock *findTargetedBlock();
 
 public:
     SVE_Vectorizer(Loop *l, int vectorizationFactor, LoopInfo *LI);
