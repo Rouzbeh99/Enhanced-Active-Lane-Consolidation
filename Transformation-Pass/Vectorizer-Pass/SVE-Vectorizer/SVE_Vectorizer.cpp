@@ -96,9 +96,9 @@ void SVE_Vectorizer::refinePreheader(BasicBlock *preVecBlock, BasicBlock *preHea
     CallInst *vscale32 = intrinsicCallGenerator->createVscale32Intrinsic(insertionPoint);
 
     CastInst *vscale = ZExtInst::Create(Instruction::CastOps::ZExt, vscale32,
-                                         Type::getInt64Ty(preheader->getContext()),
-                                         "extended.vscale",
-                                         insertionPoint);
+                                        Type::getInt64Ty(preheader->getContext()),
+                                        "extended.vscale",
+                                        insertionPoint);
 
     // check if there are iterations
     ConstantInt *shiftOp = llvm::ConstantInt::get(Type::getInt64Ty(preheader->getContext()),
@@ -197,7 +197,12 @@ SVE_Vectorizer::fillPreVecBlock(BasicBlock *preVecBlock, BasicBlock *preheader, 
     //TODO: we assume indices are added by one, make it work for other cases as well
     //should be added by vscale * VFactor * 1  ----> vscale shl log(VFactor)
 
-    CallInst *vscale = intrinsicCallGenerator->createVscale64Intrinsic(insertionPoint);
+    CallInst *vscale32 = intrinsicCallGenerator->createVscale32Intrinsic(insertionPoint);
+    CastInst *vscale = ZExtInst::Create(Instruction::CastOps::ZExt, vscale32,
+                                        Type::getInt64Ty(preheader->getContext()),
+                                        "extended.vscale",
+                                        insertionPoint);
+
     ConstantInt *shiftOp = llvm::ConstantInt::get(Type::getInt64Ty(preheader->getContext()),
                                                   int(log2(vectorizationFactor)));
     Value *stepValue = builder.CreateShl(vscale, shiftOp, "step.value");
@@ -246,13 +251,13 @@ void SVE_Vectorizer::fillVectorizingBlock(BasicBlock *vectorizingBlock, BasicBlo
 
 
     //// vectorizing header and then bodies /////
-
+    BasicBlock *targetedBlock = findTargetedBlock();
     // predicates come from header (decision block)
-    Value *predicates = formPredicateVector(insertionPoint, L->getHeader(), vectorizingBlock, stepVecPhi, inductionVar,
+    Value *predicates = formPredicateVector(insertionPoint, L->getHeader(), vectorizingBlock, targetedBlock, stepVecPhi,
+                                            inductionVar,
                                             indexVarPHI);
 
     // add vectorized instruction of then body
-    BasicBlock *targetedBlock = findTargetedBlock();
     vectorizeTargetedBlockInstructions(vectorizingBlock, targetedBlock, stepVecPhi, inductionVar, indexVarPHI,
                                        predicates);
 
@@ -287,7 +292,8 @@ void SVE_Vectorizer::fillVectorizingBlock(BasicBlock *vectorizingBlock, BasicBlo
 
 Value *
 SVE_Vectorizer::formPredicateVector(Instruction *insertionPoint, BasicBlock *decisionBlock,
-                                    BasicBlock *vectorizingBlock, PHINode *stepVecPhi, Value *inductionVar,
+                                    BasicBlock *vectorizingBlock, BasicBlock *targetedBlock, PHINode *stepVecPhi,
+                                    Value *inductionVar,
                                     Value *indexVar) {
     IRBuilder<> builder(decisionBlock->getContext());
     builder.SetInsertPoint(insertionPoint);
@@ -318,7 +324,18 @@ SVE_Vectorizer::formPredicateVector(Instruction *insertionPoint, BasicBlock *dec
 
     }
     vectorizeInstructions_nonePredicated(&clonedInstructions, vectorizingBlock, stepVecPhi, inductionVar, indexVar);
-    return vectorizingBlock->getTerminator()->getPrevNonDebugInstruction();
+    // TODO: find a better way to find the predicate vector
+    auto *predicateVec = dyn_cast<Value>(vectorizingBlock->getTerminator()->getPrevNonDebugInstruction());
+
+    // find if we should negate the predicates
+    auto *brInstr = dyn_cast<BranchInst>(decisionBlock->getTerminator());
+    BasicBlock *branchTrueTarget = brInstr->getSuccessor(0);
+
+    if (branchTrueTarget != targetedBlock) {  // should negate
+        predicateVec = builder.CreateNot(predicateVec,"negated.vector");
+    }
+
+    return predicateVec;
 }
 
 

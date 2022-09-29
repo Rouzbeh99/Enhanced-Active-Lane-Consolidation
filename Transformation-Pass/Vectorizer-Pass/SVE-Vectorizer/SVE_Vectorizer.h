@@ -57,6 +57,7 @@ private:
 
 private:
     Value *formPredicateVector(Instruction *insertionPoint, BasicBlock *decisionBlock, BasicBlock *vectorizingBlock,
+                               BasicBlock *targetedBlock,
                                PHINode *stepVec, Value *inductionVar, Value *indexVar);
 
 private:
@@ -85,7 +86,7 @@ private:
                                           Value *stepVector, Value *inductionVar, Value *indexVar, Value *predicates);
 
 private:
-    void refinePreHeaderForRemaining(BasicBlock *preHeaderForRemaining, BasicBlock *middleBlock, Value* value);
+    void refinePreHeaderForRemaining(BasicBlock *preHeaderForRemaining, BasicBlock *middleBlock, Value *value);
 
 private:
     BasicBlock *findTargetedBlock();
