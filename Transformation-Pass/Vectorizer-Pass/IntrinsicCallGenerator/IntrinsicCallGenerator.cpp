@@ -1,6 +1,5 @@
 #include "IntrinsicCallGenerator.h"
 
-
 CallInst *IntrinsicCallGenerator::createAllTruePredicates(Instruction *insertionPoint) {
 
     LLVMContext &context = module->getContext();
@@ -310,6 +309,46 @@ IntrinsicCallGenerator::createArithmeticInstruction(Instruction *insertionPoint,
     arguments.push_back(secondOp);
 
     return builder.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
+}
+
+CallInst *IntrinsicCallGenerator::createVscale64Intrinsic(Instruction *insertionPoint) {
+    LLVMContext &context = module->getContext();
+    IRBuilder<> builder(context);
+    builder.SetInsertPoint(insertionPoint);
+
+    auto intrinsic = Intrinsic::vscale;
+
+    auto type = Type::getInt64Ty(context);
+    Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, type);
+
+    return builder.CreateCall(intrinsicFunction);
+}
+
+CallInst *IntrinsicCallGenerator::createVscale32Intrinsic(Instruction *insertionPoint) {
+    LLVMContext &context = module->getContext();
+    IRBuilder<> builder(context);
+    builder.SetInsertPoint(insertionPoint);
+
+    auto intrinsic = Intrinsic::vscale;
+
+    auto type = Type::getInt32Ty(context);
+    Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, type);
+
+    return builder.CreateCall(intrinsicFunction);
+}
+
+CallInst *IntrinsicCallGenerator::createStepVector64Intrinsic(Instruction *insertionPoint) {
+
+    LLVMContext &context = module->getContext();
+    IRBuilder<> builder(context);
+    builder.SetInsertPoint(insertionPoint);
+
+    auto intrinsic = Intrinsic::experimental_stepvector;
+
+    auto vecType = VectorType::get(Type::getInt64Ty(context), vectorizationFactor, true);
+    Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, vecType);
+
+    return builder.CreateCall(intrinsicFunction);
 }
 
 IntrinsicCallGenerator::IntrinsicCallGenerator(int vectorizationFactor, Module *module1) : vectorizationFactor(

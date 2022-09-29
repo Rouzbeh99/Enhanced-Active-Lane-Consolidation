@@ -14,6 +14,7 @@
 #include "llvm/IR/ValueMap.h"
 #include "llvm/Transforms/Utils/Cloning.h"
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
+#include "llvm/IR/Constants.h"
 #include "../IntrinsicCallGenerator/IntrinsicCallGenerator.h"
 #include "map"
 
@@ -22,45 +23,79 @@ using namespace llvm;
 class SVE_Vectorizer {
 public:
     Loop *L;
-    Value *predicateVector;
     IntrinsicCallGenerator *intrinsicCallGenerator;
-    BasicBlock *targetedBB;
-    Instruction *insertionPoint;
-    std::vector<Value *> predicates;
     int vectorizationFactor;
-
-    SVE_Vectorizer(Loop *l, int vectorizationFactor, std::vector<Value *> predicates);
-
-    Value *getPredicateVector() const;
-
-    Instruction *getInsertionPoint() const;
+    LoopInfo *LI;
 
 private:
     Module *module;
 
 
 public:
-
     void doVectorization();
 
 private:
-    BasicBlock *getTargetedBB() const;
+    bool is_a_condition_block(BasicBlock *block);
 
 private:
-
-    Value *formPredicateVector();
-
+    void refinePreheader(BasicBlock *preVecBlock, BasicBlock *preHeaderForRemaining);
 
 private:
+    BasicBlock *createPreVectorizationBlock(BasicBlock *vectorizingBlock);
 
-    BasicBlock *findTargetedBB();
+private:
+    Instruction *getTripCountInPreheader(BasicBlock *preheader);
+
+private:
+    BasicBlock *createPreheaderForRemainingIterations();
+
+private:
+    std::vector<Value *> *fillPreVecBlock(BasicBlock *preVecBlock, BasicBlock *preheader, BasicBlock *vectorizingBlock);
+
+private:
+    BasicBlock *createVectorizingBlock();
+
+private:
+    Value *formPredicateVector(Instruction *insertionPoint, BasicBlock *decisionBlock, BasicBlock *vectorizingBlock,
+                               BasicBlock *targetedBlock,
+                               PHINode *stepVec, Value *inductionVar, Value *indexVar);
+
+private:
+    void vectorizeTargetedBlockInstructions(BasicBlock *vectorizingBlock, BasicBlock *targetedBlock, PHINode *stepVec,
+                                            Value *inductionVar, Value *indexVar, Value *predicates);
+
+private:
+    void
+    fillVectorizingBlock(BasicBlock *vectorizingBlock, BasicBlock *preVec, BasicBlock *preheaderForRemainingIterations,
+                         BasicBlock *exitBlock, BasicBlock *middleBlock,
+                         Type *indexVarType,
+                         std::vector<Value *> *initialValues, Value *inductionVar);
+
+private:
+    void fillMiddleBlock(BasicBlock *middleBlock, BasicBlock *preheader, BasicBlock *exitBlock, Value *remResult);
+
+private:
+    Value *createVectorOfConstants(Value *value, Instruction *insertionPoint, std::string name);
+
+private:
+    void vectorizeInstructions_nonePredicated(std::vector<Instruction *> *instructions, BasicBlock *block,
+                                              Value *stepVector, Value *inductionVar, Value *indexVar);
+
+private:
+    void vectorizeInstructions_Predicated(std::vector<Instruction *> *instructions, BasicBlock *block,
+                                          Value *stepVector, Value *inductionVar, Value *indexVar, Value *predicates);
+
+private:
+    void refinePreHeaderForRemaining(BasicBlock *preHeaderForRemaining, BasicBlock *middleBlock, Value *value);
+
+private:
+    BasicBlock *findTargetedBlock();
+
+public:
+    SVE_Vectorizer(Loop *l, int vectorizationFactor, LoopInfo *LI);
 
 
 };
-
-BasicBlock *SVE_Vectorizer::getTargetedBB() const {
-    return targetedBB;
-}
 
 
 #endif //ALC_VECTORIZER_SVE_VECTORIZER_H

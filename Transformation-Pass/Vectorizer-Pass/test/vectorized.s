@@ -31,56 +31,77 @@ foo:                                    // @foo
 	//DEBUG_VALUE: foo:c <- $x2
 	//DEBUG_VALUE: foo:b <- $x1
 	//DEBUG_VALUE: foo:a <- $x0
-	.loc	0 0 5 is_stmt 0                 // test.c:0:5
-	mov	x8, xzr
+	rdvl	x8, #1
+	lsr	x11, x8, #4
 .Ltmp3:
-	.loc	0 10 23                         // test.c:10:23
-	mov	w9, w3
-	b	.LBB0_3
+	.loc	0 10 23 is_stmt 0               // test.c:10:23
+	mov	w8, w3
 .Ltmp4:
-.LBB0_2:                                // %for.inc
-                                        //   in Loop: Header=BB0_3 Depth=1
-	//DEBUG_VALUE: i <- $x8
-	//DEBUG_VALUE: foo:n <- $w3
-	//DEBUG_VALUE: foo:c <- $x2
-	//DEBUG_VALUE: foo:b <- $x1
-	//DEBUG_VALUE: foo:a <- $x0
-	.loc	0 10 28                         // test.c:10:28
-	add	x8, x8, #1
-.Ltmp5:
-	//DEBUG_VALUE: i <- $x8
 	.loc	0 10 5                          // test.c:10:5
-	cmp	x9, x8
-	b.eq	.LBB0_5
+	cmp	x8, w11, uxtw #2
+	b.lo	.LBB0_6
+.Ltmp5:
+// %bb.2:                               // %Pre.Vectorization
+	//DEBUG_VALUE: i <- 0
+	//DEBUG_VALUE: foo:n <- $w3
+	//DEBUG_VALUE: foo:c <- $x2
+	//DEBUG_VALUE: foo:b <- $x1
+	//DEBUG_VALUE: foo:a <- $x0
+	.loc	0 0 5                           // test.c:0:5
+	and	x14, x11, #0xffffffff
+	mov	x10, xzr
+	lsl	x11, x14, #2
+	mov	x9, xzr
+	index	z0.d, #0, #1
+	lsl	x14, x14, #4
+	udiv	x12, x8, x11
+	mov	z1.d, z0.d
+	incd	z1.d
+	mov	z2.d, x11
+	ptrue	p0.d
+	mul	x13, x12, x11
+	sub	x12, x8, x13
 .Ltmp6:
-.LBB0_3:                                // %for.body
+.LBB0_3:                                // %vectorizing.block
                                         // =>This Inner Loop Header: Depth=1
+	//DEBUG_VALUE: i <- 0
 	//DEBUG_VALUE: foo:n <- $w3
 	//DEBUG_VALUE: foo:c <- $x2
 	//DEBUG_VALUE: foo:b <- $x1
 	//DEBUG_VALUE: foo:a <- $x0
-	//DEBUG_VALUE: i <- $x8
-	.loc	0 11 13 is_stmt 1               // test.c:11:13
-	tbz	w8, #0, .LBB0_2
+	mov	z3.d, z1.d
+	mov	z4.d, z0.d
 .Ltmp7:
-// %bb.4:                               // %if.then
-                                        //   in Loop: Header=BB0_3 Depth=1
-	//DEBUG_VALUE: i <- $x8
+	.loc	0 12 27 is_stmt 1               // test.c:12:27
+	add	x15, x0, x10
+	.loc	0 12 13 is_stmt 0               // test.c:12:13
+	add	x16, x1, x10
+	and	z3.d, z3.d, #0x1
+	and	z4.d, z4.d, #0x1
+	cmpne	p1.d, p0/z, z4.d, #0
+	cmpne	p2.d, p0/z, z3.d, #0
+	uzp1	p1.s, p1.s, p2.s
+	add	x9, x9, x11
+	ld1w	{ z3.s }, p1/z, [x15]
+	ld1w	{ z4.s }, p1/z, [x16]
+	add	x15, x2, x10
+	add	x10, x10, x14
+	cmp	x9, x13
+	add	z0.d, z0.d, z2.d
+	add	z1.d, z1.d, z2.d
+	mul	z4.s, p1/m, z4.s, z3.s
+	st1w	{ z4.s }, p1, [x15]
+	b.lo	.LBB0_3
+.Ltmp8:
+// %bb.4:                               // %middle.block
+	//DEBUG_VALUE: i <- 0
 	//DEBUG_VALUE: foo:n <- $w3
 	//DEBUG_VALUE: foo:c <- $x2
 	//DEBUG_VALUE: foo:b <- $x1
 	//DEBUG_VALUE: foo:a <- $x0
-	.loc	0 12 20                         // test.c:12:20
-	lsl	x10, x8, #2
-	ldr	w11, [x0, x10]
-	.loc	0 12 27 is_stmt 0               // test.c:12:27
-	ldr	w12, [x1, x10]
-	.loc	0 12 25                         // test.c:12:25
-	mul	w11, w12, w11
-	.loc	0 12 18                         // test.c:12:18
-	str	w11, [x2, x10]
-	b	.LBB0_2
-.Ltmp8:
+	.loc	0 0 13                          // test.c:0:13
+	cbnz	x12, .LBB0_8
+.Ltmp9:
 .LBB0_5:                                // %for.cond.cleanup
 	//DEBUG_VALUE: foo:n <- $w3
 	//DEBUG_VALUE: foo:c <- $x2
@@ -90,10 +111,63 @@ foo:                                    // @foo
 	//APP
 	.inst	0x2520e040
 	//NO_APP
-.Ltmp9:
+.Ltmp10:
 	.loc	0 17 1                          // test.c:17:1
 	ret
-.Ltmp10:
+.Ltmp11:
+.LBB0_6:
+	//DEBUG_VALUE: i <- 0
+	//DEBUG_VALUE: foo:n <- $w3
+	//DEBUG_VALUE: foo:c <- $x2
+	//DEBUG_VALUE: foo:b <- $x1
+	//DEBUG_VALUE: foo:a <- $x0
+	.loc	0 0 1 is_stmt 0                 // test.c:0:1
+	mov	x9, xzr
+	b	.LBB0_8
+.Ltmp12:
+.LBB0_7:                                // %for.inc
+                                        //   in Loop: Header=BB0_8 Depth=1
+	//DEBUG_VALUE: i <- $x9
+	//DEBUG_VALUE: foo:n <- $w3
+	//DEBUG_VALUE: foo:c <- $x2
+	//DEBUG_VALUE: foo:b <- $x1
+	//DEBUG_VALUE: foo:a <- $x0
+	.loc	0 10 28 is_stmt 1               // test.c:10:28
+	add	x9, x9, #1
+.Ltmp13:
+	//DEBUG_VALUE: i <- $x9
+	.loc	0 10 5 is_stmt 0                // test.c:10:5
+	cmp	x8, x9
+	b.eq	.LBB0_5
+.Ltmp14:
+.LBB0_8:                                // %for.body
+                                        // =>This Inner Loop Header: Depth=1
+	//DEBUG_VALUE: foo:n <- $w3
+	//DEBUG_VALUE: foo:c <- $x2
+	//DEBUG_VALUE: foo:b <- $x1
+	//DEBUG_VALUE: foo:a <- $x0
+	//DEBUG_VALUE: i <- $x9
+	.loc	0 11 13 is_stmt 1               // test.c:11:13
+	tbz	w9, #0, .LBB0_7
+.Ltmp15:
+// %bb.9:                               // %if.then
+                                        //   in Loop: Header=BB0_8 Depth=1
+	//DEBUG_VALUE: i <- $x9
+	//DEBUG_VALUE: foo:n <- $w3
+	//DEBUG_VALUE: foo:c <- $x2
+	//DEBUG_VALUE: foo:b <- $x1
+	//DEBUG_VALUE: foo:a <- $x0
+	.loc	0 12 20                         // test.c:12:20
+	lsl	x10, x9, #2
+	ldr	w11, [x0, x10]
+	.loc	0 12 27 is_stmt 0               // test.c:12:27
+	ldr	w12, [x1, x10]
+	.loc	0 12 25                         // test.c:12:25
+	mul	w11, w12, w11
+	.loc	0 12 18                         // test.c:12:18
+	str	w11, [x2, x10]
+	b	.LBB0_7
+.Ltmp16:
 .Lfunc_end0:
 	.size	foo, .Lfunc_end0-foo
 	.cfi_endproc
@@ -103,7 +177,7 @@ foo:                                    // @foo
 	.type	main,@function
 main:                                   // @main
 .Lfunc_begin1:
-	.loc	0 20 0                          // test.c:20:0
+	.loc	0 20 0 is_stmt 1                // test.c:20:0
 	.cfi_startproc
 // %bb.0:                               // %entry
 	stp	x29, x30, [sp, #-32]!           // 16-byte Folded Spill
@@ -116,7 +190,7 @@ main:                                   // @main
 	.cfi_offset w30, -24
 	.cfi_offset w29, -32
 	sub	sp, sp, #24, lsl #12            // =98304
-.Ltmp11:
+.Ltmp17:
 	//DEBUG_VALUE: main:n <- 8192
 	//DEBUG_VALUE: main:__vla_expr0 <- 8192
 	//DEBUG_VALUE: main:__vla_expr1 <- 8192
@@ -127,13 +201,13 @@ main:                                   // @main
 	mov	w1, wzr
 	mov	w2, #32768
 	bl	memset
-.Ltmp12:
+.Ltmp18:
 	.loc	0 0 14 is_stmt 0                // test.c:0:14
 	mov	x8, xzr
 	add	x9, sp, #16, lsl #12            // =65536
 	add	x10, sp, #8, lsl #12            // =32768
 	mov	w11, #2
-.Ltmp13:
+.Ltmp19:
 .LBB1_1:                                // %for.body
                                         // =>This Inner Loop Header: Depth=1
 	//DEBUG_VALUE: main:__vla_expr2 <- 8192
@@ -144,20 +218,20 @@ main:                                   // @main
 	.loc	0 29 14 is_stmt 1               // test.c:29:14
 	lsl	x12, x8, #2
 	str	w8, [x9, x12]
-.Ltmp14:
+.Ltmp20:
 	.loc	0 28 28                         // test.c:28:28
 	add	x8, x8, #1
-.Ltmp15:
+.Ltmp21:
 	//DEBUG_VALUE: i <- $x8
 	.loc	0 28 5 is_stmt 0                // test.c:28:5
 	cmp	x8, #2, lsl #12                 // =8192
-.Ltmp16:
+.Ltmp22:
 	.loc	0 30 14 is_stmt 1               // test.c:30:14
 	str	w11, [x10, x12]
-.Ltmp17:
+.Ltmp23:
 	.loc	0 28 5                          // test.c:28:5
 	b.ne	.LBB1_1
-.Ltmp18:
+.Ltmp24:
 // %bb.2:                               // %for.cond.cleanup
 	//DEBUG_VALUE: main:__vla_expr2 <- 8192
 	//DEBUG_VALUE: main:__vla_expr1 <- 8192
@@ -170,13 +244,13 @@ main:                                   // @main
 	mov	w3, #8192
 	mov	x19, sp
 	bl	foo
-.Ltmp19:
+.Ltmp25:
 	//DEBUG_VALUE: i <- 0
 	//DEBUG_VALUE: main:sum <- 0
 	.loc	0 0 5 is_stmt 0                 // test.c:0:5
 	mov	x8, xzr
 	mov	w1, wzr
-.Ltmp20:
+.Ltmp26:
 .LBB1_3:                                // %for.body11
                                         // =>This Inner Loop Header: Depth=1
 	//DEBUG_VALUE: main:__vla_expr2 <- 8192
@@ -187,21 +261,21 @@ main:                                   // @main
 	//DEBUG_VALUE: i <- [DW_OP_consts 4, DW_OP_div, DW_OP_stack_value] $x8
 	.loc	0 40 16 is_stmt 1               // test.c:40:16
 	ldr	w9, [x19, x8]
-.Ltmp21:
+.Ltmp27:
 	.loc	0 39 23                         // test.c:39:23
 	add	x8, x8, #4
-.Ltmp22:
+.Ltmp28:
 	.loc	0 39 5 is_stmt 0                // test.c:39:5
 	cmp	x8, #8, lsl #12                 // =32768
-.Ltmp23:
+.Ltmp29:
 	.loc	0 40 13 is_stmt 1               // test.c:40:13
 	add	w1, w9, w1
-.Ltmp24:
+.Ltmp30:
 	//DEBUG_VALUE: i <- [DW_OP_consts 4, DW_OP_div, DW_OP_consts 1, DW_OP_plus, DW_OP_stack_value] $x8
 	//DEBUG_VALUE: main:sum <- $w1
 	.loc	0 39 5                          // test.c:39:5
 	b.ne	.LBB1_3
-.Ltmp25:
+.Ltmp31:
 // %bb.4:                               // %for.cond.cleanup10
 	//DEBUG_VALUE: main:sum <- $w1
 	//DEBUG_VALUE: main:__vla_expr2 <- 8192
@@ -212,7 +286,7 @@ main:                                   // @main
 	adrp	x0, .L.str
 	add	x0, x0, :lo12:.L.str
 	bl	printf
-.Ltmp26:
+.Ltmp32:
 	.loc	0 47 1                          // test.c:47:1
 	mov	w0, wzr
 	add	sp, sp, #24, lsl #12            // =98304
@@ -225,7 +299,7 @@ main:                                   // @main
 	.cfi_restore w30
 	.cfi_restore w29
 	ret
-.Ltmp27:
+.Ltmp33:
 .Lfunc_end1:
 	.size	main, .Lfunc_end1-main
 	.cfi_endproc
@@ -251,35 +325,35 @@ main:                                   // @main
 .Ldebug_loc0:
 	.byte	4                               // DW_LLE_offset_pair
 	.uleb128 .Ltmp1-.Lfunc_begin0           //   starting offset
-	.uleb128 .Ltmp4-.Lfunc_begin0           //   ending offset
+	.uleb128 .Ltmp8-.Lfunc_begin0           //   ending offset
 	.byte	3                               // Loc expr size
 	.byte	17                              // DW_OP_consts
 	.byte	0                               // 0
 	.byte	159                             // DW_OP_stack_value
 	.byte	4                               // DW_LLE_offset_pair
-	.uleb128 .Ltmp4-.Lfunc_begin0           //   starting offset
-	.uleb128 .Ltmp8-.Lfunc_begin0           //   ending offset
+	.uleb128 .Ltmp12-.Lfunc_begin0          //   starting offset
+	.uleb128 .Lfunc_end0-.Lfunc_begin0      //   ending offset
 	.byte	1                               // Loc expr size
-	.byte	88                              // DW_OP_reg8
+	.byte	89                              // DW_OP_reg9
 	.byte	0                               // DW_LLE_end_of_list
 .Ldebug_loc1:
 	.byte	4                               // DW_LLE_offset_pair
-	.uleb128 .Ltmp11-.Lfunc_begin0          //   starting offset
-	.uleb128 .Ltmp13-.Lfunc_begin0          //   ending offset
+	.uleb128 .Ltmp17-.Lfunc_begin0          //   starting offset
+	.uleb128 .Ltmp19-.Lfunc_begin0          //   ending offset
 	.byte	3                               // Loc expr size
 	.byte	17                              // DW_OP_consts
 	.byte	0                               // 0
 	.byte	159                             // DW_OP_stack_value
 	.byte	4                               // DW_LLE_offset_pair
-	.uleb128 .Ltmp13-.Lfunc_begin0          //   starting offset
-	.uleb128 .Ltmp18-.Lfunc_begin0          //   ending offset
+	.uleb128 .Ltmp19-.Lfunc_begin0          //   starting offset
+	.uleb128 .Ltmp24-.Lfunc_begin0          //   ending offset
 	.byte	1                               // Loc expr size
 	.byte	88                              // DW_OP_reg8
 	.byte	0                               // DW_LLE_end_of_list
 .Ldebug_loc2:
 	.byte	4                               // DW_LLE_offset_pair
-	.uleb128 .Ltmp20-.Lfunc_begin0          //   starting offset
-	.uleb128 .Ltmp22-.Lfunc_begin0          //   ending offset
+	.uleb128 .Ltmp26-.Lfunc_begin0          //   starting offset
+	.uleb128 .Ltmp28-.Lfunc_begin0          //   ending offset
 	.byte	6                               // Loc expr size
 	.byte	120                             // DW_OP_breg8
 	.byte	0                               // 0
@@ -288,8 +362,8 @@ main:                                   // @main
 	.byte	27                              // DW_OP_div
 	.byte	159                             // DW_OP_stack_value
 	.byte	4                               // DW_LLE_offset_pair
-	.uleb128 .Ltmp24-.Lfunc_begin0          //   starting offset
-	.uleb128 .Ltmp25-.Lfunc_begin0          //   ending offset
+	.uleb128 .Ltmp30-.Lfunc_begin0          //   starting offset
+	.uleb128 .Ltmp31-.Lfunc_begin0          //   ending offset
 	.byte	9                               // Loc expr size
 	.byte	120                             // DW_OP_breg8
 	.byte	0                               // 0
@@ -303,15 +377,15 @@ main:                                   // @main
 	.byte	0                               // DW_LLE_end_of_list
 .Ldebug_loc3:
 	.byte	4                               // DW_LLE_offset_pair
-	.uleb128 .Ltmp19-.Lfunc_begin0          //   starting offset
-	.uleb128 .Ltmp20-.Lfunc_begin0          //   ending offset
+	.uleb128 .Ltmp25-.Lfunc_begin0          //   starting offset
+	.uleb128 .Ltmp26-.Lfunc_begin0          //   ending offset
 	.byte	3                               // Loc expr size
 	.byte	17                              // DW_OP_consts
 	.byte	0                               // 0
 	.byte	159                             // DW_OP_stack_value
 	.byte	4                               // DW_LLE_offset_pair
-	.uleb128 .Ltmp20-.Lfunc_begin0          //   starting offset
-	.uleb128 .Ltmp26-.Lfunc_begin0          //   ending offset
+	.uleb128 .Ltmp26-.Lfunc_begin0          //   starting offset
+	.uleb128 .Ltmp32-.Lfunc_begin0          //   ending offset
 	.byte	1                               // Loc expr size
 	.byte	81                              // DW_OP_reg1
 	.byte	0                               // DW_LLE_end_of_list
@@ -674,7 +748,7 @@ main:                                   // @main
 	.word	242                             // DW_AT_type
 	.byte	10                              // Abbrev [10] 0xcb:0x10 DW_TAG_lexical_block
 	.byte	2                               // DW_AT_low_pc
-	.word	.Ltmp18-.Ltmp11                 // DW_AT_high_pc
+	.word	.Ltmp24-.Ltmp17                 // DW_AT_high_pc
 	.byte	5                               // Abbrev [5] 0xd1:0x9 DW_TAG_variable
 	.byte	1                               // DW_AT_location
 	.byte	10                              // DW_AT_name
@@ -684,7 +758,7 @@ main:                                   // @main
 	.byte	0                               // End Of Children Mark
 	.byte	10                              // Abbrev [10] 0xdb:0x10 DW_TAG_lexical_block
 	.byte	3                               // DW_AT_low_pc
-	.word	.Ltmp25-.Ltmp20                 // DW_AT_high_pc
+	.word	.Ltmp31-.Ltmp26                 // DW_AT_high_pc
 	.byte	5                               // Abbrev [5] 0xe1:0x9 DW_TAG_variable
 	.byte	2                               // DW_AT_location
 	.byte	10                              // DW_AT_name
@@ -748,6 +822,9 @@ main:                                   // @main
 	.byte	4                               // DW_RLE_offset_pair
 	.uleb128 .Ltmp1-.Lfunc_begin0           //   starting offset
 	.uleb128 .Ltmp8-.Lfunc_begin0           //   ending offset
+	.byte	4                               // DW_RLE_offset_pair
+	.uleb128 .Ltmp12-.Lfunc_begin0          //   starting offset
+	.uleb128 .Ltmp16-.Lfunc_begin0          //   ending offset
 	.byte	0                               // DW_RLE_end_of_list
 .Ldebug_list_header_end1:
 	.section	.debug_str_offsets,"",@progbits
@@ -817,9 +894,9 @@ main:                                   // @main
 .Laddr_table_base0:
 	.xword	.Lfunc_begin0
 	.xword	.Lfunc_begin1
-	.xword	.Ltmp11
-	.xword	.Ltmp20
-	.xword	.Ltmp19
+	.xword	.Ltmp17
+	.xword	.Ltmp26
+	.xword	.Ltmp25
 .Ldebug_addr_end0:
 	.ident	"clang version 15.0.0 (https://www.github.com/llvm/llvm-project.git 61baf2ffa7071944c00a0642fdb9ff77d9cff0da)"
 	.section	".note.GNU-stack","",@progbits
