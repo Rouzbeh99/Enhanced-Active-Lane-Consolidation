@@ -324,6 +324,19 @@ CallInst *IntrinsicCallGenerator::createVscale64Intrinsic(Instruction *insertion
     return builder.CreateCall(intrinsicFunction);
 }
 
+CallInst *IntrinsicCallGenerator::createVscale32Intrinsic(Instruction *insertionPoint) {
+    LLVMContext &context = module->getContext();
+    IRBuilder<> builder(context);
+    builder.SetInsertPoint(insertionPoint);
+
+    auto intrinsic = Intrinsic::vscale;
+
+    auto type = Type::getInt32Ty(context);
+    Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, type);
+
+    return builder.CreateCall(intrinsicFunction);
+}
+
 CallInst *IntrinsicCallGenerator::createStepVector64Intrinsic(Instruction *insertionPoint) {
 
     LLVMContext &context = module->getContext();

@@ -74,7 +74,10 @@ public:
 
     CallInst* createVscale64Intrinsic(Instruction *insertionPoint);
 
+    CallInst* createVscale32Intrinsic(Instruction *insertionPoint);
+
     CallInst* createStepVector64Intrinsic(Instruction *insertionPoint);
+
 
 };
 

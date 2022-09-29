@@ -93,17 +93,18 @@ void SVE_Vectorizer::refinePreheader(BasicBlock *preVecBlock, BasicBlock *preHea
     auto tripCount = dyn_cast<Value>(getTripCountInPreheader(preheader));
 
     //get current vscale
-    CallInst *vscale = intrinsicCallGenerator->createVscale64Intrinsic(insertionPoint);
+    CallInst *vscale32 = intrinsicCallGenerator->createVscale32Intrinsic(insertionPoint);
+
+    CastInst *vscale = ZExtInst::Create(Instruction::CastOps::ZExt, vscale32,
+                                         Type::getInt64Ty(preheader->getContext()),
+                                         "extended.vscale",
+                                         insertionPoint);
 
     // check if there are iterations
     ConstantInt *shiftOp = llvm::ConstantInt::get(Type::getInt64Ty(preheader->getContext()),
                                                   int(log2(vectorizationFactor)));
     Value *shiftValue = builder.CreateShl(vscale, shiftOp);
     Value *condition = builder.CreateICmpUGE(tripCount, shiftValue); // if true, there are enough iterations
-
-    // if true must jump to the previous destination of preheader
-    auto *remainingIterationsBlock = dyn_cast<BasicBlock>(dyn_cast<BranchInst>(preheader->getTerminator())->getOperand(
-            0));   // TODO: what if it's conditional??
 
     builder.CreateCondBr(condition, preVecBlock, preHeaderForRemaining);
 

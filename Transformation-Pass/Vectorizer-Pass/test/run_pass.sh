@@ -44,7 +44,7 @@ make
 
 cd ../test
 
-$LLVM_BUILD_DIR/bin/clang -g -O3 -target aarch64-unknown-linux-gnu -DSVE_INTRINSICS -fno-vectorize -fno-slp-vectorize -fno-unroll-loops -S -emit-llvm $1 -o compiled_with_O3.ll
+$LLVM_BUILD_DIR/bin/clang -g -O3 -target aarch64-unknown-linux-gnu -DSVE_INTRINSICS -fno-inline -fno-vectorize -fno-slp-vectorize -fno-unroll-loops -S -emit-llvm $1 -o compiled_with_O3.ll
 $LLVM_BUILD_DIR/bin/opt -S -load-pass-plugin ../build/ALC_Vectorizer.so -passes="alc-vectorizer" compiled_with_O3.ll -o vectorized.ll
 
 opt --disable-output -dot-cfg --cfg-dot-filename-prefix=cfg vectorized.ll
