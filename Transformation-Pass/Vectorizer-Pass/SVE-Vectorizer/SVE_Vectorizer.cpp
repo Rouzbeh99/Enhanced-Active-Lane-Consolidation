@@ -94,7 +94,7 @@ void SVE_Vectorizer::refinePreheader(BasicBlock *preVecBlock, BasicBlock *preHea
 
     //get current vscale
     Value *vscale;
-    auto *vscale32 = intrinsicCallGenerator->createVscale32Intrinsic(IRB, vectorizationFactor);
+    auto *vscale32 = intrinsicCallGenerator->createVscale32Intrinsic(IRB);
 
     if (tripCount->getType() == Type::getInt64Ty(preheader->getContext())) {
         vscale = ZExtInst::Create(Instruction::CastOps::ZExt, vscale32,
@@ -199,17 +199,17 @@ SVE_Vectorizer::fillPreVecBlock(BasicBlock *preVecBlock, BasicBlock *preheader, 
     //should be added by vscale * VFactor * 1  ----> vscale shl log(VFactor)
 
     Value *vscale;
-    auto *vscale32 = intrinsicCallGenerator->createVscale32Intrinsic(builder, vectorizationFactor);
+    auto *vscale32 = intrinsicCallGenerator->createVscale32Intrinsic(builder);
 
     if (tripCount->getType() == Type::getInt64Ty(preheader->getContext())) {
         vscale = ZExtInst::Create(Instruction::CastOps::ZExt, vscale32,
                                   Type::getInt64Ty(preheader->getContext()),
                                   "extended.vscale", insertionPoint);
 
-        stepVec = intrinsicCallGenerator->createStepVector64Intrinsic(builder, vectorizationFactor);
+        stepVec = intrinsicCallGenerator->createStepVector64Intrinsic(builder);
     } else {
         vscale = reinterpret_cast<CastInst *>(vscale32);
-        stepVec = intrinsicCallGenerator->createStepVector32Intrinsic(insertionPoint);
+        stepVec = intrinsicCallGenerator->createStepVector32Intrinsic(builder);
     }
 
     // check if there are iterations

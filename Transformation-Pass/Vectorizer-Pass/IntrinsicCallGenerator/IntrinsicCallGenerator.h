@@ -62,13 +62,13 @@ public:
     Value *createArithmeticInstruction(IRBuilder<> &IRB, unsigned int intrinsic, Value *firstOp,
                                           Value *secondOp, Value *predicatedVector);
 
-    Value* createVscale64Intrinsic(IRBuilder<> &IRB, uint64_t Scaling);
+    Value* createVscale64Intrinsic(IRBuilder<> &IRB);
 
-    Value *createVscale32Intrinsic(IRBuilder<> &IRB, uint32_t Scaling);
+    Value* createVscale32Intrinsic(IRBuilder<> &IRB);
 
-    Value* createStepVector64Intrinsic(IRBuilder<> &IRB, uint64_t Scaling);
+    Value* createStepVector64Intrinsic(IRBuilder<> &IRB);
 
-    CallInst* createStepVector32Intrinsic(Instruction *insertionPoint);
+    Value* createStepVector32Intrinsic(IRBuilder<> &IRB);
 
 };
 
