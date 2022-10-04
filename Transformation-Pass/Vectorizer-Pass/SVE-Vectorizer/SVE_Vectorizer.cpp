@@ -99,9 +99,9 @@ void SVE_Vectorizer::refinePreheader(BasicBlock *preVecBlock, BasicBlock *preHea
     Value *stepVal = nullptr;
 
     if (tripCount->getType() == Type::getInt64Ty(preheader->getContext())) {
-      stepVal = intrinsicCallGenerator->createVscale64Intrinsic(IRB, vectorizationFactor);
+      stepVal = intrinsicCallGenerator->createVscale64Intrinsic(IRB);
     } else {
-      stepVal = intrinsicCallGenerator->createVscale32Intrinsic(IRB, vectorizationFactor);
+      stepVal = intrinsicCallGenerator->createVscale32Intrinsic(IRB);
     }
 
     // check if there are iterations
@@ -208,11 +208,11 @@ SVE_Vectorizer::fillPreVecBlock(BasicBlock *preVecBlock, BasicBlock *preheader, 
     Value *stepVal = nullptr;
 
     if (tripCount->getType() == Type::getInt64Ty(preheader->getContext())) {
-        stepVal = intrinsicCallGenerator->createVscale64Intrinsic(builder, vectorizationFactor);
-        stepVec = intrinsicCallGenerator->createStepVector64Intrinsic(builder, vectorizationFactor);
+        stepVal = intrinsicCallGenerator->createVscale64Intrinsic(builder);
+        stepVec = intrinsicCallGenerator->createStepVector64Intrinsic(builder);
     } else {
-        stepVal = intrinsicCallGenerator->createVscale32Intrinsic(builder, vectorizationFactor);
-        stepVec = intrinsicCallGenerator->createStepVector32Intrinsic(builder, vectorizationFactor);
+        stepVal = intrinsicCallGenerator->createVscale32Intrinsic(builder);
+        stepVec = intrinsicCallGenerator->createStepVector32Intrinsic(builder);
     }
 
     // vectorizing block termination condition: index > n - (n % stepValue)
