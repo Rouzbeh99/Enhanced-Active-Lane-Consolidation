@@ -72,14 +72,13 @@ public:
     CallInst *createArithmeticInstruction(Instruction *insertionPoint, unsigned int intrinsic, Value *firstOp,
                                           Value *secondOp, Value *predicatedVector);
 
-    CallInst *createVscale64Intrinsic(Instruction *insertionPoint);
+    Value *createVscale64Intrinsic(IRBuilder<> &IRB, uint64_t Scaling);
 
-    CallInst *createVscale32Intrinsic(Instruction *insertionPoint);
+    Value *createVscale32Intrinsic(IRBuilder<> &IRB, uint32_t Scaling);
 
-    CallInst *createStepVector64Intrinsic(Instruction *insertionPoint);
+    Value* createStepVector64Intrinsic(IRBuilder<> &IRB, uint64_t Scaling);
 
-    CallInst *createStepVector32Intrinsic(Instruction *insertionPoint);
-
+    Value* createStepVector32Intrinsic(IRBuilder<> &IRB, uint32_t Scaling);
 
 };
 

@@ -92,29 +92,22 @@ void SVE_Vectorizer::refinePreheader(BasicBlock *preVecBlock, BasicBlock *preHea
 
     BasicBlock *preheader = L->getLoopPreheader();
     Instruction *insertionPoint = preheader->getTerminator();
-    IRBuilder<> builder(preheader->getContext());
-    builder.SetInsertPoint(insertionPoint);
+    IRBuilder<> IRB(insertionPoint);
 
 
     //get current vscale
-    CastInst *vscale;
-    CallInst *vscale32 = intrinsicCallGenerator->createVscale32Intrinsic(insertionPoint);
+    Value *stepVal = nullptr;
 
     if (tripCount->getType() == Type::getInt64Ty(preheader->getContext())) {
-        vscale = ZExtInst::Create(Instruction::CastOps::ZExt, vscale32,
-                                  Type::getInt64Ty(preheader->getContext()),
-                                  "extended.vscale", insertionPoint);
+      stepVal = intrinsicCallGenerator->createVscale64Intrinsic(IRB, vectorizationFactor);
     } else {
-        vscale = reinterpret_cast<CastInst *>(vscale32);
+      stepVal = intrinsicCallGenerator->createVscale32Intrinsic(IRB, vectorizationFactor);
     }
 
     // check if there are iterations
-    Constant *shiftOp = llvm::ConstantInt::get(tripCount->getType(),
-                                               int(log2(vectorizationFactor)));
-    Value *shiftValue = builder.CreateShl(vscale, shiftOp);
-    Value *condition = builder.CreateICmpUGE(tripCount, shiftValue); // if true, there are enough iterations
+    Value *condition = IRB.CreateICmpUGE(tripCount, stepVal); // if true, there are enough iterations
 
-    builder.CreateCondBr(condition, preVecBlock, preHeaderForRemaining);
+    IRB.CreateCondBr(condition, preVecBlock, preHeaderForRemaining);
 
     // remove previous terminator
     preheader->getTerminator()->eraseFromParent();
@@ -204,49 +197,35 @@ SVE_Vectorizer::fillPreVecBlock(BasicBlock *preVecBlock, BasicBlock *preheader, 
     auto *results = new std::vector<Value *>;
 
     Instruction *insertionPoint = preVecBlock->getTerminator();
-    IRBuilder<> builder(preheader->getContext());
-    builder.SetInsertPoint(insertionPoint);
-
-
-    // create step vector
-    CallInst *stepVec = nullptr;
+    IRBuilder<> builder(insertionPoint);
 
     // create the value by which the index should be increased
     //TODO: we assume indices are added by one, make it work for other cases as well
     //should be added by vscale * VFactor * 1  ----> vscale shl log(VFactor)
 
-    CastInst *vscale;
-    CallInst *vscale32 = intrinsicCallGenerator->createVscale32Intrinsic(insertionPoint);
+    // create step vector
+    Value *stepVec = nullptr;
+    Value *stepVal = nullptr;
 
     if (tripCount->getType() == Type::getInt64Ty(preheader->getContext())) {
-        vscale = ZExtInst::Create(Instruction::CastOps::ZExt, vscale32,
-                                  Type::getInt64Ty(preheader->getContext()),
-                                  "extended.vscale", insertionPoint);
-
-        stepVec = intrinsicCallGenerator->createStepVector64Intrinsic(insertionPoint);
+        stepVal = intrinsicCallGenerator->createVscale64Intrinsic(builder, vectorizationFactor);
+        stepVec = intrinsicCallGenerator->createStepVector64Intrinsic(builder, vectorizationFactor);
     } else {
-        vscale = reinterpret_cast<CastInst *>(vscale32);
-        stepVec = intrinsicCallGenerator->createStepVector32Intrinsic(insertionPoint);
+        stepVal = intrinsicCallGenerator->createVscale32Intrinsic(builder, vectorizationFactor);
+        stepVec = intrinsicCallGenerator->createStepVector32Intrinsic(builder, vectorizationFactor);
     }
-
-    // check if there are iterations
-    Constant *shiftOp = llvm::ConstantInt::get(tripCount->getType(),
-                                               int(log2(vectorizationFactor)));
-
-    Value *stepValue = builder.CreateShl(vscale, shiftOp, "step.value");
 
     // vectorizing block termination condition: index > n - (n % stepValue)
     // forming n - (n % stepValue)
 
-    Value *remResult = builder.CreateURem(tripCount, stepValue);
+    Value *remResult = builder.CreateURem(tripCount, stepVal);
     Value *totalVecIterations = builder.CreateSub(tripCount, remResult, "total.iterations.to.be.vectorized");
 
-
     // create vector by which step vector should be updated
-    Value *stepVecUpdateValues = createVectorOfConstants(stepValue, insertionPoint, "stepVector.update.values");
+    Value *stepVecUpdateValues = createVectorOfConstants(stepVal, insertionPoint, "stepVector.update.values");
 
     results->push_back(stepVec);
-    results->push_back(stepValue);
+    results->push_back(stepVal);
     results->push_back(stepVecUpdateValues);
     results->push_back(totalVecIterations);
     results->push_back(remResult);

@@ -311,58 +311,20 @@ IntrinsicCallGenerator::createArithmeticInstruction(Instruction *insertionPoint,
     return builder.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
 }
 
-CallInst *IntrinsicCallGenerator::createVscale64Intrinsic(Instruction *insertionPoint) {
-    LLVMContext &context = module->getContext();
-    IRBuilder<> builder(context);
-    builder.SetInsertPoint(insertionPoint);
-
-    auto intrinsic = Intrinsic::vscale;
-
-    auto type = Type::getInt64Ty(context);
-    Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, type);
-
-    return builder.CreateCall(intrinsicFunction);
+Value *IntrinsicCallGenerator::createVscale64Intrinsic(IRBuilder<> &IRB, uint64_t Scaling) {
+  return IRB.CreateVScale(IRB.getInt64(Scaling));
 }
 
-CallInst *IntrinsicCallGenerator::createVscale32Intrinsic(Instruction *insertionPoint) {
-    LLVMContext &context = module->getContext();
-    IRBuilder<> builder(context);
-    builder.SetInsertPoint(insertionPoint);
-
-    auto intrinsic = Intrinsic::vscale;
-
-    auto type = Type::getInt32Ty(context);
-    Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, type);
-
-    return builder.CreateCall(intrinsicFunction);
+Value *IntrinsicCallGenerator::createVscale32Intrinsic(IRBuilder<> &IRB, uint32_t Scaling) {
+    return IRB.CreateVScale(IRB.getInt32(Scaling));
 }
 
-CallInst *IntrinsicCallGenerator::createStepVector64Intrinsic(Instruction *insertionPoint) {
-
-    LLVMContext &context = module->getContext();
-    IRBuilder<> builder(context);
-    builder.SetInsertPoint(insertionPoint);
-
-    auto intrinsic = Intrinsic::experimental_stepvector;
-
-    auto vecType = VectorType::get(Type::getInt64Ty(context), vectorizationFactor, true);
-    Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, vecType);
-
-    return builder.CreateCall(intrinsicFunction);
+Value *IntrinsicCallGenerator::createStepVector64Intrinsic(IRBuilder<> &IRB, uint64_t Scaling) {
+    return IRB.CreateStepVector(VectorType::get(IRB.getInt64Ty(), Scaling, /*Scalable*/ true));
 }
 
-CallInst *IntrinsicCallGenerator::createStepVector32Intrinsic(Instruction *insertionPoint) {
-
-    LLVMContext &context = module->getContext();
-    IRBuilder<> builder(context);
-    builder.SetInsertPoint(insertionPoint);
-
-    auto intrinsic = Intrinsic::experimental_stepvector;
-
-    auto vecType = VectorType::get(Type::getInt32Ty(context), vectorizationFactor, true);
-    Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, vecType);
-
-    return builder.CreateCall(intrinsicFunction);
+Value *IntrinsicCallGenerator::createStepVector32Intrinsic(IRBuilder<> &IRB, uint32_t Scaling) {
+    return IRB.CreateStepVector(VectorType::get(IRB.getInt32Ty(), Scaling, /*Scalable*/ true));
 }
 
 IntrinsicCallGenerator::IntrinsicCallGenerator(int vectorizationFactor, Module *module1) : vectorizationFactor(
