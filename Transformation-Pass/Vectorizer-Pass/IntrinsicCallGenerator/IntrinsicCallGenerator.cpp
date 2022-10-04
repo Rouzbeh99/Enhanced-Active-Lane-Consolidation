@@ -136,18 +136,9 @@ IntrinsicCallGenerator::createGatherLoadInstruction(IRBuilder<> &IRB, Value *ptr
 Value *
 IntrinsicCallGenerator::createLoadInstruction(IRBuilder<> &IRB, Value *ptr,
                                               Value *predicatedVector) {
-  auto intrinsic = Intrinsic::aarch64_sve_ld1;
-
   VectorType *type = VectorType::get(IRB.getInt32Ty(), vectorizationFactor, /*Scalable*/ true);
-  Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, type);
-
-
-  std::vector<Value *> arguments;
-  arguments.push_back(predicatedVector);
-  arguments.push_back(ptr);
-
-
-  return IRB.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
+  // FIXME: Use proper value for Alignment
+  return IRB.CreateMaskedLoad(type, ptr, Align(), predicatedVector);
 }
 
 
@@ -171,16 +162,8 @@ void IntrinsicCallGenerator::createScatterStoreInstruction(IRBuilder<> &IRB, Val
 void IntrinsicCallGenerator::createStoreInstruction(IRBuilder<> &IRB, Value *elementsVector,
                                                     Value *ptr,
                                                     Value *predicatedVector) {
-    auto intrinsic = Intrinsic::aarch64_sve_st1;
-
-    Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, elementsVector->getType());
-
-    std::vector<Value *> arguments;
-    arguments.push_back(elementsVector);
-    arguments.push_back(predicatedVector);
-    arguments.push_back(ptr);
-
-    IRB.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
+    // FIXME: Use proper value for Alignment
+    IRB.CreateMaskedStore(elementsVector, ptr, Align(), predicatedVector);
 }
 
 // TODO: handle double types by changing return type and operands
