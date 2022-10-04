@@ -18,4 +18,4 @@ set(srcs
         )
 
 # Create the MyLoopPass library.
-add_llvm_component_library(libLLVMUnroller MODULE ${srcs})
+add_llvm_component_library(LLVMUnroller SHARED ${srcs})

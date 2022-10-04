@@ -18,4 +18,4 @@ set(srcs
         )
 
 # Create the MyLoopPass library.
-add_llvm_component_library(libLLVMIntrinsicCallGenerator MODULE ${srcs})
+add_llvm_component_library(LLVMIntrinsicCallGenerator SHARED ${srcs})
