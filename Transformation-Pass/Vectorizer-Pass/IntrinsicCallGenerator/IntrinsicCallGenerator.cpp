@@ -1,118 +1,50 @@
 #include "IntrinsicCallGenerator.h"
+#include "llvm/IR/IntrinsicsAArch64.h"
 
 Value *IntrinsicCallGenerator::createAllTruePredicates(IRBuilder<> &IRB) {
-    auto intrinsic = Intrinsic::aarch64_sve_ptrue;
-    VectorType *type = VectorType::get(IRB.getInt1Ty(), vectorizationFactor, /*Scalable*/ true);
-    Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, type);
-    llvm::Constant *constantInt = llvm::ConstantInt::get(IRB.getInt32Ty(), vectorizationFactor, /*Scalable*/ true);
-    return IRB.CreateCall(intrinsicFunction, constantInt);
+    auto *VecTy = VectorType::get(IRB.getInt1Ty(), vectorizationFactor, /*Scalable*/ true);
+    auto *constantInt = llvm::ConstantInt::get(IRB.getInt32Ty(), vectorizationFactor, /*Scalable*/ true);
+    return IRB.CreateIntrinsic(Intrinsic::aarch64_sve_ptrue, {VecTy}, {constantInt});
 }
 
 
 Value *
 IntrinsicCallGenerator::createCompactInstruction(IRBuilder<> &IRB, Value *toBeCompacted,
                                                  Value *predicatedVector) {
-    auto intrinsic = Intrinsic::aarch64_sve_compact;
-
-    VectorType *type = VectorType::get(IRB.getInt32Ty(), vectorizationFactor, /*Scalable*/ true);
-    Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, type);
-
-    std::vector<Value *> arguments;
-    arguments.push_back(predicatedVector);
-    arguments.push_back(toBeCompacted);
-
-    return IRB.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
+    auto *VecTy = VectorType::get(IRB.getInt32Ty(), vectorizationFactor, /*Scalable*/ true);
+    return IRB.CreateIntrinsic(Intrinsic::aarch64_sve_compact, {VecTy} , {predicatedVector, toBeCompacted});
 }
 
 Value *
 IntrinsicCallGenerator::createCntpInstruction(IRBuilder<> &IRB, Value *elements, Value *predicatedVector) {
-
-    auto intrinsic = Intrinsic::aarch64_sve_cntp;
-
-    VectorType *type = VectorType::get(IRB.getInt1Ty(), vectorizationFactor, true);
-    Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, type);
-
-    std::vector<Value *> arguments;
-
-    arguments.push_back(predicatedVector);
-    arguments.push_back(elements);
-
-    return IRB.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
+    auto *VecTy = VectorType::get(IRB.getInt1Ty(), vectorizationFactor, true);
+    return IRB.CreateIntrinsic(Intrinsic::aarch64_sve_cntp, {VecTy} , {predicatedVector, elements});
 }
 
 
 Value *
-IntrinsicCallGenerator::createWhileltInstruction(IRBuilder<> &IRB, Value *firstOp, Value *secondOp) {
-
-    auto intrinsic = Intrinsic::aarch64_sve_whilelt;
-
-    VectorType *type = VectorType::get(IRB.getInt1Ty(), vectorizationFactor, /*Scalable*/ true);
-    std::vector<Type *> types;
-
-    types.push_back(type);
-    types.push_back(IRB.getInt64Ty());
-
-    Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, ArrayRef<Type *>(types));
-
-    std::vector<Value *> arguments;
-
-    arguments.push_back(firstOp);
-    arguments.push_back(secondOp);
-
-    return IRB.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
+IntrinsicCallGenerator::createWhileltInstruction(IRBuilder<> &IRB, Value *LHSOp, Value *RHSOp) {
+    auto *VecTy = VectorType::get(IRB.getInt1Ty(), vectorizationFactor, /*Scalable*/ true);
+    return IRB.CreateIntrinsic(Intrinsic::aarch64_sve_whilelt, {VecTy, IRB.getInt64Ty()} , {LHSOp, RHSOp});
 }
 
 Value *IntrinsicCallGenerator::createSpliceInstruction(IRBuilder<> &IRB, Value *firstOp, Value *secondOp,
                                                           Value *predicatedVector) {
-
-    auto intrinsic = Intrinsic::aarch64_sve_splice;
-
-    VectorType *type = VectorType::get(IRB.getInt32Ty(), vectorizationFactor, /*Scalable*/ true);
-
-    Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, type);
-
-    std::vector<Value *> arguments;
-
-    arguments.push_back(predicatedVector);
-    arguments.push_back(firstOp);
-    arguments.push_back(secondOp);
-
-    return IRB.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
+    auto *VecTy = VectorType::get(IRB.getInt32Ty(), vectorizationFactor, /*Scalable*/ true);
+    return IRB.CreateIntrinsic(Intrinsic::aarch64_sve_splice, {VecTy, IRB.getInt64Ty()} , {predicatedVector, firstOp, secondOp});
 
 }
 
 Value *IntrinsicCallGenerator::createSelInstruction(IRBuilder<> &IRB, Value *firstOp, Value *secondOp,
                                                        Value *predicatedVector) {
-
-    auto intrinsic = Intrinsic::aarch64_sve_sel;
-
-    VectorType *type = VectorType::get(IRB.getInt32Ty(), vectorizationFactor, /*Scalable*/ true);
-
-    Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, type);
-
-    std::vector<Value *> arguments;
-
-    arguments.push_back(predicatedVector);
-    arguments.push_back(firstOp);
-    arguments.push_back(secondOp);
-
-    return IRB.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
+    auto *VecTy = VectorType::get(IRB.getInt32Ty(), vectorizationFactor, /*Scalable*/ true);
+    return IRB.CreateIntrinsic(Intrinsic::aarch64_sve_sel, {VecTy} , {predicatedVector, firstOp, secondOp});
 
 }
 
 Value *IntrinsicCallGenerator::createIndexInstruction(IRBuilder<> &IRB, Value *firstOp, Value *secondOp) {
-    auto intrinsic = Intrinsic::aarch64_sve_index;
-
-    VectorType *type = VectorType::get(IRB.getInt32Ty(), vectorizationFactor, /*Scalable*/ true);
-
-    Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, type);
-
-    std::vector<Value *> arguments;
-
-    arguments.push_back(firstOp);
-    arguments.push_back(secondOp);
-
-    return IRB.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
+    auto *VecTy = VectorType::get(IRB.getInt32Ty(), vectorizationFactor, /*Scalable*/ true);
+    return IRB.CreateIntrinsic(Intrinsic::aarch64_sve_index, {VecTy} , {firstOp, secondOp});
 }
 
 Value *
@@ -170,15 +102,8 @@ void IntrinsicCallGenerator::createStoreInstruction(IRBuilder<> &IRB, Value *ele
 Value *
 IntrinsicCallGenerator::createArithmeticInstruction(IRBuilder<> &IRB, unsigned int intrinsic, Value *firstOp,
                                                     Value *secondOp, Value *predicatedVector) {
-    VectorType *type = VectorType::get(IRB.getInt32Ty(), vectorizationFactor, /*Scalable*/ true);
-    Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, type);
-
-    std::vector<Value *> arguments;
-    arguments.push_back(predicatedVector);
-    arguments.push_back(firstOp);
-    arguments.push_back(secondOp);
-
-    return IRB.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
+    auto *VecTy = VectorType::get(IRB.getInt32Ty(), vectorizationFactor, /*Scalable*/ true);
+    return IRB.CreateIntrinsic(intrinsic, {VecTy}, {predicatedVector, firstOp, secondOp});
 }
 
 Value *IntrinsicCallGenerator::createVscale64Intrinsic(IRBuilder<> &IRB, uint64_t Scaling) {
