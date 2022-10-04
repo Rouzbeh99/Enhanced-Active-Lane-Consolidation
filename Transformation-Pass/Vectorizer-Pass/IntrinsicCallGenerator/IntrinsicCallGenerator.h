@@ -25,10 +25,10 @@ using namespace llvm;
 class IntrinsicCallGenerator {
 
 private:
-    int vectorizationFactor;
-    Module *module;
+    int VF;
+    Module *M;
 public:
-    IntrinsicCallGenerator(int vectorizationFactor, Module *module1);
+    IntrinsicCallGenerator(int VF, Module *M) : VF(VF), M(M) {}
 
 public:
 
