@@ -32,44 +32,34 @@ public:
 
 public:
 
-    CallInst *createAllTruePredicates(Instruction *insertionPoint);
+    Value *createAllTruePredicates(IRBuilder<> &IRB);
 
-    CallInst *createCompactInstruction(Instruction *insertionPoint, Value *toBeCompacted, Value *predicatedVector);
+    Value *createCompactInstruction(IRBuilder<> &IRB, Value *toBeCompacted, Value *predicatedVector);
 
-    Value *createNotInstruction(Instruction *insertionPoint, Value *elements);
+    Value *createCntpInstruction(IRBuilder<> &IRB, Value *elements, Value *predicatedVector);
 
-    CallInst *createCntpInstruction(Instruction *insertionPoint, Value *elements, Value *predicatedVector);
+    Value *createWhileltInstruction(IRBuilder<> &IRB, Value *firstOp, Value *secondOp);
 
-    CallInst *createWhileltInstruction(Instruction *insertionPoint, Value *firstOp, Value *secondOp);
-
-    CallInst *createSpliceInstruction(Instruction *insertionPoint, Value *firstOp, Value *secondOp,
+    Value *createSpliceInstruction(IRBuilder<> &IRB, Value *firstOp, Value *secondOp,
                                       Value *predicatedVector);
 
-    CallInst *createSelInstruction(Instruction *insertionPoint, Value *firstOp, Value *secondOp,
+    Value *createSelInstruction(IRBuilder<> &IRB, Value *firstOp, Value *secondOp,
                                    Value *predicatedVector);
 
-    Value *createORInstruction(Instruction *insertionPoint, ArrayRef<Value *> elements);
+    Value *createIndexInstruction(IRBuilder<> &IRB, Value *firstOp, Value *secondOp);
 
-    Value *createANDInstruction(Instruction *insertionPoint, ArrayRef<Value *> elements);
-
-    CallInst *createIndexInstruction(Instruction *insertionPoint, Value *firstOp, Value *secondOp);
-
-    Value *createAddInstruction(Instruction *insertionPoint, Value *firstOp, Value *secondOp);
-
-    Value *createSubInstruction(Instruction *insertionPoint, Value *firstOp, Value *secondOp);
-
-    CallInst *createGatherLoadInstruction(Instruction *insertionPoint, Value *ptr, Value *predicatedVector,
+    Value *createGatherLoadInstruction(IRBuilder<> &IRB, Value *ptr, Value *predicatedVector,
                                           Value *indices);
 
-    CallInst *createLoadInstruction(Instruction *insertionPoint, Value *ptr, Value *predicatedVector);
+    Value *createLoadInstruction(IRBuilder<> &IRB, Value *ptr, Value *predicatedVector);
 
-    void createScatterStoreInstruction(Instruction *insertionPoint, Value *elementsVector, Value *ptr,
+    void createScatterStoreInstruction(IRBuilder<> &IRB, Value *elementsVector, Value *ptr,
                                        Value *predicatedVector, Value *indices);
 
-    void createStoreInstruction(Instruction *insertionPoint, Value *elementsVector, Value *ptr,
+    void createStoreInstruction(IRBuilder<> &IRB, Value *elementsVector, Value *ptr,
                                 Value *predicatedVector);
 
-    CallInst *createArithmeticInstruction(Instruction *insertionPoint, unsigned int intrinsic, Value *firstOp,
+    Value *createArithmeticInstruction(IRBuilder<> &IRB, unsigned int intrinsic, Value *firstOp,
                                           Value *secondOp, Value *predicatedVector);
 
     Value *createVscale64Intrinsic(IRBuilder<> &IRB, uint64_t Scaling);
