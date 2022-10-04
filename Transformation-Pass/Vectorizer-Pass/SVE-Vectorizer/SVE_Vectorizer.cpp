@@ -41,7 +41,7 @@ void SVE_Vectorizer::doVectorization() {
     BasicBlock *preheader = L->getLoopPreheader();
     BasicBlock *exitBlock = L->getExitBlock();
     PHINode *inductionVar = L->getCanonicalInductionVariable();
-    Type *inductionVarType = inductionVar->getType();
+
 
 
     // create vectorizingBlock
@@ -61,9 +61,9 @@ void SVE_Vectorizer::doVectorization() {
     // in preheader, check if there are enough iterations for a vector
     refinePreheader(preVectorizationBlock, preHeaderForRemaining);
 
+
     auto *values = fillPreVecBlock(preVectorizationBlock, preheader, vectorizingBlock);
     fillVectorizingBlock(vectorizingBlock, preVectorizationBlock, preHeaderForRemaining, exitBlock, middleBlock,
-                         inductionVarType,
                          values,
                          dyn_cast<Value>(inductionVar));
 
@@ -92,17 +92,22 @@ void SVE_Vectorizer::refinePreheader(BasicBlock *preVecBlock, BasicBlock *preHea
 
     auto tripCount = dyn_cast<Value>(getTripCountInPreheader(preheader));
 
+
     //get current vscale
+    CastInst *vscale;
     CallInst *vscale32 = intrinsicCallGenerator->createVscale32Intrinsic(insertionPoint);
 
-    CastInst *vscale = ZExtInst::Create(Instruction::CastOps::ZExt, vscale32,
-                                        Type::getInt64Ty(preheader->getContext()),
-                                        "extended.vscale",
-                                        insertionPoint);
+    if (tripCount->getType() == Type::getInt64Ty(preheader->getContext())) {
+        vscale = ZExtInst::Create(Instruction::CastOps::ZExt, vscale32,
+                                  Type::getInt64Ty(preheader->getContext()),
+                                  "extended.vscale", insertionPoint);
+    } else {
+        vscale = reinterpret_cast<CastInst *>(vscale32);
+    }
 
     // check if there are iterations
-    ConstantInt *shiftOp = llvm::ConstantInt::get(Type::getInt64Ty(preheader->getContext()),
-                                                  int(log2(vectorizationFactor)));
+    Constant *shiftOp = llvm::ConstantInt::get(tripCount->getType(),
+                                               int(log2(vectorizationFactor)));
     Value *shiftValue = builder.CreateShl(vscale, shiftOp);
     Value *condition = builder.CreateICmpUGE(tripCount, shiftValue); // if true, there are enough iterations
 
@@ -118,12 +123,8 @@ void SVE_Vectorizer::refinePreheader(BasicBlock *preVecBlock, BasicBlock *preHea
 Instruction *SVE_Vectorizer::getTripCountInPreheader(BasicBlock *preheader) {
 
     // TODO: find  more reliable way...
-    for (auto &instr: preheader->getInstList()) {
-        if (isa<ZExtInst>(instr)) {
-            return &instr;
-        }
-    }
-    return nullptr;
+
+    return &preheader->getInstList().front();
 }
 
 // TODO: complete implementation
@@ -189,27 +190,39 @@ SVE_Vectorizer::fillPreVecBlock(BasicBlock *preVecBlock, BasicBlock *preheader, 
     IRBuilder<> builder(preheader->getContext());
     builder.SetInsertPoint(insertionPoint);
 
+    auto *tripCount = dyn_cast<Value>(getTripCountInPreheader(preheader));
+
 
     // create step vector
-    CallInst *stepVec = intrinsicCallGenerator->createStepVector64Intrinsic(insertionPoint);
+    CallInst *stepVec = nullptr;
 
     // create the value by which the index should be increased
     //TODO: we assume indices are added by one, make it work for other cases as well
     //should be added by vscale * VFactor * 1  ----> vscale shl log(VFactor)
 
+    CastInst *vscale;
     CallInst *vscale32 = intrinsicCallGenerator->createVscale32Intrinsic(insertionPoint);
-    CastInst *vscale = ZExtInst::Create(Instruction::CastOps::ZExt, vscale32,
-                                        Type::getInt64Ty(preheader->getContext()),
-                                        "extended.vscale",
-                                        insertionPoint);
 
-    ConstantInt *shiftOp = llvm::ConstantInt::get(Type::getInt64Ty(preheader->getContext()),
-                                                  int(log2(vectorizationFactor)));
+    if (tripCount->getType() == Type::getInt64Ty(preheader->getContext())) {
+        vscale = ZExtInst::Create(Instruction::CastOps::ZExt, vscale32,
+                                  Type::getInt64Ty(preheader->getContext()),
+                                  "extended.vscale", insertionPoint);
+
+        stepVec = intrinsicCallGenerator->createStepVector64Intrinsic(insertionPoint);
+    } else {
+        vscale = reinterpret_cast<CastInst *>(vscale32);
+        stepVec = intrinsicCallGenerator->createStepVector32Intrinsic(insertionPoint);
+    }
+
+    // check if there are iterations
+    Constant *shiftOp = llvm::ConstantInt::get(tripCount->getType(),
+                                               int(log2(vectorizationFactor)));
+
     Value *stepValue = builder.CreateShl(vscale, shiftOp, "step.value");
 
     // vectorizing block termination condition: index > n - (n % stepValue)
     // forming n - (n % stepValue)
-    auto *tripCount = dyn_cast<Value>(getTripCountInPreheader(preheader));
+
     Value *remResult = builder.CreateURem(tripCount, stepValue);
     Value *totalVecIterations = builder.CreateSub(tripCount, remResult, "total.iterations.to.be.vectorized");
 
@@ -230,17 +243,18 @@ void SVE_Vectorizer::fillVectorizingBlock(BasicBlock *vectorizingBlock, BasicBlo
                                           BasicBlock *preheaderForRemainingIterations,
                                           BasicBlock *exitBlock,
                                           BasicBlock *middleBlock,
-                                          Type *indexVarType,
                                           std::vector<Value *> *initialValues,
                                           Value *inductionVar) {
+
 
     Instruction *insertionPoint = vectorizingBlock->getTerminator();
     IRBuilder<> builder(vectorizingBlock->getContext());
     builder.SetInsertPoint(insertionPoint);
 
     // create phi node for loop index
-    Constant *contZero = llvm::ConstantInt::get(indexVarType, 0);
-    PHINode *indexVarPHI = PHINode::Create(indexVarType, 2, "", insertionPoint);
+    Type *indexUpdatedValueType = (*initialValues)[1]->getType();   // it's the same as tripcount size
+    Constant *contZero = llvm::ConstantInt::get(indexUpdatedValueType, 0);
+    PHINode *indexVarPHI = PHINode::Create(indexUpdatedValueType, 2, "", insertionPoint);
     indexVarPHI->addIncoming(contZero, preVec);
 
 
@@ -253,23 +267,29 @@ void SVE_Vectorizer::fillVectorizingBlock(BasicBlock *vectorizingBlock, BasicBlo
     //// vectorizing header and then bodies /////
     BasicBlock *targetedBlock = findTargetedBlock();
     // predicates come from header (decision block)
+    std::map<const Value *, const Value *> *headerInstructionsMap = nullptr;
     Value *predicates = formPredicateVector(insertionPoint, L->getHeader(), vectorizingBlock, targetedBlock, stepVecPhi,
                                             inductionVar,
-                                            indexVarPHI);
+                                            indexVarPHI, &headerInstructionsMap);
 
     // add vectorized instruction of then body
     vectorizeTargetedBlockInstructions(vectorizingBlock, targetedBlock, stepVecPhi, inductionVar, indexVarPHI,
-                                       predicates);
+                                       predicates, headerInstructionsMap);
 
-    // update index 
+
+
+    // update index
     Value *stepValue = (*initialValues)[1];
     Value *updatedIndex = builder.CreateAdd(stepValue, indexVarPHI);
     indexVarPHI->addIncoming(updatedIndex, vectorizingBlock);
+
+
 
     //updated step vector
     Value *stepVecUpdateValues = (*initialValues)[2];
     Value *updatedStepVec = builder.CreateAdd(stepVecPhi, stepVecUpdateValues);
     stepVecPhi->addIncoming(updatedStepVec, vectorizingBlock);
+
 
     // vectorizing block termination condition: index > n - (n % stepValue)
     Value *totalVecIterations = (*initialValues)[3];
@@ -294,12 +314,13 @@ Value *
 SVE_Vectorizer::formPredicateVector(Instruction *insertionPoint, BasicBlock *decisionBlock,
                                     BasicBlock *vectorizingBlock, BasicBlock *targetedBlock, PHINode *stepVecPhi,
                                     Value *inductionVar,
-                                    Value *indexVar) {
+                                    Value *indexVar, std::map<const Value *, const Value *> **outputVMap) {
+
+
     IRBuilder<> builder(decisionBlock->getContext());
     builder.SetInsertPoint(insertionPoint);
-
-    // first copy instruction into vectorizing Block, then vectorize them
     llvm::ValueToValueMapTy vMap;
+    // first copy instruction into vectorizing Block, then vectorize them
     std::vector<Instruction *> clonedInstructions;
 
     for (auto &instr: decisionBlock->getInstList()) {
@@ -323,7 +344,16 @@ SVE_Vectorizer::formPredicateVector(Instruction *insertionPoint, BasicBlock *dec
         }
 
     }
-    vectorizeInstructions_nonePredicated(&clonedInstructions, vectorizingBlock, stepVecPhi, inductionVar, indexVar);
+
+    std::map<const Value *, const Value *> *headerInstrunctionsMap = vectorizeInstructions_nonePredicated(
+            &clonedInstructions,
+            vectorizingBlock,
+            stepVecPhi, inductionVar,
+            indexVar, vMap);
+
+    // output map
+    (*outputVMap) = headerInstrunctionsMap;
+
     // TODO: find a better way to find the predicate vector
     auto *predicateVec = dyn_cast<Value>(vectorizingBlock->getTerminator()->getPrevNonDebugInstruction());
 
@@ -332,8 +362,9 @@ SVE_Vectorizer::formPredicateVector(Instruction *insertionPoint, BasicBlock *dec
     BasicBlock *branchTrueTarget = brInstr->getSuccessor(0);
 
     if (branchTrueTarget != targetedBlock) {  // should negate
-        predicateVec = builder.CreateNot(predicateVec,"negated.vector");
+        predicateVec = builder.CreateNot(predicateVec, "negated.vector");
     }
+
 
     return predicateVec;
 }
@@ -341,17 +372,17 @@ SVE_Vectorizer::formPredicateVector(Instruction *insertionPoint, BasicBlock *dec
 
 void SVE_Vectorizer::vectorizeTargetedBlockInstructions(BasicBlock *vectorizingBlock, BasicBlock *targetedBlock,
                                                         PHINode *stepVec, Value *inductionVar, Value *indexVar,
-                                                        Value *predicates) {
+                                                        Value *predicates,
+                                                        std::map<const Value *, const Value *> *headerInstructionsMap) {
 
 
     IRBuilder<> builder(vectorizingBlock->getContext());
     builder.SetInsertPoint(vectorizingBlock->getTerminator());
 
     // first copy instruction into vectorizing Block, then vectorize them
-    llvm::ValueToValueMapTy vMap;
     std::vector<Instruction *> clonedInstructions;
     std::vector<Instruction *> instructions;
-
+    llvm::ValueToValueMapTy vMap;
     for (auto &instr: targetedBlock->getInstList()) {
         if (&instr == targetedBlock->getTerminator()) {
             break;
@@ -373,7 +404,7 @@ void SVE_Vectorizer::vectorizeTargetedBlockInstructions(BasicBlock *vectorizingB
     }
 
     vectorizeInstructions_Predicated(&clonedInstructions, vectorizingBlock, stepVec, inductionVar, indexVar,
-                                     predicates);
+                                     predicates, headerInstructionsMap);
 
 }
 
@@ -389,25 +420,37 @@ void SVE_Vectorizer::fillMiddleBlock(BasicBlock *middleBlock, BasicBlock *prehea
 
     BranchInst::Create(exitBlock, preheader, condition, middleBlock);
 
-
 }
 
 
 void
 SVE_Vectorizer::refinePreHeaderForRemaining(BasicBlock *preHeaderForRemaining, BasicBlock *middleBlock, Value *value) {
+    IRBuilder<> builder(middleBlock->getContext());
+    builder.SetInsertPoint(middleBlock->getTerminator());
+
     // The first instruction is a phi node
     auto *phiNode = dyn_cast<PHINode>(&preHeaderForRemaining->getInstList().front());
+
+    // one is i32 the other is i64
+    if (value->getType() != phiNode->getType()) {
+        value = builder.CreateCast(Instruction::CastOps::ZExt, value, phiNode->getType());
+
+    }
+
     phiNode->addIncoming(value, middleBlock);
 }
 
-void SVE_Vectorizer::vectorizeInstructions_nonePredicated(std::vector<Instruction *> *instructions, BasicBlock *block,
-                                                          Value *stepVector, Value *inductionVar, Value *indexVar) {
+std::map<const Value *, const Value *> *
+SVE_Vectorizer::vectorizeInstructions_nonePredicated(std::vector<Instruction *> *instructions, BasicBlock *block,
+                                                     Value *stepVector, Value *inductionVar, Value *indexVar,
+                                                     ValueToValueMapTy &inputMap) {
     Instruction *insertionPoint = block->getTerminator();
     IRBuilder<> builder(block->getContext());
     builder.SetInsertPoint(insertionPoint);
 
 
-    std::map<Value *, Value *> vMap;
+    auto outputMap = new std::map<const Value *, const Value *>;
+    ValueToValueMapTy vMap;
     // Should be remove in FILO manner to prevent removing a value that is used in following lines
     std::stack<Instruction *> toBeRemoved;
 
@@ -420,6 +463,7 @@ void SVE_Vectorizer::vectorizeInstructions_nonePredicated(std::vector<Instructio
                     instr->setOperand(i, indexVar);
                 }
             }
+
         } else if (isa<StoreInst>(instr)) {
             auto storeInstr = dyn_cast<StoreInst>(instr);
             // it's the value to be stored
@@ -440,9 +484,11 @@ void SVE_Vectorizer::vectorizeInstructions_nonePredicated(std::vector<Instructio
         } else if (isa<LoadInst>(instr)) {
 
             auto ptr = dyn_cast<GEPOperator>(instr->getOperand(0));
-            LoadInst *loadedData = builder.CreateLoad(instr->getType(), ptr);
+            Type *elementType = instr->getType();
+            LoadInst *loadedData = builder.CreateLoad(VectorType::get(elementType, vectorizationFactor, true), ptr);
             vMap[instr] = loadedData;
             toBeRemoved.push(instr);
+
         } else if (isa<BinaryOperator>(instr) || isa<ICmpInst>(instr)) { // TODO: ICmp is not binary????
 
             Value *firstOp = nullptr;
@@ -537,8 +583,11 @@ void SVE_Vectorizer::vectorizeInstructions_nonePredicated(std::vector<Instructio
                             break;
                         case CmpInst::ICMP_ULE:
                             break;
-                        case CmpInst::ICMP_SGT:
+                        case CmpInst::ICMP_SGT: {
+                            Value *ICmpInst = builder.CreateICmpSGT(firstOp, secondOp);
+                            result = dyn_cast<Value>(ICmpInst);
                             break;
+                        }
                         case CmpInst::ICMP_SGE:
                             break;
                         case CmpInst::ICMP_SLT:
@@ -557,11 +606,30 @@ void SVE_Vectorizer::vectorizeInstructions_nonePredicated(std::vector<Instructio
         }
     }
 
+    // make a mapping between the original instructions in decision block and corresponding vectorized ones
+    // inputMap contains  originalInstructions mapped to cloned instructions
+    // vMap contains  cloned instructions mapped to vectorized ones
+    for (auto inputMapRecord: inputMap) {
+        for (auto vMapRecord: vMap) {
+            if (inputMapRecord.second == vMapRecord.first) {
+                outputMap->insert({inputMapRecord.first, vMapRecord.second});
+            }
+        }
+
+        // Get Element Pointers in decision block might be used in vectorization block, so we should add them as well
+        if(isa<GEPOperator>(inputMapRecord.first)){
+            outputMap->insert({inputMapRecord.first, inputMapRecord.second});
+        }
+    }
+
+
     while (!toBeRemoved.empty()) {
         toBeRemoved.top()->eraseFromParent();
         toBeRemoved.pop();
     }
 
+
+    return outputMap;
 
 }
 
@@ -580,15 +648,24 @@ Value *SVE_Vectorizer::createVectorOfConstants(Value *value, Instruction *insert
     return builder.CreateShuffleVector(splatInsert, poisonVec, zeroInitializer, name);
 }
 
+
+// TODO: what if the operand was defined in another block?
 void SVE_Vectorizer::vectorizeInstructions_Predicated(std::vector<Instruction *> *instructions, BasicBlock *block,
                                                       Value *stepVector, Value *inductionVar, Value *indexVar,
-                                                      Value *predicates) {
-
+                                                      Value *predicates,
+                                                      std::map<const Value *, const Value *> *headerInstructionsMap) {
 
     Instruction *insertionPoint = block->getTerminator();
 
 
     std::map<Value *, Value *> vMap;
+
+    // initialize vMap with headerInstructionsMap
+    for (auto pair: *headerInstructionsMap) {
+        vMap[(Value *) pair.first] = (Value *) pair.second;
+    }
+
+
     // Should be remove in FILO manner to prevent removing a value that is used in following lines
     std::stack<Instruction *> toBeRemoved;
 
@@ -615,12 +692,18 @@ void SVE_Vectorizer::vectorizeInstructions_Predicated(std::vector<Instruction *>
                 firstOp = createVectorOfConstants(constValue, insertionPoint, "store.values");
                 // TODO: is there any other case ?
             }
-            auto ptr = dyn_cast<GEPOperator>(instr->getOperand(1));
+            auto ptr = instr->getOperand(1);
+            if (vMap.count(ptr)) {
+                ptr = vMap[ptr];
+            }
             intrinsicCallGenerator->createStoreInstruction(insertionPoint, firstOp, ptr, predicates);
             toBeRemoved.push(instr);
         } else if (isa<LoadInst>(instr)) {
 
-            auto ptr = dyn_cast<GEPOperator>(instr->getOperand(0));
+            auto ptr = instr->getOperand(0);
+            if (vMap.count(ptr)) {
+                ptr = vMap[ptr];
+            }
             auto *loadedData = dyn_cast<Value>(
                     intrinsicCallGenerator->createLoadInstruction(insertionPoint, ptr, predicates));
             vMap[instr] = loadedData;
@@ -650,11 +733,20 @@ void SVE_Vectorizer::vectorizeInstructions_Predicated(std::vector<Instruction *>
             Value *result = nullptr;
             switch (instr->getOpcode()) {
                 case Instruction::Add:
-                    //TODO
+                    result = dyn_cast<Value>(intrinsicCallGenerator->createArithmeticInstruction(insertionPoint,
+                                                                                                 Intrinsic::aarch64_sve_add,
+                                                                                                 firstOp, secondOp,
+                                                                                                 predicates));
                     break;
                 case Instruction::Mul:
                     result = dyn_cast<Value>(intrinsicCallGenerator->createArithmeticInstruction(insertionPoint,
                                                                                                  Intrinsic::aarch64_sve_mul,
+                                                                                                 firstOp, secondOp,
+                                                                                                 predicates));
+                    break;
+                case Instruction::Sub:
+                    result = dyn_cast<Value>(intrinsicCallGenerator->createArithmeticInstruction(insertionPoint,
+                                                                                                 Intrinsic::aarch64_sve_sub,
                                                                                                  firstOp, secondOp,
                                                                                                  predicates));
                     break;
@@ -729,9 +821,9 @@ void SVE_Vectorizer::vectorizeInstructions_Predicated(std::vector<Instruction *>
                 }
             }
 
-
             vMap[instr] = result;
             toBeRemoved.push(instr);
+
         }
     }
 

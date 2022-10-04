@@ -58,18 +58,19 @@ private:
 private:
     Value *formPredicateVector(Instruction *insertionPoint, BasicBlock *decisionBlock, BasicBlock *vectorizingBlock,
                                BasicBlock *targetedBlock,
-                               PHINode *stepVec, Value *inductionVar, Value *indexVar);
+                               PHINode *stepVec, Value *inductionVar, Value *indexVar,
+                               std::map<const Value *, const Value *> **outputVMap);
 
 private:
     void vectorizeTargetedBlockInstructions(BasicBlock *vectorizingBlock, BasicBlock *targetedBlock, PHINode *stepVec,
-                                            Value *inductionVar, Value *indexVar, Value *predicates);
+                                            Value *inductionVar, Value *indexVar, Value *predicates,
+                                            std::map<const Value *, const Value *> *headerInstructionsMap);
 
 private:
     void
     fillVectorizingBlock(BasicBlock *vectorizingBlock, BasicBlock *preVec, BasicBlock *preheaderForRemainingIterations,
-                         BasicBlock *exitBlock, BasicBlock *middleBlock,
-                         Type *indexVarType,
-                         std::vector<Value *> *initialValues, Value *inductionVar);
+                         BasicBlock *exitBlock, BasicBlock *middleBlock, std::vector<Value *> *initialValues,
+                         Value *inductionVar);
 
 private:
     void fillMiddleBlock(BasicBlock *middleBlock, BasicBlock *preheader, BasicBlock *exitBlock, Value *remResult);
@@ -78,12 +79,15 @@ private:
     Value *createVectorOfConstants(Value *value, Instruction *insertionPoint, std::string name);
 
 private:
-    void vectorizeInstructions_nonePredicated(std::vector<Instruction *> *instructions, BasicBlock *block,
-                                              Value *stepVector, Value *inductionVar, Value *indexVar);
+    std::map<const Value *, const Value *> *
+    vectorizeInstructions_nonePredicated(std::vector<Instruction *> *instructions, BasicBlock *block,
+                                         Value *stepVector, Value *inductionVar, Value *indexVar,
+                                         ValueToValueMapTy &inputMap);
 
 private:
     void vectorizeInstructions_Predicated(std::vector<Instruction *> *instructions, BasicBlock *block,
-                                          Value *stepVector, Value *inductionVar, Value *indexVar, Value *predicates);
+                                          Value *stepVector, Value *inductionVar, Value *indexVar, Value *predicates,
+                                          std::map<const Value *, const Value *> *headerInstructionsMap);
 
 private:
     void refinePreHeaderForRemaining(BasicBlock *preHeaderForRemaining, BasicBlock *middleBlock, Value *value);

@@ -351,6 +351,20 @@ CallInst *IntrinsicCallGenerator::createStepVector64Intrinsic(Instruction *inser
     return builder.CreateCall(intrinsicFunction);
 }
 
+CallInst *IntrinsicCallGenerator::createStepVector32Intrinsic(Instruction *insertionPoint) {
+
+    LLVMContext &context = module->getContext();
+    IRBuilder<> builder(context);
+    builder.SetInsertPoint(insertionPoint);
+
+    auto intrinsic = Intrinsic::experimental_stepvector;
+
+    auto vecType = VectorType::get(Type::getInt32Ty(context), vectorizationFactor, true);
+    Function *intrinsicFunction = Intrinsic::getDeclaration(module, intrinsic, vecType);
+
+    return builder.CreateCall(intrinsicFunction);
+}
+
 IntrinsicCallGenerator::IntrinsicCallGenerator(int vectorizationFactor, Module *module1) : vectorizationFactor(
         vectorizationFactor), module(module1) {
 }

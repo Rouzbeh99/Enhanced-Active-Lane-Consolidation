@@ -32,7 +32,7 @@ namespace {
 // alc_vectorizer implementation
 //-----------------------------------------------------------------------------
 
-
+    // TODO: TSVC tests are changed to int, make the pass work for float as well
 
     PreservedAnalyses alc_vectorizer::run(Loop &loop, LoopAnalysisManager &AM,
                                           LoopStandardAnalysisResults &AR, LPMUpdater &U) {
@@ -42,7 +42,12 @@ namespace {
             return PreservedAnalyses::all();
         }
 
-        llvm::errs() << "Running on Loop" << '\n';
+        //only apply the pass on innermost loop
+        if (!L->getSubLoops().empty()) {
+            return PreservedAnalyses::all();
+        }
+
+        llvm::outs() << "In Function : " << L->getHeader()->getParent()->getName() << "\n";
         const ArrayRef<BasicBlock *> &allBlocks = L->getBlocks();
         const DebugLoc &location = allBlocks.front()->getFirstNonPHIOrDbg()->getDebugLoc();
         llvm::outs() << "Loop at line number: " << location.getLine() - 1 << "\n";
@@ -61,9 +66,7 @@ namespace {
 
         auto *sve_vectorizer = new SVE_Vectorizer(L, factor, &LI);
         sve_vectorizer->doVectorization();
-
         printLoop(L);
-
 
         return llvm::PreservedAnalyses::none();
     }
