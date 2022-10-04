@@ -653,6 +653,7 @@ void SVE_Vectorizer::vectorizeInstructions_Predicated(std::vector<Instruction *>
                                                       std::map<const Value *, const Value *> *headerInstructionsMap) {
 
     Instruction *insertionPoint = block->getTerminator();
+    IRBuilder<> IRB(insertionPoint);
 
 
     std::map<Value *, Value *> vMap;
@@ -693,7 +694,7 @@ void SVE_Vectorizer::vectorizeInstructions_Predicated(std::vector<Instruction *>
             if (vMap.count(ptr)) {
                 ptr = vMap[ptr];
             }
-            intrinsicCallGenerator->createStoreInstruction(insertionPoint, firstOp, ptr, predicates);
+            intrinsicCallGenerator->createStoreInstruction(IRB, firstOp, ptr, predicates);
             toBeRemoved.push(instr);
         } else if (isa<LoadInst>(instr)) {
 
@@ -702,7 +703,7 @@ void SVE_Vectorizer::vectorizeInstructions_Predicated(std::vector<Instruction *>
                 ptr = vMap[ptr];
             }
             auto *loadedData = dyn_cast<Value>(
-                    intrinsicCallGenerator->createLoadInstruction(insertionPoint, ptr, predicates));
+                    intrinsicCallGenerator->createLoadInstruction(IRB, ptr, predicates));
             vMap[instr] = loadedData;
             toBeRemoved.push(instr);
         } else if (isa<BinaryOperator>(instr) || isa<ICmpInst>(instr)) { // TODO: ICmp is not binary????
@@ -730,19 +731,19 @@ void SVE_Vectorizer::vectorizeInstructions_Predicated(std::vector<Instruction *>
             Value *result = nullptr;
             switch (instr->getOpcode()) {
                 case Instruction::Add:
-                    result = dyn_cast<Value>(intrinsicCallGenerator->createArithmeticInstruction(insertionPoint,
+                    result = dyn_cast<Value>(intrinsicCallGenerator->createArithmeticInstruction(IRB,
                                                                                                  Intrinsic::aarch64_sve_add,
                                                                                                  firstOp, secondOp,
                                                                                                  predicates));
                     break;
                 case Instruction::Mul:
-                    result = dyn_cast<Value>(intrinsicCallGenerator->createArithmeticInstruction(insertionPoint,
-                                                                                                 Intrinsic::aarch64_sve_mul,
-                                                                                                 firstOp, secondOp,
-                                                                                                 predicates));
+                    result =
+                      intrinsicCallGenerator->createArithmeticInstruction(IRB,
+                          Intrinsic::aarch64_sve_mul, firstOp, secondOp,
+                          predicates);
                     break;
                 case Instruction::Sub:
-                    result = dyn_cast<Value>(intrinsicCallGenerator->createArithmeticInstruction(insertionPoint,
+                    result = dyn_cast<Value>(intrinsicCallGenerator->createArithmeticInstruction(IRB,
                                                                                                  Intrinsic::aarch64_sve_sub,
                                                                                                  firstOp, secondOp,
                                                                                                  predicates));
