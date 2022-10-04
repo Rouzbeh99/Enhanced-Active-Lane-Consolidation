@@ -87,15 +87,14 @@ void SVE_Vectorizer::refinePreheader(BasicBlock *preVecBlock, BasicBlock *preHea
 
     BasicBlock *preheader = L->getLoopPreheader();
     Instruction *insertionPoint = preheader->getTerminator();
-    IRBuilder<> builder(preheader->getContext());
-    builder.SetInsertPoint(insertionPoint);
+    IRBuilder<> IRB(insertionPoint);
 
     auto tripCount = dyn_cast<Value>(getTripCountInPreheader(preheader));
 
 
     //get current vscale
-    CastInst *vscale;
-    CallInst *vscale32 = intrinsicCallGenerator->createVscale32Intrinsic(insertionPoint);
+    Value *vscale;
+    auto *vscale32 = intrinsicCallGenerator->createVscale32Intrinsic(IRB, vectorizationFactor);
 
     if (tripCount->getType() == Type::getInt64Ty(preheader->getContext())) {
         vscale = ZExtInst::Create(Instruction::CastOps::ZExt, vscale32,
@@ -108,10 +107,10 @@ void SVE_Vectorizer::refinePreheader(BasicBlock *preVecBlock, BasicBlock *preHea
     // check if there are iterations
     Constant *shiftOp = llvm::ConstantInt::get(tripCount->getType(),
                                                int(log2(vectorizationFactor)));
-    Value *shiftValue = builder.CreateShl(vscale, shiftOp);
-    Value *condition = builder.CreateICmpUGE(tripCount, shiftValue); // if true, there are enough iterations
+    Value *shiftValue = IRB.CreateShl(vscale, shiftOp);
+    Value *condition = IRB.CreateICmpUGE(tripCount, shiftValue); // if true, there are enough iterations
 
-    builder.CreateCondBr(condition, preVecBlock, preHeaderForRemaining);
+    IRB.CreateCondBr(condition, preVecBlock, preHeaderForRemaining);
 
     // remove previous terminator
     preheader->getTerminator()->eraseFromParent();
@@ -187,28 +186,27 @@ SVE_Vectorizer::fillPreVecBlock(BasicBlock *preVecBlock, BasicBlock *preheader, 
     auto *results = new std::vector<Value *>;
 
     Instruction *insertionPoint = preVecBlock->getTerminator();
-    IRBuilder<> builder(preheader->getContext());
-    builder.SetInsertPoint(insertionPoint);
+    IRBuilder<> builder(insertionPoint);
 
     auto *tripCount = dyn_cast<Value>(getTripCountInPreheader(preheader));
 
 
     // create step vector
-    CallInst *stepVec = nullptr;
+    Value *stepVec = nullptr;
 
     // create the value by which the index should be increased
     //TODO: we assume indices are added by one, make it work for other cases as well
     //should be added by vscale * VFactor * 1  ----> vscale shl log(VFactor)
 
-    CastInst *vscale;
-    CallInst *vscale32 = intrinsicCallGenerator->createVscale32Intrinsic(insertionPoint);
+    Value *vscale;
+    auto *vscale32 = intrinsicCallGenerator->createVscale32Intrinsic(builder, vectorizationFactor);
 
     if (tripCount->getType() == Type::getInt64Ty(preheader->getContext())) {
         vscale = ZExtInst::Create(Instruction::CastOps::ZExt, vscale32,
                                   Type::getInt64Ty(preheader->getContext()),
                                   "extended.vscale", insertionPoint);
 
-        stepVec = intrinsicCallGenerator->createStepVector64Intrinsic(insertionPoint);
+        stepVec = intrinsicCallGenerator->createStepVector64Intrinsic(builder, vectorizationFactor);
     } else {
         vscale = reinterpret_cast<CastInst *>(vscale32);
         stepVec = intrinsicCallGenerator->createStepVector32Intrinsic(insertionPoint);
@@ -225,7 +223,6 @@ SVE_Vectorizer::fillPreVecBlock(BasicBlock *preVecBlock, BasicBlock *preheader, 
 
     Value *remResult = builder.CreateURem(tripCount, stepValue);
     Value *totalVecIterations = builder.CreateSub(tripCount, remResult, "total.iterations.to.be.vectorized");
-
 
     // create vector by which step vector should be updated
     Value *stepVecUpdateValues = createVectorOfConstants(stepValue, insertionPoint, "stepVector.update.values");
