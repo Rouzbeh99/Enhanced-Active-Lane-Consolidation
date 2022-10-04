@@ -49,15 +49,9 @@ Value *IntrinsicCallGenerator::createIndexInstruction(IRBuilder<> &IRB, Value *f
 
 Value * IntrinsicCallGenerator::createGatherLoadInstruction(IRBuilder<> &IRB,
     Value *ptr, Value *predicatedVector, Value *indices) {
-  auto intrinsic = Intrinsic::aarch64_sve_ld1_gather_sxtw_index;
-
-  VectorType *type = VectorType::get(IRB.getInt32Ty(), VF, /*Scalable*/ true);
-  Function *intrinsicFunction = Intrinsic::getDeclaration(M, intrinsic, type);
-
-  std::vector<Value *> arguments; arguments.push_back(predicatedVector);
-  arguments.push_back(ptr); arguments.push_back(indices);
-
-  return IRB.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
+    auto *VecTy = VectorType::get(IRB.getInt32Ty(), VF, /*Scalable*/ true);
+    return IRB.CreateIntrinsic(Intrinsic::aarch64_sve_ld1_gather_sxtw_index,
+        {VecTy}, {predicatedVector, ptr, indices});
 }
 
 
@@ -73,18 +67,9 @@ IntrinsicCallGenerator::createLoadInstruction(IRBuilder<> &IRB, Value *ptr,
 void IntrinsicCallGenerator::createScatterStoreInstruction(IRBuilder<> &IRB,
     Value *elementsVector, Value *ptr, Value *predicatedVector, Value *indices)
 {
-
-  auto intrinsic = Intrinsic::aarch64_sve_st1_scatter_sxtw;
-
-  Function *intrinsicFunction = Intrinsic::getDeclaration(M, intrinsic, elementsVector->getType());
-
-  std::vector<Value *> arguments;
-  arguments.push_back(elementsVector);
-  arguments.push_back(predicatedVector);
-  arguments.push_back(ptr);
-  arguments.push_back(indices);
-
-  IRB.CreateCall(intrinsicFunction, ArrayRef<Value *>(arguments));
+    auto *VecTy = VectorType::get(IRB.getInt32Ty(), VF, /*Scalable*/ true);
+    IRB.CreateIntrinsic(Intrinsic::aarch64_sve_st1_scatter_sxtw, {VecTy},
+        {elementsVector, predicatedVector, ptr, indices});
 }
 
 void IntrinsicCallGenerator::createStoreInstruction(IRBuilder<> &IRB, Value *elementsVector,
