@@ -25,7 +25,10 @@ public:
     Loop *L;
     IntrinsicCallGenerator *intrinsicCallGenerator;
     int vectorizationFactor;
+    LoopStandardAnalysisResults &AR;
     LoopInfo *LI;
+    Value *tripCount;
+    ScalarEvolution *SE;
 
 private:
     Module *module;
@@ -44,7 +47,7 @@ private:
     BasicBlock *createPreVectorizationBlock(BasicBlock *vectorizingBlock);
 
 private:
-    Instruction *getTripCountInPreheader(BasicBlock *preheader);
+    void computeTripCount(BasicBlock *latch, Value *inductionVar);
 
 private:
     BasicBlock *createPreheaderForRemainingIterations();
@@ -96,7 +99,7 @@ private:
     BasicBlock *findTargetedBlock();
 
 public:
-    SVE_Vectorizer(Loop *l, int vectorizationFactor, LoopInfo *LI);
+    SVE_Vectorizer(Loop *l, int vectorizationFactor, LoopStandardAnalysisResults &AR);
 
 
 };

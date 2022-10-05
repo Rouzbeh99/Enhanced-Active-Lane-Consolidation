@@ -3,6 +3,7 @@
 #include "llvm/Passes/PassBuilder.h"
 #include "llvm/IR/PassManager.h"
 #include "llvm/Transforms/Utils/Cloning.h"
+#include "llvm/Analysis/ScalarEvolution.h"
 #include "Unroller/Unroller.h"
 #include "SVE-Vectorizer/SVE_Vectorizer.h"
 #include "llvm/Analysis/LoopAnalysisManager.h"
@@ -36,7 +37,9 @@ namespace {
 
     PreservedAnalyses alc_vectorizer::run(Loop &loop, LoopAnalysisManager &AM,
                                           LoopStandardAnalysisResults &AR, LPMUpdater &U) {
+
         Loop *L = &loop;
+
 
         if (L->getHeader()->getParent()->getName() == "main") {
             return PreservedAnalyses::all();
@@ -52,8 +55,6 @@ namespace {
         const DebugLoc &location = allBlocks.front()->getFirstNonPHIOrDbg()->getDebugLoc();
         llvm::outs() << "Loop at line number: " << location.getLine() - 1 << "\n";
 
-        LoopInfo &LI = AR.LI;
-
         BasicBlock *initialLatch = L->getLoopLatch();
 
         int factor = 4;
@@ -64,7 +65,7 @@ namespace {
 //        auto *sve_permute = new SVE_ALC(L, factor, &LI, unroller->getNewLatch(), unroller->getPredicates());
 //        sve_permute->doTransformation();
 
-        auto *sve_vectorizer = new SVE_Vectorizer(L, factor, &LI);
+        auto *sve_vectorizer = new SVE_Vectorizer(L, factor, AR);
         sve_vectorizer->doVectorization();
         printLoop(L);
 

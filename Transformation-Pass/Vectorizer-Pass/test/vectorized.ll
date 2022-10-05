@@ -7,16 +7,16 @@ target triple = "aarch64-unknown-linux-gnu"
 %struct.timeval = type { i64, i64 }
 
 @__func__.s253 = private unnamed_addr constant [5 x i8] c"s253\00", align 1
-@a = dso_local local_unnamed_addr global [32000 x i32] zeroinitializer, align 64, !dbg !0
-@b = dso_local local_unnamed_addr global [32000 x i32] zeroinitializer, align 64, !dbg !18
-@d = dso_local local_unnamed_addr global [32000 x i32] zeroinitializer, align 64, !dbg !22
-@c = dso_local local_unnamed_addr global [32000 x i32] zeroinitializer, align 64, !dbg !20
+@a = dso_local global [32000 x i32] zeroinitializer, align 64, !dbg !0
+@b = dso_local global [32000 x i32] zeroinitializer, align 64, !dbg !18
+@d = dso_local global [32000 x i32] zeroinitializer, align 64, !dbg !22
+@c = dso_local global [32000 x i32] zeroinitializer, align 64, !dbg !20
+@e = dso_local global [32000 x i32] zeroinitializer, align 64, !dbg !24
+@aa = dso_local global [256 x [256 x i32]] zeroinitializer, align 64, !dbg !26
+@bb = dso_local global [256 x [256 x i32]] zeroinitializer, align 64, !dbg !31
+@cc = dso_local global [256 x [256 x i32]] zeroinitializer, align 64, !dbg !33
 @flat_2d_array = dso_local local_unnamed_addr global [65536 x i32] zeroinitializer, align 64, !dbg !7
 @x = dso_local local_unnamed_addr global [32000 x i32] zeroinitializer, align 64, !dbg !13
-@e = dso_local local_unnamed_addr global [32000 x i32] zeroinitializer, align 64, !dbg !24
-@aa = dso_local local_unnamed_addr global [256 x [256 x i32]] zeroinitializer, align 64, !dbg !26
-@bb = dso_local local_unnamed_addr global [256 x [256 x i32]] zeroinitializer, align 64, !dbg !31
-@cc = dso_local local_unnamed_addr global [256 x [256 x i32]] zeroinitializer, align 64, !dbg !33
 @tt = dso_local local_unnamed_addr global [256 x [256 x i32]] zeroinitializer, align 64, !dbg !35
 @indx = dso_local local_unnamed_addr global [32000 x i32] zeroinitializer, align 64, !dbg !37
 @xx = dso_local local_unnamed_addr global ptr null, align 8, !dbg !39
@@ -33,101 +33,103 @@ entry:
   br label %for.cond2.preheader, !dbg !90
 
 for.cond2.preheader:                              ; preds = %for.cond.cleanup4, %entry
-  %nl.037 = phi i32 [ 0, %entry ], [ %inc20, %for.cond.cleanup4 ]
-  call void @llvm.dbg.value(metadata i32 %nl.037, metadata !80, metadata !DIExpression()), !dbg !89
+  %nl.038 = phi i32 [ 0, %entry ], [ %inc21, %for.cond.cleanup4 ]
+  call void @llvm.dbg.value(metadata i32 %nl.038, metadata !80, metadata !DIExpression()), !dbg !89
   call void @llvm.dbg.value(metadata i32 0, metadata !82, metadata !DIExpression()), !dbg !91
   %0 = call i32 @llvm.vscale.i32(), !dbg !92
-  %1 = shl i32 %0, 2, !dbg !92
-  %2 = icmp uge i32 %nl.037, %1, !dbg !92
+  %extended.vscale = zext i32 %0 to i64
+  %1 = shl i64 %extended.vscale, 2, !dbg !92
+  %2 = icmp uge i64 32000, %1, !dbg !92
   br i1 %2, label %Pre.Vectorization, label %Preheader.for.remaining.iterations, !dbg !92
 
 for.cond.cleanup:                                 ; preds = %for.cond.cleanup4
   %t2 = getelementptr inbounds %struct.args_t, ptr %func_args, i64 0, i32 1, !dbg !93
-  %call22 = tail call i32 @gettimeofday(ptr noundef nonnull %t2, ptr noundef null) #8, !dbg !94
-  %call23 = tail call i32 @calc_checksum(ptr noundef nonnull @__func__.s253) #8, !dbg !95
-  ret i32 %call23, !dbg !96
+  %call23 = tail call i32 @gettimeofday(ptr noundef nonnull %t2, ptr noundef null) #8, !dbg !94
+  %call24 = tail call i32 @calc_checksum(ptr noundef nonnull @__func__.s253) #8, !dbg !95
+  ret i32 %call24, !dbg !96
 
 for.cond.cleanup4:                                ; preds = %middle.block, %for.inc
-  %inc20 = add nuw nsw i32 %nl.037, 1, !dbg !97
-  call void @llvm.dbg.value(metadata i32 %inc20, metadata !80, metadata !DIExpression()), !dbg !89
-  %exitcond39.not = icmp eq i32 %inc20, 100000, !dbg !98
-  br i1 %exitcond39.not, label %for.cond.cleanup, label %for.cond2.preheader, !dbg !90, !llvm.loop !99
+  %call19 = tail call i32 @dummy(ptr noundef nonnull @a, ptr noundef nonnull @b, ptr noundef nonnull @c, ptr noundef nonnull @d, ptr noundef nonnull @e, ptr noundef nonnull @aa, ptr noundef nonnull @bb, ptr noundef nonnull @cc, i32 noundef 0) #8, !dbg !97
+  %inc21 = add nuw nsw i32 %nl.038, 1, !dbg !98
+  call void @llvm.dbg.value(metadata i32 %inc21, metadata !80, metadata !DIExpression()), !dbg !89
+  %exitcond40.not = icmp eq i32 %inc21, 100000, !dbg !99
+  br i1 %exitcond40.not, label %for.cond.cleanup, label %for.cond2.preheader, !dbg !90, !llvm.loop !100
 
 for.body5:                                        ; preds = %Preheader.for.remaining.iterations, %for.inc
-  %indvars.iv = phi i64 [ %indvars.iv.next, %for.inc ], [ %28, %Preheader.for.remaining.iterations ]
+  %indvars.iv = phi i64 [ %indvars.iv.next, %for.inc ], [ %27, %Preheader.for.remaining.iterations ]
   call void @llvm.dbg.value(metadata i64 %indvars.iv, metadata !82, metadata !DIExpression()), !dbg !91
-  %arrayidx = getelementptr inbounds [32000 x i32], ptr @a, i64 0, i64 %indvars.iv, !dbg !103
-  %3 = load i32, ptr %arrayidx, align 4, !dbg !103, !tbaa !107
-  %arrayidx7 = getelementptr inbounds [32000 x i32], ptr @b, i64 0, i64 %indvars.iv, !dbg !111
-  %4 = load i32, ptr %arrayidx7, align 4, !dbg !111, !tbaa !107
-  %cmp8 = icmp sgt i32 %3, %4, !dbg !112
-  br i1 %cmp8, label %if.then, label %for.inc, !dbg !113
+  %arrayidx = getelementptr inbounds [32000 x i32], ptr @a, i64 0, i64 %indvars.iv, !dbg !104
+  %3 = load i32, ptr %arrayidx, align 4, !dbg !104, !tbaa !108
+  %arrayidx7 = getelementptr inbounds [32000 x i32], ptr @b, i64 0, i64 %indvars.iv, !dbg !112
+  %4 = load i32, ptr %arrayidx7, align 4, !dbg !112, !tbaa !108
+  %cmp8 = icmp sgt i32 %3, %4, !dbg !113
+  br i1 %cmp8, label %if.then, label %for.inc, !dbg !114
 
 if.then:                                          ; preds = %for.body5
-  %arrayidx14 = getelementptr inbounds [32000 x i32], ptr @d, i64 0, i64 %indvars.iv, !dbg !114
-  %5 = load i32, ptr %arrayidx14, align 4, !dbg !114, !tbaa !107
-  %mul = mul nsw i32 %5, %4, !dbg !116
-  %sub = sub nsw i32 %3, %mul, !dbg !117
+  %arrayidx14 = getelementptr inbounds [32000 x i32], ptr @d, i64 0, i64 %indvars.iv, !dbg !115
+  %5 = load i32, ptr %arrayidx14, align 4, !dbg !115, !tbaa !108
+  %mul = mul nsw i32 %5, %4, !dbg !117
+  %sub = sub nsw i32 %3, %mul, !dbg !118
   call void @llvm.dbg.value(metadata i32 %sub, metadata !79, metadata !DIExpression()), !dbg !86
-  %arrayidx16 = getelementptr inbounds [32000 x i32], ptr @c, i64 0, i64 %indvars.iv, !dbg !118
-  %6 = load i32, ptr %arrayidx16, align 4, !dbg !119, !tbaa !107
-  %add = add nsw i32 %sub, %6, !dbg !119
-  store i32 %add, ptr %arrayidx16, align 4, !dbg !119, !tbaa !107
-  store i32 %sub, ptr %arrayidx, align 4, !dbg !120, !tbaa !107
-  br label %for.inc, !dbg !121
+  %arrayidx16 = getelementptr inbounds [32000 x i32], ptr @c, i64 0, i64 %indvars.iv, !dbg !119
+  %6 = load i32, ptr %arrayidx16, align 4, !dbg !120, !tbaa !108
+  %add = add nsw i32 %sub, %6, !dbg !120
+  store i32 %add, ptr %arrayidx16, align 4, !dbg !120, !tbaa !108
+  store i32 %sub, ptr %arrayidx, align 4, !dbg !121, !tbaa !108
+  br label %for.inc, !dbg !122
 
 middle.block:                                     ; preds = %vectorizing.block
-  %condition = icmp eq i32 %10, 0
-  %7 = zext i32 %26 to i64
+  %condition = icmp eq i64 %9, 0
   br i1 %condition, label %for.cond.cleanup4, label %Preheader.for.remaining.iterations
 
 Pre.Vectorization:                                ; preds = %for.cond2.preheader
-  %8 = call i32 @llvm.vscale.i32()
-  %9 = call <vscale x 4 x i32> @llvm.experimental.stepvector.nxv4i32()
-  %step.value = shl i32 %8, 2
-  %10 = urem i32 %nl.037, %step.value
-  %total.iterations.to.be.vectorized = sub i32 %nl.037, %10
-  %11 = insertelement <vscale x 4 x i32> poison, i32 %step.value, i64 0
-  %stepVector.update.values = shufflevector <vscale x 4 x i32> %11, <vscale x 4 x i32> poison, <vscale x 4 x i32> zeroinitializer
+  %7 = call i32 @llvm.vscale.i32()
+  %extended.vscale1 = zext i32 %7 to i64
+  %8 = call <vscale x 4 x i64> @llvm.experimental.stepvector.nxv4i64()
+  %step.value = shl i64 %extended.vscale1, 2
+  %9 = urem i64 32000, %step.value
+  %total.iterations.to.be.vectorized = sub i64 32000, %9
+  %10 = insertelement <vscale x 4 x i64> poison, i64 %step.value, i64 0
+  %stepVector.update.values = shufflevector <vscale x 4 x i64> %10, <vscale x 4 x i64> poison, <vscale x 4 x i32> zeroinitializer
   br label %vectorizing.block
 
 vectorizing.block:                                ; preds = %vectorizing.block, %Pre.Vectorization
-  %12 = phi i32 [ 0, %Pre.Vectorization ], [ %26, %vectorizing.block ]
-  %13 = phi <vscale x 4 x i32> [ %9, %Pre.Vectorization ], [ %27, %vectorizing.block ]
-  %14 = getelementptr inbounds [32000 x i32], ptr @a, i64 0, i32 %12, !dbg !103
-  %15 = getelementptr inbounds [32000 x i32], ptr @b, i64 0, i32 %12, !dbg !111
+  %11 = phi i64 [ 0, %Pre.Vectorization ], [ %25, %vectorizing.block ]
+  %12 = phi <vscale x 4 x i64> [ %8, %Pre.Vectorization ], [ %26, %vectorizing.block ]
+  %13 = getelementptr inbounds [32000 x i32], ptr @a, i64 0, i64 %11, !dbg !104
+  %14 = getelementptr inbounds [32000 x i32], ptr @b, i64 0, i64 %11, !dbg !112
+  %15 = load <vscale x 4 x i32>, ptr %13, align 16
   %16 = load <vscale x 4 x i32>, ptr %14, align 16
-  %17 = load <vscale x 4 x i32>, ptr %15, align 16
-  %18 = icmp sgt <vscale x 4 x i32> %16, %17
-  %19 = getelementptr inbounds [32000 x i32], ptr @d, i64 0, i32 %12, !dbg !114
-  %20 = getelementptr inbounds [32000 x i32], ptr @c, i64 0, i32 %12, !dbg !118
-  %21 = call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.nxv4i32(<vscale x 4 x i1> %18, ptr %19)
-  %22 = call <vscale x 4 x i32> @llvm.aarch64.sve.mul.nxv4i32(<vscale x 4 x i1> %18, <vscale x 4 x i32> %21, <vscale x 4 x i32> %17)
-  %23 = call <vscale x 4 x i32> @llvm.aarch64.sve.sub.nxv4i32(<vscale x 4 x i1> %18, <vscale x 4 x i32> %16, <vscale x 4 x i32> %22)
-  %24 = call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.nxv4i32(<vscale x 4 x i1> %18, ptr %20)
-  %25 = call <vscale x 4 x i32> @llvm.aarch64.sve.add.nxv4i32(<vscale x 4 x i1> %18, <vscale x 4 x i32> %23, <vscale x 4 x i32> %24)
-  call void @llvm.aarch64.sve.st1.nxv4i32(<vscale x 4 x i32> %25, <vscale x 4 x i1> %18, ptr %20)
-  call void @llvm.aarch64.sve.st1.nxv4i32(<vscale x 4 x i32> %23, <vscale x 4 x i1> %18, ptr %14)
-  %26 = add i32 %step.value, %12
-  %27 = add <vscale x 4 x i32> %13, %stepVector.update.values
-  %terminate.condition = icmp uge i32 %26, %total.iterations.to.be.vectorized
+  %17 = icmp sgt <vscale x 4 x i32> %15, %16
+  %18 = getelementptr inbounds [32000 x i32], ptr @d, i64 0, i64 %11, !dbg !115
+  %19 = getelementptr inbounds [32000 x i32], ptr @c, i64 0, i64 %11, !dbg !119
+  %20 = call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.nxv4i32(<vscale x 4 x i1> %17, ptr %18)
+  %21 = call <vscale x 4 x i32> @llvm.aarch64.sve.mul.nxv4i32(<vscale x 4 x i1> %17, <vscale x 4 x i32> %20, <vscale x 4 x i32> %16)
+  %22 = call <vscale x 4 x i32> @llvm.aarch64.sve.sub.nxv4i32(<vscale x 4 x i1> %17, <vscale x 4 x i32> %15, <vscale x 4 x i32> %21)
+  %23 = call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.nxv4i32(<vscale x 4 x i1> %17, ptr %19)
+  %24 = call <vscale x 4 x i32> @llvm.aarch64.sve.add.nxv4i32(<vscale x 4 x i1> %17, <vscale x 4 x i32> %22, <vscale x 4 x i32> %23)
+  call void @llvm.aarch64.sve.st1.nxv4i32(<vscale x 4 x i32> %24, <vscale x 4 x i1> %17, ptr %19)
+  call void @llvm.aarch64.sve.st1.nxv4i32(<vscale x 4 x i32> %22, <vscale x 4 x i1> %17, ptr %13)
+  %25 = add i64 %step.value, %11
+  %26 = add <vscale x 4 x i64> %12, %stepVector.update.values
+  %terminate.condition = icmp uge i64 %25, %total.iterations.to.be.vectorized
   br i1 %terminate.condition, label %middle.block, label %vectorizing.block
 
 Preheader.for.remaining.iterations:               ; preds = %middle.block, %for.cond2.preheader
-  %28 = phi i64 [ 0, %for.cond2.preheader ], [ %7, %middle.block ]
+  %27 = phi i64 [ 0, %for.cond2.preheader ], [ %25, %middle.block ]
   br label %for.body5
 
 for.inc:                                          ; preds = %if.then, %for.body5
-  %indvars.iv.next = add nuw nsw i64 %indvars.iv, 1, !dbg !122
+  %indvars.iv.next = add nuw nsw i64 %indvars.iv, 1, !dbg !123
   call void @llvm.dbg.value(metadata i64 %indvars.iv.next, metadata !82, metadata !DIExpression()), !dbg !91
-  %exitcond.not = icmp eq i64 %indvars.iv.next, 32000, !dbg !123
-  br i1 %exitcond.not, label %for.cond.cleanup4, label %for.body5, !dbg !92, !llvm.loop !124
+  %exitcond.not = icmp eq i64 %indvars.iv.next, 32000, !dbg !124
+  br i1 %exitcond.not, label %for.cond.cleanup4, label %for.body5, !dbg !92, !llvm.loop !125
 }
 
-declare !dbg !126 i32 @initialise_arrays(ptr noundef) local_unnamed_addr #1
+declare !dbg !127 i32 @initialise_arrays(ptr noundef) local_unnamed_addr #1
 
 ; Function Attrs: nofree nounwind
-declare !dbg !133 noundef i32 @gettimeofday(ptr nocapture noundef, ptr nocapture noundef) local_unnamed_addr #2
+declare !dbg !134 noundef i32 @gettimeofday(ptr nocapture noundef, ptr nocapture noundef) local_unnamed_addr #2
 
 ; Function Attrs: argmemonly nocallback nofree nosync nounwind willreturn
 declare void @llvm.lifetime.start.p0(i64 immarg, ptr nocapture) #3
@@ -135,34 +137,36 @@ declare void @llvm.lifetime.start.p0(i64 immarg, ptr nocapture) #3
 ; Function Attrs: argmemonly nocallback nofree nosync nounwind willreturn
 declare void @llvm.lifetime.end.p0(i64 immarg, ptr nocapture) #3
 
-declare !dbg !139 i32 @calc_checksum(ptr noundef) local_unnamed_addr #1
+declare !dbg !140 i32 @dummy(ptr noundef, ptr noundef, ptr noundef, ptr noundef, ptr noundef, ptr noundef, ptr noundef, ptr noundef, i32 noundef) local_unnamed_addr #1
+
+declare !dbg !146 i32 @calc_checksum(ptr noundef) local_unnamed_addr #1
 
 ; Function Attrs: noinline nounwind uwtable
-define dso_local i32 @main(i32 noundef %argc, ptr nocapture noundef readnone %argv) local_unnamed_addr #0 !dbg !140 {
+define dso_local i32 @main(i32 noundef %argc, ptr nocapture noundef readnone %argv) local_unnamed_addr #0 !dbg !147 {
 entry:
   %ip = alloca ptr, align 8
   %s1 = alloca i32, align 4
   %s2 = alloca i32, align 4
-  call void @llvm.dbg.value(metadata i32 %argc, metadata !146, metadata !DIExpression()), !dbg !153
-  call void @llvm.dbg.value(metadata ptr %argv, metadata !147, metadata !DIExpression()), !dbg !153
-  call void @llvm.dbg.value(metadata i32 1, metadata !148, metadata !DIExpression()), !dbg !153
-  call void @llvm.dbg.value(metadata i32 1, metadata !149, metadata !DIExpression()), !dbg !153
-  call void @llvm.lifetime.start.p0(i64 8, ptr nonnull %ip) #8, !dbg !154
-  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %s1) #8, !dbg !155
-  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %s2) #8, !dbg !155
-  call void @llvm.dbg.value(metadata ptr %ip, metadata !150, metadata !DIExpression(DW_OP_deref)), !dbg !153
-  call void @llvm.dbg.value(metadata ptr %s1, metadata !151, metadata !DIExpression(DW_OP_deref)), !dbg !153
-  call void @llvm.dbg.value(metadata ptr %s2, metadata !152, metadata !DIExpression(DW_OP_deref)), !dbg !153
-  call void @init(ptr noundef nonnull %ip, ptr noundef nonnull %s1, ptr noundef nonnull %s2) #8, !dbg !156
-  %puts = call i32 @puts(ptr nonnull @str), !dbg !157
-  %call1 = call i32 @time_function(ptr noundef nonnull @s253, ptr noundef null) #8, !dbg !158
-  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %s2) #8, !dbg !159
-  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %s1) #8, !dbg !159
-  call void @llvm.lifetime.end.p0(i64 8, ptr nonnull %ip) #8, !dbg !159
-  ret i32 0, !dbg !159
+  call void @llvm.dbg.value(metadata i32 %argc, metadata !153, metadata !DIExpression()), !dbg !160
+  call void @llvm.dbg.value(metadata ptr %argv, metadata !154, metadata !DIExpression()), !dbg !160
+  call void @llvm.dbg.value(metadata i32 1, metadata !155, metadata !DIExpression()), !dbg !160
+  call void @llvm.dbg.value(metadata i32 1, metadata !156, metadata !DIExpression()), !dbg !160
+  call void @llvm.lifetime.start.p0(i64 8, ptr nonnull %ip) #8, !dbg !161
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %s1) #8, !dbg !162
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %s2) #8, !dbg !162
+  call void @llvm.dbg.value(metadata ptr %ip, metadata !157, metadata !DIExpression(DW_OP_deref)), !dbg !160
+  call void @llvm.dbg.value(metadata ptr %s1, metadata !158, metadata !DIExpression(DW_OP_deref)), !dbg !160
+  call void @llvm.dbg.value(metadata ptr %s2, metadata !159, metadata !DIExpression(DW_OP_deref)), !dbg !160
+  call void @init(ptr noundef nonnull %ip, ptr noundef nonnull %s1, ptr noundef nonnull %s2) #8, !dbg !163
+  %puts = call i32 @puts(ptr nonnull @str), !dbg !164
+  %call1 = call i32 @time_function(ptr noundef nonnull @s253, ptr noundef null) #8, !dbg !165
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %s2) #8, !dbg !166
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %s1) #8, !dbg !166
+  call void @llvm.lifetime.end.p0(i64 8, ptr nonnull %ip) #8, !dbg !166
+  ret i32 0, !dbg !166
 }
 
-declare !dbg !160 void @init(ptr noundef, ptr noundef, ptr noundef) local_unnamed_addr #1
+declare !dbg !167 void @init(ptr noundef, ptr noundef, ptr noundef) local_unnamed_addr #1
 
 declare i32 @time_function(...) local_unnamed_addr #1
 
@@ -176,7 +180,7 @@ declare noundef i32 @puts(ptr nocapture noundef readonly) local_unnamed_addr #5
 declare i32 @llvm.vscale.i32() #6
 
 ; Function Attrs: nocallback nofree nosync nounwind readnone willreturn
-declare <vscale x 4 x i32> @llvm.experimental.stepvector.nxv4i32() #6
+declare <vscale x 4 x i64> @llvm.experimental.stepvector.nxv4i64() #6
 
 ; Function Attrs: argmemonly nocallback nofree nosync nounwind readonly willreturn
 declare <vscale x 4 x i32> @llvm.aarch64.sve.ld1.nxv4i32(<vscale x 4 x i1>, ptr) #7
@@ -210,7 +214,7 @@ attributes #8 = { nounwind }
 !0 = !DIGlobalVariableExpression(var: !1, expr: !DIExpression())
 !1 = distinct !DIGlobalVariable(name: "a", scope: !2, file: !3, line: 14, type: !15, isLocal: false, isDefinition: true, align: 512)
 !2 = distinct !DICompileUnit(language: DW_LANG_C99, file: !3, producer: "clang version 15.0.0 (https://www.github.com/llvm/llvm-project.git 61baf2ffa7071944c00a0642fdb9ff77d9cff0da)", isOptimized: true, runtimeVersion: 0, emissionKind: FullDebug, retainedTypes: !4, globals: !6, splitDebugInlining: false, nameTableKind: None)
-!3 = !DIFile(filename: "tsvc-functions.c", directory: "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation-Pass/Vectorizer-Pass/test", checksumkind: CSK_MD5, checksum: "4b4cbc3b2a3103dc2e637ddaee61520f")
+!3 = !DIFile(filename: "tsvc-functions.c", directory: "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation-Pass/Vectorizer-Pass/test", checksumkind: CSK_MD5, checksum: "c6f620ae9f6e00b4e2b646d0818f2f39")
 !4 = !{!5}
 !5 = !DIDerivedType(tag: DW_TAG_pointer_type, baseType: null, size: 64)
 !6 = !{!7, !13, !0, !18, !20, !22, !24, !26, !31, !33, !35, !37, !39, !43}
@@ -304,70 +308,77 @@ attributes #8 = { nounwind }
 !94 = !DILocation(line: 44, column: 5, scope: !57)
 !95 = !DILocation(line: 45, column: 12, scope: !57)
 !96 = !DILocation(line: 45, column: 5, scope: !57)
-!97 = !DILocation(line: 33, column: 41, scope: !85)
-!98 = !DILocation(line: 33, column: 25, scope: !85)
-!99 = distinct !{!99, !90, !100, !101, !102}
-!100 = !DILocation(line: 42, column: 5, scope: !81)
-!101 = !{!"llvm.loop.mustprogress"}
-!102 = !{!"llvm.loop.unroll.disable"}
-!103 = !DILocation(line: 35, column: 17, scope: !104)
-!104 = distinct !DILexicalBlock(scope: !105, file: !3, line: 35, column: 17)
-!105 = distinct !DILexicalBlock(scope: !106, file: !3, line: 34, column: 42)
-!106 = distinct !DILexicalBlock(scope: !83, file: !3, line: 34, column: 9)
-!107 = !{!108, !108, i64 0}
-!108 = !{!"int", !109, i64 0}
-!109 = !{!"omnipotent char", !110, i64 0}
-!110 = !{!"Simple C/C++ TBAA"}
-!111 = !DILocation(line: 35, column: 24, scope: !104)
-!112 = !DILocation(line: 35, column: 22, scope: !104)
-!113 = !DILocation(line: 35, column: 17, scope: !105)
-!114 = !DILocation(line: 36, column: 35, scope: !115)
-!115 = distinct !DILexicalBlock(scope: !104, file: !3, line: 35, column: 30)
-!116 = !DILocation(line: 36, column: 33, scope: !115)
-!117 = !DILocation(line: 36, column: 26, scope: !115)
-!118 = !DILocation(line: 37, column: 17, scope: !115)
-!119 = !DILocation(line: 37, column: 22, scope: !115)
-!120 = !DILocation(line: 38, column: 22, scope: !115)
-!121 = !DILocation(line: 39, column: 13, scope: !115)
-!122 = !DILocation(line: 34, column: 38, scope: !106)
-!123 = !DILocation(line: 34, column: 27, scope: !106)
-!124 = distinct !{!124, !92, !125, !101, !102}
-!125 = !DILocation(line: 40, column: 9, scope: !83)
-!126 = !DISubprogram(name: "initialise_arrays", scope: !62, file: !62, line: 27, type: !127, flags: DIFlagPrototyped, spFlags: DISPFlagOptimized, retainedNodes: !132)
-!127 = !DISubroutineType(types: !128)
-!128 = !{!10, !129}
-!129 = !DIDerivedType(tag: DW_TAG_pointer_type, baseType: !130, size: 64)
-!130 = !DIDerivedType(tag: DW_TAG_const_type, baseType: !131)
-!131 = !DIBasicType(name: "char", size: 8, encoding: DW_ATE_unsigned_char)
-!132 = !{}
-!133 = !DISubprogram(name: "gettimeofday", scope: !134, file: !134, line: 66, type: !135, flags: DIFlagPrototyped, spFlags: DISPFlagOptimized, retainedNodes: !132)
-!134 = !DIFile(filename: "/usr/lib/gcc-cross/aarch64-linux-gnu/9/../../../../aarch64-linux-gnu/include/sys/time.h", directory: "", checksumkind: CSK_MD5, checksum: "99ab902f1529d4d72694df20fbf7a8ec")
-!135 = !DISubroutineType(types: !136)
-!136 = !{!10, !137, !76}
-!137 = !DIDerivedType(tag: DW_TAG_restrict_type, baseType: !138)
-!138 = !DIDerivedType(tag: DW_TAG_pointer_type, baseType: !65, size: 64)
-!139 = !DISubprogram(name: "calc_checksum", scope: !62, file: !62, line: 28, type: !127, flags: DIFlagPrototyped, spFlags: DISPFlagOptimized, retainedNodes: !132)
-!140 = distinct !DISubprogram(name: "main", scope: !3, file: !3, line: 49, type: !141, scopeLine: 49, flags: DIFlagPrototyped | DIFlagAllCallsDescribed, spFlags: DISPFlagDefinition | DISPFlagOptimized, unit: !2, retainedNodes: !145)
+!97 = !DILocation(line: 41, column: 9, scope: !84)
+!98 = !DILocation(line: 33, column: 41, scope: !85)
+!99 = !DILocation(line: 33, column: 25, scope: !85)
+!100 = distinct !{!100, !90, !101, !102, !103}
+!101 = !DILocation(line: 42, column: 5, scope: !81)
+!102 = !{!"llvm.loop.mustprogress"}
+!103 = !{!"llvm.loop.unroll.disable"}
+!104 = !DILocation(line: 35, column: 17, scope: !105)
+!105 = distinct !DILexicalBlock(scope: !106, file: !3, line: 35, column: 17)
+!106 = distinct !DILexicalBlock(scope: !107, file: !3, line: 34, column: 42)
+!107 = distinct !DILexicalBlock(scope: !83, file: !3, line: 34, column: 9)
+!108 = !{!109, !109, i64 0}
+!109 = !{!"int", !110, i64 0}
+!110 = !{!"omnipotent char", !111, i64 0}
+!111 = !{!"Simple C/C++ TBAA"}
+!112 = !DILocation(line: 35, column: 24, scope: !105)
+!113 = !DILocation(line: 35, column: 22, scope: !105)
+!114 = !DILocation(line: 35, column: 17, scope: !106)
+!115 = !DILocation(line: 36, column: 35, scope: !116)
+!116 = distinct !DILexicalBlock(scope: !105, file: !3, line: 35, column: 30)
+!117 = !DILocation(line: 36, column: 33, scope: !116)
+!118 = !DILocation(line: 36, column: 26, scope: !116)
+!119 = !DILocation(line: 37, column: 17, scope: !116)
+!120 = !DILocation(line: 37, column: 22, scope: !116)
+!121 = !DILocation(line: 38, column: 22, scope: !116)
+!122 = !DILocation(line: 39, column: 13, scope: !116)
+!123 = !DILocation(line: 34, column: 38, scope: !107)
+!124 = !DILocation(line: 34, column: 27, scope: !107)
+!125 = distinct !{!125, !92, !126, !102, !103}
+!126 = !DILocation(line: 40, column: 9, scope: !83)
+!127 = !DISubprogram(name: "initialise_arrays", scope: !62, file: !62, line: 27, type: !128, flags: DIFlagPrototyped, spFlags: DISPFlagOptimized, retainedNodes: !133)
+!128 = !DISubroutineType(types: !129)
+!129 = !{!10, !130}
+!130 = !DIDerivedType(tag: DW_TAG_pointer_type, baseType: !131, size: 64)
+!131 = !DIDerivedType(tag: DW_TAG_const_type, baseType: !132)
+!132 = !DIBasicType(name: "char", size: 8, encoding: DW_ATE_unsigned_char)
+!133 = !{}
+!134 = !DISubprogram(name: "gettimeofday", scope: !135, file: !135, line: 66, type: !136, flags: DIFlagPrototyped, spFlags: DISPFlagOptimized, retainedNodes: !133)
+!135 = !DIFile(filename: "/usr/lib/gcc-cross/aarch64-linux-gnu/9/../../../../aarch64-linux-gnu/include/sys/time.h", directory: "", checksumkind: CSK_MD5, checksum: "99ab902f1529d4d72694df20fbf7a8ec")
+!136 = !DISubroutineType(types: !137)
+!137 = !{!10, !138, !76}
+!138 = !DIDerivedType(tag: DW_TAG_restrict_type, baseType: !139)
+!139 = !DIDerivedType(tag: DW_TAG_pointer_type, baseType: !65, size: 64)
+!140 = !DISubprogram(name: "dummy", scope: !62, file: !62, line: 23, type: !141, flags: DIFlagPrototyped, spFlags: DISPFlagOptimized, retainedNodes: !133)
 !141 = !DISubroutineType(types: !142)
-!142 = !{!10, !10, !143}
+!142 = !{!10, !42, !42, !42, !42, !42, !143, !143, !143, !10}
 !143 = !DIDerivedType(tag: DW_TAG_pointer_type, baseType: !144, size: 64)
-!144 = !DIDerivedType(tag: DW_TAG_pointer_type, baseType: !131, size: 64)
-!145 = !{!146, !147, !148, !149, !150, !151, !152}
-!146 = !DILocalVariable(name: "argc", arg: 1, scope: !140, file: !3, line: 49, type: !10)
-!147 = !DILocalVariable(name: "argv", arg: 2, scope: !140, file: !3, line: 49, type: !143)
-!148 = !DILocalVariable(name: "n1", scope: !140, file: !3, line: 50, type: !10)
-!149 = !DILocalVariable(name: "n3", scope: !140, file: !3, line: 51, type: !10)
-!150 = !DILocalVariable(name: "ip", scope: !140, file: !3, line: 52, type: !42)
-!151 = !DILocalVariable(name: "s1", scope: !140, file: !3, line: 53, type: !10)
-!152 = !DILocalVariable(name: "s2", scope: !140, file: !3, line: 53, type: !10)
-!153 = !DILocation(line: 0, scope: !140)
-!154 = !DILocation(line: 52, column: 5, scope: !140)
-!155 = !DILocation(line: 53, column: 5, scope: !140)
-!156 = !DILocation(line: 54, column: 5, scope: !140)
-!157 = !DILocation(line: 55, column: 5, scope: !140)
-!158 = !DILocation(line: 57, column: 6, scope: !140)
-!159 = !DILocation(line: 58, column: 1, scope: !140)
-!160 = !DISubprogram(name: "init", scope: !62, file: !62, line: 25, type: !161, flags: DIFlagPrototyped, spFlags: DISPFlagOptimized, retainedNodes: !132)
-!161 = !DISubroutineType(types: !162)
-!162 = !{null, !163, !42, !42}
-!163 = !DIDerivedType(tag: DW_TAG_pointer_type, baseType: !42, size: 64)
+!144 = !DICompositeType(tag: DW_TAG_array_type, baseType: !10, size: 8192, elements: !145)
+!145 = !{!30}
+!146 = !DISubprogram(name: "calc_checksum", scope: !62, file: !62, line: 28, type: !128, flags: DIFlagPrototyped, spFlags: DISPFlagOptimized, retainedNodes: !133)
+!147 = distinct !DISubprogram(name: "main", scope: !3, file: !3, line: 49, type: !148, scopeLine: 49, flags: DIFlagPrototyped | DIFlagAllCallsDescribed, spFlags: DISPFlagDefinition | DISPFlagOptimized, unit: !2, retainedNodes: !152)
+!148 = !DISubroutineType(types: !149)
+!149 = !{!10, !10, !150}
+!150 = !DIDerivedType(tag: DW_TAG_pointer_type, baseType: !151, size: 64)
+!151 = !DIDerivedType(tag: DW_TAG_pointer_type, baseType: !132, size: 64)
+!152 = !{!153, !154, !155, !156, !157, !158, !159}
+!153 = !DILocalVariable(name: "argc", arg: 1, scope: !147, file: !3, line: 49, type: !10)
+!154 = !DILocalVariable(name: "argv", arg: 2, scope: !147, file: !3, line: 49, type: !150)
+!155 = !DILocalVariable(name: "n1", scope: !147, file: !3, line: 50, type: !10)
+!156 = !DILocalVariable(name: "n3", scope: !147, file: !3, line: 51, type: !10)
+!157 = !DILocalVariable(name: "ip", scope: !147, file: !3, line: 52, type: !42)
+!158 = !DILocalVariable(name: "s1", scope: !147, file: !3, line: 53, type: !10)
+!159 = !DILocalVariable(name: "s2", scope: !147, file: !3, line: 53, type: !10)
+!160 = !DILocation(line: 0, scope: !147)
+!161 = !DILocation(line: 52, column: 5, scope: !147)
+!162 = !DILocation(line: 53, column: 5, scope: !147)
+!163 = !DILocation(line: 54, column: 5, scope: !147)
+!164 = !DILocation(line: 55, column: 5, scope: !147)
+!165 = !DILocation(line: 57, column: 6, scope: !147)
+!166 = !DILocation(line: 58, column: 1, scope: !147)
+!167 = !DISubprogram(name: "init", scope: !62, file: !62, line: 25, type: !168, flags: DIFlagPrototyped, spFlags: DISPFlagOptimized, retainedNodes: !133)
+!168 = !DISubroutineType(types: !169)
+!169 = !{null, !170, !42, !42}
+!170 = !DIDerivedType(tag: DW_TAG_pointer_type, baseType: !42, size: 64)

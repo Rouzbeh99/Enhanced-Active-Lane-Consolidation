@@ -38,7 +38,7 @@ int s253(struct args_t * func_args)
                 a[i] = s;
             }
         }
-        //dummy(a, b, c, d, e, aa, bb, cc, 0.);
+        dummy(a, b, c, d, e, aa, bb, cc, 0.);
     }
 
     gettimeofday(&func_args->t2, NULL);

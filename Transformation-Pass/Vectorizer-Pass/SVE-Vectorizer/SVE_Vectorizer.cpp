@@ -4,6 +4,8 @@
 
 #include "SVE_Vectorizer.h"
 #include "math.h"
+#include "llvm/Analysis/ScalarEvolution.h"
+#include "llvm/Analysis/ScalarEvolutionExpressions.h"
 
 #include <utility>
 #include <stack>
@@ -39,9 +41,12 @@
 void SVE_Vectorizer::doVectorization() {
 
     BasicBlock *preheader = L->getLoopPreheader();
+    BasicBlock *latch = L->getLoopLatch();
     BasicBlock *exitBlock = L->getExitBlock();
     PHINode *inductionVar = L->getCanonicalInductionVariable();
 
+    // computing TripCount;
+    computeTripCount(latch, inductionVar);
 
 
     // create vectorizingBlock
@@ -90,8 +95,6 @@ void SVE_Vectorizer::refinePreheader(BasicBlock *preVecBlock, BasicBlock *preHea
     IRBuilder<> builder(preheader->getContext());
     builder.SetInsertPoint(insertionPoint);
 
-    auto tripCount = dyn_cast<Value>(getTripCountInPreheader(preheader));
-
 
     //get current vscale
     CastInst *vscale;
@@ -120,11 +123,25 @@ void SVE_Vectorizer::refinePreheader(BasicBlock *preVecBlock, BasicBlock *preHea
 }
 
 
-Instruction *SVE_Vectorizer::getTripCountInPreheader(BasicBlock *preheader) {
+void SVE_Vectorizer::computeTripCount(BasicBlock *latch, Value *inductionVar) {
+    auto *brIns = dyn_cast<BranchInst>(latch->getTerminator());
+    auto *conditionInst = dyn_cast<Instruction>(brIns->getCondition());
 
-    // TODO: find  more reliable way...
-
-    return &preheader->getInstList().front();
+    // one of the operands is the induction var and the other one is trip count
+    for (int i = 0; i < conditionInst->getNumOperands(); ++i) {
+        bool flag = false;
+        for (auto user: inductionVar->users()) {
+            if (user == conditionInst->getOperand(i)) {
+                flag = true;
+            }
+        }
+        if (flag) {
+            continue;
+        } else {
+            tripCount = conditionInst->getOperand(i);
+            return;
+        }
+    }
 }
 
 // TODO: complete implementation
@@ -189,8 +206,6 @@ SVE_Vectorizer::fillPreVecBlock(BasicBlock *preVecBlock, BasicBlock *preheader, 
     Instruction *insertionPoint = preVecBlock->getTerminator();
     IRBuilder<> builder(preheader->getContext());
     builder.SetInsertPoint(insertionPoint);
-
-    auto *tripCount = dyn_cast<Value>(getTripCountInPreheader(preheader));
 
 
     // create step vector
@@ -617,7 +632,7 @@ SVE_Vectorizer::vectorizeInstructions_nonePredicated(std::vector<Instruction *> 
         }
 
         // Get Element Pointers in decision block might be used in vectorization block, so we should add them as well
-        if(isa<GEPOperator>(inputMapRecord.first)){
+        if (isa<GEPOperator>(inputMapRecord.first)) {
             outputMap->insert({inputMapRecord.first, inputMapRecord.second});
         }
     }
@@ -847,11 +862,14 @@ BasicBlock *SVE_Vectorizer::findTargetedBlock() {
     return nullptr;
 }
 
-SVE_Vectorizer::SVE_Vectorizer(Loop *l, int vectorizationFactor, LoopInfo *li) : L(l), vectorizationFactor(
-        vectorizationFactor), LI(li) {
+SVE_Vectorizer::SVE_Vectorizer(Loop *l, int vectorizationFactor, LoopStandardAnalysisResults &analysisResults) : L(l),
+                                                                                                                 vectorizationFactor(
+                                                                                                                         vectorizationFactor),
+                                                                                                                 AR(analysisResults) {
     module = l->getHeader()->getModule();
+    LI = &AR.LI;
+    SE = &AR.SE;
     intrinsicCallGenerator = new IntrinsicCallGenerator(vectorizationFactor, module);
-
 
 }
 
