@@ -92,29 +92,22 @@ void SVE_Vectorizer::refinePreheader(BasicBlock *preVecBlock, BasicBlock *preHea
 
     BasicBlock *preheader = L->getLoopPreheader();
     Instruction *insertionPoint = preheader->getTerminator();
-    IRBuilder<> builder(preheader->getContext());
-    builder.SetInsertPoint(insertionPoint);
+    IRBuilder<> IRB(insertionPoint);
 
 
     //get current vscale
-    CastInst *vscale;
-    CallInst *vscale32 = intrinsicCallGenerator->createVscale32Intrinsic(insertionPoint);
+    Value *stepVal = nullptr;
 
     if (tripCount->getType() == Type::getInt64Ty(preheader->getContext())) {
-        vscale = ZExtInst::Create(Instruction::CastOps::ZExt, vscale32,
-                                  Type::getInt64Ty(preheader->getContext()),
-                                  "extended.vscale", insertionPoint);
+      stepVal = intrinsicCallGenerator->createVscale64Intrinsic(IRB);
     } else {
-        vscale = reinterpret_cast<CastInst *>(vscale32);
+      stepVal = intrinsicCallGenerator->createVscale32Intrinsic(IRB);
     }
 
     // check if there are iterations
-    Constant *shiftOp = llvm::ConstantInt::get(tripCount->getType(),
-                                               int(log2(vectorizationFactor)));
-    Value *shiftValue = builder.CreateShl(vscale, shiftOp);
-    Value *condition = builder.CreateICmpUGE(tripCount, shiftValue); // if true, there are enough iterations
+    Value *condition = IRB.CreateICmpUGE(tripCount, stepVal); // if true, there are enough iterations
 
-    builder.CreateCondBr(condition, preVecBlock, preHeaderForRemaining);
+    IRB.CreateCondBr(condition, preVecBlock, preHeaderForRemaining);
 
     // remove previous terminator
     preheader->getTerminator()->eraseFromParent();
@@ -204,49 +197,35 @@ SVE_Vectorizer::fillPreVecBlock(BasicBlock *preVecBlock, BasicBlock *preheader, 
     auto *results = new std::vector<Value *>;
 
     Instruction *insertionPoint = preVecBlock->getTerminator();
-    IRBuilder<> builder(preheader->getContext());
-    builder.SetInsertPoint(insertionPoint);
-
-
-    // create step vector
-    CallInst *stepVec = nullptr;
+    IRBuilder<> builder(insertionPoint);
 
     // create the value by which the index should be increased
     //TODO: we assume indices are added by one, make it work for other cases as well
     //should be added by vscale * VFactor * 1  ----> vscale shl log(VFactor)
 
-    CastInst *vscale;
-    CallInst *vscale32 = intrinsicCallGenerator->createVscale32Intrinsic(insertionPoint);
+    // create step vector
+    Value *stepVec = nullptr;
+    Value *stepVal = nullptr;
 
     if (tripCount->getType() == Type::getInt64Ty(preheader->getContext())) {
-        vscale = ZExtInst::Create(Instruction::CastOps::ZExt, vscale32,
-                                  Type::getInt64Ty(preheader->getContext()),
-                                  "extended.vscale", insertionPoint);
-
-        stepVec = intrinsicCallGenerator->createStepVector64Intrinsic(insertionPoint);
+        stepVal = intrinsicCallGenerator->createVscale64Intrinsic(builder);
+        stepVec = intrinsicCallGenerator->createStepVector64Intrinsic(builder);
     } else {
-        vscale = reinterpret_cast<CastInst *>(vscale32);
-        stepVec = intrinsicCallGenerator->createStepVector32Intrinsic(insertionPoint);
+        stepVal = intrinsicCallGenerator->createVscale32Intrinsic(builder);
+        stepVec = intrinsicCallGenerator->createStepVector32Intrinsic(builder);
     }
-
-    // check if there are iterations
-    Constant *shiftOp = llvm::ConstantInt::get(tripCount->getType(),
-                                               int(log2(vectorizationFactor)));
-
-    Value *stepValue = builder.CreateShl(vscale, shiftOp, "step.value");
 
     // vectorizing block termination condition: index > n - (n % stepValue)
     // forming n - (n % stepValue)
 
-    Value *remResult = builder.CreateURem(tripCount, stepValue);
+    Value *remResult = builder.CreateURem(tripCount, stepVal);
     Value *totalVecIterations = builder.CreateSub(tripCount, remResult, "total.iterations.to.be.vectorized");
 
-
     // create vector by which step vector should be updated
-    Value *stepVecUpdateValues = createVectorOfConstants(stepValue, insertionPoint, "stepVector.update.values");
+    Value *stepVecUpdateValues = createVectorOfConstants(stepVal, insertionPoint, "stepVector.update.values");
 
     results->push_back(stepVec);
-    results->push_back(stepValue);
+    results->push_back(stepVal);
     results->push_back(stepVecUpdateValues);
     results->push_back(totalVecIterations);
     results->push_back(remResult);
@@ -671,6 +650,7 @@ void SVE_Vectorizer::vectorizeInstructions_Predicated(std::vector<Instruction *>
                                                       std::map<const Value *, const Value *> *headerInstructionsMap) {
 
     Instruction *insertionPoint = block->getTerminator();
+    IRBuilder<> IRB(insertionPoint);
 
 
     std::map<Value *, Value *> vMap;
@@ -711,7 +691,7 @@ void SVE_Vectorizer::vectorizeInstructions_Predicated(std::vector<Instruction *>
             if (vMap.count(ptr)) {
                 ptr = vMap[ptr];
             }
-            intrinsicCallGenerator->createStoreInstruction(insertionPoint, firstOp, ptr, predicates);
+            intrinsicCallGenerator->createStoreInstruction(IRB, firstOp, ptr, predicates);
             toBeRemoved.push(instr);
         } else if (isa<LoadInst>(instr)) {
 
@@ -720,7 +700,7 @@ void SVE_Vectorizer::vectorizeInstructions_Predicated(std::vector<Instruction *>
                 ptr = vMap[ptr];
             }
             auto *loadedData = dyn_cast<Value>(
-                    intrinsicCallGenerator->createLoadInstruction(insertionPoint, ptr, predicates));
+                    intrinsicCallGenerator->createLoadInstruction(IRB, ptr, predicates));
             vMap[instr] = loadedData;
             toBeRemoved.push(instr);
         } else if (isa<BinaryOperator>(instr) || isa<ICmpInst>(instr)) { // TODO: ICmp is not binary????
@@ -748,22 +728,13 @@ void SVE_Vectorizer::vectorizeInstructions_Predicated(std::vector<Instruction *>
             Value *result = nullptr;
             switch (instr->getOpcode()) {
                 case Instruction::Add:
-                    result = dyn_cast<Value>(intrinsicCallGenerator->createArithmeticInstruction(insertionPoint,
-                                                                                                 Intrinsic::aarch64_sve_add,
-                                                                                                 firstOp, secondOp,
-                                                                                                 predicates));
+                    result = IRB.CreateAdd(firstOp, secondOp);
                     break;
                 case Instruction::Mul:
-                    result = dyn_cast<Value>(intrinsicCallGenerator->createArithmeticInstruction(insertionPoint,
-                                                                                                 Intrinsic::aarch64_sve_mul,
-                                                                                                 firstOp, secondOp,
-                                                                                                 predicates));
+                    result = IRB.CreateMul(firstOp, secondOp);
                     break;
                 case Instruction::Sub:
-                    result = dyn_cast<Value>(intrinsicCallGenerator->createArithmeticInstruction(insertionPoint,
-                                                                                                 Intrinsic::aarch64_sve_sub,
-                                                                                                 firstOp, secondOp,
-                                                                                                 predicates));
+                    result = IRB.CreateSub(firstOp, secondOp);
                     break;
                 case Instruction::URem:
                     // TODO

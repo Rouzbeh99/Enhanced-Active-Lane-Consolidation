@@ -6,18 +6,23 @@ project(ALC_Vectorizer)
 find_package(LLVM REQUIRED CONFIG)
 list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
 include(AddLLVM)
-include_directories(${LLVM_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}}/Unroller ${CMAKE_SOURCE_DIR}}/SVE-Vectorizer ${CMAKE_SOURCE_DIR}}/SVE-ALC ${CMAKE_SOURCE_DIR}}/IntrinsicCallGenerator )
+include_directories(${LLVM_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR})
 add_definitions(${LLVM_DEFINITIONS})
 
-link_directories(${CMAKE_SOURCE_DIR}/Unroller/build)
-link_directories(${CMAKE_SOURCE_DIR}/SVE-Vectorizer/build)
-link_directories(${CMAKE_SOURCE_DIR}/SVE-ALC/build)
-link_directories(${CMAKE_SOURCE_DIR}/IntrinsicCallGenerator/build)
+link_directories(${CMAKE_BINARY_DIR}/Unroller)
+link_directories(${CMAKE_BINARY_DIR}/SVE-Vectorizer)
+link_directories(${CMAKE_BINARY_DIR}/SVE-ALC)
+link_directories(${CMAKE_BINARY_DIR}/IntrinsicCallGenerator)
 
-list(APPEND CMAKE_INSTALL_RPATH "${CMAKE_SOURCE_DIR}/Unroller/build")
-list(APPEND CMAKE_INSTALL_RPATH "${CMAKE_SOURCE_DIR}/SVE-Vectorizer/build")
-list(APPEND CMAKE_INSTALL_RPATH "${CMAKE_SOURCE_DIR}/SVE-ALC/build")
-list(APPEND CMAKE_INSTALL_RPATH "${CMAKE_SOURCE_DIR}/IntrinsicCallGenerator/build")
+add_subdirectory(${CMAKE_SOURCE_DIR}/Unroller)
+add_subdirectory(${CMAKE_SOURCE_DIR}/SVE-Vectorizer)
+add_subdirectory(${CMAKE_SOURCE_DIR}/SVE-ALC)
+add_subdirectory(${CMAKE_SOURCE_DIR}/IntrinsicCallGenerator)
+
+list(APPEND CMAKE_INSTALL_RPATH "${CMAKE_BINARY_DIR}/Unroller")
+list(APPEND CMAKE_INSTALL_RPATH "${CMAKE_BINARY_DIR}/SVE-Vectorizer")
+list(APPEND CMAKE_INSTALL_RPATH "${CMAKE_BINARY_DIR}/SVE-ALC")
+list(APPEND CMAKE_INSTALL_RPATH "${CMAKE_BINARY_DIR}/IntrinsicCallGenerator")
 
 # Export compile commands db.
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -28,7 +33,14 @@ set(srcs
         )
 
 # Create the MyLoopPass library.
-llvm_add_library(ALC_Vectorizer MODULE ${srcs} LINK_COMPONENTS Unroller  MODULE ${srcs} LINK_COMPONENTS SVE_Vectorizer MODULE ${srcs} LINK_COMPONENTS SVE_ALC MODULE ${srcs} LINK_COMPONENTS IntrinsicCallGenerator)
+add_llvm_library(ALC_Vectorizer MODULE ${srcs}
+  LINK_COMPONENTS
+  Unroller
+  SVE_Vectorizer
+  SVE_ALC
+  IntrinsicCallGenerator
+  PLUGIN_TOOL
+  opt)
 
 
 

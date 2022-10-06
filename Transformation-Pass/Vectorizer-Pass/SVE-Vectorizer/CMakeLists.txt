@@ -18,4 +18,4 @@ set(srcs
         )
 
 # Create the MyLoopPass library.
-add_llvm_component_library(libLLVMSVE_Vectorizer MODULE ${srcs})
+add_llvm_component_library(LLVMSVE_Vectorizer SHARED ${srcs})
