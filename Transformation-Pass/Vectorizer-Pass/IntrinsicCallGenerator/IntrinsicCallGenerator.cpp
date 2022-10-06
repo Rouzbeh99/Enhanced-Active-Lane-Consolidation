@@ -70,8 +70,9 @@ Value *IntrinsicCallGenerator::createLoadInstruction(IRBuilder<> &IRB,
                                                      Value *ptr,
                                                      Value *predicatedVector) {
   VectorType *type = VectorType::get(IRB.getInt32Ty(), VF, /*Scalable*/ true);
-  // FIXME: Use proper value for Alignment
-  return IRB.CreateMaskedLoad(type, ptr, Align(), predicatedVector);
+  return IRB.CreateMaskedLoad(
+      type, ptr, Align(VF * (IRB.getInt32Ty()->getScalarSizeInBits() / 8)),
+      predicatedVector);
 }
 
 void IntrinsicCallGenerator::createScatterStoreInstruction(
@@ -86,8 +87,10 @@ void IntrinsicCallGenerator::createStoreInstruction(IRBuilder<> &IRB,
                                                     Value *elementsVector,
                                                     Value *ptr,
                                                     Value *predicatedVector) {
-  // FIXME: Use proper value for Alignment
-  IRB.CreateMaskedStore(elementsVector, ptr, Align(), predicatedVector);
+  IRB.CreateMaskedStore(
+      elementsVector, ptr,
+      Align(VF * (IRB.getInt32Ty()->getScalarSizeInBits() / 8)),
+      predicatedVector);
 }
 
 // TODO: handle double types by changing return type and operands
