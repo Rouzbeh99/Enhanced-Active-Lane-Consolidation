@@ -728,22 +728,13 @@ void SVE_Vectorizer::vectorizeInstructions_Predicated(std::vector<Instruction *>
             Value *result = nullptr;
             switch (instr->getOpcode()) {
                 case Instruction::Add:
-                    result = dyn_cast<Value>(intrinsicCallGenerator->createArithmeticInstruction(IRB,
-                                                                                                 Intrinsic::aarch64_sve_add,
-                                                                                                 firstOp, secondOp,
-                                                                                                 predicates));
+                    result = IRB.CreateAdd(firstOp, secondOp);
                     break;
                 case Instruction::Mul:
-                    result =
-                      intrinsicCallGenerator->createArithmeticInstruction(IRB,
-                          Intrinsic::aarch64_sve_mul, firstOp, secondOp,
-                          predicates);
+                    result = IRB.CreateMul(firstOp, secondOp);
                     break;
                 case Instruction::Sub:
-                    result = dyn_cast<Value>(intrinsicCallGenerator->createArithmeticInstruction(IRB,
-                                                                                                 Intrinsic::aarch64_sve_sub,
-                                                                                                 firstOp, secondOp,
-                                                                                                 predicates));
+                    result = IRB.CreateSub(firstOp, secondOp);
                     break;
                 case Instruction::URem:
                     // TODO
