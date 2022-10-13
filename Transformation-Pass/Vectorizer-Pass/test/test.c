@@ -5,7 +5,7 @@
 
 void foo(int *__restrict__ a, int *__restrict__ b, int *__restrict__ c, int n) {
 
-    // __asm__ volatile("dmb sy\n\torr x3,x3,x3\n":: :"memory");
+     __asm__ volatile("dmb sy\n\torr x3,x3,x3\n":: :"memory");
     __START_TRACE();
     for (int i = 0; i < n; ++i) {
         if (i % 2 == 1) {
@@ -13,7 +13,7 @@ void foo(int *__restrict__ a, int *__restrict__ b, int *__restrict__ c, int n) {
         }
     }
     __STOP_TRACE();
-    //__asm__ volatile("dmb sy\n\torr x4,x4,x4\n":: :"memory");
+    __asm__ volatile("dmb sy\n\torr x4,x4,x4\n":: :"memory");
 }
 
 
