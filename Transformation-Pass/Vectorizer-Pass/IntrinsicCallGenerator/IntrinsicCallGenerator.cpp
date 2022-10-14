@@ -38,7 +38,7 @@ IntrinsicCallGenerator::createSpliceInstruction(IRBuilder<> &IRB,
                                                 Value *predicatedVector) {
   auto *VecTy = VectorType::get(IRB.getInt32Ty(), VF, /*Scalable*/ true);
   return IRB.CreateIntrinsic(Intrinsic::aarch64_sve_splice,
-                             {VecTy, IRB.getInt64Ty()},
+                             {VecTy},
                              {predicatedVector, firstOp, secondOp});
 }
 
