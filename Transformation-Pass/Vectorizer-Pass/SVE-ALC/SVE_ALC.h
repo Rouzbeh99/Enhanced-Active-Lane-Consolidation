@@ -32,16 +32,14 @@ private:
     IntrinsicCallGenerator *intrinsicCallGenerator;
     Module *module;
     int vectorizationFactor;
-    BasicBlock *targetedBlock;
+    LoopStandardAnalysisResults &AR;
     LoopInfo *LI;
-    BasicBlock *newLatch;
-    std::vector<Value *> predicates;
+    Value *tripCount;
+    ScalarEvolution *SE;
 
 
 public:
-    SVE_ALC(Loop *l, int vectorizationFactor, LoopInfo *LI, BasicBlock *newLatch,
-            std::vector<Value *> predicateVector);
-
+    SVE_ALC(Loop *l, int vectorizationFactor, LoopStandardAnalysisResults &ar);
 
 public:
 
@@ -93,6 +91,31 @@ private:
 
 private:
     BasicBlock *makeTemporaryCopyOfTheBlock(BasicBlock *block);
+
+private:
+    BasicBlock *findTargetedBlock();
+
+private:
+    Value *computeTripCount(BasicBlock *latch, Value *inductionVar);
+
+private:
+    BasicBlock *createPreALCBlock();
+
+private:
+    BasicBlock *createPreheaderForRemainingIterations();
+
+private:
+    void refinePreheader(BasicBlock *preVecBlock, BasicBlock *preHeaderForRemaining);
+
+private:
+    std::vector<Value *> *fillPreALCBlock(BasicBlock *preALCBlock, BasicBlock *preheader);
+
+private:
+    Value *createVectorOfConstants(Value *value, IRBuilder<> &builder, std::string name);
+
+private:
+    void fillMiddleBlock(BasicBlock *middleBlock, BasicBlock *preheader, BasicBlock *exitBlock,
+    Value *remResult);
 
 };
 
