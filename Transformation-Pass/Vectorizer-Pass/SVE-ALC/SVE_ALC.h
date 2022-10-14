@@ -99,7 +99,7 @@ private:
     Value *computeTripCount(BasicBlock *latch, Value *inductionVar);
 
 private:
-    BasicBlock *createPreALCBlock();
+    BasicBlock *createEmptyBlock(const std::string& name, BasicBlock* insertBefore);
 
 private:
     BasicBlock *createPreheaderForRemainingIterations();
@@ -108,7 +108,7 @@ private:
     void refinePreheader(BasicBlock *preVecBlock, BasicBlock *preHeaderForRemaining);
 
 private:
-    std::vector<Value *> *fillPreALCBlock(BasicBlock *preALCBlock, BasicBlock *preheader);
+    std::vector<Value *> *fillPreALCBlock(BasicBlock *preALCBlock, BasicBlock *preheader,  BasicBlock* alcHeader);
 
 private:
     Value *createVectorOfConstants(Value *value, IRBuilder<> &builder, std::string name);
@@ -116,6 +116,22 @@ private:
 private:
     void fillMiddleBlock(BasicBlock *middleBlock, BasicBlock *preheader, BasicBlock *exitBlock,
     Value *remResult);
+
+private:
+    void fillALCHeaderBlock(BasicBlock* alcHeader, BasicBlock* laneGatherBlock, BasicBlock* linearized);
+
+private:
+    void fillLaneGatherBlock(BasicBlock* laneGather, BasicBlock* alcApplied);
+
+private:
+    void fillALCAppliedBlock(BasicBlock* alcApplied, BasicBlock* newLatch);
+
+private:
+    void fillLinearizedBlock(BasicBlock* linearized, BasicBlock* newLatch);
+
+private:
+    void fillNewLatchBlock(BasicBlock* newLatch, BasicBlock* alcHeader, BasicBlock* middleBlock);
+
 
 };
 

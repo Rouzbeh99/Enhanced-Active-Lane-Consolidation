@@ -45,25 +45,28 @@ void SVE_ALC::doTransformation() {
 
     /// Forming blocks structure
 
-    BasicBlock *preALCBlock = createPreALCBlock();
     BasicBlock *preheaderForRemainingBlock = createPreheaderForRemainingIterations();
 
-    //create block for after execution of vectorizing block
-    BasicBlock *middleBlock = BasicBlock::Create(L->getHeader()->getContext(), "middle.block",
-                                                 L->getHeader()->getParent(),
-                                                 preheaderForRemainingBlock);
+    BasicBlock *preALCBlock = createEmptyBlock("pre.alc", latch);
 
-    //temporary terminator for preALCBlock
-    //TODO: to be removed
-    BranchInst::Create(middleBlock, preALCBlock);
-
-    L->addBasicBlockToLoop(middleBlock, *LI);
+    //create blocks
+    BasicBlock *middleBlock = createEmptyBlock("middel.block", latch);
+    BasicBlock *alcHeader = createEmptyBlock("alc.header", middleBlock);
+    BasicBlock *laneGatherBlock = createEmptyBlock("lane.gather", middleBlock);
+    BasicBlock *alcAppliedBlock = createEmptyBlock("alc.applied", middleBlock);
+    BasicBlock *linearizedBlock = createEmptyBlock("linearized", middleBlock);
+    BasicBlock *newLatch = createEmptyBlock("new.latch", middleBlock);
 
     refinePreheader(preALCBlock, preheaderForRemainingBlock);
 
-    std::vector<Value *> *preALCBlockValues = fillPreALCBlock(preALCBlock, preheader);
+    //fill blocks
+    std::vector<Value *> *preALCBlockValues = fillPreALCBlock(preALCBlock, preheader, alcHeader);
     fillMiddleBlock(middleBlock, preALCBlock, exitBlock, (*preALCBlockValues)[4]);
-
+    fillALCHeaderBlock(alcHeader, laneGatherBlock, linearizedBlock);
+    fillLaneGatherBlock(laneGatherBlock, alcAppliedBlock);
+    fillALCAppliedBlock(alcAppliedBlock, newLatch);
+    fillLinearizedBlock(linearizedBlock, newLatch);
+    fillNewLatchBlock(newLatch, alcHeader, middleBlock);
 
     VectorType *vecType1 = VectorType::get(Type::getInt1Ty(context), vectorizationFactor, true);
     VectorType *vecType32 = VectorType::get(Type::getInt32Ty(context), vectorizationFactor, true);
@@ -828,10 +831,10 @@ BasicBlock *SVE_ALC::findTargetedBlock() {
     return nullptr;
 }
 
-BasicBlock *SVE_ALC::createPreALCBlock() {
-    BasicBlock *block = BasicBlock::Create(L->getHeader()->getContext(), "Pre.ALC",
+BasicBlock *SVE_ALC::createEmptyBlock(const std::string &name, BasicBlock *insertBefore) {
+    BasicBlock *block = BasicBlock::Create(L->getHeader()->getContext(), name,
                                            L->getHeader()->getParent(),
-                                           L->getLoopLatch());
+                                           insertBefore);
 
     L->addBasicBlockToLoop(block, *LI);
 
@@ -890,10 +893,10 @@ void SVE_ALC::refinePreheader(BasicBlock *preVecBlock, BasicBlock *preHeaderForR
 }
 
 std::vector<Value *> *
-SVE_ALC::fillPreALCBlock(BasicBlock *preALCBlock, BasicBlock *preheader) {
+SVE_ALC::fillPreALCBlock(BasicBlock *preALCBlock, BasicBlock *preheader, BasicBlock *alcHeader) {
     auto *results = new std::vector<Value *>;
 
-    IRBuilder<> builder(preALCBlock->getTerminator());
+    IRBuilder<> builder(preALCBlock);
 
     // create the value by which the index should be increased
     //TODO: we assume indices are added by one, make it work for other cases as well
@@ -920,6 +923,8 @@ SVE_ALC::fillPreALCBlock(BasicBlock *preALCBlock, BasicBlock *preheader) {
     // create vector by which step vector should be updated
     Value *stepVecUpdateValues = createVectorOfConstants(stepVal, builder, "stepVector.update.values");
 
+    builder.CreateBr(alcHeader);
+
     results->push_back(stepVec);
     results->push_back(stepVal);
     results->push_back(stepVecUpdateValues);
@@ -941,6 +946,47 @@ void SVE_ALC::fillMiddleBlock(BasicBlock *middleBlock, BasicBlock *preheader, Ba
 
     BranchInst::Create(exitBlock, preheader, condition, middleBlock);
 
+}
+
+void SVE_ALC::fillALCHeaderBlock(BasicBlock *alcHeader, BasicBlock *laneGatherBlock, BasicBlock *linearized) {
+    IRBuilder<> builder(alcHeader->getContext());
+    builder.SetInsertPoint(alcHeader);
+
+    //TODO: temporary, to be replaced with actual condition
+    ConstantInt *condition = ConstantInt::get(builder.getInt1Ty(), 1);
+
+    builder.CreateCondBr(condition, laneGatherBlock, laneGatherBlock);
+
+}
+
+void SVE_ALC::fillLaneGatherBlock(BasicBlock *laneGather, BasicBlock *alcApplied) {
+    IRBuilder<> builder(laneGather->getContext());
+    builder.SetInsertPoint(laneGather);
+
+    builder.CreateBr(alcApplied);
+}
+
+void SVE_ALC::fillALCAppliedBlock(BasicBlock *alcApplied, BasicBlock *newLatch) {
+    IRBuilder<> builder(alcApplied->getContext());
+    builder.SetInsertPoint(alcApplied);
+
+    builder.CreateBr(newLatch);
+}
+
+void SVE_ALC::fillLinearizedBlock(BasicBlock *linearized, BasicBlock *newLatch) {
+    IRBuilder<> builder(linearized->getContext());
+    builder.SetInsertPoint(linearized);
+
+    builder.CreateBr(newLatch);
+}
+
+void SVE_ALC::fillNewLatchBlock(BasicBlock *newLatch, BasicBlock *alcHeader, BasicBlock *middleBlock) {
+    IRBuilder<> builder(newLatch->getContext());
+    builder.SetInsertPoint(newLatch);
+
+    //TODO: temporary, to be replaced with actual condition
+    ConstantInt *condition = ConstantInt::get(builder.getInt1Ty(), 1);
+    builder.CreateCondBr(condition, alcHeader, middleBlock);
 }
 
 Value *SVE_ALC::computeTripCount(BasicBlock *latch, Value *inductionVar) {

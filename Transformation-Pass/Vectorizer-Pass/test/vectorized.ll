@@ -23,9 +23,9 @@ for.body.preheader:                               ; preds = %entry
   %0 = call i64 @llvm.vscale.i64(), !dbg !36
   %1 = mul i64 %0, 4, !dbg !36
   %2 = icmp uge i64 %wide.trip.count, %1, !dbg !36
-  br i1 %2, label %Pre.ALC, label %Preheader.for.remaining.iterations, !dbg !36
+  br i1 %2, label %pre.alc, label %Preheader.for.remaining.iterations, !dbg !36
 
-for.cond.cleanup.loopexit:                        ; preds = %middle.block, %for.inc
+for.cond.cleanup.loopexit:                        ; preds = %middel.block, %for.inc
   br label %for.cond.cleanup, !dbg !37
 
 for.cond.cleanup:                                 ; preds = %for.cond.cleanup.loopexit, %entry
@@ -34,7 +34,7 @@ for.cond.cleanup:                                 ; preds = %for.cond.cleanup.lo
   ret void, !dbg !42
 
 for.body:                                         ; preds = %Preheader.for.remaining.iterations, %for.inc
-  %indvars.iv = phi i64 [ %indvars.iv.next, %for.inc ], [ %10, %Preheader.for.remaining.iterations ]
+  %indvars.iv = phi i64 [ %indvars.iv.next, %for.inc ], [ %5, %Preheader.for.remaining.iterations ]
   call void @llvm.dbg.value(metadata i64 %indvars.iv, metadata !25, metadata !DIExpression()), !dbg !33
   %rem15 = and i64 %indvars.iv, 1, !dbg !43
   %cmp1.not = icmp eq i64 %rem15, 0, !dbg !43
@@ -50,23 +50,38 @@ if.then:                                          ; preds = %for.body
   store i32 %mul, ptr %arrayidx5, align 4, !dbg !56, !tbaa !49
   br label %for.inc, !dbg !57
 
-Pre.ALC:                                          ; preds = %middle.block, %for.body.preheader
-  %5 = call i64 @llvm.vscale.i64()
-  %6 = mul i64 %5, 4
-  %7 = call <vscale x 4 x i64> @llvm.experimental.stepvector.nxv4i64()
-  %8 = urem i64 %wide.trip.count, %6
-  %total.iterations.to.be.vectorized = sub i64 %wide.trip.count, %8
-  %9 = insertelement <vscale x 4 x i64> poison, i64 %6, i64 0
-  %stepVector.update.values = shufflevector <vscale x 4 x i64> %9, <vscale x 4 x i64> poison, <vscale x 4 x i32> zeroinitializer
-  br label %middle.block
-
-middle.block:                                     ; preds = %Pre.ALC
-  %condition = icmp eq i64 %8, 0
-  br i1 %condition, label %for.cond.cleanup.loopexit, label %Pre.ALC
-
 Preheader.for.remaining.iterations:               ; preds = %for.body.preheader
-  %10 = phi i64 [ 0, %for.body.preheader ]
+  %5 = phi i64 [ 0, %for.body.preheader ]
   br label %for.body
+
+pre.alc:                                          ; preds = %middel.block, %for.body.preheader
+  %6 = call i64 @llvm.vscale.i64()
+  %7 = mul i64 %6, 4
+  %8 = call <vscale x 4 x i64> @llvm.experimental.stepvector.nxv4i64()
+  %9 = urem i64 %wide.trip.count, %7
+  %total.iterations.to.be.vectorized = sub i64 %wide.trip.count, %9
+  %10 = insertelement <vscale x 4 x i64> poison, i64 %7, i64 0
+  %stepVector.update.values = shufflevector <vscale x 4 x i64> %10, <vscale x 4 x i64> poison, <vscale x 4 x i32> zeroinitializer
+  br label %alc.header
+
+alc.header:                                       ; preds = %new.latch, %pre.alc
+  br i1 true, label %lane.gather, label %lane.gather
+
+lane.gather:                                      ; preds = %alc.header, %alc.header
+  br label %alc.applied
+
+alc.applied:                                      ; preds = %lane.gather
+  br label %new.latch
+
+linearized:                                       ; No predecessors!
+  br label %new.latch
+
+new.latch:                                        ; preds = %linearized, %alc.applied
+  br i1 true, label %alc.header, label %middel.block
+
+middel.block:                                     ; preds = %new.latch
+  %condition = icmp eq i64 %9, 0
+  br i1 %condition, label %for.cond.cleanup.loopexit, label %pre.alc
 
 for.inc:                                          ; preds = %if.then, %for.body
   %indvars.iv.next = add nuw nsw i64 %indvars.iv, 1, !dbg !58
