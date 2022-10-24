@@ -99,7 +99,7 @@ private:
     Value *computeTripCount(BasicBlock *latch, Value *inductionVar);
 
 private:
-    BasicBlock *createEmptyBlock(const std::string& name, BasicBlock* insertBefore);
+    BasicBlock *createEmptyBlock(const std::string &name, BasicBlock *insertBefore);
 
 private:
     BasicBlock *createPreheaderForRemainingIterations();
@@ -108,29 +108,49 @@ private:
     void refinePreheader(BasicBlock *preVecBlock, BasicBlock *preHeaderForRemaining);
 
 private:
-    std::vector<Value *> *fillPreALCBlock(BasicBlock *preALCBlock, BasicBlock *preheader,  BasicBlock* alcHeader);
+    std::vector<Value *> *fillPreALCBlock(BasicBlock *preALCBlock, BasicBlock *preheader, BasicBlock *alcHeader);
 
 private:
     Value *createVectorOfConstants(Value *value, IRBuilder<> &builder, std::string name);
 
 private:
-    void fillMiddleBlock(BasicBlock *middleBlock, BasicBlock *preheader, BasicBlock *exitBlock,
-    Value *remResult);
+    void fillMiddleBlock(BasicBlock *middleBlock, BasicBlock *preheaderForRemaining, BasicBlock *exitBlock,
+                         Value *remResult);
 
 private:
-    void fillALCHeaderBlock(BasicBlock* alcHeader, BasicBlock* laneGatherBlock, BasicBlock* linearized);
+    void
+    fillALCHeaderBlock(BasicBlock *alcHeader, BasicBlock *laneGatherBlock, BasicBlock *linearized, BasicBlock *preALC,
+                       std::vector<Value *> *initialValues);
 
 private:
-    void fillLaneGatherBlock(BasicBlock* laneGather, BasicBlock* alcApplied);
+    void fillLaneGatherBlock(BasicBlock *laneGather, BasicBlock *alcApplied);
 
 private:
-    void fillALCAppliedBlock(BasicBlock* alcApplied, BasicBlock* newLatch);
+    void fillALCAppliedBlock(BasicBlock *alcApplied, BasicBlock *newLatch);
 
 private:
-    void fillLinearizedBlock(BasicBlock* linearized, BasicBlock* newLatch);
+    void fillLinearizedBlock(BasicBlock *linearized, BasicBlock *newLatch);
 
 private:
-    void fillNewLatchBlock(BasicBlock* newLatch, BasicBlock* alcHeader, BasicBlock* middleBlock);
+    void fillNewLatchBlock(BasicBlock *newLatch, BasicBlock *alcHeader, BasicBlock *middleBlock,
+                           BasicBlock *preHeaderForRemaining, std::vector<Value *> *initialValues);
+
+private:
+    void refinePreHeaderForRemaining(BasicBlock *preHeaderForRemaining, BasicBlock *middleBlock, Value *value);
+
+private:
+    std::vector<Value *> *formInitialPredicates(BasicBlock *decisionBlock, BasicBlock *preAlc,
+                                                Value *inductionVar);
+
+private:
+    bool usesInductionVar(Value *value, Value *inductionVar);
+
+private:
+    std::map<const Value *, const Value *> *
+    vectorizeInstructions_nonePredicated(std::vector<Instruction *> *instructions, BasicBlock *block);
+
+private:
+    void refineInitialIndexVarPhi(BasicBlock ALCHeader, Value* initialValue);
 
 
 };

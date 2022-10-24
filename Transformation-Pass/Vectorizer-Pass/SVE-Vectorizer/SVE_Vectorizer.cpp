@@ -209,10 +209,10 @@ SVE_Vectorizer::fillPreVecBlock(BasicBlock *preVecBlock, BasicBlock *preheader, 
 
     if (tripCount->getType() == Type::getInt64Ty(preheader->getContext())) {
         stepVal = intrinsicCallGenerator->createVscale64Intrinsic(builder);
-        stepVec = intrinsicCallGenerator->createStepVector64Intrinsic(builder);
+        stepVec = intrinsicCallGenerator->createStepVector64Intrinsic(builder, "step.vec");
     } else {
         stepVal = intrinsicCallGenerator->createVscale32Intrinsic(builder);
-        stepVec = intrinsicCallGenerator->createStepVector32Intrinsic(builder);
+        stepVec = intrinsicCallGenerator->createStepVector32Intrinsic(builder, "step.vec");
     }
 
     // vectorizing block termination condition: index > n - (n % stepValue)
@@ -364,6 +364,8 @@ SVE_Vectorizer::formPredicateVector(Instruction *insertionPoint, BasicBlock *dec
 }
 
 
+// TODO: how to vectorize this code?: t = a[i] + b[i]
+//                                     ... = t * ...
 void SVE_Vectorizer::vectorizeTargetedBlockInstructions(BasicBlock *vectorizingBlock, BasicBlock *targetedBlock,
                                                         PHINode *stepVec, Value *inductionVar, Value *indexVar,
                                                         Value *predicates,

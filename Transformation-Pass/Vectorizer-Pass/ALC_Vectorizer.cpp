@@ -57,16 +57,14 @@ namespace {
 
         BasicBlock *initialLatch = L->getLoopLatch();
 
-        int factor = 4;
+        int factor = 2;
 
-//        auto *unroller = new Unroller(L, &LI);
-//        unroller->doUnrolling(factor);
-//
         auto *sve_alc = new SVE_ALC(L,factor,AR);
         sve_alc->doTransformation();
 
 //        auto *sve_vectorizer = new SVE_Vectorizer(L, factor, AR);
 //        sve_vectorizer->doVectorization();
+
         printAllBlocks(L);
 
         return llvm::PreservedAnalyses::none();
