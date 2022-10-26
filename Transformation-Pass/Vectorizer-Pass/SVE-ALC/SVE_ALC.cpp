@@ -774,10 +774,11 @@ void SVE_ALC::doTransformation() {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// TODO: problem in algorithm, in the case where the total number of active lanes is not enough to fill a vector, the result vector is not correct
 void SVE_ALC::insertPermutationLogic(Instruction *insertAt, Value *z0, Value *z1, Value *p0, Value *p1,
                                      Value **permutedZ0,
                                      Value **permutedZ1, Value **permutedPredicates) {
-
+    // TODO: add code to compute predicates for uniform vector
 
     IRBuilder<> IRB(insertAt);
     auto *constZero = IRB.getInt64(0);
@@ -795,14 +796,9 @@ void SVE_ALC::insertPermutationLogic(Instruction *insertAt, Value *z0, Value *z1
     auto *z4 = intrinsicCallGenerator->createCompactInstruction(IRB, z0, p2);
     auto *z5 = intrinsicCallGenerator->createCompactInstruction(IRB, z1, p3);
 
-
-
     // gathering all active lanes to z0
     auto x0 = intrinsicCallGenerator->createCntpInstruction(IRB, p0, allTruePredicates);
-
     auto *p4 = intrinsicCallGenerator->createWhileltInstruction(IRB, constZero, x0);
-
-
     *permutedZ0 = intrinsicCallGenerator->createSpliceInstruction(IRB, z2, z3, p4);
 
     //gather others to z1
@@ -811,22 +807,12 @@ void SVE_ALC::insertPermutationLogic(Instruction *insertAt, Value *z0, Value *z1
     z2 = intrinsicCallGenerator->createSpliceInstruction(IRB, z3, z5, p5); // contains active ... inactive
     auto *x2 = intrinsicCallGenerator->createCntpInstruction(IRB, p2, allTruePredicates);
     p2 = intrinsicCallGenerator->createWhileltInstruction(IRB, constZero, x2);
-
     *permutedZ1 = intrinsicCallGenerator->createSelInstruction(IRB, z4, z2, p2);
 
     //find result predicate
     p1 = IRB.CreateNot(p2);
-    auto *x3 = intrinsicCallGenerator->createCntpInstruction(IRB, p2, allTruePredicates);
 
-    Value *numOfActivesInResult = IRB.CreateAdd(IRB.CreateSub(x1, x2), x3);
-
-    p2 = intrinsicCallGenerator->createWhileltInstruction(IRB, constZero, numOfActivesInResult);
-    auto p6 = IRB.CreateNot(p2);
-
-    Value *firstAnd = IRB.CreateAnd(p1, p2);
-    Value *secondAnd = IRB.CreateAnd(p2, p6);
-
-    *permutedPredicates = IRB.CreateOr(firstAnd, secondAnd);
+    *permutedPredicates = IRB.CreateAnd(p1, p5);
 }
 
 BasicBlock *SVE_ALC::findTargetedBlock() {
@@ -1140,7 +1126,7 @@ SVE_ALC::formInitialPredicates(BasicBlock *decisionBlock, BasicBlock *preAlc,
     const Value *&secondPred_Vectorized = (*instructionsMap)[(Value *) secondPred_scalar];
 
     initialPredicateVectors->push_back((Value *) firstPred_Vectorized);
-    initialPredicateVectors->push_back((Value *) firstPred_Vectorized);
+    initialPredicateVectors->push_back((Value *) secondPred_Vectorized);
 
     return initialPredicateVectors;
 }

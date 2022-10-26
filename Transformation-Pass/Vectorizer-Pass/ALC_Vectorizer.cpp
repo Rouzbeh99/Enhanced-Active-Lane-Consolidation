@@ -59,11 +59,11 @@ namespace {
 
         int factor = 2;
 
-        auto *sve_alc = new SVE_ALC(L,factor,AR);
-        sve_alc->doTransformation();
+//        auto *sve_alc = new SVE_ALC(L,factor,AR);
+//        sve_alc->doTransformation();
 
-//        auto *sve_vectorizer = new SVE_Vectorizer(L, factor, AR);
-//        sve_vectorizer->doVectorization();
+        auto *sve_vectorizer = new SVE_Vectorizer(L, factor, AR);
+        sve_vectorizer->doVectorization();
 
         printAllBlocks(L);
 
