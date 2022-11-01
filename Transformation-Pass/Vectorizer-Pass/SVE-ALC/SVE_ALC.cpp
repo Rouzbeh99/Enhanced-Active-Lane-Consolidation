@@ -68,18 +68,22 @@ void SVE_ALC::doTransformation() {
     fillLinearizedBlock(linearizedBlock, newLatch);
     fillNewLatchBlock(newLatch, alcHeader, middleBlock, preheaderForRemainingBlock, preALCBlockValues);
 
-    std::vector<Value *> *initialPredicates = formInitialPredicates(header, preALCBlock, inductionVar);
+
+    //// no more needed!!
+    /// do it in the header!!
+//    std::vector<Value *> *initialPredicates = formInitialPredicates(header, preALCBlock, inductionVar);
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    VectorType *vecType1 = VectorType::get(Type::getInt1Ty(context), vectorizationFactor, true);
-    VectorType *vecType64 = VectorType::get(Type::getInt64Ty(context), vectorizationFactor, true);
-    Value *permutedZ0 = UndefValue::get(vecType64);;
-    Value *permutedZ1 = UndefValue::get(vecType64);;
-    Value *permutedPredicates = UndefValue::get(vecType1);
-
-    insertPermutationLogic(laneGatherBlock->getTerminator(), (*preALCBlockValues)[0], (*preALCBlockValues)[5],
-                           (*initialPredicates)[0], (*initialPredicates)[1], &permutedZ0, &permutedZ1,
-                           &permutedPredicates);
+//    VectorType *vecType1 = VectorType::get(Type::getInt1Ty(context), vectorizationFactor, true);
+//    VectorType *vecType64 = VectorType::get(Type::getInt64Ty(context), vectorizationFactor, true);
+//    Value *permutedZ0 = UndefValue::get(vecType64);;
+//    Value *permutedZ1 = UndefValue::get(vecType64);;
+//    Value *permutedPredicates = UndefValue::get(vecType1);
+//
+//    insertPermutationLogic(laneGatherBlock->getTerminator(), (*preALCBlockValues)[0], (*preALCBlockValues)[5],
+//                           (*initialPredicates)[0], (*initialPredicates)[1], &permutedZ0, &permutedZ1,
+//                           &permutedPredicates);
 
 
 //    VectorType *vecType1 = VectorType::get(Type::getInt1Ty(context), vectorizationFactor, true);
@@ -1080,30 +1084,37 @@ SVE_ALC::formInitialPredicates(BasicBlock *decisionBlock, BasicBlock *preAlc,
 
 
         Value *vscale = nullptr;
-        // replace induction vars with 0
+        // replace induction vars
         for (auto clonedInstr: clonedInstructions) {
 
+
             if (usesInductionVar(clonedInstr, inductionVar)) {
+                // for the getElementPtr we only need to replace it with 0 and the corresponding value
+                if (isa<GetElementPtrInst>(clonedInstr)) {
 
-                for (int j = 0; j < clonedInstr->getNumOperands(); ++j) {
-                    if (clonedInstr->getOperand(j) == inductionVar) {
+                    for (int j = 0; j < clonedInstr->getNumOperands(); ++j) {
+                        if (clonedInstr->getOperand(j) == inductionVar) {
 
-                        if (i == 0) {
-                            Constant *constZero = ConstantInt::get(inductionVar->getType(), 0);
-                            clonedInstr->setOperand(j, constZero);
-                        } else {
-                            builder.SetInsertPoint(clonedInstr);
-                            if (!vscale) {
-                                if (inductionVar->getType() == builder.getInt64Ty()) {
-                                    vscale = intrinsicCallGenerator->createVscale64Intrinsic(builder);
-                                } else {
-                                    vscale = intrinsicCallGenerator->createVscale32Intrinsic(builder);
+                            if (i == 0) {
+                                Constant *constZero = ConstantInt::get(inductionVar->getType(), 0);
+                                clonedInstr->setOperand(j, constZero);
+                            } else {
+                                builder.SetInsertPoint(clonedInstr);
+                                if (!vscale) {
+                                    if (inductionVar->getType() == builder.getInt64Ty()) {
+                                        vscale = intrinsicCallGenerator->createVscale64Intrinsic(builder);
+                                    } else {
+                                        vscale = intrinsicCallGenerator->createVscale32Intrinsic(builder);
+                                    }
                                 }
-                            }
 
-                            clonedInstr->setOperand(j, vscale);
+                                clonedInstr->setOperand(j, vscale);
+                            }
                         }
                     }
+                }else{
+                    // first one should be step vector, second should be added step vec
+
                 }
             }
         }
@@ -1117,10 +1128,10 @@ SVE_ALC::formInitialPredicates(BasicBlock *decisionBlock, BasicBlock *preAlc,
 
     }
 
-
     // now we should vectorize clonedInstructions
     std::map<const Value *, const Value *> *instructionsMap = vectorizeInstructions_nonePredicated(&toBeVectorized,
                                                                                                    preAlc);
+
 
     const Value *&firstPred_Vectorized = (*instructionsMap)[(Value *) firstPred_scalar];
     const Value *&secondPred_Vectorized = (*instructionsMap)[(Value *) secondPred_scalar];
@@ -1147,6 +1158,8 @@ SVE_ALC::vectorizeInstructions_nonePredicated(std::vector<Instruction *> *instru
 
     // TODO: Complete the list
     for (auto instr: *instructions) {
+
+
 
         if (isa<GEPOperator>(instr)) {
             continue;
@@ -1176,21 +1189,31 @@ SVE_ALC::vectorizeInstructions_nonePredicated(std::vector<Instruction *> *instru
 
         } else if (isa<BinaryOperator>(instr) || isa<ICmpInst>(instr)) { // TODO: ICmp is not binary????
 
+            instr->print(outs());
+            llvm::outs() << "\n";
+
             Value *firstOp = nullptr;
             Value *secondOp = nullptr;
             if (vMap.count(instr->getOperand(0))) {
                 firstOp = vMap[instr->getOperand(0)];
-            } else {
+            } else if (isa<Constant>(instr->getOperand(0))) {
                 auto *constValue = dyn_cast<Constant>(instr->getOperand(0));
                 firstOp = createVectorOfConstants(constValue, builder, "first.operand");
+            } else {
+                /** operand is related to vscale **/
+                firstOp = instr->getOperand(0);
             }
+
 
             if (vMap.count(instr->getOperand(1))) {
                 secondOp = vMap[instr->getOperand(1)];
-            } else {
+            } else if (isa<Constant>(instr->getOperand(1))) {
                 auto *constValue = dyn_cast<Constant>(instr->getOperand(1));
                 secondOp = createVectorOfConstants(constValue, builder, "second.operand");
+            } else {
+                secondOp = instr->getOperand(1);
             }
+
 
             Value *result = nullptr;
             switch (instr->getOpcode()) {
@@ -1287,6 +1310,7 @@ SVE_ALC::vectorizeInstructions_nonePredicated(std::vector<Instruction *> *instru
             toBeRemoved.push(instr);
         }
     }
+
 
     while (!toBeRemoved.empty()) {
         toBeRemoved.top()->eraseFromParent();

@@ -1,4 +1,4 @@
-; ModuleID = 'alc_simple_handwritten.ll'
+; ModuleID = 'compiled_with_O3.ll'
 source_filename = "s253/tsvc-functions.c"
 target datalayout = "e-m:e-i8:8:32-i16:16:32-i64:64-i128:128-n32:64-S128"
 target triple = "aarch64-unknown-linux-gnu"
@@ -28,142 +28,167 @@ target triple = "aarch64-unknown-linux-gnu"
 define dso_local i32 @s253(ptr nocapture noundef %func_args) #0 !dbg !80 {
 entry:
   call void @llvm.dbg.value(metadata ptr %func_args, metadata !84, metadata !DIExpression()), !dbg !92
-  %call = tail call i32 @initialise_arrays(ptr noundef nonnull @__func__.s253) #12, !dbg !93
-  %call1 = tail call i32 @gettimeofday(ptr noundef %func_args, ptr noundef null) #12, !dbg !94
-  tail call void asm sideeffect ".inst 0x2520e020", ""() #12
-  %0 = tail call i64 @llvm.vscale.i64(), !dbg !92
-  %1 = shl i64 %0, 1
-  %2 = icmp ult i64 %1, 8193
-  %.rhs.trunc = trunc i64 %1 to i16
-  %3 = insertelement <vscale x 2 x i64> poison, i64 %1, i64 0
-  %stepVector.update.values = shufflevector <vscale x 2 x i64> %3, <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer
-  br label %for.cond2.preheader, !dbg !95
+  %call = tail call i32 @initialise_arrays(ptr noundef nonnull @__func__.s253) #8, !dbg !93
+  %call1 = tail call i32 @gettimeofday(ptr noundef %func_args, ptr noundef null) #8, !dbg !94
+  ;tail call void asm sideeffect ".inst 0x2520e020", ""() #10 
+  tail call void asm sideeffect "dmb sy\0A\09orr x3,x3,x3\0A", "~{memory}"() #10
+  br label %for.cond2.preheader, !dbg !96
 
 for.cond2.preheader:                              ; preds = %for.cond.cleanup4, %entry
   %nl.038 = phi i32 [ 0, %entry ], [ %inc21, %for.cond.cleanup4 ]
-  call void @llvm.dbg.value(metadata i32 %nl.038, metadata !86, metadata !DIExpression()), !dbg !96
+  call void @llvm.dbg.value(metadata i32 %nl.038, metadata !86, metadata !DIExpression()), !dbg !95
   call void @llvm.dbg.value(metadata i32 0, metadata !88, metadata !DIExpression()), !dbg !97
-  br i1 %2, label %pre.alc, label %for.body5.preheader, !dbg !98
+  %0 = call i64 @llvm.vscale.i64(), !dbg !98
+  %1 = mul i64 %0, 2, !dbg !98
+  %2 = icmp uge i64 8192, %1, !dbg !98
+  br i1 %2, label %pre.alc, label %Preheader.for.remaining.iterations, !dbg !98
 
-for.cond.cleanup:                                 ; preds = %for.cond.cleanup4
-  tail call void asm sideeffect ".inst 0x2520e040", ""() #12
+for.cond.cleanup:  				  ; preds = %for.cond.cleanup4
+  ;tail call void asm sideeffect ".inst 0x2520e040", ""() #10 
+  tail call void asm sideeffect "dmb sy\0A\09orr x4,x4,x4\0A", "~{memory}"() #10                          
   %t2 = getelementptr inbounds %struct.args_t, ptr %func_args, i64 0, i32 1, !dbg !99
-  %call23 = tail call i32 @gettimeofday(ptr noundef nonnull %t2, ptr noundef null) #12, !dbg !100
-  %call24 = tail call i32 @calc_checksum(ptr noundef nonnull @__func__.s253) #12, !dbg !101
+  %call23 = tail call i32 @gettimeofday(ptr noundef nonnull %t2, ptr noundef null) #8, !dbg !100
+  %call24 = tail call i32 @calc_checksum(ptr noundef nonnull @__func__.s253) #8, !dbg !101
   ret i32 %call24, !dbg !102
 
-for.cond.cleanup4:                                ; preds = %for.inc, %middel.block
-  %call19 = tail call i32 @dummy(ptr noundef nonnull @a, ptr noundef nonnull @b, ptr noundef nonnull @c, ptr noundef nonnull @d, ptr noundef nonnull @e, ptr noundef nonnull @aa, ptr noundef nonnull @bb, ptr noundef nonnull @cc, i32 noundef 0) #12, !dbg !103
+for.cond.cleanup4:                                ; preds = %middel.block, %for.inc
+  %call19 = tail call i32 @dummy(ptr noundef nonnull @a, ptr noundef nonnull @b, ptr noundef nonnull @c, ptr noundef nonnull @d, ptr noundef nonnull @e, ptr noundef nonnull @aa, ptr noundef nonnull @bb, ptr noundef nonnull @cc, i32 noundef 0) #8, !dbg !103
   %inc21 = add nuw nsw i32 %nl.038, 1, !dbg !104
-  call void @llvm.dbg.value(metadata i32 %inc21, metadata !86, metadata !DIExpression()), !dbg !96
+  call void @llvm.dbg.value(metadata i32 %inc21, metadata !86, metadata !DIExpression()), !dbg !95
   %exitcond40.not = icmp eq i32 %inc21, 10, !dbg !105
-  br i1 %exitcond40.not, label %for.cond.cleanup, label %for.cond2.preheader, !dbg !95, !llvm.loop !106
+  br i1 %exitcond40.not, label %for.cond.cleanup, label %for.cond2.preheader, !dbg !96, !llvm.loop !106
 
-for.body5:                                        ; preds = %for.body5.preheader, %for.inc
-  %indvars.iv = phi i64 [ %indvars.iv.next, %for.inc ], [ %indvars.iv.ph, %for.body5.preheader ]
+for.body5:                                        ; preds = %Preheader.for.remaining.iterations, %for.inc
+  %indvars.iv = phi i64 [ %indvars.iv.next, %for.inc ], [ %7, %Preheader.for.remaining.iterations ]
   call void @llvm.dbg.value(metadata i64 %indvars.iv, metadata !88, metadata !DIExpression()), !dbg !97
   %arrayidx = getelementptr inbounds [8192 x i32], ptr @a, i64 0, i64 %indvars.iv, !dbg !110
-  %4 = load i32, ptr %arrayidx, align 4, !dbg !110, !tbaa !114
+  %3 = load i32, ptr %arrayidx, align 4, !dbg !110, !tbaa !114
   %arrayidx7 = getelementptr inbounds [8192 x i32], ptr @b, i64 0, i64 %indvars.iv, !dbg !118
-  %5 = load i32, ptr %arrayidx7, align 4, !dbg !118, !tbaa !114
-  %cmp8 = icmp sgt i32 %4, %5, !dbg !119
+  %4 = load i32, ptr %arrayidx7, align 4, !dbg !118, !tbaa !114
+  %cmp8 = icmp sgt i32 %3, %4, !dbg !119
   br i1 %cmp8, label %if.then, label %for.inc, !dbg !120
 
 if.then:                                          ; preds = %for.body5
   %arrayidx14 = getelementptr inbounds [8192 x i32], ptr @d, i64 0, i64 %indvars.iv, !dbg !121
-  %6 = load i32, ptr %arrayidx14, align 4, !dbg !121, !tbaa !114
-  %mul = mul nsw i32 %6, %5, !dbg !123
-  %sub = sub nsw i32 %4, %mul, !dbg !124
+  %5 = load i32, ptr %arrayidx14, align 4, !dbg !121, !tbaa !114
+  %mul = mul nsw i32 %5, %4, !dbg !123
+  %sub = sub nsw i32 %3, %mul, !dbg !124
   call void @llvm.dbg.value(metadata i32 %sub, metadata !85, metadata !DIExpression()), !dbg !92
   %arrayidx16 = getelementptr inbounds [8192 x i32], ptr @c, i64 0, i64 %indvars.iv, !dbg !125
-  %7 = load i32, ptr %arrayidx16, align 4, !dbg !126, !tbaa !114
-  %add = add nsw i32 %sub, %7, !dbg !126
+  %6 = load i32, ptr %arrayidx16, align 4, !dbg !126, !tbaa !114
+  %add = add nsw i32 %sub, %6, !dbg !126
   store i32 %add, ptr %arrayidx16, align 4, !dbg !126, !tbaa !114
   store i32 %sub, ptr %arrayidx, align 4, !dbg !127, !tbaa !114
   br label %for.inc, !dbg !128
 
+Preheader.for.remaining.iterations:               ; preds = %middel.block, %for.cond2.preheader
+  %7 = phi i64 [ 0, %for.cond2.preheader ], [ %45, %middel.block ]
+  br label %for.body5
+
 pre.alc:                                          ; preds = %for.cond2.preheader
-  %8 = urem i16 8192, %.rhs.trunc
-  %.zext = zext i16 %8 to i64
-  %total.iterations.to.be.vectorized = sub nuw nsw i64 8192, %.zext
-  %9 = tail call <vscale x 2 x i1> @llvm.aarch64.sve.ptrue.nxv2i1(i32 2)
+  %8 = call i64 @llvm.vscale.i64()
+  %9 = mul i64 %8, 2
+  %first.iteration.indices = call <vscale x 2 x i64> @llvm.experimental.stepvector.nxv4i64()
+  %10 = urem i64 8192, %9
+  %total.iterations.to.be.vectorized = sub i64 8192, %10
+  %11 = insertelement <vscale x 2 x i64> poison, i64 %9, i64 0
+  %stepVector.update.values = shufflevector <vscale x 2 x i64> %11, <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer
+  %second.iteration.indices = add <vscale x 2 x i64> %first.iteration.indices, %stepVector.update.values
+  %12 = getelementptr inbounds [8192 x i32], ptr @a, i64 0, i64 0, !dbg !110
+  %13 = getelementptr inbounds [8192 x i32], ptr @b, i64 0, i64 0, !dbg !118
+  %14 = call i64 @llvm.vscale.i64(), !dbg !110
+  %15 = mul i64 %14, 2, !dbg !110
+  %16 = getelementptr inbounds [8192 x i32], ptr @a, i64 0, i64 %15, !dbg !110
+  %17 = getelementptr inbounds [8192 x i32], ptr @b, i64 0, i64 %15, !dbg !118
+  %18 = load <vscale x 2 x i32>, ptr %12, align 8
+  %19 = load <vscale x 2 x i32>, ptr %13, align 8
+  %20 = icmp sgt <vscale x 2 x i32> %18, %19
+  %21 = load <vscale x 2 x i32>, ptr %16, align 8
+  %22 = load <vscale x 2 x i32>, ptr %17, align 8
+  %23 = icmp sgt <vscale x 2 x i32> %21, %22
+  %start.index = mul i64 %15, 2
   br label %alc.header
 
 alc.header:                                       ; preds = %new.latch, %pre.alc
-  %10 = phi i64 [ 0, %pre.alc ], [ %25, %new.latch ]
-  %second.itr.index = add i64 %10, %1
-  %11 = getelementptr inbounds [8192 x i32], ptr @a, i64 0, i64 %10, !dbg !110
-  %12 = getelementptr inbounds [8192 x i32], ptr @b, i64 0, i64 %10, !dbg !118
-  %13 = getelementptr inbounds [8192 x i32], ptr @a, i64 0, i64 %second.itr.index, !dbg !110
-  %14 = getelementptr inbounds [8192 x i32], ptr @b, i64 0, i64 %second.itr.index, !dbg !118
-  %15 = load <vscale x 2 x i32>, ptr %11, align 8
-  %16 = load <vscale x 2 x i32>, ptr %12, align 8
-  %predicate.vector.1 = icmp slt <vscale x 2 x i32> %15, %16
-  %17 = load <vscale x 2 x i32>, ptr %13, align 8
-  %18 = load <vscale x 2 x i32>, ptr %14, align 8
-  %predicate.vector.2 = icmp slt <vscale x 2 x i32> %17, %18
-  %num.active.lanes.1 = tail call i64 @llvm.aarch64.sve.cntp.nxv2i1(<vscale x 2 x i1> %9, <vscale x 2 x i1> %predicate.vector.1)
-  %num.active.lanes.2 = tail call i64 @llvm.aarch64.sve.cntp.nxv2i1(<vscale x 2 x i1> %9, <vscale x 2 x i1> %predicate.vector.2)
-  %num.all.true.preds = add i64 %num.active.lanes.2, %num.active.lanes.1
-  %condition.not = icmp ugt i64 %num.all.true.preds, %1
-  br i1 %condition.not, label %linearized, label %lane.gather
+  %24 = phi i64 [ %15, %pre.alc ], [ %45, %new.latch ]
+  %25 = phi <vscale x 2 x i64> [ %first.iteration.indices, %pre.alc ], [ %next.uniform.vec, %new.latch ]
+  %26 = phi <vscale x 2 x i64> [ %second.iteration.indices, %pre.alc ], [ %next.remaining.vec, %new.latch ]
+  %predicate.vector.1= phi <vscale x 2 x i1> [ %20, %pre.alc ], [ %next.uniform.predicates, %new.latch ]
+  %predicate.vector.2= phi <vscale x 2 x i1> [ %23, %pre.alc ], [ %next.remaining.predicates, %new.latch ]
+   br label %lane.gather
 
 lane.gather:                                      ; preds = %alc.header
-  %19 = tail call <vscale x 2 x i64> @llvm.aarch64.sve.index.nxv2i64(i64 %10, i64 1)
-  %20 = add <vscale x 2 x i64> %19, %stepVector.update.values
-  %21 = tail call <vscale x 2 x i64> @llvm.aarch64.sve.compact.nxv2i64(<vscale x 2 x i1> %predicate.vector.1, <vscale x 2 x i64> %19)
-  %22 = tail call <vscale x 2 x i64> @llvm.aarch64.sve.compact.nxv2i64(<vscale x 2 x i1> %predicate.vector.2, <vscale x 2 x i64> %20)
-  %23 = tail call <vscale x 2 x i1> @llvm.aarch64.sve.whilelt.nxv2i1.i64(i64 0, i64 %num.active.lanes.1)
-  %24 = tail call <vscale x 2 x i64> @llvm.aarch64.sve.splice.nxv2i64(<vscale x 2 x i1> %23, <vscale x 2 x i64> %21, <vscale x 2 x i64> %22)
-  %uniform.vec.predicate = tail call <vscale x 2 x i1> @llvm.aarch64.sve.whilelt.nxv2i1.i64(i64 0, i64 %num.all.true.preds)
-  %ptr.vec.a = getelementptr inbounds [8192 x i32], ptr @a, i64 0, <vscale x 2 x i64> %24, !dbg !110
-  %ptr.vec.b = getelementptr inbounds [8192 x i32], ptr @b, i64 0, <vscale x 2 x i64> %24, !dbg !110
-  %loaded.a = tail call <vscale x 2 x i32> @llvm.masked.gather.nxv2i32.nxv2p0(<vscale x 2 x ptr> %ptr.vec.a, i32 16, <vscale x 2 x i1> %uniform.vec.predicate, <vscale x 2 x i32> poison)
-  %loaded.b = tail call <vscale x 2 x i32> @llvm.masked.gather.nxv2i32.nxv2p0(<vscale x 2 x ptr> %ptr.vec.b, i32 16, <vscale x 2 x i1> %uniform.vec.predicate, <vscale x 2 x i32> poison)
-  %ptr.vec.d = getelementptr inbounds [8192 x i32], ptr @d, i64 0, <vscale x 2 x i64> %24, !dbg !110
-  %loaded.d = tail call <vscale x 2 x i32> @llvm.masked.gather.nxv2i32.nxv2p0(<vscale x 2 x ptr> %ptr.vec.d, i32 16, <vscale x 2 x i1> %uniform.vec.predicate, <vscale x 2 x i32> poison)
-  %mul.vec = mul <vscale x 2 x i32> %loaded.d, %loaded.b
-  %sub.vec = sub <vscale x 2 x i32> %loaded.a, %mul.vec
-  %ptr.vec.c = getelementptr inbounds [8192 x i32], ptr @c, i64 0, <vscale x 2 x i64> %24, !dbg !110
-  %loaded.c = tail call <vscale x 2 x i32> @llvm.masked.gather.nxv2i32.nxv2p0(<vscale x 2 x ptr> %ptr.vec.c, i32 16, <vscale x 2 x i1> %uniform.vec.predicate, <vscale x 2 x i32> poison)
-  %add.vec = add <vscale x 2 x i32> %sub.vec, %loaded.c
-  tail call void @llvm.masked.scatter.nxv2i32.nxv2p0(<vscale x 2 x i32> %add.vec, <vscale x 2 x ptr> %ptr.vec.c, i32 16, <vscale x 2 x i1> %uniform.vec.predicate)
-  tail call void @llvm.masked.scatter.nxv2i32.nxv2p0(<vscale x 2 x i32> %sub.vec, <vscale x 2 x ptr> %ptr.vec.a, i32 16, <vscale x 2 x i1> %uniform.vec.predicate)
+  %27 = call <vscale x 2 x i1> @llvm.aarch64.sve.ptrue.nxv2i1(i32 2)
+  %28 = call <vscale x 2 x i64> @llvm.aarch64.sve.compact.nxv2i64(<vscale x 2 x i1> %predicate.vector.1, <vscale x 2 x i64> %25)
+  %29 = call <vscale x 2 x i64> @llvm.aarch64.sve.compact.nxv2i64(<vscale x 2 x i1> %predicate.vector.2, <vscale x 2 x i64> %26)
+  %30 = xor <vscale x 2 x i1> %predicate.vector.1, shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer)
+  %31 = xor <vscale x 2 x i1> %predicate.vector.2, shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer)
+  %32 = call <vscale x 2 x i64> @llvm.aarch64.sve.compact.nxv2i64(<vscale x 2 x i1> %30, <vscale x 2 x i64> %25)
+  %33 = call <vscale x 2 x i64> @llvm.aarch64.sve.compact.nxv2i64(<vscale x 2 x i1> %31, <vscale x 2 x i64> %26)
+  %34 = call i64 @llvm.aarch64.sve.cntp.nxv2i1(<vscale x 2 x i1> %27, <vscale x 2 x i1> %predicate.vector.1)
+  %35 = call <vscale x 2 x i1> @llvm.aarch64.sve.whilelt.nxv2i1.i64(i64 0, i64 %34)
+  %36 = call <vscale x 2 x i64> @llvm.aarch64.sve.splice.nxv2i64(<vscale x 2 x i1> %35, <vscale x 2 x i64> %28, <vscale x 2 x i64> %29)	; unifrom vector
+  %37 = call i64 @llvm.aarch64.sve.cntp.nxv2i1(<vscale x 2 x i1> %27, <vscale x 2 x i1> %predicate.vector.2)
+  %num.all.true.preds = add i64 %34, %37; 
+  %uniform.vec.predicate = call <vscale x 2 x i1> @llvm.aarch64.sve.whilelt.nxv2i1.i64(i64 0, i64 %num.all.true.preds)
+  %38 = call <vscale x 2 x i1> @llvm.aarch64.sve.whilelt.nxv2i1.i64(i64 0, i64 %37)
+  %39 = call <vscale x 2 x i64> @llvm.aarch64.sve.splice.nxv2i64(<vscale x 2 x i1> %38, <vscale x 2 x i64> %29, <vscale x 2 x i64> %33)
+  %40 = call i64 @llvm.aarch64.sve.cntp.nxv2i1(<vscale x 2 x i1> %27, <vscale x 2 x i1> %30)
+  %41 = call <vscale x 2 x i1> @llvm.aarch64.sve.whilelt.nxv2i1.i64(i64 0, i64 %40)
+  %42 = call <vscale x 2 x i64> @llvm.aarch64.sve.sel.nxv2i64(<vscale x 2 x i1> %41, <vscale x 2 x i64> %32, <vscale x 2 x i64> %39)	; remainder vector
+  %43 = xor <vscale x 2 x i1> %41, shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer)
+  %44 = and <vscale x 2 x i1> %43, %38													; predicates for remaining vector
+  %condition = icmp uge i64 %num.all.true.preds, %9 													
+  br i1 %condition, label %alc.applied, label %linearized
+
+
+alc.applied:  					 ; preds = %lane.gather
+  %all.true.p = call <vscale x 2 x i1> @llvm.aarch64.sve.ptrue.nxv2i1(i32 31)
+  %ptr.vec.a = getelementptr inbounds [8192 x i32], ptr @a, i64 0, <vscale x 2 x i64> %36, !dbg !110
+  %ptr.vec.b = getelementptr inbounds [8192 x i32], ptr @b, i64 0, <vscale x 2 x i64> %36, !dbg !110
+  %loaded.a = call <vscale x 2 x i32> @llvm.masked.gather.v4i32.v4p0(<vscale x 2 x ptr> %ptr.vec.a , i32 16, <vscale x 2 x i1> %all.true.p, <vscale x 2 x i32> poison)
+  %loaded.b = call <vscale x 2 x i32> @llvm.masked.gather.v4i32.v4p0(<vscale x 2 x ptr> %ptr.vec.b , i32 16, <vscale x 2 x i1> %all.true.p, <vscale x 2 x i32> poison)
+  %ptr.vec.d = getelementptr inbounds [8192 x i32], ptr @d, i64 0, <vscale x 2 x i64> %36, !dbg !110
+  %loaded.d = call <vscale x 2 x i32> @llvm.masked.gather.v4i32.v4p0(<vscale x 2 x ptr> %ptr.vec.d , i32 16, <vscale x 2 x i1> %all.true.p, <vscale x 2 x i32> poison)
+  %mul.vec = mul <vscale x 2 x i32> %loaded.b, %loaded.d
+  %sub.vec = sub <vscale x 2 x i32>  %loaded.a, %mul.vec
+  %ptr.vec.c = getelementptr inbounds [8192 x i32], ptr @c, i64 0, <vscale x 2 x i64> %36, !dbg !110
+  %loaded.c = call <vscale x 2 x i32> @llvm.masked.gather.v4i32.v4p0(<vscale x 2 x ptr> %ptr.vec.c , i32 16, <vscale x 2 x i1> %all.true.p, <vscale x 2 x i32> poison)
+  %add.vec = add <vscale x 2 x i32> %loaded.c, %sub.vec
+  call void @llvm.masked.scatter.v4i32.v4p0(<vscale x 2 x i32> %add.vec, <vscale x 2 x ptr> %ptr.vec.c, i32 16, <vscale x 2 x i1> %all.true.p)
+  call void @llvm.masked.scatter.v4i32.v4p0(<vscale x 2 x i32> %sub.vec, <vscale x 2 x ptr> %ptr.vec.a, i32 16, <vscale x 2 x i1> %all.true.p)
+  ;forming predicates for the next iteration
+  %new.index = add i64 %24, %9
+  %new.ptr.a = getelementptr inbounds [8192 x i32], ptr @a, i64 0, i64 %new.index, !dbg !110
+  %new.ptr.b = getelementptr inbounds [8192 x i32], ptr @b, i64 0, i64 %new.index, !dbg !118
+  %new.loaded.a = load <vscale x 2 x i32>, ptr %12, align 8
+  %new.loaded.b = load <vscale x 2 x i32>, ptr %13, align 8
+  %new.predicates = icmp sgt <vscale x 2 x i32> %18, %19
+  %new.index.vec = call <vscale x 2 x i64> @llvm.aarch64.sve.index.nxv2i64(i64 %24, i64 1)
   br label %new.latch
 
-linearized:                                       ; preds = %alc.header
-  %ptr.d.linearize.1 = getelementptr inbounds [8192 x i32], ptr @d, i64 0, i64 %10, !dbg !110
-  %loaded.d.linearize.1 = tail call <vscale x 2 x i32> @llvm.masked.load.nxv2i32.p0(ptr nonnull %ptr.d.linearize.1, i32 8, <vscale x 2 x i1> %predicate.vector.1, <vscale x 2 x i32> undef)
-  %mul.linearize.1 = mul <vscale x 2 x i32> %loaded.d.linearize.1, %16
-  %sub.linearize.1 = sub <vscale x 2 x i32> %15, %mul.linearize.1
-  %ptr.c.linearize.1 = getelementptr inbounds [8192 x i32], ptr @c, i64 0, i64 %10, !dbg !110
-  %loaded.c.linearize.1 = tail call <vscale x 2 x i32> @llvm.masked.load.nxv2i32.p0(ptr nonnull %ptr.c.linearize.1, i32 8, <vscale x 2 x i1> %predicate.vector.1, <vscale x 2 x i32> undef)
-  %add.vec.linearize.1 = add <vscale x 2 x i32> %sub.linearize.1, %loaded.c.linearize.1
-  tail call void @llvm.masked.store.nxv2i32.p0(<vscale x 2 x i32> %add.vec.linearize.1, ptr nonnull %ptr.c.linearize.1, i32 8, <vscale x 2 x i1> %predicate.vector.1)
-  tail call void @llvm.masked.store.nxv2i32.p0(<vscale x 2 x i32> %sub.linearize.1, ptr nonnull %11, i32 8, <vscale x 2 x i1> %predicate.vector.1)
-  %ptr.d.linearize.2 = getelementptr inbounds [8192 x i32], ptr @d, i64 0, i64 %second.itr.index, !dbg !110
-  %loaded.d.linearize.2 = tail call <vscale x 2 x i32> @llvm.masked.load.nxv2i32.p0(ptr nonnull %ptr.d.linearize.2, i32 8, <vscale x 2 x i1> %predicate.vector.1, <vscale x 2 x i32> undef)
-  %mul.linearize.2 = mul <vscale x 2 x i32> %loaded.d.linearize.2, %18
-  %sub.linearize.2 = sub <vscale x 2 x i32> %17, %mul.linearize.2
-  %ptr.c.linearize.2 = getelementptr inbounds [8192 x i32], ptr @c, i64 0, i64 %second.itr.index, !dbg !110
-  %loaded.c.linearize.2 = tail call <vscale x 2 x i32> @llvm.masked.load.nxv2i32.p0(ptr nonnull %ptr.c.linearize.2, i32 8, <vscale x 2 x i1> %predicate.vector.1, <vscale x 2 x i32> undef)
-  %add.vec.linearize.2 = add <vscale x 2 x i32> %sub.linearize.2, %loaded.c.linearize.2
-  tail call void @llvm.masked.store.nxv2i32.p0(<vscale x 2 x i32> %add.vec.linearize.2, ptr nonnull %ptr.c.linearize.2, i32 8, <vscale x 2 x i1> %predicate.vector.2)
-  tail call void @llvm.masked.store.nxv2i32.p0(<vscale x 2 x i32> %sub.linearize.2, ptr nonnull %13, i32 8, <vscale x 2 x i1> %predicate.vector.2)
+linearized:   				 ; preds = %alc.header
+  %new.index.linearized = add i64 %24, %9
+  %new.ptr.a.linearized = getelementptr inbounds [8192 x i32], ptr @a, i64 0, i64 %new.index.linearized, !dbg !110
+  %new.ptr.b.linearized = getelementptr inbounds [8192 x i32], ptr @b, i64 0, i64 %new.index.linearized, !dbg !118
+  %new.loaded.a.linearized = load <vscale x 2 x i32>, ptr %new.ptr.a.linearized , align 8
+  %new.loaded.b.linearized = load <vscale x 2 x i32>, ptr %new.ptr.b.linearized , align 8
+  %new.predicates.linearized = icmp sgt <vscale x 2 x i32> %new.loaded.a.linearized, %new.loaded.b.linearized
+  %new.index.vec.linearized = call <vscale x 2 x i64> @llvm.aarch64.sve.index.nxv2i64(i64 %24, i64 1)                                   
   br label %new.latch
 
-new.latch:                                        ; preds = %linearized, %lane.gather
-  %25 = add i64 %second.itr.index, %1
-  %loop.exit.cond = icmp ugt i64 %25, %total.iterations.to.be.vectorized   ;;;; %25 or %second.itr??
+new.latch:                                        ; preds = %linearized, %alc.applied
+  %next.uniform.vec = phi <vscale x 2 x i64> [ %new.index.vec, %alc.applied ], [ %36, %linearized ]
+  %next.remaining.vec = phi <vscale x 2 x i64> [ %42, %alc.applied ], [ %new.index.vec.linearized, %linearized ]
+  %next.uniform.predicates = phi <vscale x 2 x i1> [ %new.predicates, %alc.applied ], [  %uniform.vec.predicate, %linearized ]
+  %next.remaining.predicates = phi <vscale x 2 x i1> [ %44, %alc.applied ], [ %new.predicates.linearized, %linearized ]
+  %45 = add i64 %24, %9
+  %loop.exit.cond = icmp ugt i64 %45, %total.iterations.to.be.vectorized
   br i1 %loop.exit.cond, label %middel.block, label %alc.header
 
 middel.block:                                     ; preds = %new.latch
-  %condition.mid.block = icmp eq i16 %8, 0
-  br i1 %condition.mid.block, label %for.cond.cleanup4, label %for.body5.preheader
-
-for.body5.preheader:                              ; preds = %middel.block, %for.cond2.preheader
-  %indvars.iv.ph = phi i64 [ %25, %middel.block ], [ 0, %for.cond2.preheader ]
-  br label %for.body5, !dbg !98
+  %condition.mid.block = icmp eq i64 %10, 0
+  br i1 %condition.mid.block, label %for.cond.cleanup4, label %Preheader.for.remaining.iterations
 
 for.inc:                                          ; preds = %if.then, %for.body5
   %indvars.iv.next = add nuw nsw i64 %indvars.iv, 1, !dbg !129
@@ -172,7 +197,7 @@ for.inc:                                          ; preds = %if.then, %for.body5
   br i1 %exitcond.not, label %for.cond.cleanup4, label %for.body5, !dbg !98, !llvm.loop !131
 }
 
-; Function Attrs: mustprogress nocallback nofree nosync nounwind readnone speculatable willreturn
+; Function Attrs: nocallback nofree nosync nounwind readnone speculatable willreturn
 declare void @llvm.dbg.declare(metadata, metadata, metadata) #1
 
 declare !dbg !133 i32 @initialise_arrays(ptr noundef) local_unnamed_addr #2
@@ -180,10 +205,10 @@ declare !dbg !133 i32 @initialise_arrays(ptr noundef) local_unnamed_addr #2
 ; Function Attrs: nofree nounwind
 declare !dbg !140 noundef i32 @gettimeofday(ptr nocapture noundef, ptr nocapture noundef) local_unnamed_addr #3
 
-; Function Attrs: argmemonly mustprogress nocallback nofree nosync nounwind willreturn
+; Function Attrs: argmemonly nocallback nofree nosync nounwind willreturn
 declare void @llvm.lifetime.start.p0(i64 immarg, ptr nocapture) #4
 
-; Function Attrs: argmemonly mustprogress nocallback nofree nosync nounwind willreturn
+; Function Attrs: argmemonly nocallback nofree nosync nounwind willreturn
 declare void @llvm.lifetime.end.p0(i64 immarg, ptr nocapture) #4
 
 declare !dbg !146 i32 @dummy(ptr noundef, ptr noundef, ptr noundef, ptr noundef, ptr noundef, ptr noundef, ptr noundef, ptr noundef, i32 noundef) local_unnamed_addr #2
@@ -196,12 +221,12 @@ entry:
   %func_args = alloca %struct.args_t, align 8
   call void @llvm.dbg.value(metadata ptr %vector_func, metadata !159, metadata !DIExpression()), !dbg !167
   call void @llvm.dbg.value(metadata ptr %arg_info, metadata !160, metadata !DIExpression()), !dbg !167
-  call void @llvm.lifetime.start.p0(i64 40, ptr nonnull %func_args) #12, !dbg !168
+  call void @llvm.lifetime.start.p0(i64 40, ptr nonnull %func_args) #8, !dbg !168
   call void @llvm.dbg.declare(metadata ptr %func_args, metadata !161, metadata !DIExpression()), !dbg !169
   call void @llvm.memset.p0.i64(ptr noundef nonnull align 8 dereferenceable(40) %func_args, i8 0, i64 32, i1 false), !dbg !169
   %arg_info1 = getelementptr inbounds %struct.args_t, ptr %func_args, i64 0, i32 2, !dbg !170
   store ptr %arg_info, ptr %arg_info1, align 8, !dbg !170, !tbaa !171
-  %call = call i32 %vector_func(ptr noundef nonnull %func_args) #12, !dbg !176
+  %call = call i32 %vector_func(ptr noundef nonnull %func_args) #8, !dbg !176
   %conv = sitofp i32 %call to double, !dbg !176
   call void @llvm.dbg.value(metadata double %conv, metadata !162, metadata !DIExpression()), !dbg !167
   %0 = load i64, ptr %func_args, align 8, !dbg !177, !tbaa !178
@@ -224,11 +249,11 @@ entry:
   %sub = fsub double %add11, %add, !dbg !194
   call void @llvm.dbg.value(metadata double %sub, metadata !166, metadata !DIExpression()), !dbg !167
   %call12 = call i32 (ptr, ...) @printf(ptr noundef nonnull @.str, double noundef %sub, double noundef %conv), !dbg !195
-  call void @llvm.lifetime.end.p0(i64 40, ptr nonnull %func_args) #12, !dbg !196
+  call void @llvm.lifetime.end.p0(i64 40, ptr nonnull %func_args) #8, !dbg !196
   ret void, !dbg !196
 }
 
-; Function Attrs: argmemonly mustprogress nofree nounwind willreturn writeonly
+; Function Attrs: argmemonly nofree nounwind willreturn writeonly
 declare void @llvm.memset.p0.i64(ptr nocapture writeonly, i8, i64, i1 immarg) #5
 
 ; Function Attrs: nofree nounwind
@@ -246,58 +271,54 @@ entry:
   ret i32 0, !dbg !210
 }
 
-; Function Attrs: mustprogress nocallback nofree nosync nounwind readnone speculatable willreturn
+; Function Attrs: nocallback nofree nosync nounwind readnone speculatable willreturn
 declare void @llvm.dbg.value(metadata, metadata, metadata) #1
 
 ; Function Attrs: nofree nounwind
 declare noundef i32 @puts(ptr nocapture noundef readonly) local_unnamed_addr #6
 
-; Function Attrs: mustprogress nocallback nofree nosync nounwind readnone willreturn
+; Function Attrs: nocallback nofree nosync nounwind readnone willreturn
 declare i64 @llvm.vscale.i64() #7
 
-; Function Attrs: mustprogress nocallback nofree nosync nounwind readnone willreturn
+; Function Attrs: nocallback nofree nosync nounwind readnone willreturn
+declare <vscale x 2 x i64> @llvm.experimental.stepvector.nxv4i64() #7
+
+; Function Attrs: nocallback nofree nosync nounwind readnone willreturn
 declare <vscale x 2 x i1> @llvm.aarch64.sve.ptrue.nxv2i1(i32 immarg) #7
 
-; Function Attrs: mustprogress nocallback nofree nosync nounwind readnone willreturn
-declare <vscale x 2 x i64> @llvm.aarch64.sve.compact.nxv2i64(<vscale x 2 x i1>, <vscale x 2 x i64>) #7
+; Function Attrs: nocallback nofree nosync nounwind readnone willreturn
+declare <vscale x 2 x i64> @llvm.aarch64.sve.compact.nxv2i64(<vscale x 2 x i1>, <vscale x 2 x i64>) #7	   
 
-; Function Attrs: mustprogress nocallback nofree nosync nounwind readnone willreturn
+; Function Attrs: nocallback nofree nosync nounwind readnone willreturn
 declare i64 @llvm.aarch64.sve.cntp.nxv2i1(<vscale x 2 x i1>, <vscale x 2 x i1>) #7
 
-; Function Attrs: mustprogress nocallback nofree nosync nounwind readnone willreturn
+
+; Function Attrs: nocallback nofree nosync nounwind readnone willreturn
 declare <vscale x 2 x i1> @llvm.aarch64.sve.whilelt.nxv2i1.i64(i64, i64) #7
 
-; Function Attrs: mustprogress nocallback nofree nosync nounwind readnone willreturn
+; Function Attrs: nocallback nofree nosync nounwind readnone willreturn
 declare <vscale x 2 x i64> @llvm.aarch64.sve.splice.nxv2i64(<vscale x 2 x i1>, <vscale x 2 x i64>, <vscale x 2 x i64>) #7
 
-; Function Attrs: mustprogress nocallback nofree nosync nounwind readnone willreturn
-declare <vscale x 2 x i64> @llvm.aarch64.sve.index.nxv2i64(i64, i64) #7
+; Function Attrs: nocallback nofree nosync nounwind readnone willreturn
+declare <vscale x 2 x i64> @llvm.aarch64.sve.sel.nxv2i64(<vscale x 2 x i1>, <vscale x 2 x i64>, <vscale x 2 x i64>) #7
 
-; Function Attrs: argmemonly mustprogress nocallback nofree nosync nounwind readonly willreturn
-declare <vscale x 2 x i32> @llvm.masked.load.nxv2i32.p0(ptr, i32 immarg, <vscale x 2 x i1>, <vscale x 2 x i32>) #8
 
-; Function Attrs: argmemonly mustprogress nocallback nofree nosync nounwind willreturn writeonly
-declare void @llvm.masked.store.nxv2i32.p0(<vscale x 2 x i32>, ptr, i32 immarg, <vscale x 2 x i1>) #9
+declare <vscale x 2 x i32> @llvm.masked.gather.v4i32.v4p0(<vscale x 2 x ptr>, i32, <vscale x 2 x i1>, <vscale x 2 x i32>)
 
-; Function Attrs: mustprogress nocallback nofree nosync nounwind readonly willreturn
-declare <vscale x 2 x i32> @llvm.masked.gather.nxv2i32.nxv2p0(<vscale x 2 x ptr>, i32 immarg, <vscale x 2 x i1>, <vscale x 2 x i32>) #10
+declare void @llvm.masked.scatter.v4i32.v4p0(<vscale x 2 x i32>, <vscale x 2 x ptr>, i32, <vscale x 2 x i1>)
 
-; Function Attrs: mustprogress nocallback nofree nosync nounwind willreturn writeonly
-declare void @llvm.masked.scatter.nxv2i32.nxv2p0(<vscale x 2 x i32>, <vscale x 2 x ptr>, i32 immarg, <vscale x 2 x i1>) #11
+declare <vscale x 2 x i64> @llvm.aarch64.sve.index.nxv2i64(i64, i64)
+
 
 attributes #0 = { noinline nounwind uwtable "frame-pointer"="non-leaf" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="generic" "target-features"="+neon,+v8a" }
-attributes #1 = { mustprogress nocallback nofree nosync nounwind readnone speculatable willreturn }
+attributes #1 = { nocallback nofree nosync nounwind readnone speculatable willreturn }
 attributes #2 = { "frame-pointer"="non-leaf" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="generic" "target-features"="+neon,+v8a" }
 attributes #3 = { nofree nounwind "frame-pointer"="non-leaf" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="generic" "target-features"="+neon,+v8a" }
-attributes #4 = { argmemonly mustprogress nocallback nofree nosync nounwind willreturn }
-attributes #5 = { argmemonly mustprogress nofree nounwind willreturn writeonly }
+attributes #4 = { argmemonly nocallback nofree nosync nounwind willreturn }
+attributes #5 = { argmemonly nofree nounwind willreturn writeonly }
 attributes #6 = { nofree nounwind }
-attributes #7 = { mustprogress nocallback nofree nosync nounwind readnone willreturn }
-attributes #8 = { argmemonly mustprogress nocallback nofree nosync nounwind readonly willreturn }
-attributes #9 = { argmemonly mustprogress nocallback nofree nosync nounwind willreturn writeonly }
-attributes #10 = { mustprogress nocallback nofree nosync nounwind readonly willreturn }
-attributes #11 = { mustprogress nocallback nofree nosync nounwind willreturn writeonly }
-attributes #12 = { nounwind }
+attributes #7 = { nocallback nofree nosync nounwind readnone willreturn }
+attributes #8 = { nounwind }
 
 !llvm.dbg.cu = !{!2}
 !llvm.module.flags = !{!68, !69, !70, !71, !72, !73, !74, !75, !76, !77, !78}
@@ -398,8 +419,8 @@ attributes #12 = { nounwind }
 !92 = !DILocation(line: 0, scope: !80)
 !93 = !DILocation(line: 34, column: 5, scope: !80)
 !94 = !DILocation(line: 35, column: 5, scope: !80)
-!95 = !DILocation(line: 39, column: 5, scope: !87)
-!96 = !DILocation(line: 0, scope: !87)
+!95 = !DILocation(line: 0, scope: !87)
+!96 = !DILocation(line: 39, column: 5, scope: !87)
 !97 = !DILocation(line: 0, scope: !89)
 !98 = !DILocation(line: 40, column: 9, scope: !89)
 !99 = !DILocation(line: 51, column: 30, scope: !80)
@@ -409,7 +430,7 @@ attributes #12 = { nounwind }
 !103 = !DILocation(line: 47, column: 9, scope: !90)
 !104 = !DILocation(line: 39, column: 41, scope: !91)
 !105 = !DILocation(line: 39, column: 25, scope: !91)
-!106 = distinct !{!106, !95, !107, !108, !109}
+!106 = distinct !{!106, !96, !107, !108, !109}
 !107 = !DILocation(line: 48, column: 5, scope: !87)
 !108 = !{!"llvm.loop.mustprogress"}
 !109 = !{!"llvm.loop.unroll.disable"}

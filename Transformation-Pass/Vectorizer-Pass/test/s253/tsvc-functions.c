@@ -35,7 +35,7 @@ int s253(struct args_t * func_args)
     gettimeofday(&func_args->t1, NULL);
 
     __START_TRACE();
-//    __START_SIMULATE();
+    __START_SIMULATE();
     int s;
     for (int nl = 0; nl < iterations; nl++) {
         for (int i = 0; i < LEN_1D; i++) {
@@ -47,7 +47,7 @@ int s253(struct args_t * func_args)
         }
         dummy(a, b, c, d, e, aa, bb, cc, 0.);
     }
-//    __STOP_SIMULATE();
+    __STOP_SIMULATE();
     __STOP_TRACE();
 
     

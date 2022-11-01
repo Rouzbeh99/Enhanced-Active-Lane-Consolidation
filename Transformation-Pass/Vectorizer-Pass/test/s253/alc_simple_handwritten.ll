@@ -30,7 +30,8 @@ entry:
   call void @llvm.dbg.value(metadata ptr %func_args, metadata !84, metadata !DIExpression()), !dbg !92
   %call = tail call i32 @initialise_arrays(ptr noundef nonnull @__func__.s253) #8, !dbg !93
   %call1 = tail call i32 @gettimeofday(ptr noundef %func_args, ptr noundef null) #8, !dbg !94
-  tail call void asm sideeffect ".inst 0x2520e020", ""() #10 
+  ;tail call void asm sideeffect ".inst 0x2520e020", ""() #10 
+  tail call void asm sideeffect "dmb sy\0A\09orr x3,x3,x3\0A", "~{memory}"() #10
   br label %for.cond2.preheader, !dbg !96
 
 for.cond2.preheader:                              ; preds = %for.cond.cleanup4, %entry
@@ -43,7 +44,8 @@ for.cond2.preheader:                              ; preds = %for.cond.cleanup4, 
   br i1 %2, label %pre.alc, label %Preheader.for.remaining.iterations, !dbg !98
 
 for.cond.cleanup:  				  ; preds = %for.cond.cleanup4
-  tail call void asm sideeffect ".inst 0x2520e040", ""() #10                              
+  ;tail call void asm sideeffect ".inst 0x2520e040", ""() #10                              
+  tail call void asm sideeffect "dmb sy\0A\09orr x4,x4,x4\0A", "~{memory}"() #10
   %t2 = getelementptr inbounds %struct.args_t, ptr %func_args, i64 0, i32 1, !dbg !99
   %call23 = tail call i32 @gettimeofday(ptr noundef nonnull %t2, ptr noundef null) #8, !dbg !100
   %call24 = tail call i32 @calc_checksum(ptr noundef nonnull @__func__.s253) #8, !dbg !101
@@ -123,20 +125,24 @@ lane.gather:                                      ; preds = %alc.header
   %uniform.vec.predicate = call <vscale x 2 x i1> @llvm.aarch64.sve.whilelt.nxv2i1.i64(i64 0, i64 %num.all.true.preds)
   br label %alc.applied
 
+
 alc.applied:  					 ; preds = %lane.gather
   %ptr.vec.a = getelementptr inbounds [8192 x i32], ptr @a, i64 0, <vscale x 2 x i64> %27, !dbg !110
   %ptr.vec.b = getelementptr inbounds [8192 x i32], ptr @b, i64 0, <vscale x 2 x i64> %27, !dbg !110
-  %loaded.a = call <vscale x 2 x i32> @llvm.masked.gather.v4i32.v4p0(<vscale x 2 x ptr> %ptr.vec.a , i32 16, <vscale x 2 x i1> %uniform.vec.predicate, <vscale x 2 x i32> poison)
-  %loaded.b = call <vscale x 2 x i32> @llvm.masked.gather.v4i32.v4p0(<vscale x 2 x ptr> %ptr.vec.b , i32 16, <vscale x 2 x i1> %uniform.vec.predicate, <vscale x 2 x i32> poison)
+  %loaded.a = call <vscale x 2 x i32> @llvm.masked.gather.v2i32.v2p0(<vscale x 2 x ptr> %ptr.vec.a , i32 8, <vscale x 2 x i1> %uniform.vec.predicate, <vscale x 2 x i32> poison)
+  %loaded.b = call <vscale x 2 x i32> @llvm.masked.gather.v2i32.v2p0(<vscale x 2 x ptr> %ptr.vec.b , i32 8, <vscale x 2 x i1> %uniform.vec.predicate, <vscale x 2 x i32> poison)
   %ptr.vec.d = getelementptr inbounds [8192 x i32], ptr @d, i64 0, <vscale x 2 x i64> %27, !dbg !110
-  %loaded.d = call <vscale x 2 x i32> @llvm.masked.gather.v4i32.v4p0(<vscale x 2 x ptr> %ptr.vec.d , i32 16, <vscale x 2 x i1> %uniform.vec.predicate, <vscale x 2 x i32> poison)
+  %loaded.d = call <vscale x 2 x i32> @llvm.masked.gather.v2i32.v2p0(<vscale x 2 x ptr> %ptr.vec.d , i32 8, <vscale x 2 x i1> %uniform.vec.predicate, <vscale x 2 x i32> poison)
   %mul.vec = mul <vscale x 2 x i32> %loaded.b, %loaded.d
   %sub.vec = sub <vscale x 2 x i32>  %loaded.a, %mul.vec
   %ptr.vec.c = getelementptr inbounds [8192 x i32], ptr @c, i64 0, <vscale x 2 x i64> %27, !dbg !110
-  %loaded.c = call <vscale x 2 x i32> @llvm.masked.gather.v4i32.v4p0(<vscale x 2 x ptr> %ptr.vec.c , i32 16, <vscale x 2 x i1> %uniform.vec.predicate, <vscale x 2 x i32> poison)
+  %loaded.c = call <vscale x 2 x i32> @llvm.masked.gather.v2i32.v2p0(<vscale x 2 x ptr> %ptr.vec.c , i32 8, <vscale x 2 x i1> %uniform.vec.predicate, <vscale x 2 x i32> poison)
   %add.vec = add <vscale x 2 x i32> %loaded.c, %sub.vec
-  call void @llvm.masked.scatter.v4i32.v4p0(<vscale x 2 x i32> %add.vec, <vscale x 2 x ptr> %ptr.vec.c, i32 16, <vscale x 2 x i1> %uniform.vec.predicate)
-  call void @llvm.masked.scatter.v4i32.v4p0(<vscale x 2 x i32> %sub.vec, <vscale x 2 x ptr> %ptr.vec.a, i32 16, <vscale x 2 x i1> %uniform.vec.predicate)
+  call void @llvm.masked.scatter.v2i32.v2p0(<vscale x 2 x i32> %add.vec, <vscale x 2 x ptr> %ptr.vec.c, i32 8, <vscale x 2 x i1> %uniform.vec.predicate) ;;; NOT supported on the simulator!!!
+  call void @llvm.masked.scatter.v2i32.v2p0(<vscale x 2 x i32> %sub.vec, <vscale x 2 x ptr> %ptr.vec.a, i32 8, <vscale x 2 x i1> %uniform.vec.predicate)
+  ;call void @llvm.masked.store.nxv2i32.p0(<vscale x 2 x i32>  %add.vec, ptr %15, i32 8, <vscale x 2 x i1> %uniform.vec.predicate) 
+  ;call void @llvm.masked.store.nxv2i32.p0(<vscale x 2 x i32>  %sub.vec, ptr %16, i32 8, <vscale x 2 x i1> %uniform.vec.predicate)
+
   br label %new.latch
 
 linearized:   				 ; preds = %alc.header
@@ -156,7 +162,7 @@ linearized:   				 ; preds = %alc.header
   %ptr.c.linearize.2 = getelementptr inbounds [8192 x i32], ptr @c, i64 0, i64 %second.itr.index, !dbg !110
   %loaded.c.linearize.2 = call <vscale x 2 x i32> @llvm.masked.load.nxv2i32.p0(ptr %ptr.c.linearize.2, i32 8, <vscale x 2 x i1>  %predicate.vector.1, <vscale x 2 x i32> undef)
   %add.vec.linearize.2 = add <vscale x 2 x i32> %loaded.c.linearize.2, %sub.linearize.2
-  call void @llvm.masked.store.nxv2i32.p0(<vscale x 2 x i32>  %add.vec.linearize.2, ptr %ptr.c.linearize.2, i32 8, <vscale x 2 x i1> %predicate.vector.2)
+  call void @llvm.masked.store.nxv2i32.p0(<vscale x 2 x i32>  %add.vec.linearize.2, ptr %ptr.c.linearize.2, i32 8, <vscale x 2 x i1> %predicate.vector.2) 
   call void @llvm.masked.store.nxv2i32.p0(<vscale x 2 x i32>  %sub.linearize.2, ptr %17, i32 8, <vscale x 2 x i1> %predicate.vector.2)
   br label %new.latch
 
@@ -259,8 +265,6 @@ declare noundef i32 @puts(ptr nocapture noundef readonly) local_unnamed_addr #6
 ; Function Attrs: nocallback nofree nosync nounwind readnone willreturn
 declare i64 @llvm.vscale.i64() #7
 
-; Function Attrs: nocallback nofree nosync nounwind readnone willreturn
-declare <vscale x 2 x i64> @llvm.experimental.stepvector.nxv4i64() #7
 
 ; Function Attrs: nocallback nofree nosync nounwind readnone willreturn
 declare <vscale x 2 x i1> @llvm.aarch64.sve.ptrue.nxv2i1(i32 immarg) #7
@@ -282,9 +286,9 @@ declare <vscale x 2 x i64> @llvm.aarch64.sve.splice.nxv2i64(<vscale x 2 x i1>, <
 declare <vscale x 2 x i64> @llvm.aarch64.sve.sel.nxv2i64(<vscale x 2 x i1>, <vscale x 2 x i64>, <vscale x 2 x i64>) #7
 
 
-declare <vscale x 2 x i32> @llvm.masked.gather.v4i32.v4p0(<vscale x 2 x ptr>, i32, <vscale x 2 x i1>, <vscale x 2 x i32>)
+declare <vscale x 2 x i32> @llvm.masked.gather.v2i32.v2p0(<vscale x 2 x ptr>, i32, <vscale x 2 x i1>, <vscale x 2 x i32>)
 
-declare void @llvm.masked.scatter.v4i32.v4p0(<vscale x 2 x i32>, <vscale x 2 x ptr>, i32, <vscale x 2 x i1>)
+declare void @llvm.masked.scatter.v2i32.v2p0(<vscale x 2 x i32>, <vscale x 2 x ptr>, i32, <vscale x 2 x i1>)
 
 declare <vscale x 2 x i64> @llvm.aarch64.sve.index.nxv2i64(i64, i64)
 
