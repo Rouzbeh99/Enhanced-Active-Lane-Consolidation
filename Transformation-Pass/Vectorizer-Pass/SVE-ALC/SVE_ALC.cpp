@@ -167,14 +167,13 @@ void SVE_ALC::refinePreheader(BasicBlock *preVecBlock, BasicBlock *preHeaderForR
     Instruction *insertionPoint = preheader->getTerminator();
     IRBuilder<> IRB(insertionPoint);
 
-    
 
     if (tripCount->getType() == Type::getInt64Ty(preheader->getContext())) {
         vectorLength = intrinsicCallGenerator->createVscale64Intrinsic(IRB);
     } else {
         vectorLength = intrinsicCallGenerator->createVscale32Intrinsic(IRB);
     }
-    
+
 
 
     // check if there are iterations
@@ -204,8 +203,8 @@ SVE_ALC::fillPreALCBlock(BasicBlock *preALCBlock, BasicBlock *preheader, BasicBl
     // create step vector
     Constant *constZero = ConstantInt::get(tripCount->getType(), 0, false);
     Constant *constOne = ConstantInt::get(tripCount->getType(), 1, false);
-    Value *initialUniformVec = intrinsicCallGenerator->createIndexInstruction(builder, constZero,constOne);
-    Value * stepVal = vectorLength;
+    Value *initialUniformVec = intrinsicCallGenerator->createIndexInstruction(builder, constZero, constOne);
+    Value *stepVal = vectorLength;
 
 
     // vectorizing block termination condition: index > n - (n % stepValue)
@@ -564,7 +563,10 @@ SVE_ALC::vectorizeInstructions_nonePredicated(std::vector<Instruction *> *instru
     std::stack<Instruction *> toBeRemoved;
 
     // TODO: Complete the list
+    llvm::outs() << "----------------------------------------------------------\n";
     for (auto instr: *instructions) {
+        instr->print(outs());
+        llvm::outs() << "\n";
 
         if (isa<GEPOperator>(instr)) {
             continue;
@@ -636,11 +638,17 @@ SVE_ALC::vectorizeInstructions_nonePredicated(std::vector<Instruction *> *instru
                 case Instruction::Mul:
                     result = builder.CreateMul(firstOp, secondOp);
                     break;
+                case Instruction::SDiv:
+                    result = builder.CreateSDiv(firstOp, secondOp);
+                    break;
                 case Instruction::URem:
                     result = builder.CreateURem(firstOp, secondOp);
                     break;
                 case Instruction::And:
                     result = builder.CreateAnd(firstOp, secondOp);
+                    break;
+                case Instruction::Shl:
+                    result = builder.CreateShl(firstOp, secondOp);
                     break;
                 case Instruction::ICmp: {
                     switch (dyn_cast<ICmpInst>(instr)->getPredicate()) {
@@ -833,6 +841,9 @@ void SVE_ALC::vectorizeInstructions_Predicated(std::vector<Instruction *> *instr
                 case Instruction::Mul:
                     result = IRB.CreateMul(firstOp, secondOp);
                     break;
+                case Instruction::SDiv:
+                    result = IRB.CreateSDiv(firstOp, secondOp);
+                    break;
                 case Instruction::Sub:
                     result = IRB.CreateSub(firstOp, secondOp);
                     break;
@@ -841,6 +852,9 @@ void SVE_ALC::vectorizeInstructions_Predicated(std::vector<Instruction *> *instr
                     break;
                 case Instruction::And:
                     // TODO
+                    break;
+                case Instruction::Shl:
+                    result = IRB.CreateShl(firstOp, secondOp);
                     break;
                 case Instruction::ICmp: {
                     switch (dyn_cast<ICmpInst>(instr)->getPredicate()) {

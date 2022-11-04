@@ -10,7 +10,9 @@ void foo(int *__restrict__ a, int *__restrict__ b, int *__restrict__ c, bool *__
     __START_TRACE();
     for (int i = 0; i < n; ++i) {
         if (cond[i]) {
-            c[i] = a[i] * b[i];
+            a[i] = (18 * a[i] + 2 * c[i]) / (b[i] - 4 * a[i]);
+            b[i] = 5 * b[i] * a[i];
+            c[i] = 2 * b[i] - 3 * a[i];
         }
     }
     __STOP_TRACE();

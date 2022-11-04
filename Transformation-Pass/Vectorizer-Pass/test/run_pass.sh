@@ -15,8 +15,8 @@ $LLVM_BUILD_DIR/bin/clang -g -O3  -target aarch64-unknown-linux-gnu -DSVE_INTRIN
 $LLVM_BUILD_DIR/bin/opt -S -load-pass-plugin ../build/ALC_Vectorizer.so -passes="alc-vectorizer" compiled_with_O3.ll -o alc_applied.ll
 $LLVM_BUILD_DIR/bin/clang -g -O3  -target aarch64-unknown-linux-gnu -DSVE_INTRINSICS -fno-inline -fno-vectorize -fno-slp-vectorize -fno-unroll-loops -S -emit-llvm alc_applied.ll -o alc_applied_O3.ll
 
-#opt --disable-output -dot-cfg --cfg-dot-filename-prefix=cfg alc_applied_O3.ll
-#dot -Tpdf cfg.foo.dot -o cfg.pdf
+opt --disable-output -dot-cfg --cfg-dot-filename-prefix=cfg alc_applied_O3.ll
+dot -Tpdf cfg.foo.dot -o cfg.pdf
 # dot -Tpdf cfg.s253.dot -o cfg.pdf
 
 $LLVM_BUILD_DIR/bin/llc -O3  -mtriple=aarch64-linux-gnu -mattr=sve,sve2 -mcpu=cortex-a710 -filetype=obj alc_applied_O3.ll -o alc_applied_O3.o
@@ -24,5 +24,5 @@ $LLVM_BUILD_DIR/bin/llc -O3  -mtriple=aarch64-linux-gnu -mattr=sve,sve2 -mcpu=co
 #$LLVM_BUILD_DIR/bin/llc -O3  -mtriple=aarch64-linux-gnu -mattr=sve,sve2 -mcpu=cortex-a710 -filetype=asm alc_applied_O3.ll -o alc_applied_O3.s
 #$LLVM_BUILD_DIR/bin/llc -O3  -mtriple=aarch64-linux-gnu -mattr=sve,sve2 -mcpu=cortex-a710 -filetype=asm compiled_with_O3.ll -o compiled_with_O3.s
 
-#rm *.dot
+rm *.dot
 #rm compiled_with_O3.*
