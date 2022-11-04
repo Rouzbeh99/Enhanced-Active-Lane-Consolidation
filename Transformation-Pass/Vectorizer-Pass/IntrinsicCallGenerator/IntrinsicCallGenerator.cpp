@@ -4,7 +4,7 @@
 Value *IntrinsicCallGenerator::createAllTruePredicates(IRBuilder<> &IRB) {
     auto *VecTy = VectorType::get(IRB.getInt1Ty(), VF, /*Scalable*/ true);
     auto *constantInt =
-            llvm::ConstantInt::get(IRB.getInt32Ty(), VF, /*Scalable*/ true);
+            llvm::ConstantInt::get(IRB.getInt32Ty(), 31, /*Scalable*/ true);
     return IRB.CreateIntrinsic(Intrinsic::aarch64_sve_ptrue, {VecTy},
                                {constantInt});
 }

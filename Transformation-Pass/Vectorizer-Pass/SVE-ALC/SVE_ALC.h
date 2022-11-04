@@ -37,6 +37,7 @@ private:
     Value *tripCount;
     ScalarEvolution *SE;
     Value *vectorLength;
+    Value *vscale;
     Value *allTrue;
 
 
@@ -47,48 +48,6 @@ public:
 
     void doTransformation();
 
-private:
-    void formInitialPredicateVectors(Value *inductionVariable, Value **firstPredicates, Value **secondPredicates,
-                                     Value **firstVector, Value **secondVector);
-    // returns last generated block
-private:
-    BasicBlock *duplicateBlocksForInitialPredicateGeneration(Value *inductionVariable,
-                                                             std::vector<Value *> *firstInitialPredicates,
-                                                             std::vector<Value *> *secondInitialPredicates);
-
-
-private:
-    BasicBlock *doPermutation(Value *firstPredicates, Value *secondPredicates, Value *firstVector, Value *secondVector,
-                              Value **permutedZ0,
-                              Value **permutedZ1, Value **permutedPredicates);
-
-private:
-    BasicBlock *findTargetedBB();
-
-private:
-    void updateVectors(BasicBlock *insertAt, Value **indicesVector, Value **predicateVector, Value *inductionVariable);
-
-    //returns latch phi node
-private:
-    PHINode *
-    insertPhiNodsForVector(Value *updatedValue, Value *initialValue, BasicBlock *mainPath, BasicBlock *otherPath);
-
-
-private:
-    void makeBlockVectorized(BasicBlock *block, Value *predicateVector, Value *indices);
-
-    //blocks contain scalar code
-private:
-    void fillBlock(BasicBlock *blockToBeFilled, const std::vector<BasicBlock *> &blocks);
-
-private:
-    void refineLoopConditionCheck();
-
-private:
-    void setInitialValueForInductionVariable();
-
-private:
-    BasicBlock *makeTemporaryCopyOfTheBlock(BasicBlock *block);
 
 private:
     BasicBlock *findTargetedBlock();
@@ -120,7 +79,7 @@ private:
 
 private:
     void fillMiddleBlock(BasicBlock *middleBlock, BasicBlock *preheaderForRemaining, BasicBlock *exitBlock,
-                         Value *remResult);
+                         Value *remResult, Value *uniformVec, Value *uniformVecPredicates, Value *inductionVar);
 
 private:
     std::vector<Value *> *
@@ -143,18 +102,20 @@ private:
 
 private:
     void fillLinearizedBlock(BasicBlock *linearized, BasicBlock *newLatch, BasicBlock *toBeVectorizedBlock,
-                             Value *inductionVar, Value *indexPhi);
+                             Value *indexVec, Value *predicates, Value *inductionVar, Value *indexPhi);
 
 private:
     std::vector<Value *> *
     fillJoinBlock(BasicBlock *joinBlock, BasicBlock *newLatch, BasicBlock *uniformBlock, BasicBlock *laneGather,
-                  std::vector<Value *> *alcHeaderOutputs, std::vector<Value *> *uniformBlockOutputs);
+                  Value *headerIndex, std::vector<Value *> *laneGatherOutputs,
+                  std::vector<Value *> *uniformBlockOutputs);
 
 private:
-    void fillNewLatchBlock(BasicBlock *newLatch, BasicBlock *alcHeader, BasicBlock *middleBlock,
-                           BasicBlock *preHeaderForRemaining, BasicBlock *joinBlock, BasicBlock *linearizedBlock,
-                           std::vector<Value *> *alcHeaderOutputs, std::vector<Value *> *joinBlockOutputs,
-                           Value *totalVecIterations);
+    std::vector<Value *> *fillNewLatchBlock(BasicBlock *newLatch, BasicBlock *alcHeader, BasicBlock *middleBlock,
+                                            BasicBlock *joinBlock, BasicBlock *linearizedBlock,
+                                            std::vector<Value *> *alcHeaderOutputs,
+                                            std::vector<Value *> *joinBlockOutputs,
+                                            Value *totalVecIterations);
 
 private:
     void refinePreHeaderForRemaining(BasicBlock *preHeaderForRemaining, BasicBlock *middleBlock, Value *value);
@@ -173,6 +134,12 @@ private:
 private:
     std::map<const Value *, const Value *> *
     vectorizeInstructions_nonePredicated(std::vector<Instruction *> *instructions, BasicBlock *block, Value *indices);
+
+private:
+    void vectorizeInstructions_Predicated(std::vector<Instruction *> *instructions, BasicBlock *block,
+                                          Value *indices, Value *inductionVar, Value *indexVar,
+                                          Value *predicates, bool isPermuted,
+                                          std::map<const Value *, const Value *> *headerInstructionsMap);
 
 
 };
