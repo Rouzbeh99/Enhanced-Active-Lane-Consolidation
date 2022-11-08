@@ -32,67 +32,159 @@ private:
     IntrinsicCallGenerator *intrinsicCallGenerator;
     Module *module;
     int vectorizationFactor;
-    BasicBlock *targetedBlock;
+    LoopStandardAnalysisResults &AR;
     LoopInfo *LI;
-    BasicBlock *newLatch;
-    std::vector<Value *> predicates;
+    Value *tripCount;
+    ScalarEvolution *SE;
+    Value *vectorLength;
+    Value *allTrue;
 
 
 public:
-    SVE_ALC(Loop *l, int vectorizationFactor, LoopInfo *LI, BasicBlock *newLatch,
-            std::vector<Value *> predicateVector);
-
+    SVE_ALC(Loop *l, int vectorizationFactor, LoopStandardAnalysisResults &ar);
 
 public:
 
-    void doTransformation();
+    void doTransformation_newVersion();
+
+public:
+    void doTransformation_simpleVersion();
+
 
 private:
-    void formInitialPredicateVectors(Value *inductionVariable, Value **firstPredicates, Value **secondPredicates,
-                                     Value **firstVector, Value **secondVector);
-    // returns last generated block
-private:
-    BasicBlock *duplicateBlocksForInitialPredicateGeneration(Value *inductionVariable,
-                                                             std::vector<Value *> *firstInitialPredicates,
-                                                             std::vector<Value *> *secondInitialPredicates);
+    BasicBlock *findTargetedBlock();
 
 private:
     void
-    insertPermutationLogic(Instruction *insertAt, Value *z0, Value *z1, Value *p0, Value *p1, Value **permutedZ0,
-                           Value **permutedZ1, Value **permutedPredicates);
+    insertPermutationLogic(BasicBlock *insertAt, Value *z0, Value *z1, Value *p0, Value *p1, Value *firstActives,
+                           Value *bothActives,
+                           Value **permutedZ0,
+                           Value **permutedPredicates);
 
 private:
-    BasicBlock *doPermutation(Value *firstPredicates, Value *secondPredicates, Value *firstVector, Value *secondVector,
-                              Value **permutedZ0,
-                              Value **permutedZ1, Value **permutedPredicates);
+    Value *computeTripCount(BasicBlock *latch, Value *inductionVar);
 
 private:
-    BasicBlock *findTargetedBB();
+    BasicBlock *createEmptyBlock(const std::string &name, BasicBlock *insertBefore);
 
 private:
-    void updateVectors(BasicBlock *insertAt, Value **indicesVector, Value **predicateVector, Value *inductionVariable);
-
-    //returns latch phi node
-private:
-    PHINode *
-    insertPhiNodsForVector(Value *updatedValue, Value *initialValue, BasicBlock *mainPath, BasicBlock *otherPath);
-
+    BasicBlock *createPreheaderForRemainingIterations();
 
 private:
-    void makeBlockVectorized(BasicBlock *block, Value *predicateVector, Value *indices);
-
-    //blocks contain scalar code
-private:
-    void fillBlock(BasicBlock *blockToBeFilled, const std::vector<BasicBlock *> &blocks);
+    void refinePreheader(BasicBlock *preVecBlock, BasicBlock *preHeaderForRemaining);
 
 private:
-    void refineLoopConditionCheck();
+    std::vector<Value *> *
+    fillPreALCBlock_newVersion(BasicBlock *preALCBlock, BasicBlock *preheader, BasicBlock *alcHeader);
 
 private:
-    void setInitialValueForInductionVariable();
+    Value *createVectorOfConstants(Value *value, IRBuilder<> &builder, std::string name);
 
 private:
-    BasicBlock *makeTemporaryCopyOfTheBlock(BasicBlock *block);
+    void fillMiddleBlock_newVersion(BasicBlock *middleBlock, BasicBlock *preheaderForRemaining, BasicBlock *exitBlock,
+                                    Value *remResult, Value *uniformVec, Value *uniformVecPredicates,
+                                    Value *inductionVar);
+
+private:
+    std::vector<Value *> *
+    fillALCHeaderBlock_newVersion(BasicBlock *alcHeader, BasicBlock *laneGatherBlock, BasicBlock *linearized,
+                                  BasicBlock *preALC,
+                                  Value *initialPredicates,
+                                  std::vector<Value *> *initialValues, BasicBlock *header, Value *inductionVar);
+
+private:
+    std::vector<Value *> *
+    fillLaneGatherBlock_newVersion(BasicBlock *laneGather, BasicBlock *alcApplied, BasicBlock *joinBlock, Value *z0,
+                                   Value *z1,
+                                   Value *p0, Value *p1,
+                                   Value *firstActives,
+                                   Value *bothActives);
+
+private:
+    std::vector<Value *> *
+    fillUniformBlock_newVersion(BasicBlock *uniformBlock, BasicBlock *joinBlock, BasicBlock *toBeVectorizedBlock,
+                                BasicBlock *header,
+                                Value *indices, Value *inductionVar, Value *indexPhi);
+
+private:
+    void fillLinearizedBlock_newVersion(BasicBlock *linearized, BasicBlock *newLatch, BasicBlock *toBeVectorizedBlock,
+                                        Value *indexVec, Value *predicates, Value *inductionVar, Value *indexPhi);
+
+private:
+    std::vector<Value *> *
+    fillJoinBlock(BasicBlock *joinBlock, BasicBlock *newLatch, BasicBlock *uniformBlock, BasicBlock *laneGather,
+                  Value *headerIndex, std::vector<Value *> *laneGatherOutputs,
+                  std::vector<Value *> *uniformBlockOutputs);
+
+private:
+    std::vector<Value *> *
+    fillNewLatchBlock_newVersion(BasicBlock *newLatch, BasicBlock *alcHeader, BasicBlock *middleBlock,
+                                 BasicBlock *joinBlock, BasicBlock *linearizedBlock,
+                                 std::vector<Value *> *alcHeaderOutputs,
+                                 std::vector<Value *> *joinBlockOutputs,
+                                 Value *totalVecIterations);
+
+private:
+    void refinePreHeaderForRemaining(BasicBlock *preHeaderForRemaining, BasicBlock *middleBlock, Value *value);
+
+private:
+    Value *formPredicate(BasicBlock *decisionBlock, BasicBlock *predicateHolderBlock,
+                         Value *inductionVar, Value *inductionVarInitialValue);
+
+private:
+    std::vector<Instruction *> *
+    cloneInstructions(BasicBlock *From, BasicBlock *to, Value *inductionVar, Value *inductionVarInitialValue);
+
+private:
+    bool usesInductionVar(Value *value, Value *inductionVar);
+
+private:
+    std::map<const Value *, const Value *> *
+    vectorizeInstructions_nonePredicated(std::vector<Instruction *> *instructions, BasicBlock *block, Value *indices);
+
+private:
+    void vectorizeInstructions_Predicated(std::vector<Instruction *> *instructions, BasicBlock *block,
+                                          Value *indices, Value *inductionVar, Value *indexVar,
+                                          Value *predicates, bool isPermuted,
+                                          std::map<const Value *, const Value *> *headerInstructionsMap);
+
+private:
+    std::vector<Value *> *
+    fillALCHeaderBlock_simpleVersion(BasicBlock *alcHeader, BasicBlock *laneGatherBlock, BasicBlock *linearized,
+                                     BasicBlock *preALC, std::vector<Value *> *preALCOutputs, BasicBlock *header,
+                                     Value *vecUpdateValue, Value *inductionVar);
+
+private:
+    std::vector<Value *> *fillPreALCBlock_simpleVersion(BasicBlock *preALCBlock, BasicBlock *alcHeader);
+
+private:
+    std::vector<Value *> *
+    fillLaneGatherBlock_simpleVersion(BasicBlock *laneGather, BasicBlock *alcApplied, Value *z0,
+                                      Value *z1, Value *p0, Value *p1,
+                                      Value *firstActives,
+                                      Value *bothActives);
+
+private:
+    void
+    fillUniformBlock_simpleVersion(BasicBlock *uniformBlock, BasicBlock *latch, BasicBlock *toBeVectorizedBlock,
+                                   Value *indices, Value *inductionVar, Value *indexVar, Value *predicates);
+
+private:
+    void
+    fillLinearizedBlock_simpleVersion(BasicBlock *linearized, BasicBlock *newLatch, BasicBlock *toBeVectorizedBlock,
+                                      Value *firstPredicates, Value *secondPredicates, Value *inductionVar,
+                                      Value *index, Value *nextItrIndex);
+
+private:
+    std::vector<Value *> *
+    fillNewLatchBlock_simpleVersion(BasicBlock *newLatch, BasicBlock *alcHeader, BasicBlock *middleBlock,
+                                    Value *nextItrIndex, Value *totalVecIterations);
+
+private:
+    void
+    fillMiddleBlock_simpleVersion(BasicBlock *middleBlock, BasicBlock *preheaderForRemaining, BasicBlock *exitBlock,
+                                  Value *remResult);
+
 
 };
 

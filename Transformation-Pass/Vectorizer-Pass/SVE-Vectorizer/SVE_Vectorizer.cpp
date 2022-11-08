@@ -99,9 +99,9 @@ void SVE_Vectorizer::refinePreheader(BasicBlock *preVecBlock, BasicBlock *preHea
     Value *stepVal = nullptr;
 
     if (tripCount->getType() == Type::getInt64Ty(preheader->getContext())) {
-      stepVal = intrinsicCallGenerator->createVscale64Intrinsic(IRB);
+        stepVal = intrinsicCallGenerator->createVscale64Intrinsic(IRB);
     } else {
-      stepVal = intrinsicCallGenerator->createVscale32Intrinsic(IRB);
+        stepVal = intrinsicCallGenerator->createVscale32Intrinsic(IRB);
     }
 
     // check if there are iterations
@@ -209,10 +209,10 @@ SVE_Vectorizer::fillPreVecBlock(BasicBlock *preVecBlock, BasicBlock *preheader, 
 
     if (tripCount->getType() == Type::getInt64Ty(preheader->getContext())) {
         stepVal = intrinsicCallGenerator->createVscale64Intrinsic(builder);
-        stepVec = intrinsicCallGenerator->createStepVector64Intrinsic(builder);
+        stepVec = intrinsicCallGenerator->createStepVector64Intrinsic(builder, "step.vec");
     } else {
         stepVal = intrinsicCallGenerator->createVscale32Intrinsic(builder);
-        stepVec = intrinsicCallGenerator->createStepVector32Intrinsic(builder);
+        stepVec = intrinsicCallGenerator->createStepVector32Intrinsic(builder, "step.vec");
     }
 
     // vectorizing block termination condition: index > n - (n % stepValue)
@@ -364,6 +364,8 @@ SVE_Vectorizer::formPredicateVector(Instruction *insertionPoint, BasicBlock *dec
 }
 
 
+// TODO: how to vectorize this code?: t = a[i] + b[i]
+//                                     ... = t * ...
 void SVE_Vectorizer::vectorizeTargetedBlockInstructions(BasicBlock *vectorizingBlock, BasicBlock *targetedBlock,
                                                         PHINode *stepVec, Value *inductionVar, Value *indexVar,
                                                         Value *predicates,
@@ -513,11 +515,17 @@ SVE_Vectorizer::vectorizeInstructions_nonePredicated(std::vector<Instruction *> 
                 case Instruction::Mul:
                     result = builder.CreateMul(firstOp, secondOp);
                     break;
+                case Instruction::SDiv:
+                    result = builder.CreateSDiv(firstOp, secondOp);
+                    break;
                 case Instruction::URem:
                     result = builder.CreateURem(firstOp, secondOp);
                     break;
                 case Instruction::And:
                     result = builder.CreateAnd(firstOp, secondOp);
+                    break;
+                case Instruction::Shl:
+                    result = builder.CreateShl(firstOp, secondOp);
                     break;
                 case Instruction::ICmp: {
                     switch (dyn_cast<ICmpInst>(instr)->getPredicate()) {
@@ -667,6 +675,9 @@ void SVE_Vectorizer::vectorizeInstructions_Predicated(std::vector<Instruction *>
     // TODO: Complete the list
     for (auto instr: *instructions) {
 
+        instr->print(outs());
+        llvm::outs() << "\n";
+
         if (isa<GEPOperator>(instr)) {
             for (int i = 0; i < instr->getNumOperands(); ++i) {
                 if (instr->getOperand(i)->getName() == inductionVar->getName()) {  // TODO: ??????
@@ -736,11 +747,17 @@ void SVE_Vectorizer::vectorizeInstructions_Predicated(std::vector<Instruction *>
                 case Instruction::Sub:
                     result = IRB.CreateSub(firstOp, secondOp);
                     break;
+                case Instruction::SDiv:
+                    result = IRB.CreateSDiv(firstOp, secondOp);
+                    break;
                 case Instruction::URem:
                     // TODO
                     break;
                 case Instruction::And:
                     // TODO
+                    break;
+                case Instruction::Shl:
+                    result = IRB.CreateShl(firstOp, secondOp);
                     break;
                 case Instruction::ICmp: {
                     switch (dyn_cast<ICmpInst>(instr)->getPredicate()) {
