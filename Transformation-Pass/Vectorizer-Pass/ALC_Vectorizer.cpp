@@ -57,20 +57,7 @@ namespace {
 
         BasicBlock *initialLatch = L->getLoopLatch();
 
-<<<<<<< HEAD
-        int factor = 4;
 
-        auto *unroller = new Unroller(L, &AR.LI);
-        unroller->doUnrolling(factor);
-
-        auto *sve_permute = new SVE_ALC(L, factor, &AR.LI, unroller->getNewLatch(), unroller->getPredicates());
-        sve_permute->doTransformation();
-
-//        auto *sve_vectorizer = new SVE_Vectorizer(L, factor, AR);
-//        sve_vectorizer->doVectorization();
-
-        printLoop(L);
-=======
         int factor = 2;
 
         auto *sve_alc = new SVE_ALC(L, factor, AR);
@@ -80,9 +67,7 @@ namespace {
 //        sve_alc->doTransformation_newVersion();
         sve_alc->doTransformation_simpleVersion();
 
-
         printAllBlocks(L);
->>>>>>> ALC_new_strategy
 
         return llvm::PreservedAnalyses::none();
     }

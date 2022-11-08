@@ -35,17 +35,11 @@ Value *
 IntrinsicCallGenerator::createSpliceInstruction(IRBuilder<> &IRB,
                                                 Value *firstOp, Value *secondOp,
                                                 Value *predicatedVector) {
-<<<<<<< HEAD
-  auto *VecTy = VectorType::get(IRB.getInt32Ty(), VF, /*Scalable*/ true);
-  return IRB.CreateIntrinsic(Intrinsic::aarch64_sve_splice,
-                             {VecTy},
-                             {predicatedVector, firstOp, secondOp});
-=======
 
     return IRB.CreateIntrinsic(Intrinsic::aarch64_sve_splice,
                                {firstOp->getType()},
                                {predicatedVector, firstOp, secondOp});
->>>>>>> ALC_new_strategy
+
 }
 
 Value *IntrinsicCallGenerator::createSelInstruction(IRBuilder<> &IRB,
