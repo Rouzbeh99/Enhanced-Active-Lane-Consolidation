@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdbool.h>
+#include <gem5/m5ops.h>
 
 #define __START_TRACE() { asm volatile (".inst 0x2520e020"); }
 #define __STOP_TRACE() { asm volatile (".inst 0x2520e040"); }
@@ -7,7 +8,8 @@
 void foo(int *__restrict__ a, int *__restrict__ b, int *__restrict__ c, bool *__restrict__ cond, int n) {
 
 //     __asm__ volatile("dmb sy\n\torr x3,x3,x3\n":: :"memory");
-    __START_TRACE();
+//    __START_TRACE();
+    m5_reset_stats(0,0);
     for (int i = 0; i < n; ++i) {
         if (cond[i]) {
             a[i] = (18 * a[i] + 2 * c[i]) / (b[i] - 4 * a[i]);
@@ -15,7 +17,8 @@ void foo(int *__restrict__ a, int *__restrict__ b, int *__restrict__ c, bool *__
             c[i] = 2 * b[i] - 3 * a[i];
         }
     }
-    __STOP_TRACE();
+    m5_dump_stats(0,0);
+//   __STOP_TRACE();
 //    __asm__ volatile("dmb sy\n\torr x4,x4,x4\n":: :"memory");
 }
 
