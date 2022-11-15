@@ -79,7 +79,7 @@ private:
     void fillMiddleBlock(BasicBlock *middleBlock, BasicBlock *preheader, BasicBlock *exitBlock, Value *remResult);
 
 private:
-    Value *createVectorOfConstants(Value *value, Instruction *insertionPoint, std::string name);
+    Value *createVectorOfConstants(Value *value, IRBuilder<> &IRB, std::string name);
 
 private:
     std::map<const Value *, const Value *> *

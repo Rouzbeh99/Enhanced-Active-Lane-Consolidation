@@ -196,8 +196,7 @@ SVE_Vectorizer::fillPreVecBlock(BasicBlock *preVecBlock, BasicBlock *preheader, 
 
     auto *results = new std::vector<Value *>;
 
-    Instruction *insertionPoint = preVecBlock->getTerminator();
-    IRBuilder<> builder(insertionPoint);
+    IRBuilder<> IRB(preVecBlock->getTerminator());
 
     // create the value by which the index should be increased
     //TODO: we assume indices are added by one, make it work for other cases as well
@@ -207,22 +206,22 @@ SVE_Vectorizer::fillPreVecBlock(BasicBlock *preVecBlock, BasicBlock *preheader, 
     Value *stepVec = nullptr;
     Value *stepVal = nullptr;
 
-    if (tripCount->getType() == Type::getInt64Ty(preheader->getContext())) {
-        stepVal = intrinsicCallGenerator->createVscale64Intrinsic(builder);
-        stepVec = intrinsicCallGenerator->createStepVector64Intrinsic(builder, "step.vec");
+    if (tripCount->getType() == IRB.getInt64Ty()) {
+        stepVal = intrinsicCallGenerator->createVscale64Intrinsic(IRB);
+        stepVec = intrinsicCallGenerator->createStepVector64Intrinsic(IRB, "step.vec");
     } else {
-        stepVal = intrinsicCallGenerator->createVscale32Intrinsic(builder);
-        stepVec = intrinsicCallGenerator->createStepVector32Intrinsic(builder, "step.vec");
+        stepVal = intrinsicCallGenerator->createVscale32Intrinsic(IRB);
+        stepVec = intrinsicCallGenerator->createStepVector32Intrinsic(IRB, "step.vec");
     }
 
     // vectorizing block termination condition: index > n - (n % stepValue)
     // forming n - (n % stepValue)
 
-    Value *remResult = builder.CreateURem(tripCount, stepVal);
-    Value *totalVecIterations = builder.CreateSub(tripCount, remResult, "total.iterations.to.be.vectorized");
+    Value *remResult = IRB.CreateURem(tripCount, stepVal);
+    Value *totalVecIterations = IRB.CreateSub(tripCount, remResult, "total.iterations.to.be.vectorized");
 
     // create vector by which step vector should be updated
-    Value *stepVecUpdateValues = createVectorOfConstants(stepVal, insertionPoint, "stepVector.update.values");
+    Value *stepVecUpdateValues = createVectorOfConstants(stepVal, IRB, "stepVector.update.values");
 
     results->push_back(stepVec);
     results->push_back(stepVal);
@@ -440,9 +439,7 @@ std::map<const Value *, const Value *> *
 SVE_Vectorizer::vectorizeInstructions_nonePredicated(std::vector<Instruction *> *instructions, BasicBlock *block,
                                                      Value *stepVector, Value *inductionVar, Value *indexVar,
                                                      ValueToValueMapTy &inputMap) {
-    Instruction *insertionPoint = block->getTerminator();
-    IRBuilder<> builder(block->getContext());
-    builder.SetInsertPoint(insertionPoint);
+    IRBuilder<> IRB(block->getTerminator());
 
 
     auto outputMap = new std::map<const Value *, const Value *>;
@@ -471,17 +468,17 @@ SVE_Vectorizer::vectorizeInstructions_nonePredicated(std::vector<Instruction *> 
             } else {
                 // it's constant
                 auto *constValue = dyn_cast<Constant>(storeInstr->getOperand(0));
-                firstOp = createVectorOfConstants(constValue, insertionPoint, "store.values");
+                firstOp = createVectorOfConstants(constValue, IRB, "store.values");
                 // TODO: is there any other case ?
             }
             auto ptr = dyn_cast<GEPOperator>(instr->getOperand(1));
-            builder.CreateStore(firstOp, ptr);
+            IRB.CreateStore(firstOp, ptr);
             toBeRemoved.push(instr);
         } else if (isa<LoadInst>(instr)) {
 
             auto ptr = dyn_cast<GEPOperator>(instr->getOperand(0));
             Type *elementType = instr->getType();
-            LoadInst *loadedData = builder.CreateLoad(VectorType::get(elementType, vectorizationFactor, true), ptr);
+            LoadInst *loadedData = IRB.CreateLoad(VectorType::get(elementType, vectorizationFactor, true), ptr);
             vMap[instr] = loadedData;
             toBeRemoved.push(instr);
 
@@ -495,7 +492,7 @@ SVE_Vectorizer::vectorizeInstructions_nonePredicated(std::vector<Instruction *> 
                 firstOp = stepVector;
             } else {
                 auto *constValue = dyn_cast<Constant>(instr->getOperand(0));
-                firstOp = createVectorOfConstants(constValue, insertionPoint, "first.operand");
+                firstOp = createVectorOfConstants(constValue, IRB, "first.operand");
             }
 
             if (vMap.count(instr->getOperand(1))) {
@@ -504,28 +501,28 @@ SVE_Vectorizer::vectorizeInstructions_nonePredicated(std::vector<Instruction *> 
                 secondOp = stepVector;
             } else {
                 auto *constValue = dyn_cast<Constant>(instr->getOperand(1));
-                secondOp = createVectorOfConstants(constValue, insertionPoint, "second.operand");
+                secondOp = createVectorOfConstants(constValue, IRB, "second.operand");
             }
 
             Value *result = nullptr;
             switch (instr->getOpcode()) {
                 case Instruction::Add:
-                    result = builder.CreateAdd(firstOp, secondOp);
+                    result = IRB.CreateAdd(firstOp, secondOp);
                     break;
                 case Instruction::Mul:
-                    result = builder.CreateMul(firstOp, secondOp);
+                    result = IRB.CreateMul(firstOp, secondOp);
                     break;
                 case Instruction::SDiv:
-                    result = builder.CreateSDiv(firstOp, secondOp);
+                    result = IRB.CreateSDiv(firstOp, secondOp);
                     break;
                 case Instruction::URem:
-                    result = builder.CreateURem(firstOp, secondOp);
+                    result = IRB.CreateURem(firstOp, secondOp);
                     break;
                 case Instruction::And:
-                    result = builder.CreateAnd(firstOp, secondOp);
+                    result = IRB.CreateAnd(firstOp, secondOp);
                     break;
                 case Instruction::Shl:
-                    result = builder.CreateShl(firstOp, secondOp);
+                    result = IRB.CreateShl(firstOp, secondOp);
                     break;
                 case Instruction::ICmp: {
                     switch (dyn_cast<ICmpInst>(instr)->getPredicate()) {
@@ -565,14 +562,10 @@ SVE_Vectorizer::vectorizeInstructions_nonePredicated(std::vector<Instruction *> 
                         case CmpInst::BAD_FCMP_PREDICATE:
                             break;
                         case CmpInst::ICMP_EQ: {
-                            Value *ICmpInst = builder.CreateICmpEQ(firstOp, secondOp);
-
-                            CastInst *truncInst = TruncInst::Create(Instruction::CastOps::BitCast, ICmpInst,
-                                                                    VectorType::get(
-                                                                            Type::getInt1Ty(block->getContext()),
-                                                                            vectorizationFactor, true), "",
-                                                                    insertionPoint);
-                            result = dyn_cast<Value>(truncInst);
+                            Value *ICmpInst = IRB.CreateICmpEQ(firstOp, secondOp);
+                            result = IRB.CreateBitCast(ICmpInst,
+                                VectorType::get(Type::getInt1Ty(block->getContext()),
+                                  vectorizationFactor, true));
                             break;
                         }
                         case CmpInst::ICMP_NE:
@@ -586,8 +579,7 @@ SVE_Vectorizer::vectorizeInstructions_nonePredicated(std::vector<Instruction *> 
                         case CmpInst::ICMP_ULE:
                             break;
                         case CmpInst::ICMP_SGT: {
-                            Value *ICmpInst = builder.CreateICmpSGT(firstOp, secondOp);
-                            result = dyn_cast<Value>(ICmpInst);
+                            result = IRB.CreateICmpSGT(firstOp, secondOp);
                             break;
                         }
                         case CmpInst::ICMP_SGE:
@@ -635,19 +627,16 @@ SVE_Vectorizer::vectorizeInstructions_nonePredicated(std::vector<Instruction *> 
 
 }
 
-Value *SVE_Vectorizer::createVectorOfConstants(Value *value, Instruction *insertionPoint, std::string name) {
-
-    IRBuilder<> builder(insertionPoint->getContext());
-    builder.SetInsertPoint(insertionPoint);
+Value *SVE_Vectorizer::createVectorOfConstants(Value *value, IRBuilder<> &IRB, std::string name) {
 
     auto *vecType = VectorType::get(value->getType(), vectorizationFactor, true);
     auto poisonVec = PoisonValue::get(vecType);
     u_int64_t indexZero = 0;
-    Value *splatInsert = builder.CreateInsertElement(poisonVec, value, indexZero);
+    Value *splatInsert = IRB.CreateInsertElement(poisonVec, value, indexZero);
 
     ConstantAggregateZero *zeroInitializer = ConstantAggregateZero::get(vecType);
 
-    return builder.CreateShuffleVector(splatInsert, poisonVec, zeroInitializer, name);
+    return IRB.CreateShuffleVector(splatInsert, poisonVec, zeroInitializer, name);
 }
 
 
@@ -657,8 +646,7 @@ void SVE_Vectorizer::vectorizeInstructions_Predicated(std::vector<Instruction *>
                                                       Value *predicates,
                                                       std::map<const Value *, const Value *> *headerInstructionsMap) {
 
-    Instruction *insertionPoint = block->getTerminator();
-    IRBuilder<> IRB(insertionPoint);
+    IRBuilder<> IRB(block->getTerminator());
 
 
     std::map<Value *, Value *> vMap;
@@ -695,7 +683,7 @@ void SVE_Vectorizer::vectorizeInstructions_Predicated(std::vector<Instruction *>
             } else {
                 // it's constant
                 auto *constValue = dyn_cast<Constant>(storeInstr->getOperand(0));
-                firstOp = createVectorOfConstants(constValue, insertionPoint, "store.values");
+                firstOp = createVectorOfConstants(constValue, IRB, "store.values");
                 // TODO: is there any other case ?
             }
             auto ptr = instr->getOperand(1);
@@ -724,7 +712,7 @@ void SVE_Vectorizer::vectorizeInstructions_Predicated(std::vector<Instruction *>
                 firstOp = stepVector;
             } else {
                 auto *constValue = dyn_cast<Constant>(instr->getOperand(0));
-                firstOp = createVectorOfConstants(constValue, insertionPoint, "first.operand");
+                firstOp = createVectorOfConstants(constValue, IRB, "first.operand");
             }
 
             if (vMap.count(instr->getOperand(1))) {
@@ -733,7 +721,7 @@ void SVE_Vectorizer::vectorizeInstructions_Predicated(std::vector<Instruction *>
                 secondOp = stepVector;
             } else {
                 auto *constValue = dyn_cast<Constant>(instr->getOperand(1));
-                secondOp = createVectorOfConstants(constValue, insertionPoint, "second.operand");
+                secondOp = createVectorOfConstants(constValue, IRB, "second.operand");
             }
 
             Value *result = nullptr;
