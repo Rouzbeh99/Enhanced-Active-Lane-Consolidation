@@ -29,6 +29,12 @@ public:
     LoopInfo *LI;
     Value *tripCount;
     ScalarEvolution *SE;
+private:
+    Value *InductionVector;
+    Value *VectorizedStepValue;
+    Value *StepVector;
+    Value *VectorizedIterations;
+    Value *NonVectorizedIterations;
 
 private:
     Module *module;
@@ -53,7 +59,7 @@ private:
     BasicBlock *createPreheaderForRemainingIterations();
 
 private:
-    std::vector<Value *> *fillPreVecBlock(BasicBlock *preVecBlock, BasicBlock *preheader, BasicBlock *vectorizingBlock);
+    void fillPreVecBlock(BasicBlock *preVecBlock);
 
 private:
     BasicBlock *createVectorizingBlock();
@@ -72,7 +78,7 @@ private:
 private:
     void
     fillVectorizingBlock(BasicBlock *vectorizingBlock, BasicBlock *preVec, BasicBlock *preheaderForRemainingIterations,
-                         BasicBlock *exitBlock, BasicBlock *middleBlock, std::vector<Value *> *initialValues,
+                         BasicBlock *exitBlock, BasicBlock *middleBlock,
                          Value *inductionVar);
 
 private:
