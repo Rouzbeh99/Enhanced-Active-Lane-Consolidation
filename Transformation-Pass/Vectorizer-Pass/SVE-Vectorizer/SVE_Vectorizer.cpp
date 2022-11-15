@@ -67,9 +67,8 @@ void SVE_Vectorizer::doVectorization() {
     refinePreheader(preVectorizationBlock, preHeaderForRemaining);
 
 
-    auto *values = fillPreVecBlock(preVectorizationBlock, preheader, vectorizingBlock);
+    fillPreVecBlock(preVectorizationBlock);
     fillVectorizingBlock(vectorizingBlock, preVectorizationBlock, preHeaderForRemaining, exitBlock, middleBlock,
-                         values,
                          dyn_cast<Value>(inductionVar));
 
 
@@ -191,10 +190,7 @@ BasicBlock *SVE_Vectorizer::createVectorizingBlock() {
     return block;
 }
 
-std::vector<Value *> *
-SVE_Vectorizer::fillPreVecBlock(BasicBlock *preVecBlock, BasicBlock *preheader, BasicBlock *vectorizingBlock) {
-
-    auto *results = new std::vector<Value *>;
+void SVE_Vectorizer::fillPreVecBlock(BasicBlock *preVecBlock) {
 
     IRBuilder<> IRB(preVecBlock->getTerminator());
 
@@ -202,41 +198,27 @@ SVE_Vectorizer::fillPreVecBlock(BasicBlock *preVecBlock, BasicBlock *preheader, 
     //TODO: we assume indices are added by one, make it work for other cases as well
     //should be added by vscale * VFactor * 1  ----> vscale shl log(VFactor)
 
-    // create step vector
-    Value *stepVec = nullptr;
-    Value *stepVal = nullptr;
-
     if (tripCount->getType() == IRB.getInt64Ty()) {
-        stepVal = intrinsicCallGenerator->createVscale64Intrinsic(IRB);
-        stepVec = intrinsicCallGenerator->createStepVector64Intrinsic(IRB, "step.vec");
+        VectorizedStepValue = intrinsicCallGenerator->createVscale64Intrinsic(IRB);
+        InductionVector = intrinsicCallGenerator->createStepVector64Intrinsic(IRB, "induction.vector");
     } else {
-        stepVal = intrinsicCallGenerator->createVscale32Intrinsic(IRB);
-        stepVec = intrinsicCallGenerator->createStepVector32Intrinsic(IRB, "step.vec");
+        VectorizedStepValue = intrinsicCallGenerator->createVscale32Intrinsic(IRB);
+        InductionVector = intrinsicCallGenerator->createStepVector32Intrinsic(IRB, "induction.vector");
     }
 
     // vectorizing block termination condition: index > n - (n % stepValue)
     // forming n - (n % stepValue)
-
-    Value *remResult = IRB.CreateURem(tripCount, stepVal);
-    Value *totalVecIterations = IRB.CreateSub(tripCount, remResult, "total.iterations.to.be.vectorized");
+    NonVectorizedIterations = IRB.CreateURem(tripCount, VectorizedStepValue, "num.non-vectorized.iterations");
+    VectorizedIterations = IRB.CreateSub(tripCount, NonVectorizedIterations, "num.vectorized.iterations");
 
     // create vector by which step vector should be updated
-    Value *stepVecUpdateValues = createVectorOfConstants(stepVal, IRB, "stepVector.update.values");
-
-    results->push_back(stepVec);
-    results->push_back(stepVal);
-    results->push_back(stepVecUpdateValues);
-    results->push_back(totalVecIterations);
-    results->push_back(remResult);
-
-    return results;
+    StepVector = createVectorOfConstants(VectorizedStepValue, IRB, "step.vector");
 }
 
 void SVE_Vectorizer::fillVectorizingBlock(BasicBlock *vectorizingBlock, BasicBlock *preVec,
                                           BasicBlock *preheaderForRemainingIterations,
                                           BasicBlock *exitBlock,
                                           BasicBlock *middleBlock,
-                                          std::vector<Value *> *initialValues,
                                           Value *inductionVar) {
 
 
@@ -245,55 +227,50 @@ void SVE_Vectorizer::fillVectorizingBlock(BasicBlock *vectorizingBlock, BasicBlo
     builder.SetInsertPoint(insertionPoint);
 
     // create phi node for loop index
-    Type *indexUpdatedValueType = (*initialValues)[1]->getType();   // it's the same as tripcount size
+    auto *indexUpdatedValueType = VectorizedStepValue->getType();   // it's the same as tripcount size
     Constant *contZero = llvm::ConstantInt::get(indexUpdatedValueType, 0);
     PHINode *indexVarPHI = PHINode::Create(indexUpdatedValueType, 2, "", insertionPoint);
     indexVarPHI->addIncoming(contZero, preVec);
 
 
     // create phi for step vector
-    Value *&stepVecInPrevBlock = (*initialValues)[0];
-    PHINode *stepVecPhi = PHINode::Create(stepVecInPrevBlock->getType(), 2, "", insertionPoint);
-    stepVecPhi->addIncoming(stepVecInPrevBlock, preVec);
+    PHINode *IndVectorPHI = PHINode::Create(InductionVector->getType(), 2, "", insertionPoint);
+    IndVectorPHI->addIncoming(InductionVector, preVec);
 
 
     //// vectorizing header and then bodies /////
     BasicBlock *targetedBlock = findTargetedBlock();
     // predicates come from header (decision block)
     std::map<const Value *, const Value *> *headerInstructionsMap = nullptr;
-    Value *predicates = formPredicateVector(insertionPoint, L->getHeader(), vectorizingBlock, targetedBlock, stepVecPhi,
+    Value *predicates = formPredicateVector(insertionPoint, L->getHeader(), vectorizingBlock, targetedBlock, IndVectorPHI,
                                             inductionVar,
                                             indexVarPHI, &headerInstructionsMap);
 
     // add vectorized instruction of then body
-    vectorizeTargetedBlockInstructions(vectorizingBlock, targetedBlock, stepVecPhi, inductionVar, indexVarPHI,
+    vectorizeTargetedBlockInstructions(vectorizingBlock, targetedBlock, IndVectorPHI, inductionVar, indexVarPHI,
                                        predicates, headerInstructionsMap);
 
 
 
     // update index
-    Value *stepValue = (*initialValues)[1];
-    Value *updatedIndex = builder.CreateAdd(stepValue, indexVarPHI);
+    Value *updatedIndex = builder.CreateAdd(VectorizedStepValue, indexVarPHI);
     indexVarPHI->addIncoming(updatedIndex, vectorizingBlock);
 
 
 
     //updated step vector
-    Value *stepVecUpdateValues = (*initialValues)[2];
-    Value *updatedStepVec = builder.CreateAdd(stepVecPhi, stepVecUpdateValues);
-    stepVecPhi->addIncoming(updatedStepVec, vectorizingBlock);
+    Value *NextIndVector = builder.CreateAdd(IndVectorPHI, StepVector);
+    IndVectorPHI->addIncoming(NextIndVector, vectorizingBlock);
 
 
     // vectorizing block termination condition: index > n - (n % stepValue)
-    Value *totalVecIterations = (*initialValues)[3];
-    Value *condition = builder.CreateICmpUGE(updatedIndex, totalVecIterations, "terminate.condition");
+    Value *VecTermCond = builder.CreateICmpUGE(updatedIndex, VectorizedIterations, "vectorize.term.cond");
 
     // remove previous terminator and create branch instruction
     vectorizingBlock->getTerminator()->eraseFromParent();
-    BranchInst::Create(middleBlock, vectorizingBlock, condition, vectorizingBlock);
+    BranchInst::Create(middleBlock, vectorizingBlock, VecTermCond, vectorizingBlock);
 
-    Value *remResult = (*initialValues)[4];
-    fillMiddleBlock(middleBlock, preheaderForRemainingIterations, exitBlock, remResult);
+    fillMiddleBlock(middleBlock, preheaderForRemainingIterations, exitBlock, NonVectorizedIterations);
 
     // fix PHI node in preHeaderForRemaining
     refinePreHeaderForRemaining(preheaderForRemainingIterations, middleBlock, updatedIndex);
