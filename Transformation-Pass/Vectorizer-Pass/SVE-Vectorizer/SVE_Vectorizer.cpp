@@ -77,13 +77,8 @@ void SVE_Vectorizer::doVectorization() {
 
 bool SVE_Vectorizer::is_a_condition_block(BasicBlock *block) {
     Instruction *terminator = block->getTerminator();
-
-    if (!isa<BranchInst>(terminator)) {
-        // TODO: raise error
-    }
-
-    auto *brInstr = dyn_cast<BranchInst>(terminator);
-
+    assert(isa<BranchInst>(terminator) && "Expected a BranchInst!");
+    auto *brInstr = static_cast<BranchInst*>(terminator);
     return brInstr->isConditional();
 }
 
@@ -116,8 +111,12 @@ void SVE_Vectorizer::refinePreheader(BasicBlock *preVecBlock, BasicBlock *preHea
 
 
 void SVE_Vectorizer::computeTripCount(BasicBlock *latch) {
-    auto *brIns = dyn_cast<BranchInst>(latch->getTerminator());
-    auto *conditionInst = dyn_cast<Instruction>(brIns->getCondition());
+    auto *terminator = latch->getTerminator();
+    assert(isa<BranchInst>(terminator) && "Expected a BranchInst!");
+    auto *brIns = static_cast<BranchInst*>(terminator);
+    auto *MaybeCondInst = brIns->getCondition();
+    assert(isa<Instruction>(MaybeCondInst) && "Expected a Instruction as condition!");
+    auto *conditionInst = static_cast<Instruction*>(MaybeCondInst);
 
     // one of the operands is the induction var and the other one is trip count
     for (int i = 0; i < conditionInst->getNumOperands(); ++i) {
@@ -221,19 +220,17 @@ void SVE_Vectorizer::fillVectorizingBlock(BasicBlock *vectorizingBlock, BasicBlo
                                           BasicBlock *middleBlock) {
 
 
-    Instruction *insertionPoint = vectorizingBlock->getTerminator();
-    IRBuilder<> builder(vectorizingBlock->getContext());
-    builder.SetInsertPoint(insertionPoint);
+    IRBuilder<> IRB(vectorizingBlock->getTerminator());
 
     // create phi node for loop index
     auto *indexUpdatedValueType = VectorizedStepValue->getType();   // it's the same as tripcount size
     Constant *contZero = llvm::ConstantInt::get(indexUpdatedValueType, 0);
-    VectorLoopIndex = PHINode::Create(indexUpdatedValueType, 2, "", insertionPoint);
+    VectorLoopIndex = IRB.CreatePHI(indexUpdatedValueType, 2);
     VectorLoopIndex->addIncoming(contZero, preVec);
 
 
     // create phi for step vector
-    VectorIV = PHINode::Create(VectorIVInitializer->getType(), 2, "", insertionPoint);
+    VectorIV = IRB.CreatePHI(VectorIVInitializer->getType(), 2);
     VectorIV->addIncoming(VectorIVInitializer, preVec);
 
 
@@ -241,7 +238,7 @@ void SVE_Vectorizer::fillVectorizingBlock(BasicBlock *vectorizingBlock, BasicBlo
     BasicBlock *targetedBlock = findTargetedBlock();
     // predicates come from header (decision block)
     std::map<const Value *, const Value *> *headerInstructionsMap = nullptr;
-    Value *predicates = formPredicateVector(insertionPoint, L->getHeader(), vectorizingBlock, targetedBlock,
+    Value *predicates = formPredicateVector(IRB, L->getHeader(), vectorizingBlock, targetedBlock,
         &headerInstructionsMap);
 
     // add vectorized instruction of then body
@@ -251,18 +248,18 @@ void SVE_Vectorizer::fillVectorizingBlock(BasicBlock *vectorizingBlock, BasicBlo
 
 
     // update index
-    Value *updatedIndex = builder.CreateAdd(VectorizedStepValue, VectorLoopIndex);
+    Value *updatedIndex = IRB.CreateAdd(VectorizedStepValue, VectorLoopIndex);
     VectorLoopIndex->addIncoming(updatedIndex, vectorizingBlock);
 
 
 
     //updated step vector
-    Value *NextVectorIV = builder.CreateAdd(VectorIV, StepVector);
+    Value *NextVectorIV = IRB.CreateAdd(VectorIV, StepVector);
     VectorIV->addIncoming(NextVectorIV, vectorizingBlock);
 
 
     // vectorizing block termination condition: index > n - (n % stepValue)
-    Value *VecTermCond = builder.CreateICmpUGE(updatedIndex, VectorizedIterations, "vectorize.term.cond");
+    Value *VecTermCond = IRB.CreateICmpUGE(updatedIndex, VectorizedIterations, "vectorize.term.cond");
 
     // remove previous terminator and create branch instruction
     vectorizingBlock->getTerminator()->eraseFromParent();
@@ -279,13 +276,11 @@ void SVE_Vectorizer::fillVectorizingBlock(BasicBlock *vectorizingBlock, BasicBlo
 // TODO: Isn't it the case that limits ALC which Ehsan mentioned(dependency between blocks)?
 
 Value *
-SVE_Vectorizer::formPredicateVector(Instruction *insertionPoint, BasicBlock *decisionBlock,
+SVE_Vectorizer::formPredicateVector(IRBuilder<> &IRB, BasicBlock *decisionBlock,
                                     BasicBlock *vectorizingBlock, BasicBlock *targetedBlock,
                                     std::map<const Value *, const Value *> **outputVMap) {
 
 
-    IRBuilder<> builder(decisionBlock->getContext());
-    builder.SetInsertPoint(insertionPoint);
     llvm::ValueToValueMapTy vMap;
     // first copy instruction into vectorizing Block, then vectorize them
     std::vector<Instruction *> clonedInstructions;
@@ -328,7 +323,7 @@ SVE_Vectorizer::formPredicateVector(Instruction *insertionPoint, BasicBlock *dec
     BasicBlock *branchTrueTarget = brInstr->getSuccessor(0);
 
     if (branchTrueTarget != targetedBlock) {  // should negate
-        predicateVec = builder.CreateNot(predicateVec, "negated.vector");
+        predicateVec = IRB.CreateNot(predicateVec, "negated.vector");
     }
 
 
@@ -341,10 +336,6 @@ SVE_Vectorizer::formPredicateVector(Instruction *insertionPoint, BasicBlock *dec
 void SVE_Vectorizer::vectorizeTargetedBlockInstructions(BasicBlock *vectorizingBlock, BasicBlock *targetedBlock,
                                                         Value *predicates,
                                                         std::map<const Value *, const Value *> *headerInstructionsMap) {
-
-
-    IRBuilder<> builder(vectorizingBlock->getContext());
-    builder.SetInsertPoint(vectorizingBlock->getTerminator());
 
     // first copy instruction into vectorizing Block, then vectorize them
     std::vector<Instruction *> clonedInstructions;
@@ -377,30 +368,25 @@ void SVE_Vectorizer::vectorizeTargetedBlockInstructions(BasicBlock *vectorizingB
 
 void SVE_Vectorizer::fillMiddleBlock(BasicBlock *middleBlock, BasicBlock *preheader, BasicBlock *exitBlock,
                                      Value *remResult) {
-
-    IRBuilder<> builder(preheader->getContext());
-    builder.SetInsertPoint(middleBlock);
-
+    IRBuilder<> IRB(middleBlock);
     Constant *constZero = ConstantInt::get(remResult->getType(), 0, false);
-    Value *condition = builder.CreateICmpEQ(remResult, constZero, "condition");
-
-
-    BranchInst::Create(exitBlock, preheader, condition, middleBlock);
-
+    Value *condition = IRB.CreateICmpEQ(remResult, constZero, "condition");
+    IRB.CreateCondBr(condition, exitBlock, preheader);
 }
 
 
 void
 SVE_Vectorizer::refinePreHeaderForRemaining(BasicBlock *preHeaderForRemaining, BasicBlock *middleBlock, Value *value) {
-    IRBuilder<> builder(middleBlock->getContext());
-    builder.SetInsertPoint(middleBlock->getTerminator());
+    IRBuilder<> IRB(middleBlock->getTerminator());
 
     // The first instruction is a phi node
-    auto *phiNode = dyn_cast<PHINode>(&preHeaderForRemaining->getInstList().front());
+    auto *FirstInst = &preHeaderForRemaining->getInstList().front();
+    assert(isa<PHINode>(FirstInst) && "Expected first instruction to be PHINode!");
+    PHINode *phiNode = static_cast<PHINode*>(FirstInst);
 
     // one is i32 the other is i64
     if (value->getType() != phiNode->getType()) {
-        value = builder.CreateCast(Instruction::CastOps::ZExt, value, phiNode->getType());
+        value = IRB.CreateCast(Instruction::CastOps::ZExt, value, phiNode->getType());
 
     }
 

@@ -68,7 +68,7 @@ private:
     BasicBlock *createVectorizingBlock();
 
 private:
-    Value *formPredicateVector(Instruction *insertionPoint, BasicBlock *decisionBlock, BasicBlock *vectorizingBlock,
+    Value *formPredicateVector(IRBuilder<> &IRB, BasicBlock *decisionBlock, BasicBlock *vectorizingBlock,
                                BasicBlock *targetedBlock,
                                std::map<const Value *, const Value *> **outputVMap);
 
