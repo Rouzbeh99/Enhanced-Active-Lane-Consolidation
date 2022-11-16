@@ -7,6 +7,13 @@
 
 \chapter{Main Chapter}
 
-Hello.
+SIMD intructions allow modern processor to apply the same Intruction on multiple data at the ame time. The performance improvement gained from these intructions is 
+so considerable(?) that made compiler specialists to explore different ways to exploite SIMD intructions. Auto-vectorization [cite] is a compiler tranformation that is proposed
+for this purpose. Implemented by almost all current compilers, auto-vectorization looks for possibility of using SIMD instructions (also called vector instructions) in the program and replaces
+scalar code (code that is made of simple instructions) with vector instructions wherever possible.
+
+A huge amount of work has been done to improve codes using vectorization [cite] however, the transformation needs the code to meet certain requirements which if not met, would result in invalid code
+produced by the compilers. Furthuremore, replacing scalar code with vector is not always benefitial. In some situations(?) scalar code can provide better performace in comparison to vector code.
+In response to these two problems with vectorization, compilers come with an analysis pass to check both legality of the tranformation and it's profitability.
 
 \end{document}
