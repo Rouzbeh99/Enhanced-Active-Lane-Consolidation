@@ -56,22 +56,19 @@ void SVE_Vectorizer::doVectorization() {
     // form a block for the case where there are not enough iterations
     BasicBlock *preVectorizationBlock = createPreVectorizationBlock(vectorizingBlock);
 
-    BasicBlock *preHeaderForRemaining = createPreheaderForRemainingIterations();
-
-    //create block for after execution of vectorizing block
-    BasicBlock *middleBlock = BasicBlock::Create(L->getHeader()->getContext(), "middle.block",
-                                                 L->getHeader()->getParent(),
-                                                 preVectorizationBlock);
-    L->addBasicBlockToLoop(middleBlock, *LI);
-
-    // in preheader, check if there are enough iterations for a vector
-    refinePreheader(preVectorizationBlock, preHeaderForRemaining);
-
 
     fillPreVecBlock(preVectorizationBlock);
-    fillVectorizingBlock(vectorizingBlock, preVectorizationBlock, preHeaderForRemaining, exitBlock, middleBlock);
+    fillVectorizingBlock(vectorizingBlock, preVectorizationBlock, exitBlock);
 
-
+    auto *PreheaderSingleSucc = preheader->getSingleSuccessor();
+    assert(PreheaderSingleSucc && "Expected Loop preheader to have a single successor!");
+    // Remove preheader as successor of original loop's header
+    PreheaderSingleSucc->removePredecessor(preheader);
+    auto *MaybeBranchInst = preheader->getTerminator();
+    assert(isa<BranchInst>(MaybeBranchInst) && "Expected Loop preheader terminator to be a BranchInst!");
+    auto *BrInst = static_cast<BranchInst*>(MaybeBranchInst);
+    // Make preVectorizationBlock only sucessor of L's preheader
+    BrInst->setSuccessor(0, preVectorizationBlock);
 }
 
 
@@ -81,34 +78,6 @@ bool SVE_Vectorizer::is_a_condition_block(BasicBlock *block) {
     auto *brInstr = static_cast<BranchInst*>(terminator);
     return brInstr->isConditional();
 }
-
-void SVE_Vectorizer::refinePreheader(BasicBlock *preVecBlock, BasicBlock *preHeaderForRemaining) {
-
-    BasicBlock *preheader = L->getLoopPreheader();
-    Instruction *insertionPoint = preheader->getTerminator();
-    IRBuilder<> IRB(insertionPoint);
-
-
-    //get current vscale
-    Value *stepVal = nullptr;
-
-    if (tripCount->getType() == Type::getInt64Ty(preheader->getContext())) {
-        stepVal = intrinsicCallGenerator->createVscale64Intrinsic(IRB);
-    } else {
-        stepVal = intrinsicCallGenerator->createVscale32Intrinsic(IRB);
-    }
-
-    // check if there are iterations
-    Value *condition = IRB.CreateICmpUGE(tripCount, stepVal); // if true, there are enough iterations
-
-    IRB.CreateCondBr(condition, preVecBlock, preHeaderForRemaining);
-
-    // remove previous terminator
-    preheader->getTerminator()->eraseFromParent();
-
-
-}
-
 
 void SVE_Vectorizer::computeTripCount(BasicBlock *latch) {
     auto *terminator = latch->getTerminator();
@@ -150,33 +119,6 @@ BasicBlock *SVE_Vectorizer::createPreVectorizationBlock(BasicBlock *vectorizingB
     return block;
 }
 
-// only contains a phi instruction for induction variable
-BasicBlock *SVE_Vectorizer::createPreheaderForRemainingIterations() {
-    BasicBlock *block = BasicBlock::Create(L->getHeader()->getContext(), "Preheader.for.remaining.iterations",
-                                           L->getHeader()->getParent(),
-                                           L->getLoopLatch());
-    // branch to loop header
-    BranchInst::Create(L->getHeader(), block);
-
-    //add to loop
-    L->addBasicBlockToLoop(block, *LI);
-
-    auto *headerPHi = dyn_cast<PHINode>(
-            &L->getHeader()->getInstList().front()); // TODO: what if there are other phi nodes?
-
-    //add PHI Node
-    PHINode *inductionVar = PHINode::Create(headerPHi->getType(), 2, "", block->getTerminator());
-    Constant *contZero = llvm::ConstantInt::get(headerPHi->getType(), 0);
-    inductionVar->addIncoming(contZero, L->getLoopPreheader());
-
-
-    // refine phi Node in the header associated with induction var
-    headerPHi->addIncoming(inductionVar, block);
-    headerPHi->removeIncomingValue(L->getLoopPreheader(), false);
-
-    return block;
-}
-
 BasicBlock *SVE_Vectorizer::createVectorizingBlock() {
     BasicBlock *block = BasicBlock::Create(L->getHeader()->getContext(), "vectorizing.block",
                                            L->getHeader()->getParent(),
@@ -197,27 +139,26 @@ void SVE_Vectorizer::fillPreVecBlock(BasicBlock *preVecBlock) {
     //TODO: we assume indices are added by one, make it work for other cases as well
     //should be added by vscale * VFactor * 1  ----> vscale shl log(VFactor)
 
-    if (tripCount->getType() == IRB.getInt64Ty()) {
-        VectorizedStepValue = intrinsicCallGenerator->createVscale64Intrinsic(IRB);
-        //VectorIVInitializer = intrinsicCallGenerator->createStepVector64Intrinsic(IRB, "induction.vector");
+    if (auto *ZExt = dyn_cast_or_null<ZExtInst>(tripCount))
+      if (ZExt->getSrcTy() == IRB.getInt32Ty())
+        tripCount = ZExt->getOperand(0);
+
+    auto *TripCountTy = tripCount->getType();
+    assert((TripCountTy == IRB.getInt32Ty() || TripCountTy == IRB.getInt64Ty()) && "Expected loop trip count to be either i32 or i64 type!");
+    if (TripCountTy == IRB.getInt64Ty()) {
+      VectorizedStepValue = intrinsicCallGenerator->createVscale64Intrinsic(IRB);
     } else {
-        VectorizedStepValue = intrinsicCallGenerator->createVscale32Intrinsic(IRB);
-        //VectorIVInitializer = intrinsicCallGenerator->createStepVector32Intrinsic(IRB, "induction.vector");
+      VectorizedStepValue = intrinsicCallGenerator->createVscale32Intrinsic(IRB);
     }
 
-    // vectorizing block termination condition: index > n - (n % stepValue)
-    // forming n - (n % stepValue)
-    NonVectorizedIterations = IRB.CreateURem(tripCount, VectorizedStepValue, "num.non-vectorized.iterations");
-    VectorizedIterations = IRB.CreateSub(tripCount, NonVectorizedIterations, "num.vectorized.iterations");
-
-    // create vector by which step vector should be updated
-    StepVector = createVectorOfConstants(VectorizedStepValue, IRB, "step.vector");
+    auto *VTy = VectorType::get(TripCountTy, vectorizationFactor, /*Scalable*/ true);
+    StepVector = IRB.CreateStepVector(VTy, "step.vector");
+    VectorizedTripCount = createVectorOfConstants(tripCount, IRB, "vectorized.trip.count");
+    VectorIVPredicateInit = IRB.CreateICmpUGT(VectorizedTripCount, StepVector);
 }
 
 void SVE_Vectorizer::fillVectorizingBlock(BasicBlock *vectorizingBlock, BasicBlock *preVec,
-                                          BasicBlock *preheaderForRemainingIterations,
-                                          BasicBlock *exitBlock,
-                                          BasicBlock *middleBlock) {
+                                          BasicBlock *exitBlock) {
 
 
     IRBuilder<> IRB(vectorizingBlock->getTerminator());
@@ -230,8 +171,8 @@ void SVE_Vectorizer::fillVectorizingBlock(BasicBlock *vectorizingBlock, BasicBlo
 
 
     // create phi for step vector
-    //VectorIV = IRB.CreatePHI(VectorIVInitializer->getType(), 2);
-    //VectorIV->addIncoming(VectorIVInitializer, preVec);
+    VectorIVPredicate = IRB.CreatePHI(VectorIVPredicateInit->getType(), 2);
+    VectorIVPredicate->addIncoming(VectorIVPredicateInit, preVec);
 
 
     //// vectorizing header and then bodies /////
@@ -254,22 +195,19 @@ void SVE_Vectorizer::fillVectorizingBlock(BasicBlock *vectorizingBlock, BasicBlo
 
 
     //updated step vector
-    //Value *NextVectorIV = IRB.CreateAdd(VectorIV, StepVector);
-    //VectorIV->addIncoming(NextVectorIV, vectorizingBlock);
+    auto *VectorUpdatedIndex = createVectorOfConstants(updatedIndex, IRB, "vector.updated.index");
+    auto *NextStepVector = IRB.CreateAdd(VectorUpdatedIndex, StepVector);
+    Value *NextVectorIVPredicate = IRB.CreateICmpULT(NextStepVector, VectorizedTripCount, "next.vector.iv.predicate");
+    VectorIVPredicate->addIncoming(NextVectorIVPredicate, vectorizingBlock);
 
 
-    // vectorizing block termination condition: index > n - (n % stepValue)
-    Value *VecTermCond = IRB.CreateICmpUGE(updatedIndex, VectorizedIterations, "vectorize.term.cond");
+    // vectorizing block termination condition
+    Value *VecTermCond = IRB.CreateICmpUGE(updatedIndex, tripCount, "vectorize.term.cond");
 
     // remove previous terminator and create branch instruction
+    //BranchInst::Create(middleBlock, vectorizingBlock, VecTermCond, vectorizingBlock);
+    IRB.CreateCondBr(VecTermCond, exitBlock, vectorizingBlock);
     vectorizingBlock->getTerminator()->eraseFromParent();
-    BranchInst::Create(middleBlock, vectorizingBlock, VecTermCond, vectorizingBlock);
-
-    fillMiddleBlock(middleBlock, preheaderForRemainingIterations, exitBlock, NonVectorizedIterations);
-
-    // fix PHI node in preHeaderForRemaining
-    refinePreHeaderForRemaining(preheaderForRemainingIterations, middleBlock, updatedIndex);
-
 }
 
 // TODO: Assumption: there is 1 (for inductionVar) or 0 PHI nodes in the decision block
@@ -326,8 +264,7 @@ SVE_Vectorizer::formPredicateVector(IRBuilder<> &IRB, BasicBlock *decisionBlock,
         predicateVec = IRB.CreateNot(predicateVec, "negated.vector");
     }
 
-
-    return predicateVec;
+    return IRB.CreateAnd(VectorIVPredicate, predicateVec);
 }
 
 
@@ -364,33 +301,6 @@ void SVE_Vectorizer::vectorizeTargetedBlockInstructions(BasicBlock *vectorizingB
     vectorizeInstructions_Predicated(&clonedInstructions, vectorizingBlock,
                                      predicates, headerInstructionsMap);
 
-}
-
-void SVE_Vectorizer::fillMiddleBlock(BasicBlock *middleBlock, BasicBlock *preheader, BasicBlock *exitBlock,
-                                     Value *remResult) {
-    IRBuilder<> IRB(middleBlock);
-    Constant *constZero = ConstantInt::get(remResult->getType(), 0, false);
-    Value *condition = IRB.CreateICmpEQ(remResult, constZero, "condition");
-    IRB.CreateCondBr(condition, exitBlock, preheader);
-}
-
-
-void
-SVE_Vectorizer::refinePreHeaderForRemaining(BasicBlock *preHeaderForRemaining, BasicBlock *middleBlock, Value *value) {
-    IRBuilder<> IRB(middleBlock->getTerminator());
-
-    // The first instruction is a phi node
-    auto *FirstInst = &preHeaderForRemaining->getInstList().front();
-    assert(isa<PHINode>(FirstInst) && "Expected first instruction to be PHINode!");
-    PHINode *phiNode = static_cast<PHINode*>(FirstInst);
-
-    // one is i32 the other is i64
-    if (value->getType() != phiNode->getType()) {
-        value = IRB.CreateCast(Instruction::CastOps::ZExt, value, phiNode->getType());
-
-    }
-
-    phiNode->addIncoming(value, middleBlock);
 }
 
 std::map<const Value *, const Value *> *
@@ -776,15 +686,13 @@ void SVE_Vectorizer::vectorizeInstructions_Predicated(std::vector<Instruction *>
 }
 
 BasicBlock *SVE_Vectorizer::findTargetedBlock() {
-    // TODO: make a complete analysis
-
-    for (auto succ: successors(L->getHeader())) {
-        if (succ->getSingleSuccessor() != L->getLoopLatch()) {
-            return succ;
-        }
+  // TODO: make a complete analysis
+  for (auto succ: successors(L->getHeader())) {
+    if (succ != L->getLoopLatch() && succ->getSingleSuccessor() == L->getLoopLatch()) {
+      return succ;
     }
-
-    return nullptr;
+  }
+  return nullptr;
 }
 
 SVE_Vectorizer::SVE_Vectorizer(Loop *l, int vectorizationFactor, LoopStandardAnalysisResults &analysisResults) : L(l),
