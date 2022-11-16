@@ -31,8 +31,10 @@ public:
     ScalarEvolution *SE;
 private:
     const PHINode *ScalarIV;
-    PHINode *VectorIV;
+    PHINode *VectorIVPredicate;
     PHINode *VectorLoopIndex;
+    Value *VectorizedTripCount;
+    Value *VectorIVPredicateInit;
     Value *VectorIVInitializer;
     Value *VectorizedStepValue;
     Value *StepVector;
@@ -50,16 +52,10 @@ private:
     bool is_a_condition_block(BasicBlock *block);
 
 private:
-    void refinePreheader(BasicBlock *preVecBlock, BasicBlock *preHeaderForRemaining);
-
-private:
     BasicBlock *createPreVectorizationBlock(BasicBlock *vectorizingBlock);
 
 private:
     void computeTripCount(BasicBlock *latch);
-
-private:
-    BasicBlock *createPreheaderForRemainingIterations();
 
 private:
     void fillPreVecBlock(BasicBlock *preVecBlock);
@@ -79,11 +75,8 @@ private:
 
 private:
     void
-    fillVectorizingBlock(BasicBlock *vectorizingBlock, BasicBlock *preVec, BasicBlock *preheaderForRemainingIterations,
-                         BasicBlock *exitBlock, BasicBlock *middleBlock);
-
-private:
-    void fillMiddleBlock(BasicBlock *middleBlock, BasicBlock *preheader, BasicBlock *exitBlock, Value *remResult);
+    fillVectorizingBlock(BasicBlock *vectorizingBlock, BasicBlock *preVec,
+                         BasicBlock *exitBlock);
 
 private:
     Value *createVectorOfConstants(Value *value, IRBuilder<> &IRB, std::string name);
@@ -97,9 +90,6 @@ private:
     void vectorizeInstructions_Predicated(std::vector<Instruction *> *instructions, BasicBlock *block,
                                           Value *predicates,
                                           std::map<const Value *, const Value *> *headerInstructionsMap);
-
-private:
-    void refinePreHeaderForRemaining(BasicBlock *preHeaderForRemaining, BasicBlock *middleBlock, Value *value);
 
 private:
     BasicBlock *findTargetedBlock();
