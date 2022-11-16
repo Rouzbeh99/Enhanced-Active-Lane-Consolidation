@@ -199,10 +199,10 @@ void SVE_Vectorizer::fillPreVecBlock(BasicBlock *preVecBlock) {
 
     if (tripCount->getType() == IRB.getInt64Ty()) {
         VectorizedStepValue = intrinsicCallGenerator->createVscale64Intrinsic(IRB);
-        VectorIVInitializer = intrinsicCallGenerator->createStepVector64Intrinsic(IRB, "induction.vector");
+        //VectorIVInitializer = intrinsicCallGenerator->createStepVector64Intrinsic(IRB, "induction.vector");
     } else {
         VectorizedStepValue = intrinsicCallGenerator->createVscale32Intrinsic(IRB);
-        VectorIVInitializer = intrinsicCallGenerator->createStepVector32Intrinsic(IRB, "induction.vector");
+        //VectorIVInitializer = intrinsicCallGenerator->createStepVector32Intrinsic(IRB, "induction.vector");
     }
 
     // vectorizing block termination condition: index > n - (n % stepValue)
@@ -230,8 +230,8 @@ void SVE_Vectorizer::fillVectorizingBlock(BasicBlock *vectorizingBlock, BasicBlo
 
 
     // create phi for step vector
-    VectorIV = IRB.CreatePHI(VectorIVInitializer->getType(), 2);
-    VectorIV->addIncoming(VectorIVInitializer, preVec);
+    //VectorIV = IRB.CreatePHI(VectorIVInitializer->getType(), 2);
+    //VectorIV->addIncoming(VectorIVInitializer, preVec);
 
 
     //// vectorizing header and then bodies /////
@@ -254,8 +254,8 @@ void SVE_Vectorizer::fillVectorizingBlock(BasicBlock *vectorizingBlock, BasicBlo
 
 
     //updated step vector
-    Value *NextVectorIV = IRB.CreateAdd(VectorIV, StepVector);
-    VectorIV->addIncoming(NextVectorIV, vectorizingBlock);
+    //Value *NextVectorIV = IRB.CreateAdd(VectorIV, StepVector);
+    //VectorIV->addIncoming(NextVectorIV, vectorizingBlock);
 
 
     // vectorizing block termination condition: index > n - (n % stepValue)
