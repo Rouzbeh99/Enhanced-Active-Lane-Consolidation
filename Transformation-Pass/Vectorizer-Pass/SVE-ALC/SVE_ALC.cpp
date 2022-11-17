@@ -1095,14 +1095,15 @@ SVE_ALC::fillPreALCBlock_simpleVersion(BasicBlock *preALCBlock, BasicBlock *alcH
 
     // create step vector
     Value *stepVal = vectorLength;
-    Constant *constOne = llvm::ConstantInt::get(stepVal->getType(), 1, true);
-    Value *vectorUpdateValue = createVectorOfConstants(constOne, builder, "vector.Update.Value");
+    Value *vectorUpdateValue = createVectorOfConstants(stepVal, builder, "vector.Update.Value");
 
 
     // vectorizing block termination condition: index > n - (n % stepValue)
     // forming n - (n % stepValue)
 
-    Value *remResult = builder.CreateURem(tripCount, stepVal);
+    Value *mulResult = builder.CreateMul(stepVal, llvm::ConstantInt::get(stepVal->getType(), 2, false));
+
+    Value *remResult = builder.CreateURem(tripCount, mulResult);
     Value *totalIterationToVectorize = builder.CreateSub(tripCount, remResult, "total.iterations.to.be.vectorized");
 
     builder.CreateBr(alcHeader);

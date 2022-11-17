@@ -10,7 +10,7 @@ cd /home/rouzbeh/Graduate/LLVM/GEM5/gem5-arm-sve
 
 source scripts/setenv.sh
 
-VL_array=(1 2 4 8 16)
+VL_array=(1 2 3 4 5 8 10 16)
 # shellcheck disable=SC2068
 for i in ${VL_array[@]}; do
   bash scripts/run-binary-in-gem5.sh -b $FILE -l $i

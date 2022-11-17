@@ -1,2 +1,0 @@
-simOps                                         120270                       # Number of ops (including micro ops) simulated (Count)
-system.cpu.numCycles                            35014                       # Number of cpu cycles simulated (Cycle)

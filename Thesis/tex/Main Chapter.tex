@@ -12,8 +12,15 @@ so considerable(?) that made compiler specialists to explore different ways to e
 for this purpose. Implemented by almost all current compilers, auto-vectorization looks for possibility of using SIMD instructions (also called vector instructions) in the program and replaces
 scalar code (code that is made of simple instructions) with vector instructions wherever possible.
 
+Since most of the execution time of a program is spent on loops, vectorization is typically applied on loops. Famous Compilers have optimization passes (such as slp-vectorizer in clang ... [cite, more examples])
+that vectorize loops body. In spite of loop-vectorization there has been efforts to vectorize other structres such as functions [cite] as well however, the focus of research in this area is on loops.
+
 A huge amount of work has been done to improve codes using vectorization [cite] however, the transformation needs the code to meet certain requirements which if not met, would result in invalid code
 produced by the compilers. Furthuremore, replacing scalar code with vector is not always benefitial. In some situations(?) scalar code can provide better performace in comparison to vector code.
 In response to these two problems with vectorization, compilers come with an analysis pass to check both legality of the tranformation and it's profitability.
+
+One of the larget obstacles for vectorization is control flow divergence. Existence of branches (such as if-then-else statements or swithch case statements) causes the program to take different paths during execution time 
+based on some conditions inside the code that could change dynamically. This is called divergence in the control flow of the program. Having divergence in the code, vectorization can not be simply applied,
+as different iterations of the loop might take different paths and as a result disabling the compiler to replace instructions with SIMD ones. 
 
 \end{document}

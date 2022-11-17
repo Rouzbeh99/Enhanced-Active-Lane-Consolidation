@@ -58,14 +58,14 @@ namespace {
         BasicBlock *initialLatch = L->getLoopLatch();
 
 
-        int factor = 4;
+        int factor = 2;
 
         auto *sve_alc = new SVE_ALC(L, factor, AR);
         auto *sve_vectorizer = new SVE_Vectorizer(L, factor, AR);
 
-        sve_vectorizer->doVectorization();
+//        sve_vectorizer->doVectorization();
 //        sve_alc->doTransformation_newVersion();
-//        sve_alc->doTransformation_simpleVersion();
+        sve_alc->doTransformation_simpleVersion();
 
         printAllBlocks(L);
 
