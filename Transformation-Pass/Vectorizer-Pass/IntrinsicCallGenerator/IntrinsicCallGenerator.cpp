@@ -67,12 +67,18 @@ Value *IntrinsicCallGenerator::createGatherLoadInstruction(
 }
 
 Value *IntrinsicCallGenerator::createLoadInstruction(IRBuilder<> &IRB,
+                                                     Type *SrcTy,
                                                      Value *ptr,
                                                      Value *predicatedVector) {
-    VectorType *type = VectorType::get(IRB.getInt32Ty(), VF, /*Scalable*/ true);
-    return IRB.CreateMaskedLoad(
-            type, ptr, Align(VF * (IRB.getInt32Ty()->getScalarSizeInBits() / 8)),
+    auto *VTy = VectorType::get(SrcTy, VF, /*Scalable*/ true);
+    // TODO: Fix alignment
+    auto AlignNumBytes = 4;
+    auto *Load = IRB.CreateMaskedLoad(
+            VTy, ptr, Align(VF * AlignNumBytes),
             predicatedVector);
+    Load->print(errs());
+    errs() << '\n';
+    return Load;
 }
 
 void IntrinsicCallGenerator::createScatterStoreInstruction(
@@ -87,10 +93,13 @@ void IntrinsicCallGenerator::createStoreInstruction(IRBuilder<> &IRB,
                                                     Value *elementsVector,
                                                     Value *ptr,
                                                     Value *predicatedVector) {
+    // TODO: Fix alignment
+    auto AlignNumBytes = 4;
     IRB.CreateMaskedStore(
             elementsVector, ptr,
-            Align(VF * (IRB.getInt32Ty()->getScalarSizeInBits() / 8)),
-            predicatedVector);
+            Align(VF * (AlignNumBytes)),
+            predicatedVector)->print(errs());
+    errs() << '\n';
 }
 
 // TODO: handle double types by changing return type and operands

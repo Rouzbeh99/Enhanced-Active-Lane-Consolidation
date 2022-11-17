@@ -701,7 +701,10 @@ SVE_ALC::vectorizeInstructions(std::vector<Instruction *> *instructions, BasicBl
             if (isPermuted) {
                 loadedData = intrinsicCallGenerator->createGatherLoadInstruction(IRB, ptr, predicates, indices);
             } else if (isPredicated) {
-                loadedData = intrinsicCallGenerator->createLoadInstruction(IRB, ptr, predicates);
+                assert(isa<GEPOperator>(ptr) && "Expected LoadInst PointerOperand to be GetElementPtr!");
+                auto *GEP = static_cast<GEPOperator*>(ptr);
+                auto *SrcTy = GEP->getSourceElementType();
+                loadedData = intrinsicCallGenerator->createLoadInstruction(IRB, SrcTy, ptr, predicates);
             } else {
                 loadedData = IRB.CreateLoad(VectorType::get(instr->getType(), vectorizationFactor, true), ptr);
             }
