@@ -562,7 +562,8 @@ void SVE_Vectorizer::vectorizeInstructions_Predicated(std::vector<Instruction *>
         auto *NewPtrOp = Load->getPointerOperand();
         assert(isa<GEPOperator>(NewPtrOp) && "Expected LoadInst PointerOperand to be GetElementPtr!");
         auto *GEP = static_cast<GEPOperator*>(NewPtrOp);
-        auto *NewLoad = intrinsicCallGenerator->createLoadInstruction(IRB, NewPtrOp, predicates);
+        auto *SrcTy = GEP->getSourceElementType();
+        auto *NewLoad = intrinsicCallGenerator->createLoadInstruction(IRB, SrcTy, NewPtrOp, predicates);
         vMap[Inst] = NewLoad;
         toBeRemoved.push(Inst);
       } else if (auto *CInst = dyn_cast_or_null<CmpInst>(Inst)) {
