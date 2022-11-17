@@ -331,14 +331,15 @@ SVE_Vectorizer::vectorizeInstructions_nonePredicated(std::vector<Instruction *> 
         auto *PtrOp = Store->getPointerOperand();
         assert(isa<GEPOperator>(PtrOp) && "Expected StoreInst PointerOperand to be GetElementPtr!");
         auto *GEP = static_cast<GEPOperator*>(PtrOp);
-        IRB.CreateStore(ValOp, GEP);
+        intrinsicCallGenerator->createStoreInstruction(IRB, NewValOp, PtrOp, VectorIVPredicate);
         toBeRemoved.push(Inst);
       } else if (auto *Load = dyn_cast_or_null<LoadInst>(Inst)) {
         auto *PtrOp = Load->getPointerOperand();
         assert(isa<GEPOperator>(PtrOp) && "Expected LoadInst PointerOperand to be GetElementPtr!");
         auto *GEP = static_cast<GEPOperator*>(PtrOp);
-        auto *VTy = VectorType::get(GEP->getSourceElementType(), vectorizationFactor, true);
-        auto *NewLoad = IRB.CreateLoad(VTy, PtrOp);
+        auto *SrcTy = GEP->getSourceElementType();
+        auto *VTy = VectorType::get(SrcTy, vectorizationFactor, true);
+        auto *NewLoad = intrinsicCallGenerator->createLoadInstruction(IRB, SrcTy, PtrOp, VectorIVPredicate);
         vMap[Inst] = NewLoad;
         toBeRemoved.push(Inst);
       } else if (auto *CInst = dyn_cast_or_null<CmpInst>(Inst)) {
@@ -356,6 +357,21 @@ SVE_Vectorizer::vectorizeInstructions_nonePredicated(std::vector<Instruction *> 
           } else
             assert(0 && "CmpInst second operand neither already vectorized nor Constant!");
         }
+        // Cast operands to i1 to be compatible with predicate vector type
+        if (auto *VTy = dyn_cast_or_null<VectorType>(FirstOp->getType())) {
+          if (VTy->getElementType() != IRB.getInt1Ty()) {
+            auto *DestTy = VectorType::get(IRB.getInt1Ty(), VTy->getElementCount());
+            FirstOp = IRB.CreateTruncOrBitCast(FirstOp, DestTy);
+          }
+        } else
+          assert(0 && "Non-VectorType found and expected VectorType!");
+        if (auto *VTy = dyn_cast_or_null<VectorType>(SecondOp->getType())) {
+          if (VTy->getElementType() != IRB.getInt1Ty()) {
+            auto *DestTy = VectorType::get(IRB.getInt1Ty(), VTy->getElementCount());
+            SecondOp = IRB.CreateTruncOrBitCast(SecondOp, DestTy);
+          }
+        } else
+          assert(0 && "Non-VectorType found and expected VectorType!");
         Value *NewInst = nullptr;
         switch (CInst->getPredicate()) {
           // TODO: handle other cases
