@@ -25,7 +25,7 @@ $LLVM_BUILD_DIR/bin/llc -O3  -mtriple=aarch64-linux-gnu -mattr=sve -mcpu=cortex-
 #$LLVM_BUILD_DIR/bin/llc -O3  -mtriple=aarch64-linux-gnu -mattr=sve -mcpu=cortex-a710 -filetype=asm alc_applied_O3.ll -o alc_applied_O3.s
 #$LLVM_BUILD_DIR/bin/llc -O3  -mtriple=aarch64-linux-gnu -mattr=sve -mcpu=cortex-a710 -filetype=asm compiled_with_O3.ll -o compiled_with_O3.s
 
-$LLVM_BUILD_DIR/bin/clang -target aarch64-none-linux-gnu  --gcc-toolchain=$GCC_TOOLCHAIN --sysroot=$GCC_TOOLCHAIN/aarch64-none-linux-gnu/libc  -mcpu=cortex-a710 -march=armv9.2-a+sve -static alc_applied_O3.o -o alc_applied.x -L $M5_LIB_PATH/ -lm5
+$LLVM_BUILD_DIR/bin/clang -target aarch64-none-linux-gnu  --gcc-toolchain=$GCC_TOOLCHAIN --sysroot=$GCC_TOOLCHAIN/aarch64-none-linux-gnu/libc  -mcpu=cortex-a710 -march=armv9.2-a+sve -static alc_applied_O3.o -o output.x -L $M5_LIB_PATH/ -lm5
 
 #opt --disable-output -dot-cfg --cfg-dot-filename-prefix=cfg alc_applied_O3.ll
 #dot -Tpdf cfg.foo.dot -o cfg.pdf

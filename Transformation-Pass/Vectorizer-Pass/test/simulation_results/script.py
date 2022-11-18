@@ -3,7 +3,7 @@ from pathlib import Path
 import csv
 
 # assign directory
-directory = '.'
+directory = "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation-Pass/Vectorizer-Pass/test/simulation_results"
 
 # iterate over files in
 # that directory
@@ -25,7 +25,7 @@ for filename in os.listdir(directory):
 lengthes.sort()
 uniqueFiles.sort(reverse=True)
 
-metrics = ["system.cpu.numInsts", "system.cpu.numOps", "system.cpu.numCycles"]
+metrics = ["system.cpu.committedInsts", "system.cpu.numInsts", "system.cpu.numCycles"]
 
 for metric in metrics:
     file_dict = {"first row":["inputs"]}
@@ -37,7 +37,7 @@ for metric in metrics:
         rowName = uniqueFile.replace("-", " ").replace("_", " ")
         column_value_list = [rowName]
         for VL in lengthes:
-            source_file_name = uniqueFile + str(VL) + ".txt"
+            source_file_name = directory +"/"+ uniqueFile + str(VL) + ".txt"
             with open(source_file_name) as file:
                 for line in file:
                     if "End Simulation Statistics" in line:
@@ -47,7 +47,7 @@ for metric in metrics:
                 file.close()
         file_dict[rowName] = column_value_list
 
-    instructionsCSV = open("./summerized/" + metric + ".csv", 'w')
+    instructionsCSV = open(directory + "/summerized/" + metric + ".csv", 'w')
     csv_writer = csv.writer(instructionsCSV)
     for v in file_dict.values():
         csv_writer.writerow(v)
