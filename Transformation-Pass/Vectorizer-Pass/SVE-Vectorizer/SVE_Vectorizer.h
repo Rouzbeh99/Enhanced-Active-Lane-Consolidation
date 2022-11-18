@@ -29,6 +29,15 @@ public:
     LoopInfo *LI;
     Value *tripCount;
     ScalarEvolution *SE;
+private:
+    const PHINode *ScalarIV;
+    PHINode *VectorIV;
+    PHINode *VectorLoopIndex;
+    Value *VectorIVInitializer;
+    Value *VectorizedStepValue;
+    Value *StepVector;
+    Value *VectorizedIterations;
+    Value *NonVectorizedIterations;
 
 private:
     Module *module;
@@ -47,49 +56,46 @@ private:
     BasicBlock *createPreVectorizationBlock(BasicBlock *vectorizingBlock);
 
 private:
-    void computeTripCount(BasicBlock *latch, Value *inductionVar);
+    void computeTripCount(BasicBlock *latch);
 
 private:
     BasicBlock *createPreheaderForRemainingIterations();
 
 private:
-    std::vector<Value *> *fillPreVecBlock(BasicBlock *preVecBlock, BasicBlock *preheader, BasicBlock *vectorizingBlock);
+    void fillPreVecBlock(BasicBlock *preVecBlock);
 
 private:
     BasicBlock *createVectorizingBlock();
 
 private:
-    Value *formPredicateVector(Instruction *insertionPoint, BasicBlock *decisionBlock, BasicBlock *vectorizingBlock,
+    Value *formPredicateVector(IRBuilder<> &IRB, BasicBlock *decisionBlock, BasicBlock *vectorizingBlock,
                                BasicBlock *targetedBlock,
-                               PHINode *stepVec, Value *inductionVar, Value *indexVar,
                                std::map<const Value *, const Value *> **outputVMap);
 
 private:
-    void vectorizeTargetedBlockInstructions(BasicBlock *vectorizingBlock, BasicBlock *targetedBlock, PHINode *stepVec,
-                                            Value *inductionVar, Value *indexVar, Value *predicates,
+    void vectorizeTargetedBlockInstructions(BasicBlock *vectorizingBlock, BasicBlock *targetedBlock,
+                                            Value *predicates,
                                             std::map<const Value *, const Value *> *headerInstructionsMap);
 
 private:
     void
     fillVectorizingBlock(BasicBlock *vectorizingBlock, BasicBlock *preVec, BasicBlock *preheaderForRemainingIterations,
-                         BasicBlock *exitBlock, BasicBlock *middleBlock, std::vector<Value *> *initialValues,
-                         Value *inductionVar);
+                         BasicBlock *exitBlock, BasicBlock *middleBlock);
 
 private:
     void fillMiddleBlock(BasicBlock *middleBlock, BasicBlock *preheader, BasicBlock *exitBlock, Value *remResult);
 
 private:
-    Value *createVectorOfConstants(Value *value, Instruction *insertionPoint, std::string name);
+    Value *createVectorOfConstants(Value *value, IRBuilder<> &IRB, std::string name);
 
 private:
     std::map<const Value *, const Value *> *
     vectorizeInstructions_nonePredicated(std::vector<Instruction *> *instructions, BasicBlock *block,
-                                         Value *stepVector, Value *inductionVar, Value *indexVar,
                                          ValueToValueMapTy &inputMap);
 
 private:
     void vectorizeInstructions_Predicated(std::vector<Instruction *> *instructions, BasicBlock *block,
-                                          Value *stepVector, Value *inductionVar, Value *indexVar, Value *predicates,
+                                          Value *predicates,
                                           std::map<const Value *, const Value *> *headerInstructionsMap);
 
 private:

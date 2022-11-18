@@ -43,10 +43,11 @@ void SVE_Vectorizer::doVectorization() {
     BasicBlock *preheader = L->getLoopPreheader();
     BasicBlock *latch = L->getLoopLatch();
     BasicBlock *exitBlock = L->getExitBlock();
-    PHINode *inductionVar = L->getCanonicalInductionVariable();
+    ScalarIV = L->getCanonicalInductionVariable();
+    assert(isa<PHINode>(ScalarIV) && "Induction variable must be a PHINode!");
 
     // computing TripCount;
-    computeTripCount(latch, inductionVar);
+    computeTripCount(latch);
 
 
     // create vectorizingBlock
@@ -67,10 +68,8 @@ void SVE_Vectorizer::doVectorization() {
     refinePreheader(preVectorizationBlock, preHeaderForRemaining);
 
 
-    auto *values = fillPreVecBlock(preVectorizationBlock, preheader, vectorizingBlock);
-    fillVectorizingBlock(vectorizingBlock, preVectorizationBlock, preHeaderForRemaining, exitBlock, middleBlock,
-                         values,
-                         dyn_cast<Value>(inductionVar));
+    fillPreVecBlock(preVectorizationBlock);
+    fillVectorizingBlock(vectorizingBlock, preVectorizationBlock, preHeaderForRemaining, exitBlock, middleBlock);
 
 
 }
@@ -78,13 +77,8 @@ void SVE_Vectorizer::doVectorization() {
 
 bool SVE_Vectorizer::is_a_condition_block(BasicBlock *block) {
     Instruction *terminator = block->getTerminator();
-
-    if (!isa<BranchInst>(terminator)) {
-        // TODO: raise error
-    }
-
-    auto *brInstr = dyn_cast<BranchInst>(terminator);
-
+    assert(isa<BranchInst>(terminator) && "Expected a BranchInst!");
+    auto *brInstr = static_cast<BranchInst*>(terminator);
     return brInstr->isConditional();
 }
 
@@ -116,14 +110,18 @@ void SVE_Vectorizer::refinePreheader(BasicBlock *preVecBlock, BasicBlock *preHea
 }
 
 
-void SVE_Vectorizer::computeTripCount(BasicBlock *latch, Value *inductionVar) {
-    auto *brIns = dyn_cast<BranchInst>(latch->getTerminator());
-    auto *conditionInst = dyn_cast<Instruction>(brIns->getCondition());
+void SVE_Vectorizer::computeTripCount(BasicBlock *latch) {
+    auto *terminator = latch->getTerminator();
+    assert(isa<BranchInst>(terminator) && "Expected a BranchInst!");
+    auto *brIns = static_cast<BranchInst*>(terminator);
+    auto *MaybeCondInst = brIns->getCondition();
+    assert(isa<Instruction>(MaybeCondInst) && "Expected a Instruction as condition!");
+    auto *conditionInst = static_cast<Instruction*>(MaybeCondInst);
 
     // one of the operands is the induction var and the other one is trip count
     for (int i = 0; i < conditionInst->getNumOperands(); ++i) {
         bool flag = false;
-        for (auto user: inductionVar->users()) {
+        for (auto user: ScalarIV->users()) {
             if (user == conditionInst->getOperand(i)) {
                 flag = true;
             }
@@ -191,110 +189,83 @@ BasicBlock *SVE_Vectorizer::createVectorizingBlock() {
     return block;
 }
 
-std::vector<Value *> *
-SVE_Vectorizer::fillPreVecBlock(BasicBlock *preVecBlock, BasicBlock *preheader, BasicBlock *vectorizingBlock) {
+void SVE_Vectorizer::fillPreVecBlock(BasicBlock *preVecBlock) {
 
-    auto *results = new std::vector<Value *>;
-
-    Instruction *insertionPoint = preVecBlock->getTerminator();
-    IRBuilder<> builder(insertionPoint);
+    IRBuilder<> IRB(preVecBlock->getTerminator());
 
     // create the value by which the index should be increased
     //TODO: we assume indices are added by one, make it work for other cases as well
     //should be added by vscale * VFactor * 1  ----> vscale shl log(VFactor)
 
-    // create step vector
-    Value *stepVec = nullptr;
-    Value *stepVal = nullptr;
-
-    if (tripCount->getType() == Type::getInt64Ty(preheader->getContext())) {
-        stepVal = intrinsicCallGenerator->createVscale64Intrinsic(builder);
-        stepVec = intrinsicCallGenerator->createStepVector64Intrinsic(builder, "step.vec");
+    if (tripCount->getType() == IRB.getInt64Ty()) {
+        VectorizedStepValue = intrinsicCallGenerator->createVscale64Intrinsic(IRB);
+        //VectorIVInitializer = intrinsicCallGenerator->createStepVector64Intrinsic(IRB, "induction.vector");
     } else {
-        stepVal = intrinsicCallGenerator->createVscale32Intrinsic(builder);
-        stepVec = intrinsicCallGenerator->createStepVector32Intrinsic(builder, "step.vec");
+        VectorizedStepValue = intrinsicCallGenerator->createVscale32Intrinsic(IRB);
+        //VectorIVInitializer = intrinsicCallGenerator->createStepVector32Intrinsic(IRB, "induction.vector");
     }
 
     // vectorizing block termination condition: index > n - (n % stepValue)
     // forming n - (n % stepValue)
-
-    Value *remResult = builder.CreateURem(tripCount, stepVal);
-    Value *totalVecIterations = builder.CreateSub(tripCount, remResult, "total.iterations.to.be.vectorized");
+    NonVectorizedIterations = IRB.CreateURem(tripCount, VectorizedStepValue, "num.non-vectorized.iterations");
+    VectorizedIterations = IRB.CreateSub(tripCount, NonVectorizedIterations, "num.vectorized.iterations");
 
     // create vector by which step vector should be updated
-    Value *stepVecUpdateValues = createVectorOfConstants(stepVal, insertionPoint, "stepVector.update.values");
-
-    results->push_back(stepVec);
-    results->push_back(stepVal);
-    results->push_back(stepVecUpdateValues);
-    results->push_back(totalVecIterations);
-    results->push_back(remResult);
-
-    return results;
+    StepVector = createVectorOfConstants(VectorizedStepValue, IRB, "step.vector");
 }
 
 void SVE_Vectorizer::fillVectorizingBlock(BasicBlock *vectorizingBlock, BasicBlock *preVec,
                                           BasicBlock *preheaderForRemainingIterations,
                                           BasicBlock *exitBlock,
-                                          BasicBlock *middleBlock,
-                                          std::vector<Value *> *initialValues,
-                                          Value *inductionVar) {
+                                          BasicBlock *middleBlock) {
 
 
-    Instruction *insertionPoint = vectorizingBlock->getTerminator();
-    IRBuilder<> builder(vectorizingBlock->getContext());
-    builder.SetInsertPoint(insertionPoint);
+    IRBuilder<> IRB(vectorizingBlock->getTerminator());
 
     // create phi node for loop index
-    Type *indexUpdatedValueType = (*initialValues)[1]->getType();   // it's the same as tripcount size
+    auto *indexUpdatedValueType = VectorizedStepValue->getType();   // it's the same as tripcount size
     Constant *contZero = llvm::ConstantInt::get(indexUpdatedValueType, 0);
-    PHINode *indexVarPHI = PHINode::Create(indexUpdatedValueType, 2, "", insertionPoint);
-    indexVarPHI->addIncoming(contZero, preVec);
+    VectorLoopIndex = IRB.CreatePHI(indexUpdatedValueType, 2);
+    VectorLoopIndex->addIncoming(contZero, preVec);
 
 
     // create phi for step vector
-    Value *&stepVecInPrevBlock = (*initialValues)[0];
-    PHINode *stepVecPhi = PHINode::Create(stepVecInPrevBlock->getType(), 2, "", insertionPoint);
-    stepVecPhi->addIncoming(stepVecInPrevBlock, preVec);
+    //VectorIV = IRB.CreatePHI(VectorIVInitializer->getType(), 2);
+    //VectorIV->addIncoming(VectorIVInitializer, preVec);
 
 
     //// vectorizing header and then bodies /////
     BasicBlock *targetedBlock = findTargetedBlock();
     // predicates come from header (decision block)
     std::map<const Value *, const Value *> *headerInstructionsMap = nullptr;
-    Value *predicates = formPredicateVector(insertionPoint, L->getHeader(), vectorizingBlock, targetedBlock, stepVecPhi,
-                                            inductionVar,
-                                            indexVarPHI, &headerInstructionsMap);
+    Value *predicates = formPredicateVector(IRB, L->getHeader(), vectorizingBlock, targetedBlock,
+        &headerInstructionsMap);
 
     // add vectorized instruction of then body
-    vectorizeTargetedBlockInstructions(vectorizingBlock, targetedBlock, stepVecPhi, inductionVar, indexVarPHI,
+    vectorizeTargetedBlockInstructions(vectorizingBlock, targetedBlock,
                                        predicates, headerInstructionsMap);
 
 
 
     // update index
-    Value *stepValue = (*initialValues)[1];
-    Value *updatedIndex = builder.CreateAdd(stepValue, indexVarPHI);
-    indexVarPHI->addIncoming(updatedIndex, vectorizingBlock);
+    Value *updatedIndex = IRB.CreateAdd(VectorizedStepValue, VectorLoopIndex);
+    VectorLoopIndex->addIncoming(updatedIndex, vectorizingBlock);
 
 
 
     //updated step vector
-    Value *stepVecUpdateValues = (*initialValues)[2];
-    Value *updatedStepVec = builder.CreateAdd(stepVecPhi, stepVecUpdateValues);
-    stepVecPhi->addIncoming(updatedStepVec, vectorizingBlock);
+    //Value *NextVectorIV = IRB.CreateAdd(VectorIV, StepVector);
+    //VectorIV->addIncoming(NextVectorIV, vectorizingBlock);
 
 
     // vectorizing block termination condition: index > n - (n % stepValue)
-    Value *totalVecIterations = (*initialValues)[3];
-    Value *condition = builder.CreateICmpUGE(updatedIndex, totalVecIterations, "terminate.condition");
+    Value *VecTermCond = IRB.CreateICmpUGE(updatedIndex, VectorizedIterations, "vectorize.term.cond");
 
     // remove previous terminator and create branch instruction
     vectorizingBlock->getTerminator()->eraseFromParent();
-    BranchInst::Create(middleBlock, vectorizingBlock, condition, vectorizingBlock);
+    BranchInst::Create(middleBlock, vectorizingBlock, VecTermCond, vectorizingBlock);
 
-    Value *remResult = (*initialValues)[4];
-    fillMiddleBlock(middleBlock, preheaderForRemainingIterations, exitBlock, remResult);
+    fillMiddleBlock(middleBlock, preheaderForRemainingIterations, exitBlock, NonVectorizedIterations);
 
     // fix PHI node in preHeaderForRemaining
     refinePreHeaderForRemaining(preheaderForRemainingIterations, middleBlock, updatedIndex);
@@ -305,14 +276,11 @@ void SVE_Vectorizer::fillVectorizingBlock(BasicBlock *vectorizingBlock, BasicBlo
 // TODO: Isn't it the case that limits ALC which Ehsan mentioned(dependency between blocks)?
 
 Value *
-SVE_Vectorizer::formPredicateVector(Instruction *insertionPoint, BasicBlock *decisionBlock,
-                                    BasicBlock *vectorizingBlock, BasicBlock *targetedBlock, PHINode *stepVecPhi,
-                                    Value *inductionVar,
-                                    Value *indexVar, std::map<const Value *, const Value *> **outputVMap) {
+SVE_Vectorizer::formPredicateVector(IRBuilder<> &IRB, BasicBlock *decisionBlock,
+                                    BasicBlock *vectorizingBlock, BasicBlock *targetedBlock,
+                                    std::map<const Value *, const Value *> **outputVMap) {
 
 
-    IRBuilder<> builder(decisionBlock->getContext());
-    builder.SetInsertPoint(insertionPoint);
     llvm::ValueToValueMapTy vMap;
     // first copy instruction into vectorizing Block, then vectorize them
     std::vector<Instruction *> clonedInstructions;
@@ -342,8 +310,7 @@ SVE_Vectorizer::formPredicateVector(Instruction *insertionPoint, BasicBlock *dec
     std::map<const Value *, const Value *> *headerInstrunctionsMap = vectorizeInstructions_nonePredicated(
             &clonedInstructions,
             vectorizingBlock,
-            stepVecPhi, inductionVar,
-            indexVar, vMap);
+            vMap);
 
     // output map
     (*outputVMap) = headerInstrunctionsMap;
@@ -356,7 +323,7 @@ SVE_Vectorizer::formPredicateVector(Instruction *insertionPoint, BasicBlock *dec
     BasicBlock *branchTrueTarget = brInstr->getSuccessor(0);
 
     if (branchTrueTarget != targetedBlock) {  // should negate
-        predicateVec = builder.CreateNot(predicateVec, "negated.vector");
+        predicateVec = IRB.CreateNot(predicateVec, "negated.vector");
     }
 
 
@@ -367,13 +334,8 @@ SVE_Vectorizer::formPredicateVector(Instruction *insertionPoint, BasicBlock *dec
 // TODO: how to vectorize this code?: t = a[i] + b[i]
 //                                     ... = t * ...
 void SVE_Vectorizer::vectorizeTargetedBlockInstructions(BasicBlock *vectorizingBlock, BasicBlock *targetedBlock,
-                                                        PHINode *stepVec, Value *inductionVar, Value *indexVar,
                                                         Value *predicates,
                                                         std::map<const Value *, const Value *> *headerInstructionsMap) {
-
-
-    IRBuilder<> builder(vectorizingBlock->getContext());
-    builder.SetInsertPoint(vectorizingBlock->getTerminator());
 
     // first copy instruction into vectorizing Block, then vectorize them
     std::vector<Instruction *> clonedInstructions;
@@ -399,37 +361,32 @@ void SVE_Vectorizer::vectorizeTargetedBlockInstructions(BasicBlock *vectorizingB
 
     }
 
-    vectorizeInstructions_Predicated(&clonedInstructions, vectorizingBlock, stepVec, inductionVar, indexVar,
+    vectorizeInstructions_Predicated(&clonedInstructions, vectorizingBlock,
                                      predicates, headerInstructionsMap);
 
 }
 
 void SVE_Vectorizer::fillMiddleBlock(BasicBlock *middleBlock, BasicBlock *preheader, BasicBlock *exitBlock,
                                      Value *remResult) {
-
-    IRBuilder<> builder(preheader->getContext());
-    builder.SetInsertPoint(middleBlock);
-
+    IRBuilder<> IRB(middleBlock);
     Constant *constZero = ConstantInt::get(remResult->getType(), 0, false);
-    Value *condition = builder.CreateICmpEQ(remResult, constZero, "condition");
-
-
-    BranchInst::Create(exitBlock, preheader, condition, middleBlock);
-
+    Value *condition = IRB.CreateICmpEQ(remResult, constZero, "condition");
+    IRB.CreateCondBr(condition, exitBlock, preheader);
 }
 
 
 void
 SVE_Vectorizer::refinePreHeaderForRemaining(BasicBlock *preHeaderForRemaining, BasicBlock *middleBlock, Value *value) {
-    IRBuilder<> builder(middleBlock->getContext());
-    builder.SetInsertPoint(middleBlock->getTerminator());
+    IRBuilder<> IRB(middleBlock->getTerminator());
 
     // The first instruction is a phi node
-    auto *phiNode = dyn_cast<PHINode>(&preHeaderForRemaining->getInstList().front());
+    auto *FirstInst = &preHeaderForRemaining->getInstList().front();
+    assert(isa<PHINode>(FirstInst) && "Expected first instruction to be PHINode!");
+    PHINode *phiNode = static_cast<PHINode*>(FirstInst);
 
     // one is i32 the other is i64
     if (value->getType() != phiNode->getType()) {
-        value = builder.CreateCast(Instruction::CastOps::ZExt, value, phiNode->getType());
+        value = IRB.CreateCast(Instruction::CastOps::ZExt, value, phiNode->getType());
 
     }
 
@@ -438,11 +395,8 @@ SVE_Vectorizer::refinePreHeaderForRemaining(BasicBlock *preHeaderForRemaining, B
 
 std::map<const Value *, const Value *> *
 SVE_Vectorizer::vectorizeInstructions_nonePredicated(std::vector<Instruction *> *instructions, BasicBlock *block,
-                                                     Value *stepVector, Value *inductionVar, Value *indexVar,
                                                      ValueToValueMapTy &inputMap) {
-    Instruction *insertionPoint = block->getTerminator();
-    IRBuilder<> builder(block->getContext());
-    builder.SetInsertPoint(insertionPoint);
+    IRBuilder<> IRB(block->getTerminator());
 
 
     auto outputMap = new std::map<const Value *, const Value *>;
@@ -451,161 +405,158 @@ SVE_Vectorizer::vectorizeInstructions_nonePredicated(std::vector<Instruction *> 
     std::stack<Instruction *> toBeRemoved;
 
     // TODO: Complete the list
-    for (auto instr: *instructions) {
-
-        if (isa<GEPOperator>(instr)) {
-            for (int i = 0; i < instr->getNumOperands(); ++i) {
-                if (instr->getOperand(i)->getName() == inductionVar->getName()) {  // TODO: ??????
-                    instr->setOperand(i, indexVar);
-                }
-            }
-
-        } else if (isa<StoreInst>(instr)) {
-            auto storeInstr = dyn_cast<StoreInst>(instr);
-            // it's the value to be stored
-            Value *firstOp = nullptr;
-            if (vMap.count(storeInstr->getOperand(0))) {
-                firstOp = vMap[storeInstr->getOperand(0)];
-            } else if (storeInstr->getOperand(0)->getName() == inductionVar->getName()) {
-                firstOp = stepVector;
-            } else {
-                // it's constant
-                auto *constValue = dyn_cast<Constant>(storeInstr->getOperand(0));
-                firstOp = createVectorOfConstants(constValue, insertionPoint, "store.values");
-                // TODO: is there any other case ?
-            }
-            auto ptr = dyn_cast<GEPOperator>(instr->getOperand(1));
-            builder.CreateStore(firstOp, ptr);
-            toBeRemoved.push(instr);
-        } else if (isa<LoadInst>(instr)) {
-
-            auto ptr = dyn_cast<GEPOperator>(instr->getOperand(0));
-            Type *elementType = instr->getType();
-            LoadInst *loadedData = builder.CreateLoad(VectorType::get(elementType, vectorizationFactor, true), ptr);
-            vMap[instr] = loadedData;
-            toBeRemoved.push(instr);
-
-        } else if (isa<BinaryOperator>(instr) || isa<ICmpInst>(instr)) { // TODO: ICmp is not binary????
-
-            Value *firstOp = nullptr;
-            Value *secondOp = nullptr;
-            if (vMap.count(instr->getOperand(0))) {
-                firstOp = vMap[instr->getOperand(0)];
-            } else if (instr->getOperand(0)->getName() == inductionVar->getName()) {  // TODO: is it safe?
-                firstOp = stepVector;
-            } else {
-                auto *constValue = dyn_cast<Constant>(instr->getOperand(0));
-                firstOp = createVectorOfConstants(constValue, insertionPoint, "first.operand");
-            }
-
-            if (vMap.count(instr->getOperand(1))) {
-                secondOp = vMap[instr->getOperand(1)];
-            } else if (instr->getOperand(1)->getName() == inductionVar->getName()) {
-                secondOp = stepVector;
-            } else {
-                auto *constValue = dyn_cast<Constant>(instr->getOperand(1));
-                secondOp = createVectorOfConstants(constValue, insertionPoint, "second.operand");
-            }
-
-            Value *result = nullptr;
-            switch (instr->getOpcode()) {
-                case Instruction::Add:
-                    result = builder.CreateAdd(firstOp, secondOp);
-                    break;
-                case Instruction::Mul:
-                    result = builder.CreateMul(firstOp, secondOp);
-                    break;
-                case Instruction::SDiv:
-                    result = builder.CreateSDiv(firstOp, secondOp);
-                    break;
-                case Instruction::URem:
-                    result = builder.CreateURem(firstOp, secondOp);
-                    break;
-                case Instruction::And:
-                    result = builder.CreateAnd(firstOp, secondOp);
-                    break;
-                case Instruction::Shl:
-                    result = builder.CreateShl(firstOp, secondOp);
-                    break;
-                case Instruction::ICmp: {
-                    switch (dyn_cast<ICmpInst>(instr)->getPredicate()) {
-                        // TODO: handle other cases
-                        case CmpInst::FCMP_FALSE:
-                            break;
-                        case CmpInst::FCMP_OEQ:
-                            break;
-                        case CmpInst::FCMP_OGT:
-                            break;
-                        case CmpInst::FCMP_OGE:
-                            break;
-                        case CmpInst::FCMP_OLT:
-                            break;
-                        case CmpInst::FCMP_OLE:
-                            break;
-                        case CmpInst::FCMP_ONE:
-                            break;
-                        case CmpInst::FCMP_ORD:
-                            break;
-                        case CmpInst::FCMP_UNO:
-                            break;
-                        case CmpInst::FCMP_UEQ:
-                            break;
-                        case CmpInst::FCMP_UGT:
-                            break;
-                        case CmpInst::FCMP_UGE:
-                            break;
-                        case CmpInst::FCMP_ULT:
-                            break;
-                        case CmpInst::FCMP_ULE:
-                            break;
-                        case CmpInst::FCMP_UNE:
-                            break;
-                        case CmpInst::FCMP_TRUE:
-                            break;
-                        case CmpInst::BAD_FCMP_PREDICATE:
-                            break;
-                        case CmpInst::ICMP_EQ: {
-                            Value *ICmpInst = builder.CreateICmpEQ(firstOp, secondOp);
-
-                            CastInst *truncInst = TruncInst::Create(Instruction::CastOps::BitCast, ICmpInst,
-                                                                    VectorType::get(
-                                                                            Type::getInt1Ty(block->getContext()),
-                                                                            vectorizationFactor, true), "",
-                                                                    insertionPoint);
-                            result = dyn_cast<Value>(truncInst);
-                            break;
-                        }
-                        case CmpInst::ICMP_NE:
-                            break;
-                        case CmpInst::ICMP_UGT:
-                            break;
-                        case CmpInst::ICMP_UGE:
-                            break;
-                        case CmpInst::ICMP_ULT:
-                            break;
-                        case CmpInst::ICMP_ULE:
-                            break;
-                        case CmpInst::ICMP_SGT: {
-                            Value *ICmpInst = builder.CreateICmpSGT(firstOp, secondOp);
-                            result = dyn_cast<Value>(ICmpInst);
-                            break;
-                        }
-                        case CmpInst::ICMP_SGE:
-                            break;
-                        case CmpInst::ICMP_SLT:
-                            break;
-                        case CmpInst::ICMP_SLE:
-                            break;
-                        case CmpInst::BAD_ICMP_PREDICATE:
-                            break;
-                    }
-                }
-            }
-
-
-            vMap[instr] = result;
-            toBeRemoved.push(instr);
+    for (auto *Inst: *instructions) {
+      if (auto *GEP = dyn_cast_or_null<GEPOperator>(Inst)) {
+        assert(GEP->getNumIndices() == 1 && "Expected GetElementPtr with one index operand!");
+        if (GEP->getOperand(1) == ScalarIV) {
+          GEP->setOperand(1, VectorLoopIndex);
         }
+      } else if (auto *Store = dyn_cast_or_null<StoreInst>(Inst)) {
+        auto *ValOp = Store->getValueOperand();
+        Value *NewValOp = vMap[ValOp];
+        if (auto *ConstantValue = dyn_cast_or_null<Constant>(ValOp)) {
+          ValOp = createVectorOfConstants(ConstantValue, IRB, "store.with.constant.val.op");
+          // TODO: is there any other case ?
+        }
+        auto *PtrOp = Store->getPointerOperand();
+        assert(isa<GEPOperator>(PtrOp) && "Expected StoreInst PointerOperand to be GetElementPtr!");
+        auto *GEP = static_cast<GEPOperator*>(PtrOp);
+        IRB.CreateStore(ValOp, GEP);
+        toBeRemoved.push(Inst);
+      } else if (auto *Load = dyn_cast_or_null<LoadInst>(Inst)) {
+        auto *PtrOp = Load->getPointerOperand();
+        assert(isa<GEPOperator>(PtrOp) && "Expected LoadInst PointerOperand to be GetElementPtr!");
+        auto *GEP = static_cast<GEPOperator*>(PtrOp);
+        auto *VTy = VectorType::get(GEP->getSourceElementType(), vectorizationFactor, true);
+        auto *NewLoad = IRB.CreateLoad(VTy, PtrOp);
+        vMap[Inst] = NewLoad;
+        toBeRemoved.push(Inst);
+      } else if (auto *CInst = dyn_cast_or_null<CmpInst>(Inst)) {
+        Value *FirstOp = vMap[CInst->getOperand(0)];
+        if (FirstOp == nullptr) {
+          if (auto *ConstantValue = dyn_cast_or_null<Constant>(CInst->getOperand(0))) {
+            FirstOp = createVectorOfConstants(ConstantValue, IRB, "cmpinst.first.operand");
+          } else
+            assert(0 && "CmpInst first operand neither already vectorized nor Constant!");
+        }
+        Value *SecondOp = vMap[CInst->getOperand(1)];
+        if (SecondOp == nullptr) {
+          if (auto *ConstantValue = dyn_cast_or_null<Constant>(CInst->getOperand(1))) {
+            SecondOp = createVectorOfConstants(ConstantValue, IRB, "cmpinst.second.operand");
+          } else
+            assert(0 && "CmpInst second operand neither already vectorized nor Constant!");
+        }
+        Value *NewInst = nullptr;
+        switch (CInst->getPredicate()) {
+          // TODO: handle other cases
+          case CmpInst::FCMP_FALSE:
+            break;
+          case CmpInst::FCMP_OEQ:
+            break;
+          case CmpInst::FCMP_OGT:
+            break;
+          case CmpInst::FCMP_OGE:
+            break;
+          case CmpInst::FCMP_OLT:
+            break;
+          case CmpInst::FCMP_OLE:
+            break;
+          case CmpInst::FCMP_ONE:
+            break;
+          case CmpInst::FCMP_ORD:
+            break;
+          case CmpInst::FCMP_UNO:
+            break;
+          case CmpInst::FCMP_UEQ:
+            break;
+          case CmpInst::FCMP_UGT:
+            break;
+          case CmpInst::FCMP_UGE:
+            break;
+          case CmpInst::FCMP_ULT:
+            break;
+          case CmpInst::FCMP_ULE:
+            break;
+          case CmpInst::FCMP_UNE:
+            break;
+          case CmpInst::FCMP_TRUE:
+            break;
+          case CmpInst::BAD_FCMP_PREDICATE:
+            break;
+          case CmpInst::ICMP_EQ: {
+                                   auto *ICmpInst = IRB.CreateICmpEQ(FirstOp, SecondOp);
+                                   NewInst = IRB.CreateBitCast(ICmpInst,
+                                       VectorType::get(Type::getInt1Ty(block->getContext()),
+                                         vectorizationFactor, true));
+                                   break;
+                                 }
+          case CmpInst::ICMP_NE:
+                                 break;
+          case CmpInst::ICMP_UGT:
+                                 break;
+          case CmpInst::ICMP_UGE:
+                                 break;
+          case CmpInst::ICMP_ULT:
+                                 break;
+          case CmpInst::ICMP_ULE:
+                                 break;
+          case CmpInst::ICMP_SGT: {
+                                    NewInst = IRB.CreateICmpSGT(FirstOp, SecondOp);
+                                    break;
+                                  }
+          case CmpInst::ICMP_SGE:
+                                  break;
+          case CmpInst::ICMP_SLT:
+                                  break;
+          case CmpInst::ICMP_SLE:
+                                  break;
+          case CmpInst::BAD_ICMP_PREDICATE:
+                                  break;
+        }
+        assert(NewInst && "Unhandled CmpInst!");
+        vMap[Inst] = NewInst;
+        toBeRemoved.push(Inst);
+      } else if (auto *BinOp = dyn_cast_or_null<BinaryOperator>(Inst)) {
+        Value *FirstOp = vMap[BinOp->getOperand(0)];
+        if (FirstOp == nullptr) {
+          if (auto *ConstantValue = dyn_cast_or_null<Constant>(BinOp->getOperand(0))) {
+            FirstOp = createVectorOfConstants(ConstantValue, IRB, "binop.first.operand");
+          } else
+            assert(0 && "BinaryOperator first operand neither already vectorized nor Constant!");
+        }
+        Value *SecondOp = vMap[BinOp->getOperand(1)];
+        if (SecondOp == nullptr) {
+          if (auto *ConstantValue = dyn_cast_or_null<Constant>(BinOp->getOperand(1))) {
+            SecondOp = createVectorOfConstants(ConstantValue, IRB, "binop.second.operand");
+          } else
+            assert(0 && "BinaryOperator second operand neither already vectorized nor Constant!");
+        }
+        Value *NewInst = nullptr;
+        switch (Inst->getOpcode()) {
+          case Instruction::Add:
+            NewInst = IRB.CreateAdd(FirstOp, SecondOp);
+            break;
+          case Instruction::Mul:
+            NewInst = IRB.CreateMul(FirstOp, SecondOp);
+            break;
+          case Instruction::SDiv:
+            NewInst = IRB.CreateSDiv(FirstOp, SecondOp);
+            break;
+          case Instruction::URem:
+            NewInst = IRB.CreateURem(FirstOp, SecondOp);
+            break;
+          case Instruction::And:
+            NewInst = IRB.CreateAnd(FirstOp, SecondOp);
+            break;
+          case Instruction::Shl:
+            NewInst = IRB.CreateShl(FirstOp, SecondOp);
+            break;
+        }
+        assert(NewInst && "Unhandled BinaryOperator!");
+        vMap[Inst] = NewInst;
+        toBeRemoved.push(Inst);
+      } else
+        assert(0 && "Unhandled Instruction!");
     }
 
     // make a mapping between the original instructions in decision block and corresponding vectorized ones
@@ -635,30 +586,25 @@ SVE_Vectorizer::vectorizeInstructions_nonePredicated(std::vector<Instruction *> 
 
 }
 
-Value *SVE_Vectorizer::createVectorOfConstants(Value *value, Instruction *insertionPoint, std::string name) {
-
-    IRBuilder<> builder(insertionPoint->getContext());
-    builder.SetInsertPoint(insertionPoint);
+Value *SVE_Vectorizer::createVectorOfConstants(Value *value, IRBuilder<> &IRB, std::string name) {
 
     auto *vecType = VectorType::get(value->getType(), vectorizationFactor, true);
     auto poisonVec = PoisonValue::get(vecType);
     u_int64_t indexZero = 0;
-    Value *splatInsert = builder.CreateInsertElement(poisonVec, value, indexZero);
+    Value *splatInsert = IRB.CreateInsertElement(poisonVec, value, indexZero);
 
     ConstantAggregateZero *zeroInitializer = ConstantAggregateZero::get(vecType);
 
-    return builder.CreateShuffleVector(splatInsert, poisonVec, zeroInitializer, name);
+    return IRB.CreateShuffleVector(splatInsert, poisonVec, zeroInitializer, name);
 }
 
 
 // TODO: what if the operand was defined in another block?
 void SVE_Vectorizer::vectorizeInstructions_Predicated(std::vector<Instruction *> *instructions, BasicBlock *block,
-                                                      Value *stepVector, Value *inductionVar, Value *indexVar,
                                                       Value *predicates,
                                                       std::map<const Value *, const Value *> *headerInstructionsMap) {
 
-    Instruction *insertionPoint = block->getTerminator();
-    IRBuilder<> IRB(insertionPoint);
+    IRBuilder<> IRB(block->getTerminator());
 
 
     std::map<Value *, Value *> vMap;
@@ -673,161 +619,152 @@ void SVE_Vectorizer::vectorizeInstructions_Predicated(std::vector<Instruction *>
     std::stack<Instruction *> toBeRemoved;
 
     // TODO: Complete the list
-    for (auto instr: *instructions) {
-
-        instr->print(outs());
-        llvm::outs() << "\n";
-
-        if (isa<GEPOperator>(instr)) {
-            for (int i = 0; i < instr->getNumOperands(); ++i) {
-                if (instr->getOperand(i)->getName() == inductionVar->getName()) {  // TODO: ??????
-                    instr->setOperand(i, indexVar);
-                }
-            }
-        } else if (isa<StoreInst>(instr)) {
-            auto storeInstr = dyn_cast<StoreInst>(instr);
-            // it's the value to be stored
-            Value *firstOp = nullptr;
-            if (vMap.count(storeInstr->getOperand(0))) {
-                firstOp = vMap[storeInstr->getOperand(0)];
-            } else if (storeInstr->getOperand(0)->getName() == inductionVar->getName()) {
-                firstOp = stepVector;
-            } else {
-                // it's constant
-                auto *constValue = dyn_cast<Constant>(storeInstr->getOperand(0));
-                firstOp = createVectorOfConstants(constValue, insertionPoint, "store.values");
-                // TODO: is there any other case ?
-            }
-            auto ptr = instr->getOperand(1);
-            if (vMap.count(ptr)) {
-                ptr = vMap[ptr];
-            }
-            intrinsicCallGenerator->createStoreInstruction(IRB, firstOp, ptr, predicates);
-            toBeRemoved.push(instr);
-        } else if (isa<LoadInst>(instr)) {
-
-            auto ptr = instr->getOperand(0);
-            if (vMap.count(ptr)) {
-                ptr = vMap[ptr];
-            }
-            auto *loadedData = dyn_cast<Value>(
-                    intrinsicCallGenerator->createLoadInstruction(IRB, ptr, predicates));
-            vMap[instr] = loadedData;
-            toBeRemoved.push(instr);
-        } else if (isa<BinaryOperator>(instr) || isa<ICmpInst>(instr)) { // TODO: ICmp is not binary????
-
-            Value *firstOp = nullptr;
-            Value *secondOp = nullptr;
-            if (vMap.count(instr->getOperand(0))) {
-                firstOp = vMap[instr->getOperand(0)];
-            } else if (instr->getOperand(0)->getName() == inductionVar->getName()) {  // TODO: is it safe?
-                firstOp = stepVector;
-            } else {
-                auto *constValue = dyn_cast<Constant>(instr->getOperand(0));
-                firstOp = createVectorOfConstants(constValue, insertionPoint, "first.operand");
-            }
-
-            if (vMap.count(instr->getOperand(1))) {
-                secondOp = vMap[instr->getOperand(1)];
-            } else if (instr->getOperand(1)->getName() == inductionVar->getName()) {
-                secondOp = stepVector;
-            } else {
-                auto *constValue = dyn_cast<Constant>(instr->getOperand(1));
-                secondOp = createVectorOfConstants(constValue, insertionPoint, "second.operand");
-            }
-
-            Value *result = nullptr;
-            switch (instr->getOpcode()) {
-                case Instruction::Add:
-                    result = IRB.CreateAdd(firstOp, secondOp);
-                    break;
-                case Instruction::Mul:
-                    result = IRB.CreateMul(firstOp, secondOp);
-                    break;
-                case Instruction::Sub:
-                    result = IRB.CreateSub(firstOp, secondOp);
-                    break;
-                case Instruction::SDiv:
-                    result = IRB.CreateSDiv(firstOp, secondOp);
-                    break;
-                case Instruction::URem:
-                    // TODO
-                    break;
-                case Instruction::And:
-                    // TODO
-                    break;
-                case Instruction::Shl:
-                    result = IRB.CreateShl(firstOp, secondOp);
-                    break;
-                case Instruction::ICmp: {
-                    switch (dyn_cast<ICmpInst>(instr)->getPredicate()) {
-                        // TODO: handle other cases
-                        case CmpInst::FCMP_FALSE:
-                            break;
-                        case CmpInst::FCMP_OEQ:
-                            break;
-                        case CmpInst::FCMP_OGT:
-                            break;
-                        case CmpInst::FCMP_OGE:
-                            break;
-                        case CmpInst::FCMP_OLT:
-                            break;
-                        case CmpInst::FCMP_OLE:
-                            break;
-                        case CmpInst::FCMP_ONE:
-                            break;
-                        case CmpInst::FCMP_ORD:
-                            break;
-                        case CmpInst::FCMP_UNO:
-                            break;
-                        case CmpInst::FCMP_UEQ:
-                            break;
-                        case CmpInst::FCMP_UGT:
-                            break;
-                        case CmpInst::FCMP_UGE:
-                            break;
-                        case CmpInst::FCMP_ULT:
-                            break;
-                        case CmpInst::FCMP_ULE:
-                            break;
-                        case CmpInst::FCMP_UNE:
-                            break;
-                        case CmpInst::FCMP_TRUE:
-                            break;
-                        case CmpInst::BAD_FCMP_PREDICATE:
-                            break;
-                        case CmpInst::ICMP_EQ: {
-                            // TODO
-                            break;
-                        }
-                        case CmpInst::ICMP_NE:
-                            break;
-                        case CmpInst::ICMP_UGT:
-                            break;
-                        case CmpInst::ICMP_UGE:
-                            break;
-                        case CmpInst::ICMP_ULT:
-                            break;
-                        case CmpInst::ICMP_ULE:
-                            break;
-                        case CmpInst::ICMP_SGT:
-                            break;
-                        case CmpInst::ICMP_SGE:
-                            break;
-                        case CmpInst::ICMP_SLT:
-                            break;
-                        case CmpInst::ICMP_SLE:
-                            break;
-                        case CmpInst::BAD_ICMP_PREDICATE:
-                            break;
-                    }
-                }
-            }
-
-            vMap[instr] = result;
-            toBeRemoved.push(instr);
-
+    for (auto Inst: *instructions) {
+      Inst->print(outs());
+      llvm::outs() << "\n";
+      if (auto *GEP = dyn_cast_or_null<GEPOperator>(Inst)) {
+        assert(GEP->getNumIndices() == 1 && "Expected GetElementPtr with one index operand!");
+        if (GEP->getOperand(1) == ScalarIV) {
+          GEP->setOperand(1, VectorLoopIndex);
         }
+      } else if (auto *Store = dyn_cast_or_null<StoreInst>(Inst)) {
+        auto *ValOp = Store->getValueOperand();
+        Value *NewValOp = vMap[ValOp];
+        if (auto *ConstantValue = dyn_cast_or_null<Constant>(ValOp)) {
+          ValOp = createVectorOfConstants(ConstantValue, IRB, "store.with.constant.val.op");
+          // TODO: is there any other case ?
+        }
+        assert(NewValOp && "StoreInst ValueOperand not vectorized!");
+        // TODO: We need to check if PtrOp is defined inside the loop, because
+        // in that case it might need to be handled differently here.
+        //auto *NewPtrOp = vMap[Store->getPointerOperand()];
+        //assert(NewPtrOp && "StoreInst PointerOperand not vectorized!");
+        auto *NewPtrOp = Store->getPointerOperand();
+        assert(isa<GEPOperator>(NewPtrOp) && "Expected StoreInst PointerOperand to be GetElementPtr!");
+        auto *GEP = static_cast<GEPOperator*>(NewPtrOp);
+        intrinsicCallGenerator->createStoreInstruction(IRB, NewValOp, NewPtrOp, predicates);
+        toBeRemoved.push(Inst);
+      } else if (auto *Load = dyn_cast_or_null<LoadInst>(Inst)) {
+        // TODO: We need to check if PtrOp is defined inside the loop, because
+        // in that case it might need to be handled differently here.
+        //auto *NewPtrOp = vMap[Load->getPointerOperand()];
+        //assert(NewPtrOp && "LoadInst PointerOperand not vectorized!");
+        auto *NewPtrOp = Load->getPointerOperand();
+        assert(isa<GEPOperator>(NewPtrOp) && "Expected LoadInst PointerOperand to be GetElementPtr!");
+        auto *GEP = static_cast<GEPOperator*>(NewPtrOp);
+        auto *NewLoad = intrinsicCallGenerator->createLoadInstruction(IRB, NewPtrOp, predicates);
+        vMap[Inst] = NewLoad;
+        toBeRemoved.push(Inst);
+      } else if (auto *CInst = dyn_cast_or_null<CmpInst>(Inst)) {
+        Value *NewInst = nullptr;
+        switch (CInst->getPredicate()) {
+          // TODO: handle other cases
+          case CmpInst::FCMP_FALSE:
+            break;
+          case CmpInst::FCMP_OEQ:
+            break;
+          case CmpInst::FCMP_OGT:
+            break;
+          case CmpInst::FCMP_OGE:
+            break;
+          case CmpInst::FCMP_OLT:
+            break;
+          case CmpInst::FCMP_OLE:
+            break;
+          case CmpInst::FCMP_ONE:
+            break;
+          case CmpInst::FCMP_ORD:
+            break;
+          case CmpInst::FCMP_UNO:
+            break;
+          case CmpInst::FCMP_UEQ:
+            break;
+          case CmpInst::FCMP_UGT:
+            break;
+          case CmpInst::FCMP_UGE:
+            break;
+          case CmpInst::FCMP_ULT:
+            break;
+          case CmpInst::FCMP_ULE:
+            break;
+          case CmpInst::FCMP_UNE:
+            break;
+          case CmpInst::FCMP_TRUE:
+            break;
+          case CmpInst::BAD_FCMP_PREDICATE:
+            break;
+          case CmpInst::ICMP_EQ: {
+                                   // TODO
+                                   break;
+                                 }
+          case CmpInst::ICMP_NE:
+                                 break;
+          case CmpInst::ICMP_UGT:
+                                 break;
+          case CmpInst::ICMP_UGE:
+                                 break;
+          case CmpInst::ICMP_ULT:
+                                 break;
+          case CmpInst::ICMP_ULE:
+                                 break;
+          case CmpInst::ICMP_SGT:
+                                 break;
+          case CmpInst::ICMP_SGE:
+                                 break;
+          case CmpInst::ICMP_SLT:
+                                 break;
+          case CmpInst::ICMP_SLE:
+                                 break;
+          case CmpInst::BAD_ICMP_PREDICATE:
+                                 break;
+        }
+        assert(NewInst && "Unhandled CmpInst!");
+        vMap[Inst] = NewInst;
+        toBeRemoved.push(Inst);
+      } else if (auto *BinOp = dyn_cast_or_null<BinaryOperator>(Inst)) {
+        Value *FirstOp = vMap[BinOp->getOperand(0)];
+        if (FirstOp == nullptr) {
+          if (auto *ConstantValue = dyn_cast_or_null<Constant>(BinOp->getOperand(0))) {
+            FirstOp = createVectorOfConstants(ConstantValue, IRB, "binop.first.operand");
+          } else
+            assert(0 && "BinaryOperator first operand neither already vectorized nor Constant!");
+        }
+        Value *SecondOp = vMap[BinOp->getOperand(1)];
+        if (SecondOp == nullptr) {
+          if (auto *ConstantValue = dyn_cast_or_null<Constant>(BinOp->getOperand(1))) {
+            SecondOp = createVectorOfConstants(ConstantValue, IRB, "binop.second.operand");
+          } else
+            assert(0 && "BinaryOperator second operand neither already vectorized nor Constant!");
+        }
+        Value *NewInst = nullptr;
+        switch (Inst->getOpcode()) {
+          case Instruction::Add:
+            NewInst = IRB.CreateAdd(FirstOp, SecondOp);
+            break;
+          case Instruction::Mul:
+            NewInst = IRB.CreateMul(FirstOp, SecondOp);
+            break;
+          case Instruction::Sub:
+            NewInst = IRB.CreateSub(FirstOp, SecondOp);
+            break;
+          case Instruction::SDiv:
+            NewInst = IRB.CreateSDiv(FirstOp, SecondOp);
+            break;
+          case Instruction::URem:
+            // TODO
+            break;
+          case Instruction::And:
+            // TODO
+            break;
+          case Instruction::Shl:
+            NewInst = IRB.CreateShl(FirstOp, SecondOp);
+            break;
+        }
+        assert(NewInst && "Unhandled BinaryOperator!");
+        vMap[Inst] = NewInst;
+        toBeRemoved.push(Inst);
+      } else
+        assert(0 && "Unhandled Instruction!");
     }
 
     while (!toBeRemoved.empty()) {
