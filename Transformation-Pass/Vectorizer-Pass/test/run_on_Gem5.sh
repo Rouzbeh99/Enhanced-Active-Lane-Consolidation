@@ -5,7 +5,6 @@ FILE=$1
 for FILE in *.x
 do
   filename="${FILE%.*}"
-  result_name="$filename-report.txt"
 
   cp $FILE /home/rouzbeh/Graduate/LLVM/GEM5/gem5-arm-sve
   # shellcheck disable=SC2164
@@ -13,7 +12,7 @@ do
 
   source scripts/setenv.sh
 
-  VL_array=(1 2 3 4 5 8 10 16)
+  VL_array=(1 2 4 8 16)
   # shellcheck disable=SC2068
   for i in ${VL_array[@]}; do
     bash scripts/run-binary-in-gem5.sh -b $FILE -l $i

@@ -1,68 +1,102 @@
+import math
 import os
 from pathlib import Path
 import csv
+import numpy as np
+import pandas as pd
+from matplotlib import pyplot as plt
+from matplotlib.pyplot import figure
+import re
 
-# assign directory
 directory = "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation-Pass/Vectorizer-Pass/test/simulation_results"
 
 # iterate over files in
 # that directory
 uniqueFiles = []
-lengthes = []
+vectorized = "vectorized"
+armClang = "armclang"
+
 for filename in os.listdir(directory):
     # checking if it is a file
     if os.path.isfile(os.path.join(directory, filename)):
         if filename.endswith(".txt") and not "summerized" in filename:
             name_without_extension = Path(filename).stem
-            VL = name_without_extension[name_without_extension.rindex("-") + 1:len(name_without_extension)]
-            strippedName = name_without_extension.strip(VL)
-            if not int(VL) in lengthes:
-                lengthes.append(int(VL))
+            strippedName = re.sub("[^A-Za-z_]", "", name_without_extension)
             if strippedName in uniqueFiles:
                 continue
-            uniqueFiles.append(strippedName)
+            if vectorized not in strippedName and armClang not in strippedName:
+                uniqueFiles.append(strippedName)
 
-lengthes.sort()
-uniqueFiles.sort(reverse=True)
+metrics = ["system.cpu.numCycles"]
+# metrics = ["system.cpu.committedInsts", "system.cpu.numInsts", "system.cpu.numCycles"]
+lengthes = [1, 2, 4, 8, 16]
+percentages = ["10%", "20%", "25%", "33%", "50%", "66%", "75%", "80%", "90%"]
 
-metrics = ["system.cpu.committedInsts", "system.cpu.numInsts", "system.cpu.numCycles"]
+generated_CSVs = []
 
-for metric in metrics:
-    file_dict = {"first row":["inputs"]}
+for percentage in percentages:
+    for metric in metrics:
+        file_dict = {"first row": ["inputs"]}
 
-    for i in lengthes:
-        file_dict["first row"].append("VL=" + str(i))
+        for i in lengthes:
+            file_dict["first row"].append("VL=" + str(i))
 
-    for uniqueFile in uniqueFiles:
-        rowName = uniqueFile.replace("-", " ").replace("_", " ")
-        column_value_list = [rowName]
-        for VL in lengthes:
-            source_file_name = directory +"/"+ uniqueFile + str(VL) + ".txt"
-            with open(source_file_name) as file:
-                for line in file:
-                    if "End Simulation Statistics" in line:
-                        break
-                    if metric in line:
-                        column_value_list.append(line.split()[1])
-                file.close()
-        file_dict[rowName] = column_value_list
+        for vec in [vectorized, armClang]:
+            column_value_list = [vec]
+            for VL in lengthes:
+                source_file_name = directory + "/" + vec + "-" + str(VL) + ".txt"
+                with open(source_file_name) as file:
+                    for line in file:
+                        if "End Simulation Statistics" in line:
+                            break
+                        if metric in line:
+                            column_value_list.append(line.split()[1])
+                    file.close()
+            file_dict[vec] = column_value_list
 
-    instructionsCSV = open(directory + "/summerized/" + metric + ".csv", 'w')
-    csv_writer = csv.writer(instructionsCSV)
-    for v in file_dict.values():
-        csv_writer.writerow(v)
+        for uniqueFile in uniqueFiles:
+            column_value_list = [re.sub("[^A-Za-z]", " ", uniqueFile)]
+            for VL in lengthes:
+                source_file_name = directory + "/" + uniqueFile + percentage + "-" + str(VL) + ".txt"
+                with open(source_file_name) as file:
+                    for line in file:
+                        if "End Simulation Statistics" in line:
+                            break
+                        if metric in line:
+                            column_value_list.append(line.split()[1])
+                    file.close()
 
-# for uniqueFile in uniqueFiles:
-#     writer = open("./summerized/" + uniqueFile[0: len(uniqueFile) - 1] + ".txt", 'w')
-#     for VL in lengthes:
-#         writer.write("VL = " + str(VL))
-#         writer.write('\n')
-#         filename = uniqueFile + str(VL) + ".txt"
-#         with open(filename) as file:
-#             for line in file:
-#                 if "End Simulation Statistics" in line:
-#                     break
-#                 if "system.cpu.numOps" in line or "system.cpu.numCycles" in line or "system.cpu.numInsts" in line:
-#                     writer.write(line)
-#         writer.write("----------------------------------------------------------\n")
-#     writer.close()
+            file_dict[uniqueFile] = column_value_list
+
+        csv_name = directory + "/summerized/" + metric + "_" + percentage + ".csv"
+        instructionsCSV = open(csv_name, 'w')
+        csv_writer = csv.writer(instructionsCSV)
+        for v in file_dict.values():
+            csv_writer.writerow(v)
+        generated_CSVs.append(csv_name)
+        instructionsCSV.close()
+
+tmp = math.sqrt(len(generated_CSVs))
+sqrt = int(tmp) if tmp.is_integer() else int(tmp) + 1
+plt.rcParams["figure.figsize"] = (23, 12)
+plt.rcParams["figure.autolayout"] = True
+fig, axes = plt.subplots(nrows=sqrt, ncols=sqrt)
+
+for i in range(sqrt):
+    for j in range(sqrt):
+        df = pd.read_csv(generated_CSVs[i * sqrt + j])
+        df = df.set_index('inputs')
+        for row in df.index:
+            if row == armClang:
+                continue
+            for col in df.columns:
+                df.at[row, col] = 1 / (int(df.at[row, col]) / int(df.at[armClang, col]))
+        df = df.drop('armclang')
+        df.plot.bar(ax=axes[i, j], rot=0,
+                    title="Speedup, " + percentages[(i * sqrt + j)] + " true input")
+        axes[i, j].xaxis.label.set_visible(False)
+        np_df = df.to_numpy()
+        axes[i, j].axhline(y=1, xmin=-3, xmax=20, color='black', linestyle='dashed', linewidth=1)
+
+plt.plot()
+plt.savefig("Chart.png")
