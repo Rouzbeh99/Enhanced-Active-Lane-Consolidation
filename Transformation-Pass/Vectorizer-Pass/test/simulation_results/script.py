@@ -57,7 +57,7 @@ for percentage in percentages:
         for uniqueFile in uniqueFiles:
             column_value_list = [re.sub("[^A-Za-z]", " ", uniqueFile)]
             for VL in lengthes:
-                source_file_name = directory + "/" + uniqueFile + percentage + "-" + str(VL) + ".txt"
+                source_file_name = directory + "/" + uniqueFile + "-" + percentage + "-" + str(VL) + ".txt"
                 with open(source_file_name) as file:
                     for line in file:
                         if "End Simulation Statistics" in line:

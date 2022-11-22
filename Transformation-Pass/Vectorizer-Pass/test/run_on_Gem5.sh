@@ -26,4 +26,3 @@ do
 
 done
 
-python3 simulation_results/script.py

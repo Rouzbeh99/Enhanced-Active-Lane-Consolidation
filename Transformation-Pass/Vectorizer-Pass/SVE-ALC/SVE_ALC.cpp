@@ -696,6 +696,9 @@ SVE_ALC::vectorizeInstructions_nonePredicated(std::vector<Instruction *> *instru
                 case Instruction::Add:
                     result = builder.CreateAdd(firstOp, secondOp);
                     break;
+                case Instruction::Sub:
+                    result = builder.CreateSub(firstOp, secondOp);
+                    break;
                 case Instruction::Mul:
                     result = builder.CreateMul(firstOp, secondOp);
                     break;
