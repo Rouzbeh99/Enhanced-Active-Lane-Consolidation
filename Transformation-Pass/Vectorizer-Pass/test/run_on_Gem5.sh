@@ -2,6 +2,8 @@
 
 FILE=$1
 
+rm ./simulation_results/*.txt ./simulation_results/summerized/*.csv
+
 for FILE in *.x
 do
   filename="${FILE%.*}"

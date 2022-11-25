@@ -38,14 +38,17 @@ void SVE_ALC::doTransformation_newVersion() {
 
     auto *header = L->getHeader();
     auto &context = header->getContext();
-    auto *inductionVar = L->getCanonicalInductionVariable();
+    inductionVar = L->getCanonicalInductionVariable();
     auto *preheader = L->getLoopPreheader();
     auto *latch = L->getLoopLatch();
     auto *exitBlock = L->getExitBlock();
     Constant *constZero = llvm::ConstantInt::get(inductionVar->getType(), 0, true);
 
 
-    /// Forming blocks structure
+    targetedBlock = findTargetedBlock();
+    sharedInstructions = findHeaderInstructionsRequiredInThenBlock(header,
+                                                                   targetedBlock);
+
 
     BasicBlock *preheaderForRemainingBlock = createPreheaderForRemainingIterations();
 
@@ -60,6 +63,7 @@ void SVE_ALC::doTransformation_newVersion() {
     BasicBlock *joinBlock = createEmptyBlock("join.block", newLatch);
 
     refinePreheader(preALCBlock, preheaderForRemainingBlock);
+
 
 
     //fill blocks
@@ -77,10 +81,10 @@ void SVE_ALC::doTransformation_newVersion() {
                                                                             (*headerOutputs)[4], (*headerOutputs)[5],
                                                                             (*headerOutputs)[7]);
     std::vector<Value *> *uniformBlockOutputs = fillUniformBlock_newVersion(uniformBlock, joinBlock,
-                                                                            findTargetedBlock(), header,
+                                                                            targetedBlock, header,
                                                                             (*laneGatherOutput)[0], inductionVar,
                                                                             (*headerOutputs)[0]);
-    fillLinearizedBlock_newVersion(linearizedBlock, newLatch, findTargetedBlock(), (*headerOutputs)[3],
+    fillLinearizedBlock_newVersion(linearizedBlock, newLatch, targetedBlock, (*headerOutputs)[3],
                                    (*headerOutputs)[4],
                                    inductionVar, (*headerOutputs)[0]);
     std::vector<Value *> *joinBlockOutputs = fillJoinBlock(joinBlock, newLatch, uniformBlock, laneGatherBlock,
@@ -101,11 +105,16 @@ void SVE_ALC::doTransformation_newVersion() {
 void SVE_ALC::doTransformation_simpleVersion() {
     auto *header = L->getHeader();
     auto &context = header->getContext();
-    auto *inductionVar = L->getCanonicalInductionVariable();
+    inductionVar = L->getCanonicalInductionVariable();
     auto *preheader = L->getLoopPreheader();
     auto *latch = L->getLoopLatch();
     auto *exitBlock = L->getExitBlock();
     Constant *constZero = llvm::ConstantInt::get(inductionVar->getType(), 0, true);
+
+    targetedBlock = findTargetedBlock();
+    sharedInstructions = findHeaderInstructionsRequiredInThenBlock(header,
+                                                                   targetedBlock);
+
 
 
     /// Forming blocks structure
@@ -135,10 +144,10 @@ void SVE_ALC::doTransformation_simpleVersion() {
                                                                                 (*headerOutputs)[3],
                                                                                 (*headerOutputs)[8]);
 
-    fillUniformBlock_simpleVersion(uniformBlock, newLatch, findTargetedBlock(), (*laneGatherOutputs)[0], inductionVar,
+    fillUniformBlock_simpleVersion(uniformBlock, newLatch, targetedBlock, (*laneGatherOutputs)[0], inductionVar,
                                    (*headerOutputs)[0], (*laneGatherOutputs)[1]);
 
-    fillLinearizedBlock_simpleVersion(linearizedBlock, newLatch, findTargetedBlock(), (*headerOutputs)[2],
+    fillLinearizedBlock_simpleVersion(linearizedBlock, newLatch, targetedBlock, (*headerOutputs)[2],
                                       (*headerOutputs)[6], inductionVar, (*headerOutputs)[0], (*headerOutputs)[4]);
 
     std::vector<Value *> *newLatchOutputs = fillNewLatchBlock_simpleVersion(newLatch, alcHeader, middleBlock,
@@ -176,7 +185,7 @@ BasicBlock *SVE_ALC::findTargetedBlock() {
     // TODO: make a complete analysis
 
     for (auto succ: successors(L->getHeader())) {
-        if (succ->getSingleSuccessor() != L->getLoopLatch()) {
+        if (succ->getSingleSuccessor() == L->getLoopLatch()) {
             return succ;
         }
     }
@@ -300,11 +309,13 @@ SVE_ALC::fillMiddleBlock_newVersion(BasicBlock *middleBlock, BasicBlock *prehead
     // make linearized path for remaining active lanes in uniform vec
 
     // since we're using uniform vec as indices, addresses should start from zero
-    std::vector<Instruction *> *clonedInstructions = cloneInstructions(findTargetedBlock(), middleBlock, inductionVar,
+    std::vector<Instruction *> *clonedInstructions = cloneInstructions(targetedBlock, middleBlock, inductionVar,
                                                                        constZero);
-    vectorizeInstructions_Predicated(clonedInstructions, middleBlock, uniformVec, inductionVar, constZero,
-                                     uniformVecPredicates,
-                                     true, nullptr);
+
+    // when permuted, all indices in gather/scatter will be computed with respect to indicesVec so index var should be 0
+    vectorizeInstructions(clonedInstructions, middleBlock, uniformVec, inductionVar, constZero,
+                          uniformVecPredicates,
+                          true, false, nullptr);
 
 
 }
@@ -428,7 +439,8 @@ SVE_ALC::fillUniformBlock_newVersion(BasicBlock *uniformBlock, BasicBlock *joinB
                                                                        constZero);
 
     // TODO: handle cases where instruction uses 0 instead of induction var
-    vectorizeInstructions_nonePredicated(clonedInstructions, uniformBlock, indices);
+    vectorizeInstructions(clonedInstructions, uniformBlock, indices, inductionVar, constZero, allTrue, true, false,
+                          nullptr);
 
     //Form next iteration
     Value *nextItrIndex = builder.CreateAdd(indexPhi, vectorLength);
@@ -456,9 +468,8 @@ SVE_ALC::fillLinearizedBlock_newVersion(BasicBlock *linearized, BasicBlock *newL
     std::vector<Instruction *> *clonedInstructions = cloneInstructions(toBeVectorizedBlock, linearized,
                                                                        inductionVar,
                                                                        indexPhi);
-    vectorizeInstructions_Predicated(clonedInstructions, linearized, indexVec, inductionVar, indexPhi, predicates,
-                                     false,
-                                     nullptr);
+    vectorizeInstructions(clonedInstructions, linearized, indexVec, inductionVar, indexPhi, predicates,
+                          false, true, nullptr);
 
 }
 
@@ -589,10 +600,10 @@ SVE_ALC::formPredicate(BasicBlock *decisionBlock, BasicBlock *predicateHolderBlo
     predicates_scalar = clonedInstructions->back();
 
     // now we should vectorize clonedInstructions
-    std::map<const Value *, const Value *> *instructionsMap = vectorizeInstructions_nonePredicated(
+    std::map<const Value *, const Value *> *instructionsMap = vectorizeInstructions(
             clonedInstructions,
             predicateHolderBlock,
-            nullptr);
+            nullptr, inductionVar, inductionVarInitialValue, nullptr, false, false, nullptr);
     const Value *&predicates = (*instructionsMap)[(Value *)
             predicates_scalar];
 
@@ -611,202 +622,12 @@ SVE_ALC::formPredicate(BasicBlock *decisionBlock, BasicBlock *predicateHolderBlo
     return const_cast<Value *>(predicates);
 }
 
+
 std::map<const Value *, const Value *> *
-SVE_ALC::vectorizeInstructions_nonePredicated(std::vector<Instruction *> *instructions, BasicBlock *block,
-                                              Value *indices) {
-
-    Instruction *insertionPoint = block->getTerminator();
-    IRBuilder<> builder(block->getContext());
-    builder.SetInsertPoint(insertionPoint);
-
-
-    auto outputMap = new std::map<const Value *, const Value *>;
-    ValueToValueMapTy vMap;
-
-    // Should be remove in FILO manner to prevent removing a value that is used in following lines
-    std::stack<Instruction *> toBeRemoved;
-
-    // TODO: Complete the list
-    for (auto instr: *instructions) {
-
-        if (isa<GEPOperator>(instr)) {
-            continue;
-
-        } else if (isa<StoreInst>(instr)) {
-            auto storeInstr = dyn_cast<StoreInst>(instr);
-            // it's the value to be stored
-            Value *firstOp = nullptr;
-            if (vMap.count(storeInstr->getOperand(0))) {
-                firstOp = vMap[storeInstr->getOperand(0)];
-            } else {
-                // it's constant
-                auto *constValue = dyn_cast<Constant>(storeInstr->getOperand(0));
-                firstOp = createVectorOfConstants(constValue, builder, "store.values");
-                // TODO: is there any other case ?
-            }
-            auto ptr = dyn_cast<GEPOperator>(instr->getOperand(1));
-            if (indices == nullptr) {
-                builder.CreateStore(firstOp, ptr);
-            } else {
-                intrinsicCallGenerator->createScatterStoreInstruction(builder, firstOp, ptr, allTrue, indices);
-            }
-            toBeRemoved.push(instr);
-        } else if (isa<LoadInst>(instr)) {
-
-            auto ptr = dyn_cast<GEPOperator>(instr->getOperand(0));
-            Type *elementType = instr->getType();
-            Value *loadedData = nullptr;
-            if (indices == nullptr) {
-                loadedData = builder.CreateLoad(VectorType::get(elementType, vectorizationFactor, true), ptr);
-            } else {
-                loadedData = intrinsicCallGenerator->createGatherLoadInstruction(builder, ptr, allTrue, indices);
-            }
-            vMap[instr] = loadedData;
-            toBeRemoved.push(instr);
-
-        } else if (isa<BinaryOperator>(instr) || isa<ICmpInst>(instr)) { // TODO: ICmp is not binary????
-
-
-            Value *firstOp = nullptr;
-            Value *secondOp = nullptr;
-            if (vMap.count(instr->getOperand(0))) {
-                firstOp = vMap[instr->getOperand(0)];
-            } else if (isa<Constant>(instr->getOperand(0))) {
-                auto *constValue = dyn_cast<Constant>(instr->getOperand(0));
-                firstOp = createVectorOfConstants(constValue, builder, "first.operand");
-            } else {
-                /** operand is related to vscale **/
-                //TODO: what else?
-                firstOp = instr->getOperand(0);
-            }
-
-
-            if (vMap.count(instr->getOperand(1))) {
-                secondOp = vMap[instr->getOperand(1)];
-            } else if (isa<Constant>(instr->getOperand(1))) {
-                auto *constValue = dyn_cast<Constant>(instr->getOperand(1));
-                secondOp = createVectorOfConstants(constValue, builder, "second.operand");
-            } else {
-                secondOp = instr->getOperand(1);
-            }
-
-
-            Value *result = nullptr;
-            switch (instr->getOpcode()) {
-                case Instruction::Add:
-                    result = builder.CreateAdd(firstOp, secondOp);
-                    break;
-                case Instruction::Sub:
-                    result = builder.CreateSub(firstOp, secondOp);
-                    break;
-                case Instruction::Mul:
-                    result = builder.CreateMul(firstOp, secondOp);
-                    break;
-                case Instruction::SDiv:
-                    result = builder.CreateSDiv(firstOp, secondOp);
-                    break;
-                case Instruction::URem:
-                    result = builder.CreateURem(firstOp, secondOp);
-                    break;
-                case Instruction::And:
-                    result = builder.CreateAnd(firstOp, secondOp);
-                    break;
-                case Instruction::Shl:
-                    result = builder.CreateShl(firstOp, secondOp);
-                    break;
-                case Instruction::ICmp: {
-                    switch (dyn_cast<ICmpInst>(instr)->getPredicate()) {
-                        // TODO: handle other cases
-                        case CmpInst::FCMP_FALSE:
-                            break;
-                        case CmpInst::FCMP_OEQ:
-                            break;
-                        case CmpInst::FCMP_OGT:
-                            break;
-                        case CmpInst::FCMP_OGE:
-                            break;
-                        case CmpInst::FCMP_OLT:
-                            break;
-                        case CmpInst::FCMP_OLE:
-                            break;
-                        case CmpInst::FCMP_ONE:
-                            break;
-                        case CmpInst::FCMP_ORD:
-                            break;
-                        case CmpInst::FCMP_UNO:
-                            break;
-                        case CmpInst::FCMP_UEQ:
-                            break;
-                        case CmpInst::FCMP_UGT:
-                            break;
-                        case CmpInst::FCMP_UGE:
-                            break;
-                        case CmpInst::FCMP_ULT:
-                            break;
-                        case CmpInst::FCMP_ULE:
-                            result = builder.CreateICmpULE(firstOp, secondOp);
-                            break;
-                            break;
-                        case CmpInst::FCMP_UNE:
-                            break;
-                        case CmpInst::FCMP_TRUE:
-                            break;
-                        case CmpInst::BAD_FCMP_PREDICATE:
-                            break;
-                        case CmpInst::ICMP_EQ: {
-                            Value *ICmpInst = builder.CreateICmpEQ(firstOp, secondOp);
-                            result = dyn_cast<Value>(ICmpInst);
-                            break;
-                        }
-                        case CmpInst::ICMP_NE:
-                            break;
-                        case CmpInst::ICMP_UGT:
-                            break;
-                        case CmpInst::ICMP_UGE:
-                            break;
-                        case CmpInst::ICMP_ULT:
-                            break;
-                        case CmpInst::ICMP_ULE:
-                            break;
-                        case CmpInst::ICMP_SGT: {
-                            Value *ICmpInst = builder.CreateICmpSGT(firstOp, secondOp);
-                            result = dyn_cast<Value>(ICmpInst);
-                            break;
-                        }
-                        case CmpInst::ICMP_SGE:
-                            break;
-                        case CmpInst::ICMP_SLT:
-                            break;
-                        case CmpInst::ICMP_SLE:
-                            break;
-                        case CmpInst::BAD_ICMP_PREDICATE:
-                            break;
-                    }
-                }
-            }
-
-
-            vMap[instr] = result;
-            outputMap->insert({instr, result});
-            toBeRemoved.push(instr);
-        }
-    }
-
-
-    while (!toBeRemoved.empty()) {
-        toBeRemoved.top()->eraseFromParent();
-        toBeRemoved.pop();
-    }
-
-    return outputMap;
-
-}
-
-
-void SVE_ALC::vectorizeInstructions_Predicated(std::vector<Instruction *> *instructions, BasicBlock *block,
-                                               Value *indices, Value *inductionVar, Value *indexVar,
-                                               Value *predicates, bool isPermuted,
-                                               std::map<const Value *, const Value *> *headerInstructionsMap) {
+SVE_ALC::vectorizeInstructions(std::vector<Instruction *> *instructions, BasicBlock *block,
+                               Value *indices, Value *inductionVar, Value *indexVar,
+                               Value *predicates, bool isPermuted, bool isPredicated,
+                               std::map<const Value *, const Value *> *headerInstructionsMap) {
 
     Instruction *insertionPoint = block->getTerminator();
     IRBuilder<> IRB(insertionPoint);
@@ -815,6 +636,9 @@ void SVE_ALC::vectorizeInstructions_Predicated(std::vector<Instruction *> *instr
     if (indices == nullptr) {
         indices = intrinsicCallGenerator->createIndexInstruction(IRB, indexVar, constOne);
     }
+
+
+    auto outputMap = new std::map<const Value *, const Value *>;
 
 
     std::map<Value *, Value *> vMap;
@@ -828,17 +652,17 @@ void SVE_ALC::vectorizeInstructions_Predicated(std::vector<Instruction *> *instr
 
     // Should be remove in FILO manner to prevent removing a value that is used in following lines
     std::stack<Instruction *> toBeRemoved;
-
     // TODO: Complete the list
     for (auto instr: *instructions) {
-
-        if (isa<GEPOperator>(instr)) {
+        if (auto *GEP = dyn_cast_or_null<GEPOperator>(instr)) {
+//            assert(GEP->getNumIndices() == 1 && "Expected GetElementPtr with one index operand!");
             for (int i = 0; i < instr->getNumOperands(); ++i) {
-                if (instr->getOperand(i)->getName() == inductionVar->getName()) {  // TODO: ??????
+                if (instr->getOperand(i) == inductionVar) {
                     instr->setOperand(i, indexVar);
                 }
             }
         } else if (isa<StoreInst>(instr)) {
+
             auto storeInstr = dyn_cast<StoreInst>(instr);
             // it's the value to be stored
             Value *firstOp = nullptr;
@@ -856,11 +680,13 @@ void SVE_ALC::vectorizeInstructions_Predicated(std::vector<Instruction *> *instr
             if (vMap.count(ptr)) {
                 ptr = vMap[ptr];
             }
-
+            assert(isa<GEPOperator>(ptr) && "Expected StoreInst PointerOperand to be GetElementPtr!");
             if (isPermuted) {
                 intrinsicCallGenerator->createScatterStoreInstruction(IRB, firstOp, ptr, predicates, indices);
-            } else {
+            } else if (isPredicated) {
                 intrinsicCallGenerator->createStoreInstruction(IRB, firstOp, ptr, predicates);
+            } else {
+                IRB.CreateStore(firstOp, ptr);
             }
 
             toBeRemoved.push(instr);
@@ -871,11 +697,13 @@ void SVE_ALC::vectorizeInstructions_Predicated(std::vector<Instruction *> *instr
                 ptr = vMap[ptr];
             }
             Value *loadedData = nullptr;
-
+            assert(isa<GEPOperator>(ptr) && "Expected LoadInst PointerOperand to be GetElementPtr!");
             if (isPermuted) {
                 loadedData = intrinsicCallGenerator->createGatherLoadInstruction(IRB, ptr, predicates, indices);
-            } else {
+            } else if (isPredicated) {
                 loadedData = intrinsicCallGenerator->createLoadInstruction(IRB, ptr, predicates);
+            } else {
+                loadedData = IRB.CreateLoad(VectorType::get(instr->getType(), vectorizationFactor, true), ptr);
             }
 
             vMap[instr] = loadedData;
@@ -889,8 +717,11 @@ void SVE_ALC::vectorizeInstructions_Predicated(std::vector<Instruction *> *instr
             } else if (instr->getOperand(0)->getName() == inductionVar->getName()) {  // TODO: is it safe?
                 firstOp = indices;
             } else {
-                auto *constValue = dyn_cast<Constant>(instr->getOperand(0));
-                firstOp = createVectorOfConstants(constValue, IRB, "first.operand");
+                if (auto *ConstantValue = dyn_cast_or_null<Constant>(instr->getOperand(0))) {
+                    firstOp = createVectorOfConstants(ConstantValue, IRB, "first.operand");
+                } else {
+                    assert(0 && "first operand neither already vectorized nor Constant!");
+                }
             }
 
             if (vMap.count(instr->getOperand(1))) {
@@ -898,8 +729,10 @@ void SVE_ALC::vectorizeInstructions_Predicated(std::vector<Instruction *> *instr
             } else if (instr->getOperand(1)->getName() == inductionVar->getName()) {
                 secondOp = indices;
             } else {
-                auto *constValue = dyn_cast<Constant>(instr->getOperand(1));
-                secondOp = createVectorOfConstants(constValue, IRB, "second.operand");
+                if (auto *ConstantValue = dyn_cast_or_null<Constant>(instr->getOperand(1))) {
+                    secondOp = createVectorOfConstants(ConstantValue, IRB, "second.operand");
+                } else
+                    assert(0 && "second operand neither already vectorized nor Constant!");
             }
 
             Value *result = nullptr;
@@ -917,10 +750,10 @@ void SVE_ALC::vectorizeInstructions_Predicated(std::vector<Instruction *> *instr
                     result = IRB.CreateSub(firstOp, secondOp);
                     break;
                 case Instruction::URem:
-                    // TODO
+                    result = IRB.CreateURem(firstOp, secondOp);
                     break;
                 case Instruction::And:
-                    // TODO
+                    result = IRB.CreateAnd(firstOp, secondOp);
                     break;
                 case Instruction::Shl:
                     result = IRB.CreateShl(firstOp, secondOp);
@@ -955,6 +788,8 @@ void SVE_ALC::vectorizeInstructions_Predicated(std::vector<Instruction *> *instr
                         case CmpInst::FCMP_ULT:
                             break;
                         case CmpInst::FCMP_ULE:
+                            result = IRB.CreateICmpULE(firstOp, secondOp);
+                            break;
                             break;
                         case CmpInst::FCMP_UNE:
                             break;
@@ -963,7 +798,8 @@ void SVE_ALC::vectorizeInstructions_Predicated(std::vector<Instruction *> *instr
                         case CmpInst::BAD_FCMP_PREDICATE:
                             break;
                         case CmpInst::ICMP_EQ: {
-                            // TODO
+                            Value *ICmpInst = IRB.CreateICmpEQ(firstOp, secondOp);
+                            result = dyn_cast<Value>(ICmpInst);
                             break;
                         }
                         case CmpInst::ICMP_NE:
@@ -976,8 +812,11 @@ void SVE_ALC::vectorizeInstructions_Predicated(std::vector<Instruction *> *instr
                             break;
                         case CmpInst::ICMP_ULE:
                             break;
-                        case CmpInst::ICMP_SGT:
+                        case CmpInst::ICMP_SGT: {
+                            Value *ICmpInst = IRB.CreateICmpSGT(firstOp, secondOp);
+                            result = dyn_cast<Value>(ICmpInst);
                             break;
+                        }
                         case CmpInst::ICMP_SGE:
                             break;
                         case CmpInst::ICMP_SLT:
@@ -989,8 +828,9 @@ void SVE_ALC::vectorizeInstructions_Predicated(std::vector<Instruction *> *instr
                     }
                 }
             }
-
+            assert(result && "Unhandled BinaryOperator!");
             vMap[instr] = result;
+            outputMap->insert({instr, result});
             toBeRemoved.push(instr);
 
         }
@@ -1001,7 +841,7 @@ void SVE_ALC::vectorizeInstructions_Predicated(std::vector<Instruction *> *instr
         toBeRemoved.pop();
     }
 
-
+    return outputMap;
 }
 
 
@@ -1020,7 +860,6 @@ SVE_ALC::refinePreHeaderForRemaining(BasicBlock *preHeaderForRemaining, BasicBlo
     }
     phiNode->addIncoming(value, middleBlock);
 }
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 std::vector<Value *> *
 SVE_ALC::fillALCHeaderBlock_simpleVersion(BasicBlock *alcHeader, BasicBlock *laneGatherBlock, BasicBlock *linearized,
@@ -1161,10 +1000,8 @@ SVE_ALC::fillUniformBlock_simpleVersion(BasicBlock *uniformBlock, BasicBlock *la
                                                                        inductionVar,
                                                                        constZero);
 
-    // TODO: handle cases where instruction uses 0 instead of induction var
-    vectorizeInstructions_Predicated(clonedInstructions, uniformBlock, indices, inductionVar, indexVar, predicates,
-                                     true,
-                                     nullptr);
+    vectorizeInstructions(clonedInstructions, uniformBlock, indices, inductionVar, indexVar, predicates,
+                          true, true, nullptr);
 
 }
 
@@ -1180,17 +1017,14 @@ void SVE_ALC::fillLinearizedBlock_simpleVersion(BasicBlock *linearized, BasicBlo
     std::vector<Instruction *> *clonedInstructions = cloneInstructions(toBeVectorizedBlock, linearized,
                                                                        inductionVar,
                                                                        index);
-    vectorizeInstructions_Predicated(clonedInstructions, linearized, nullptr, inductionVar, index, firstPredicates,
-                                     false,
-                                     nullptr);
+    vectorizeInstructions(clonedInstructions, linearized, nullptr, inductionVar, index, firstPredicates,
+                          false, true, nullptr);
 
     std::vector<Instruction *> *clonedInstructions2 = cloneInstructions(toBeVectorizedBlock, linearized,
                                                                         inductionVar,
                                                                         nextItrIndex);
-    vectorizeInstructions_Predicated(clonedInstructions2, linearized, nullptr, inductionVar, nextItrIndex,
-                                     secondPredicates,
-                                     false,
-                                     nullptr);
+    vectorizeInstructions(clonedInstructions2, linearized, nullptr, inductionVar, nextItrIndex,
+                          secondPredicates, false, true, nullptr);
 
 }
 
@@ -1241,6 +1075,15 @@ SVE_ALC::cloneInstructions(BasicBlock *From, BasicBlock *to, Value *inductionVar
     // first copy instruction into vectorizing Block, then vectorize them
     auto *clonedInstructions = new std::vector<Instruction *>;
 
+    //initialize clonedInstructions with sharedInstruction from header
+    for (auto instr: *sharedInstructions) {
+        Instruction *clonedInstr = instr->clone();
+        clonedInstr->insertBefore(to->getTerminator());
+        clonedInstructions->push_back(clonedInstr);
+        vMap[instr] = clonedInstr;
+    }
+
+
     for (auto &instr: From->instructionsWithoutDebug()) {
         if (&instr == From->getTerminator()) {
             break;
@@ -1253,6 +1096,7 @@ SVE_ALC::cloneInstructions(BasicBlock *From, BasicBlock *to, Value *inductionVar
         clonedInstr->insertBefore(to->getTerminator());
         vMap[&instr] = clonedInstr;
         clonedInstructions->push_back(clonedInstr);
+
 
         for (auto &cloned_instr: *clonedInstructions) {
             llvm::RemapInstruction(cloned_instr, vMap, RF_NoModuleLevelChanges | RF_IgnoreMissingLocals);
@@ -1273,7 +1117,56 @@ SVE_ALC::cloneInstructions(BasicBlock *From, BasicBlock *to, Value *inductionVar
         }
     }
 
+
     return clonedInstructions;
+}
+
+std::vector<Instruction *> *
+SVE_ALC::findHeaderInstructionsRequiredInThenBlock(BasicBlock *header, BasicBlock *thenBlock) {
+    auto output = new std::vector<Instruction *>();
+    for (auto &thenInstr: thenBlock->instructionsWithoutDebug()) {
+
+        if (&thenInstr == thenBlock->getTerminator()) {
+            break;
+        }
+
+        for (int i = 0; i < thenInstr.getNumOperands(); ++i) {
+
+            std::vector<Instruction *> toCheckOperands;
+            auto operand = thenInstr.getOperand(i);
+            if (operand == inductionVar || !isa<Instruction>(operand)) {
+                continue;
+            }
+            auto *instruction = dyn_cast<Instruction>(operand);
+
+            if (instruction->getParent() == header &&
+                (std::find(output->begin(), output->end(), instruction) == output->end())) {
+                output->push_back(instruction);
+                toCheckOperands.push_back(instruction);
+            }
+
+            for (int k = 0; k < toCheckOperands.size(); ++k) {
+                for (int j = 0; j < toCheckOperands[k]->getNumOperands(); ++j) {
+                    Value *innerOp = toCheckOperands[k]->getOperand(j);
+                    if (innerOp == inductionVar || isa<Constant>(innerOp)) {
+                        continue;
+                    }
+                    auto opInstr = dyn_cast<Instruction>(innerOp);
+                    if (opInstr->getParent() == header &&
+                        (std::find(output->begin(), output->end(), opInstr) == output->end())) {
+                        output->push_back(opInstr);
+                        toCheckOperands.push_back(opInstr);
+                    }
+                }
+
+            }
+
+        }
+    }
+
+    // should revers the output so that each instruction comes after the instruction it depends on
+    std::reverse(output->begin(), output->end());
+    return output;
 }
 
 bool SVE_ALC::usesInductionVar(Value *value, Value *inductionVar) {
@@ -1282,10 +1175,10 @@ bool SVE_ALC::usesInductionVar(Value *value, Value *inductionVar) {
     }
     for (auto user: inductionVar->users()) {
         if (user == value) {
+
             return true;
         }
     }
-
     return false;
 }
 

@@ -38,6 +38,9 @@ private:
     ScalarEvolution *SE;
     Value *vectorLength;
     Value *allTrue;
+    Value* inductionVar;
+    BasicBlock* targetedBlock;
+    std::vector<Instruction *> *sharedInstructions;
 
 
 public:
@@ -138,15 +141,12 @@ private:
 private:
     bool usesInductionVar(Value *value, Value *inductionVar);
 
-private:
-    std::map<const Value *, const Value *> *
-    vectorizeInstructions_nonePredicated(std::vector<Instruction *> *instructions, BasicBlock *block, Value *indices);
 
 private:
-    void vectorizeInstructions_Predicated(std::vector<Instruction *> *instructions, BasicBlock *block,
-                                          Value *indices, Value *inductionVar, Value *indexVar,
-                                          Value *predicates, bool isPermuted,
-                                          std::map<const Value *, const Value *> *headerInstructionsMap);
+    std::map<const Value *, const Value *> * vectorizeInstructions(std::vector<Instruction *> *instructions, BasicBlock *block,
+                               Value *indices, Value *inductionVar, Value *indexVar,
+                               Value *predicates, bool isPermuted, bool isPredicated,
+                               std::map<const Value *, const Value *> *headerInstructionsMap);
 
 private:
     std::vector<Value *> *
@@ -184,6 +184,9 @@ private:
     void
     fillMiddleBlock_simpleVersion(BasicBlock *middleBlock, BasicBlock *preheaderForRemaining, BasicBlock *exitBlock,
                                   Value *remResult);
+
+private:
+    std::vector<Instruction*>* findHeaderInstructionsRequiredInThenBlock(BasicBlock* header, BasicBlock* thenBlock);
 
 
 };
