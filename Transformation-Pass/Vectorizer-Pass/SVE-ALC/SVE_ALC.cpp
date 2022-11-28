@@ -38,11 +38,12 @@ void SVE_ALC::doTransformation_newVersion() {
 
     auto *header = L->getHeader();
     auto &context = header->getContext();
-    inductionVar = L->getCanonicalInductionVariable();
+    ScalarIV = L->getCanonicalInductionVariable();
+    assert(isa<PHINode>(ScalarIV) && "Induction variable must be a PHINode!");
     auto *preheader = L->getLoopPreheader();
     auto *latch = L->getLoopLatch();
     auto *exitBlock = L->getExitBlock();
-    Constant *constZero = llvm::ConstantInt::get(inductionVar->getType(), 0, true);
+    ConstZeroOfIVTyVector = llvm::ConstantInt::get(ScalarIV->getType(), 0, true);
 
 
     targetedBlock = findTargetedBlock();
@@ -69,11 +70,11 @@ void SVE_ALC::doTransformation_newVersion() {
 
     //fill blocks
     std::vector<Value *> *preALCBlockValues = fillPreALCBlock_newVersion(preALCBlock, preheader, alcHeader);
-    Value *initialPredicates = formPredicate(header, preALCBlock, inductionVar, constZero); // initial predicates
+    Value *initialPredicates = formPredicate(header, preALCBlock, ConstZeroOfIVTyVector); // initial predicates
     std::vector<Value *> *headerOutputs = fillALCHeaderBlock_newVersion(alcHeader, laneGatherBlock, linearizedBlock,
                                                                         preALCBlock,
                                                                         initialPredicates,
-                                                                        preALCBlockValues, header, inductionVar);
+                                                                        preALCBlockValues, header);
 
 
     std::vector<Value *> *laneGatherOutput = fillLaneGatherBlock_newVersion(laneGatherBlock, uniformBlock, joinBlock,
@@ -83,13 +84,11 @@ void SVE_ALC::doTransformation_newVersion() {
                                                                             (*headerOutputs)[7]);
     std::vector<Value *> *uniformBlockOutputs = fillUniformBlock_newVersion(uniformBlock, joinBlock,
                                                                             targetedBlock, header,
-                                                                            (*laneGatherOutput)[0], inductionVar,
+                                                                            (*laneGatherOutput)[0],
                                                                             (*headerOutputs)[0]);
 
     fillLinearizedBlock_newVersion(linearizedBlock, newLatch, targetedBlock, (*headerOutputs)[3],
-                                   (*headerOutputs)[4],
-                                   inductionVar, (*headerOutputs)[0]);
-
+                                   (*headerOutputs)[4]);
     std::vector<Value *> *joinBlockOutputs = fillJoinBlock(joinBlock, newLatch, uniformBlock, laneGatherBlock,
                                                            headerOutputs->front(),
                                                            laneGatherOutput, uniformBlockOutputs);
@@ -101,7 +100,7 @@ void SVE_ALC::doTransformation_newVersion() {
 
     fillMiddleBlock_newVersion(middleBlock, preheaderForRemainingBlock, exitBlock, (*preALCBlockValues)[2],
                                (*latchOutputs)[1],
-                               (*latchOutputs)[2], inductionVar);
+                               (*latchOutputs)[2]);
 
     refinePreHeaderForRemaining(preheaderForRemainingBlock, middleBlock, (*latchOutputs)[0]);
 }
@@ -110,11 +109,12 @@ void SVE_ALC::doTransformation_newVersion() {
 void SVE_ALC::doTransformation_simpleVersion() {
     auto *header = L->getHeader();
     auto &context = header->getContext();
-    inductionVar = L->getCanonicalInductionVariable();
+    ScalarIV = L->getCanonicalInductionVariable();
+    assert(isa<PHINode>(ScalarIV) && "Induction variable must be a PHINode!");
     auto *preheader = L->getLoopPreheader();
     auto *latch = L->getLoopLatch();
     auto *exitBlock = L->getExitBlock();
-    Constant *constZero = llvm::ConstantInt::get(inductionVar->getType(), 0, true);
+    ConstZeroOfIVTyVector = llvm::ConstantInt::get(ScalarIV->getType(), 0, true);
 
     targetedBlock = findTargetedBlock();
     sharedInstructions = findHeaderInstructionsRequiredInThenBlock(header,
@@ -137,10 +137,10 @@ void SVE_ALC::doTransformation_simpleVersion() {
 
     refinePreheader(preALCBlock, preheaderForRemainingBlock);
 
-    std::vector<Value *> *preALCBlockValues = fillPreALCBlock_simpleVersion(preALCBlock, alcHeader);
+    fillPreALCBlock_simpleVersion(preALCBlock, alcHeader);
     std::vector<Value *> *headerOutputs = fillALCHeaderBlock_simpleVersion(alcHeader, laneGatherBlock, linearizedBlock,
-                                                                           preALCBlock, preALCBlockValues, header,
-                                                                           (*preALCBlockValues)[3], inductionVar);
+                                                                           preALCBlock, header,
+                                                                           ScalarIV);
     std::vector<Value *> *laneGatherOutputs = fillLaneGatherBlock_simpleVersion(laneGatherBlock, uniformBlock,
                                                                                 (*headerOutputs)[1],
                                                                                 (*headerOutputs)[5],
@@ -149,17 +149,15 @@ void SVE_ALC::doTransformation_simpleVersion() {
                                                                                 (*headerOutputs)[3],
                                                                                 (*headerOutputs)[8]);
 
-    fillUniformBlock_simpleVersion(uniformBlock, newLatch, targetedBlock, (*laneGatherOutputs)[0], inductionVar,
-                                   (*headerOutputs)[0], (*laneGatherOutputs)[1]);
+    fillUniformBlock_simpleVersion(uniformBlock, newLatch, targetedBlock, (*laneGatherOutputs)[0], (*laneGatherOutputs)[1]);
 
     fillLinearizedBlock_simpleVersion(linearizedBlock, newLatch, targetedBlock, (*headerOutputs)[2],
-                                      (*headerOutputs)[6], inductionVar, (*headerOutputs)[0], (*headerOutputs)[4]);
+                                      (*headerOutputs)[6]);
 
     std::vector<Value *> *newLatchOutputs = fillNewLatchBlock_simpleVersion(newLatch, alcHeader, middleBlock,
-                                                                            (*headerOutputs)[4],
-                                                                            (*preALCBlockValues)[2]);
+                                                                            VectorizedIterations);
 
-    fillMiddleBlock_simpleVersion(middleBlock, preheaderForRemainingBlock, exitBlock, (*preALCBlockValues)[1]);
+    fillMiddleBlock_simpleVersion(middleBlock, preheaderForRemainingBlock, exitBlock, NonVectorizedIterations);
 
     refinePreHeaderForRemaining(preheaderForRemainingBlock, middleBlock, (*newLatchOutputs)[0]);
 
@@ -236,29 +234,24 @@ BasicBlock *SVE_ALC::createPreheaderForRemainingIterations() {
 
 void SVE_ALC::refinePreheader(BasicBlock *preVecBlock, BasicBlock *preHeaderForRemaining) {
 
+    auto *Terminator = L->getLoopPreheader()->getTerminator();
+    IRBuilder<> IRB(Terminator);
 
-    BasicBlock *preheader = L->getLoopPreheader();
-    Instruction *insertionPoint = preheader->getTerminator();
-    IRBuilder<> IRB(insertionPoint);
-
-
-    if (tripCount->getType() == Type::getInt64Ty(preheader->getContext())) {
-        vectorLength = intrinsicCallGenerator->createVscale64Intrinsic(IRB);
+    if (tripCount->getType() == IRB.getInt64Ty()) {
+        VectorizedStepValue = intrinsicCallGenerator->createVscale64Intrinsic(IRB);
     } else {
-        vectorLength = intrinsicCallGenerator->createVscale32Intrinsic(IRB);
+        VectorizedStepValue = intrinsicCallGenerator->createVscale32Intrinsic(IRB);
     }
 
-
-
     // check if there are iterations
-    Constant *contTwo = llvm::ConstantInt::get(vectorLength->getType(), 2);
-    Value *add = IRB.CreateMul(vectorLength, contTwo);
+    Constant *contTwo = llvm::ConstantInt::get(VectorizedStepValue->getType(), 2);
+    Value *add = IRB.CreateMul(VectorizedStepValue, contTwo);
     Value *condition = IRB.CreateICmpUGE(tripCount, add); // if true, there are enough iterations
 
     IRB.CreateCondBr(condition, preVecBlock, preHeaderForRemaining);
 
     // remove previous terminator
-    preheader->getTerminator()->eraseFromParent();
+    Terminator->eraseFromParent();
 }
 
 std::vector<Value *> *
@@ -278,7 +271,7 @@ SVE_ALC::fillPreALCBlock_newVersion(BasicBlock *preALCBlock, BasicBlock *prehead
     Constant *constZero = ConstantInt::get(tripCount->getType(), 0, false);
     Constant *constOne = ConstantInt::get(tripCount->getType(), 1, false);
     Value *initialUniformVec = intrinsicCallGenerator->createIndexInstruction(builder, constZero, constOne);
-    Value *stepVal = vectorLength;
+    Value *stepVal = VectorizedStepValue;
 
 
     // vectorizing block termination condition: index > n - (n % stepValue)
@@ -299,9 +292,7 @@ SVE_ALC::fillPreALCBlock_newVersion(BasicBlock *preALCBlock, BasicBlock *prehead
 
 void
 SVE_ALC::fillMiddleBlock_newVersion(BasicBlock *middleBlock, BasicBlock *preheaderForRemaining, BasicBlock *exitBlock,
-                                    Value *remResult, Value *uniformVec, Value *uniformVecPredicates,
-                                    Value *inductionVar
-) {
+                                    Value *remResult, Value *uniformVec, Value *uniformVecPredicates) {
 
 
     IRBuilder<> builder(preheaderForRemaining->getContext());
@@ -314,11 +305,10 @@ SVE_ALC::fillMiddleBlock_newVersion(BasicBlock *middleBlock, BasicBlock *prehead
     // make linearized path for remaining active lanes in uniform vec
 
     // since we're using uniform vec as indices, addresses should start from zero
-    std::vector<Instruction *> *clonedInstructions = cloneInstructions(targetedBlock, middleBlock, inductionVar,
-                                                                       constZero);
+    std::vector<Instruction *> *clonedInstructions = cloneInstructions(targetedBlock, middleBlock, constZero);
 
     // when permuted, all indices in gather/scatter will be computed with respect to indicesVec so index var should be 0
-    vectorizeInstructions(clonedInstructions, middleBlock, uniformVec, inductionVar, constZero,
+    vectorizeInstructions(clonedInstructions, middleBlock, uniformVec, constZero,
                           uniformVecPredicates,
                           true, false, nullptr);
 
@@ -328,7 +318,7 @@ SVE_ALC::fillMiddleBlock_newVersion(BasicBlock *middleBlock, BasicBlock *prehead
 std::vector<Value *> *
 SVE_ALC::fillALCHeaderBlock_newVersion(BasicBlock *alcHeader, BasicBlock *laneGatherBlock, BasicBlock *linearized,
                                        BasicBlock *preALC, Value *initialPredicates,
-                                       std::vector<Value *> *initialValues, BasicBlock *header, Value *inductionVar) {
+                                       std::vector<Value *> *initialValues, BasicBlock *header) {
 
 
     auto outputs = new std::vector<Value *>;
@@ -342,10 +332,8 @@ SVE_ALC::fillALCHeaderBlock_newVersion(BasicBlock *alcHeader, BasicBlock *laneGa
     builder.SetInsertPoint(alcHeader->getTerminator());
 
     // create phi node for loop index
-    Value *&indexUpdateValue = (*initialValues)[1];
-    Type *indexUpdatedValueType = indexUpdateValue->getType();   // it's the same as tripCount type
-    PHINode *index = builder.CreatePHI(indexUpdatedValueType, 2, "index");
-    index->addIncoming(vectorLength, preALC);
+    VectorLoopIndex = builder.CreatePHI(VectorizedStepValue->getType(), 2, "vector.loop.index");
+    VectorLoopIndex->addIncoming(VectorizedStepValue, preALC);
 
     // create phi for uniformVec
     Value *&initalUniformVec = (*initialValues)[0];
@@ -370,21 +358,21 @@ SVE_ALC::fillALCHeaderBlock_newVersion(BasicBlock *alcHeader, BasicBlock *laneGa
     numberOfUniformVecActives->addIncoming(initialUniformVecActives, preALC);
 
     //next iteration index vec
-    Constant *constOne = llvm::ConstantInt::get(inductionVar->getType(), 1, true);
-    Value *indexVector = intrinsicCallGenerator->createIndexInstruction(builder, index, constOne);
+    Constant *constOne = llvm::ConstantInt::get(VectorizedStepValue->getType(), 1, true);
+    Value *indexVector = intrinsicCallGenerator->createIndexInstruction(builder, VectorLoopIndex, constOne);
 
     //form predicates
-    Value *indexVecPredicates = formPredicate(header, alcHeader, inductionVar, index);
+    Value *indexVecPredicates = formPredicate(header, alcHeader, VectorLoopIndex);
 
     //form condition for the branch
     Value *numberOfSecondActives = intrinsicCallGenerator->createCntpInstruction(builder, indexVecPredicates,
                                                                                  indexVecPredicates);
     Value *addResult = builder.CreateAdd(numberOfUniformVecActives, numberOfSecondActives);
-    Value *actualCondition = builder.CreateICmpULE(addResult, vectorLength, "condition");
+    Value *actualCondition = builder.CreateICmpULE(addResult, VectorizedStepValue, "condition");
     dyn_cast<BranchInst>(alcHeader->getTerminator())->setCondition(actualCondition);
 
 
-    outputs->push_back(index);
+    outputs->push_back(VectorLoopIndex);
     outputs->push_back(uniformVec);
     outputs->push_back(uniformVecPredicates);
     outputs->push_back(indexVector);
@@ -415,7 +403,7 @@ SVE_ALC::fillLaneGatherBlock_newVersion(BasicBlock *laneGather, BasicBlock *alcA
     Value *activeCount = intrinsicCallGenerator->createCntpInstruction(builder, permutedPredicates, permutedPredicates);
 
     // check if z0 is uniform
-    Value *condition = builder.CreateICmpEQ(bothActives, vectorLength);
+    Value *condition = builder.CreateICmpEQ(bothActives, VectorizedStepValue);
     builder.CreateCondBr(condition, alcApplied, joinBlock);
 
     outputs->push_back(permutedZ0);
@@ -427,7 +415,7 @@ SVE_ALC::fillLaneGatherBlock_newVersion(BasicBlock *laneGather, BasicBlock *alcA
 std::vector<Value *> *
 SVE_ALC::fillUniformBlock_newVersion(BasicBlock *uniformBlock, BasicBlock *joinBlock, BasicBlock *toBeVectorizedBlock,
                                      BasicBlock *header,
-                                     Value *indices, Value *inductionVar, Value *indexPhi) {
+                                     Value *indices, Value *indexPhi) {
 
     auto outputs = new std::vector<Value *>;
 
@@ -436,21 +424,19 @@ SVE_ALC::fillUniformBlock_newVersion(BasicBlock *uniformBlock, BasicBlock *joinB
     builder.CreateBr(joinBlock);
     builder.SetInsertPoint(uniformBlock->getTerminator());
 
-    Constant *constZero = llvm::ConstantInt::get(inductionVar->getType(), 0, true);
-    Constant *constOne = llvm::ConstantInt::get(inductionVar->getType(), 1, true);
+    Constant *constOne = llvm::ConstantInt::get(ScalarIV->getType(), 1, true);
 
     std::vector<Instruction *> *clonedInstructions = cloneInstructions(toBeVectorizedBlock, uniformBlock,
-                                                                       inductionVar,
-                                                                       constZero);
+                                                                       ConstZeroOfIVTyVector);
 
     // TODO: handle cases where instruction uses 0 instead of induction var
-    vectorizeInstructions(clonedInstructions, uniformBlock, indices, inductionVar, constZero, allTrue, true, false,
+    vectorizeInstructions(clonedInstructions, uniformBlock, indices, ConstZeroOfIVTyVector, allTrue, true, false,
                           nullptr);
 
     //Form next iteration
-    Value *nextItrIndex = builder.CreateAdd(indexPhi, vectorLength);
+    Value *nextItrIndex = builder.CreateAdd(indexPhi, VectorizedStepValue);
     Value *nextUniformVec = intrinsicCallGenerator->createIndexInstruction(builder, nextItrIndex, constOne);
-    Value *nextPredicateVec = formPredicate(header, uniformBlock, inductionVar, nextItrIndex);
+    Value *nextPredicateVec = formPredicate(header, uniformBlock, nextItrIndex);
     Value *activeElements = intrinsicCallGenerator->createCntpInstruction(builder, nextPredicateVec,
                                                                           nextPredicateVec);
 
@@ -465,15 +451,14 @@ SVE_ALC::fillUniformBlock_newVersion(BasicBlock *uniformBlock, BasicBlock *joinB
 
 void
 SVE_ALC::fillLinearizedBlock_newVersion(BasicBlock *linearized, BasicBlock *newLatch, BasicBlock *toBeVectorizedBlock,
-                                        Value *indexVec, Value *predicates, Value *inductionVar, Value *indexPhi) {
+                                        Value *indexVec, Value *predicates) {
     IRBuilder<> builder(linearized->getContext());
     builder.SetInsertPoint(linearized);
     builder.CreateBr(newLatch);
 
     std::vector<Instruction *> *clonedInstructions = cloneInstructions(toBeVectorizedBlock, linearized,
-                                                                       inductionVar,
-                                                                       indexPhi);
-    vectorizeInstructions(clonedInstructions, linearized, indexVec, inductionVar, indexPhi, predicates,
+                                                                       VectorLoopIndex);
+    vectorizeInstructions(clonedInstructions, linearized, indexVec, VectorLoopIndex, predicates,
                           false, true, nullptr);
 
 }
@@ -520,7 +505,7 @@ SVE_ALC::fillNewLatchBlock_newVersion(BasicBlock *newLatch, BasicBlock *alcHeade
 
     // update phi nodes in header
     const BasicBlock::phi_iterator &headerIndexPhi = alcHeader->phis().begin();
-    Value *updatedIndex = builder.CreateAdd(indexPhi, vectorLength);
+    Value *updatedIndex = builder.CreateAdd(indexPhi, VectorizedStepValue);
     headerIndexPhi->addIncoming(updatedIndex, newLatch);
 
     const BasicBlock::phi_iterator &headerUniformVecPhi = std::next(headerIndexPhi, 1);
@@ -594,13 +579,13 @@ SVE_ALC::fillJoinBlock(BasicBlock *joinBlock, BasicBlock *newLatch, BasicBlock *
 
 Value *
 SVE_ALC::formPredicate(BasicBlock *decisionBlock, BasicBlock *predicateHolderBlock,
-                       Value *inductionVar, Value *inductionVarInitialValue) {
+                       Value *inductionVarInitialValue) {
 
 
     Instruction *predicates_scalar = nullptr;
 
     std::vector<Instruction *> *clonedInstructions = cloneInstructions(decisionBlock, predicateHolderBlock,
-                                                                       inductionVar, inductionVarInitialValue);
+                                                                       inductionVarInitialValue);
 
     predicates_scalar = clonedInstructions->back();
 
@@ -608,7 +593,7 @@ SVE_ALC::formPredicate(BasicBlock *decisionBlock, BasicBlock *predicateHolderBlo
     std::map<const Value *, const Value *> *instructionsMap = vectorizeInstructions(
             clonedInstructions,
             predicateHolderBlock,
-            nullptr, inductionVar, inductionVarInitialValue, nullptr, false, false, nullptr);
+            nullptr, inductionVarInitialValue, nullptr, false, false, nullptr);
     const Value *&predicates = (*instructionsMap)[(Value *)
             predicates_scalar];
 
@@ -630,16 +615,16 @@ SVE_ALC::formPredicate(BasicBlock *decisionBlock, BasicBlock *predicateHolderBlo
 
 std::map<const Value *, const Value *> *
 SVE_ALC::vectorizeInstructions(std::vector<Instruction *> *instructions, BasicBlock *block,
-                               Value *indices, Value *inductionVar, Value *indexVar,
+                               Value *indices, Value *VectorIndex,
                                Value *predicates, bool isPermuted, bool isPredicated,
                                std::map<const Value *, const Value *> *headerInstructionsMap) {
 
     Instruction *insertionPoint = block->getTerminator();
     IRBuilder<> IRB(insertionPoint);
 
-    Constant *constOne = llvm::ConstantInt::get(inductionVar->getType(), 1, true);
+    Constant *constOne = llvm::ConstantInt::get(ScalarIV->getType(), 1, true);
     if (indices == nullptr) {
-        indices = intrinsicCallGenerator->createIndexInstruction(IRB, indexVar, constOne);
+        indices = intrinsicCallGenerator->createIndexInstruction(IRB, VectorIndex, constOne);
     }
 
 
@@ -662,8 +647,8 @@ SVE_ALC::vectorizeInstructions(std::vector<Instruction *> *instructions, BasicBl
         if (auto *GEP = dyn_cast_or_null<GEPOperator>(instr)) {
 //            assert(GEP->getNumIndices() == 1 && "Expected GetElementPtr with one index operand!");
             for (int i = 0; i < instr->getNumOperands(); ++i) {
-                if (instr->getOperand(i) == inductionVar) {
-                    instr->setOperand(i, indexVar);
+                if (instr->getOperand(i) == ScalarIV) {
+                    instr->setOperand(i, VectorIndex);
                 }
             }
         } else if (isa<StoreInst>(instr)) {
@@ -673,7 +658,7 @@ SVE_ALC::vectorizeInstructions(std::vector<Instruction *> *instructions, BasicBl
             Value *firstOp = nullptr;
             if (vMap.count(storeInstr->getOperand(0))) {
                 firstOp = vMap[storeInstr->getOperand(0)];
-            } else if (storeInstr->getOperand(0)->getName() == inductionVar->getName()) {
+            } else if (storeInstr->getOperand(0)->getName() == ScalarIV->getName()) {
                 firstOp = indices;
             } else {
                 // it's constant
@@ -725,7 +710,7 @@ SVE_ALC::vectorizeInstructions(std::vector<Instruction *> *instructions, BasicBl
             Value *secondOp = nullptr;
             if (vMap.count(instr->getOperand(0))) {
                 firstOp = vMap[instr->getOperand(0)];
-            } else if (instr->getOperand(0)->getName() == inductionVar->getName()) {  // TODO: is it safe?
+            } else if (instr->getOperand(0)->getName() == ScalarIV->getName()) {  // TODO: is it safe?
                 firstOp = indices;
             } else {
                 if (auto *ConstantValue = dyn_cast_or_null<Constant>(instr->getOperand(0))) {
@@ -737,7 +722,7 @@ SVE_ALC::vectorizeInstructions(std::vector<Instruction *> *instructions, BasicBl
 
             if (vMap.count(instr->getOperand(1))) {
                 secondOp = vMap[instr->getOperand(1)];
-            } else if (instr->getOperand(1)->getName() == inductionVar->getName()) {
+            } else if (instr->getOperand(1)->getName() == ScalarIV->getName()) {
                 secondOp = indices;
             } else {
                 if (auto *ConstantValue = dyn_cast_or_null<Constant>(instr->getOperand(1))) {
@@ -874,8 +859,8 @@ SVE_ALC::refinePreHeaderForRemaining(BasicBlock *preHeaderForRemaining, BasicBlo
 
 std::vector<Value *> *
 SVE_ALC::fillALCHeaderBlock_simpleVersion(BasicBlock *alcHeader, BasicBlock *laneGatherBlock, BasicBlock *linearized,
-                                          BasicBlock *preALC, std::vector<Value *> *preALCOutputs, BasicBlock *header,
-                                          Value *vecUpdateValue, Value *inductionVar) {
+                                          BasicBlock *preALC, BasicBlock *header,
+                                          Value *inductionVar) {
 
     auto outputs = new std::vector<Value *>;
 
@@ -887,44 +872,40 @@ SVE_ALC::fillALCHeaderBlock_simpleVersion(BasicBlock *alcHeader, BasicBlock *lan
     builder.CreateCondBr(tmpCond, laneGatherBlock, linearized);
     builder.SetInsertPoint(alcHeader->getTerminator());
 
-    Constant *constZero = llvm::ConstantInt::get(inductionVar->getType(), 0, true);
-
     // create phi node for loop index
-    Value *&indexUpdateValue = (*preALCOutputs)[0];
-    Type *indexUpdatedValueType = indexUpdateValue->getType();   // it's the same as tripCount type
-    PHINode *index = builder.CreatePHI(indexUpdatedValueType, 2, "index");
-    index->addIncoming(constZero, preALC);
+    VectorLoopIndex = builder.CreatePHI(VectorizedStepValue->getType(), 2, "index");
+    VectorLoopIndex->addIncoming(ConstZeroOfIVTyVector, preALC);
 
 
     //index vec
     Constant *constOne = llvm::ConstantInt::get(inductionVar->getType(), 1, true);
-    Value *firstIndexVec = intrinsicCallGenerator->createIndexInstruction(builder, index, constOne);
+    Value *firstIndexVec = intrinsicCallGenerator->createIndexInstruction(builder, VectorLoopIndex, constOne);
 
     //form predicates
-    Value *firstPredicates = formPredicate(header, alcHeader, inductionVar, index);
+    Value *firstPredicates = formPredicate(header, alcHeader, VectorLoopIndex);
 
     //form condition for the branch
     Value *numberOfFirstActives = intrinsicCallGenerator->createCntpInstruction(builder, firstPredicates,
                                                                                 firstPredicates);
 
     // nexr itr
-    Value *nextIndex = builder.CreateAdd(index, vectorLength);
-    Value *secondIndexVec = builder.CreateAdd(firstIndexVec, vecUpdateValue);
-    Value *secondPredicates = formPredicate(header, alcHeader, inductionVar, nextIndex);
+    VectorLoopNextIndex = builder.CreateAdd(VectorLoopIndex, VectorizedStepValue);
+    Value *secondIndexVec = builder.CreateAdd(firstIndexVec, StepVector);
+    Value *secondPredicates = formPredicate(header, alcHeader, VectorLoopNextIndex);
     Value *numberOfSecondActives = intrinsicCallGenerator->createCntpInstruction(builder, secondPredicates,
                                                                                  secondPredicates);
 
 
     Value *addResult = builder.CreateAdd(numberOfFirstActives, numberOfSecondActives);
-    Value *actualCondition = builder.CreateICmpULE(addResult, vectorLength, "condition");
+    Value *actualCondition = builder.CreateICmpULE(addResult, VectorizedStepValue, "condition");
     dyn_cast<BranchInst>(alcHeader->getTerminator())->setCondition(actualCondition);
 
 
-    outputs->push_back(index);
+    outputs->push_back(VectorLoopIndex);
     outputs->push_back(firstIndexVec);
     outputs->push_back(firstPredicates);
     outputs->push_back(numberOfFirstActives);
-    outputs->push_back(nextIndex);
+    outputs->push_back(VectorLoopNextIndex);
     outputs->push_back(secondIndexVec);
     outputs->push_back(secondPredicates);
     outputs->push_back(numberOfSecondActives);
@@ -933,7 +914,7 @@ SVE_ALC::fillALCHeaderBlock_simpleVersion(BasicBlock *alcHeader, BasicBlock *lan
 
 }
 
-std::vector<Value *> *
+void
 SVE_ALC::fillPreALCBlock_simpleVersion(BasicBlock *preALCBlock, BasicBlock *alcHeader) {
     auto *results = new std::vector<Value *>;
 
@@ -947,26 +928,17 @@ SVE_ALC::fillPreALCBlock_simpleVersion(BasicBlock *preALCBlock, BasicBlock *alcH
     allTrue = intrinsicCallGenerator->createAllTruePredicates(builder);
 
     // create step vector
-    Value *stepVal = vectorLength;
-    Value *vectorUpdateValue = createVectorOfConstants(stepVal, builder, "vector.Update.Value");
-
+    StepVector = createVectorOfConstants(VectorizedStepValue, builder, "step.vector");
 
     // vectorizing block termination condition: index > n - (n % stepValue)
     // forming n - (n % stepValue)
 
-    Value *mulResult = builder.CreateMul(stepVal, llvm::ConstantInt::get(stepVal->getType(), 2, false));
+    Value *mulResult = builder.CreateMul(VectorizedStepValue, llvm::ConstantInt::get(VectorizedStepValue->getType(), 2, false));
 
-    Value *remResult = builder.CreateURem(tripCount, mulResult);
-    Value *totalIterationToVectorize = builder.CreateSub(tripCount, remResult, "total.iterations.to.be.vectorized");
+    NonVectorizedIterations = builder.CreateURem(tripCount, mulResult);
+    VectorizedIterations = builder.CreateSub(tripCount, NonVectorizedIterations, "total.iterations.to.be.vectorized");
 
     builder.CreateBr(alcHeader);
-
-    results->push_back(stepVal);
-    results->push_back(remResult);
-    results->push_back(totalIterationToVectorize);
-    results->push_back(vectorUpdateValue);
-
-    return results;
 }
 
 std::vector<Value *> *
@@ -981,8 +953,7 @@ SVE_ALC::fillLaneGatherBlock_simpleVersion(BasicBlock *laneGather, BasicBlock *a
     insertPermutationLogic(laneGather, z0, z1, p0, p1, firstActives, bothActives, &permutedZ0,
                            &permutedPredicates);
 
-    IRBuilder<> builder(laneGather->getContext());
-    builder.SetInsertPoint(laneGather);
+    IRBuilder<> builder(laneGather);
 
     Value *activeCount = intrinsicCallGenerator->createCntpInstruction(builder, permutedPredicates, permutedPredicates);
 
@@ -998,62 +969,50 @@ SVE_ALC::fillLaneGatherBlock_simpleVersion(BasicBlock *laneGather, BasicBlock *a
 
 void
 SVE_ALC::fillUniformBlock_simpleVersion(BasicBlock *uniformBlock, BasicBlock *latch, BasicBlock *toBeVectorizedBlock,
-                                        Value *indices, Value *inductionVar, Value *indexVar, Value *predicates) {
+                                        Value *indices, Value *predicates) {
 
-    IRBuilder<> builder(uniformBlock->getContext());
-    builder.SetInsertPoint(uniformBlock);
+    IRBuilder<> builder(uniformBlock);
     builder.CreateBr(latch);
-    builder.SetInsertPoint(uniformBlock->getTerminator());
-
-    Constant *constZero = llvm::ConstantInt::get(inductionVar->getType(), 0, true);
 
     std::vector<Instruction *> *clonedInstructions = cloneInstructions(toBeVectorizedBlock, uniformBlock,
-                                                                       inductionVar,
-                                                                       constZero);
+                                                                       ConstZeroOfIVTyVector);
 
-    vectorizeInstructions(clonedInstructions, uniformBlock, indices, inductionVar, indexVar, predicates,
+    vectorizeInstructions(clonedInstructions, uniformBlock, indices, VectorLoopIndex, predicates,
                           true, true, nullptr);
 
 }
 
 void SVE_ALC::fillLinearizedBlock_simpleVersion(BasicBlock *linearized, BasicBlock *newLatch,
                                                 BasicBlock *toBeVectorizedBlock,
-                                                Value *firstPredicates, Value *secondPredicates, Value *inductionVar,
-                                                Value *index, Value *nextItrIndex) {
+                                                Value *firstPredicates, Value *secondPredicates) {
 
-    IRBuilder<> builder(linearized->getContext());
-    builder.SetInsertPoint(linearized);
+    IRBuilder<> builder(linearized);
     builder.CreateBr(newLatch);
 
     std::vector<Instruction *> *clonedInstructions = cloneInstructions(toBeVectorizedBlock, linearized,
-                                                                       inductionVar,
-                                                                       index);
-    vectorizeInstructions(clonedInstructions, linearized, nullptr, inductionVar, index, firstPredicates,
+                                                                       VectorLoopIndex);
+    vectorizeInstructions(clonedInstructions, linearized, nullptr, VectorLoopIndex, firstPredicates,
                           false, true, nullptr);
 
     std::vector<Instruction *> *clonedInstructions2 = cloneInstructions(toBeVectorizedBlock, linearized,
-                                                                        inductionVar,
-                                                                        nextItrIndex);
-    vectorizeInstructions(clonedInstructions2, linearized, nullptr, inductionVar, nextItrIndex,
+                                                                        VectorLoopNextIndex);
+    vectorizeInstructions(clonedInstructions2, linearized, nullptr, VectorLoopNextIndex,
                           secondPredicates, false, true, nullptr);
 
 }
 
 std::vector<Value *> *
 SVE_ALC::fillNewLatchBlock_simpleVersion(BasicBlock *newLatch, BasicBlock *alcHeader, BasicBlock *middleBlock,
-                                         Value *nextItrIndex, Value *totalVecIterations) {
+                                         Value *totalVecIterations) {
 
     auto outputs = new std::vector<Value *>;
 
-    IRBuilder<> builder(newLatch->getContext());
-    builder.SetInsertPoint(newLatch);
-
+    IRBuilder<> builder(newLatch);
 
     // update phi nodes in header
     const BasicBlock::phi_iterator &headerIndexPhi = alcHeader->phis().begin();
-    Value *updatedIndex = builder.CreateAdd(nextItrIndex, vectorLength);
+    Value *updatedIndex = builder.CreateAdd(VectorLoopNextIndex, VectorizedStepValue);
     headerIndexPhi->addIncoming(updatedIndex, newLatch);
-
 
     Value *condition = builder.CreateICmpEQ(updatedIndex, totalVecIterations);
     builder.CreateCondBr(condition, middleBlock, alcHeader);
@@ -1067,8 +1026,7 @@ SVE_ALC::fillNewLatchBlock_simpleVersion(BasicBlock *newLatch, BasicBlock *alcHe
 void SVE_ALC::fillMiddleBlock_simpleVersion(BasicBlock *middleBlock, BasicBlock *preheaderForRemaining,
                                             BasicBlock *exitBlock, Value *remResult) {
 
-    IRBuilder<> builder(preheaderForRemaining->getContext());
-    builder.SetInsertPoint(middleBlock);
+    IRBuilder<> builder(middleBlock);
 
     Constant *constZero = ConstantInt::get(remResult->getType(), 0, false);
     Value *condition = builder.CreateICmpEQ(remResult, constZero, "condition");
@@ -1078,7 +1036,7 @@ void SVE_ALC::fillMiddleBlock_simpleVersion(BasicBlock *middleBlock, BasicBlock 
 }
 
 std::vector<Instruction *> *
-SVE_ALC::cloneInstructions(BasicBlock *From, BasicBlock *to, Value *inductionVar, Value *inductionVarInitialValue) {
+SVE_ALC::cloneInstructions(BasicBlock *From, BasicBlock *to, Value *VectorIndex) {
 
     // TODO: assumption : there are no more than one phi node that is the induction var (since decision block is header)
 
@@ -1119,10 +1077,10 @@ SVE_ALC::cloneInstructions(BasicBlock *From, BasicBlock *to, Value *inductionVar
     // replace induction vars with inductionVarInitialValue
     for (auto clonedInstr: *clonedInstructions) {
 
-        if (usesInductionVar(clonedInstr, inductionVar)) {
+        if (usesInductionVar(clonedInstr, ScalarIV)) {
             for (int j = 0; j < clonedInstr->getNumOperands(); ++j) {
-                if (clonedInstr->getOperand(j) == inductionVar) {
-                    clonedInstr->setOperand(j, inductionVarInitialValue);
+                if (clonedInstr->getOperand(j) == ScalarIV) {
+                    clonedInstr->setOperand(j, VectorIndex);
                 }
             }
         }
@@ -1145,7 +1103,7 @@ SVE_ALC::findHeaderInstructionsRequiredInThenBlock(BasicBlock *header, BasicBloc
 
             std::vector<Instruction *> toCheckOperands;
             auto operand = thenInstr.getOperand(i);
-            if (operand == inductionVar || !isa<Instruction>(operand)) {
+            if (operand == ScalarIV || !isa<Instruction>(operand)) {
                 continue;
             }
             auto *instruction = dyn_cast<Instruction>(operand);
@@ -1159,7 +1117,7 @@ SVE_ALC::findHeaderInstructionsRequiredInThenBlock(BasicBlock *header, BasicBloc
             for (int k = 0; k < toCheckOperands.size(); ++k) {
                 for (int j = 0; j < toCheckOperands[k]->getNumOperands(); ++j) {
                     Value *innerOp = toCheckOperands[k]->getOperand(j);
-                    if (innerOp == inductionVar || isa<Constant>(innerOp)) {
+                    if (innerOp == ScalarIV || isa<Constant>(innerOp)) {
                         continue;
                     }
                     auto opInstr = dyn_cast<Instruction>(innerOp);
