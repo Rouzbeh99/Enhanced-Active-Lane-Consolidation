@@ -69,6 +69,9 @@ void SVE_Vectorizer::doVectorization() {
     auto *BrInst = static_cast<BranchInst*>(MaybeBranchInst);
     // Make preVectorizationBlock only sucessor of L's preheader
     BrInst->setSuccessor(0, preVectorizationBlock);
+    LI->removeBlock(findTargetedBlock());
+    LI->removeBlock(L->getLoopLatch());
+    LI->removeBlock(L->getHeader());
 }
 
 
