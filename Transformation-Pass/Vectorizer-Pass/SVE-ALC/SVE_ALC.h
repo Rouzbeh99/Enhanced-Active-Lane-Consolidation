@@ -42,6 +42,13 @@ private:
     Value *NonVectorizedIterations;
     Value *VectorizedIterations;
     Value *StepVector;
+    Value *IndexVectorOfFirstVector;
+    Value *PredicatesOfFirstVector;
+    Value *ActiveLanesInFirstVector;
+    Value *IndexVectorOfSecondVector;
+    Value *PredicatesOfSecondVector;
+    Value *ActiveLanesInSecondVector;
+    Value *ActiveLanesInBothVectors;
     Value *allTrue;
     Constant *ConstZeroOfIVTyVector;
     PHINode *ScalarIV;
@@ -154,10 +161,9 @@ private:
                                std::map<const Value *, const Value *> *headerInstructionsMap);
 
 private:
-    std::vector<Value *> *
+    void
     fillALCHeaderBlock_simpleVersion(BasicBlock *alcHeader, BasicBlock *laneGatherBlock, BasicBlock *linearized,
-                                     BasicBlock *preALC, BasicBlock *header,
-                                     Value *inductionVar);
+                                     BasicBlock *preALC, BasicBlock *header);
 
 private:
     void fillPreALCBlock_simpleVersion(BasicBlock *preALCBlock, BasicBlock *alcHeader);

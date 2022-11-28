@@ -138,21 +138,20 @@ void SVE_ALC::doTransformation_simpleVersion() {
     refinePreheader(preALCBlock, preheaderForRemainingBlock);
 
     fillPreALCBlock_simpleVersion(preALCBlock, alcHeader);
-    std::vector<Value *> *headerOutputs = fillALCHeaderBlock_simpleVersion(alcHeader, laneGatherBlock, linearizedBlock,
-                                                                           preALCBlock, header,
-                                                                           ScalarIV);
+    fillALCHeaderBlock_simpleVersion(alcHeader, laneGatherBlock, linearizedBlock,
+                                                                           preALCBlock, header);
     std::vector<Value *> *laneGatherOutputs = fillLaneGatherBlock_simpleVersion(laneGatherBlock, uniformBlock,
-                                                                                (*headerOutputs)[1],
-                                                                                (*headerOutputs)[5],
-                                                                                (*headerOutputs)[2],
-                                                                                (*headerOutputs)[6],
-                                                                                (*headerOutputs)[3],
-                                                                                (*headerOutputs)[8]);
+                                                                                IndexVectorOfFirstVector,
+                                                                                IndexVectorOfSecondVector,
+                                                                                PredicatesOfFirstVector,
+                                                                                PredicatesOfSecondVector,
+                                                                                ActiveLanesInFirstVector,
+                                                                                ActiveLanesInBothVectors);
 
     fillUniformBlock_simpleVersion(uniformBlock, newLatch, targetedBlock, (*laneGatherOutputs)[0], (*laneGatherOutputs)[1]);
 
-    fillLinearizedBlock_simpleVersion(linearizedBlock, newLatch, targetedBlock, (*headerOutputs)[2],
-                                      (*headerOutputs)[6]);
+    fillLinearizedBlock_simpleVersion(linearizedBlock, newLatch, targetedBlock, PredicatesOfFirstVector,
+                                      PredicatesOfSecondVector);
 
     std::vector<Value *> *newLatchOutputs = fillNewLatchBlock_simpleVersion(newLatch, alcHeader, middleBlock,
                                                                             VectorizedIterations);
@@ -857,10 +856,9 @@ SVE_ALC::refinePreHeaderForRemaining(BasicBlock *preHeaderForRemaining, BasicBlo
     phiNode->addIncoming(value, middleBlock);
 }
 
-std::vector<Value *> *
+void
 SVE_ALC::fillALCHeaderBlock_simpleVersion(BasicBlock *alcHeader, BasicBlock *laneGatherBlock, BasicBlock *linearized,
-                                          BasicBlock *preALC, BasicBlock *header,
-                                          Value *inductionVar) {
+                                          BasicBlock *preALC, BasicBlock *header) {
 
     auto outputs = new std::vector<Value *>;
 
@@ -878,40 +876,27 @@ SVE_ALC::fillALCHeaderBlock_simpleVersion(BasicBlock *alcHeader, BasicBlock *lan
 
 
     //index vec
-    Constant *constOne = llvm::ConstantInt::get(inductionVar->getType(), 1, true);
-    Value *firstIndexVec = intrinsicCallGenerator->createIndexInstruction(builder, VectorLoopIndex, constOne);
+    Constant *constOne = llvm::ConstantInt::get(ScalarIV->getType(), 1, true);
+    IndexVectorOfFirstVector = intrinsicCallGenerator->createIndexInstruction(builder, VectorLoopIndex, constOne);
 
     //form predicates
-    Value *firstPredicates = formPredicate(header, alcHeader, VectorLoopIndex);
+    PredicatesOfFirstVector = formPredicate(header, alcHeader, VectorLoopIndex);
 
     //form condition for the branch
-    Value *numberOfFirstActives = intrinsicCallGenerator->createCntpInstruction(builder, firstPredicates,
-                                                                                firstPredicates);
+    ActiveLanesInFirstVector = intrinsicCallGenerator->createCntpInstruction(builder, PredicatesOfFirstVector,
+                                                                                PredicatesOfFirstVector);
 
     // nexr itr
     VectorLoopNextIndex = builder.CreateAdd(VectorLoopIndex, VectorizedStepValue);
-    Value *secondIndexVec = builder.CreateAdd(firstIndexVec, StepVector);
-    Value *secondPredicates = formPredicate(header, alcHeader, VectorLoopNextIndex);
-    Value *numberOfSecondActives = intrinsicCallGenerator->createCntpInstruction(builder, secondPredicates,
-                                                                                 secondPredicates);
+    IndexVectorOfSecondVector = builder.CreateAdd(IndexVectorOfFirstVector, StepVector);
+    PredicatesOfSecondVector = formPredicate(header, alcHeader, VectorLoopNextIndex);
+    ActiveLanesInSecondVector = intrinsicCallGenerator->createCntpInstruction(builder, PredicatesOfSecondVector,
+                                                                                 PredicatesOfSecondVector);
 
 
-    Value *addResult = builder.CreateAdd(numberOfFirstActives, numberOfSecondActives);
-    Value *actualCondition = builder.CreateICmpULE(addResult, VectorizedStepValue, "condition");
+    ActiveLanesInBothVectors = builder.CreateAdd(ActiveLanesInFirstVector, ActiveLanesInSecondVector);
+    Value *actualCondition = builder.CreateICmpULE(ActiveLanesInBothVectors, VectorizedStepValue, "condition");
     dyn_cast<BranchInst>(alcHeader->getTerminator())->setCondition(actualCondition);
-
-
-    outputs->push_back(VectorLoopIndex);
-    outputs->push_back(firstIndexVec);
-    outputs->push_back(firstPredicates);
-    outputs->push_back(numberOfFirstActives);
-    outputs->push_back(VectorLoopNextIndex);
-    outputs->push_back(secondIndexVec);
-    outputs->push_back(secondPredicates);
-    outputs->push_back(numberOfSecondActives);
-    outputs->push_back(addResult);
-    return outputs;
-
 }
 
 void
