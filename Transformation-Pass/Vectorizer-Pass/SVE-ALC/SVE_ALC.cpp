@@ -66,6 +66,7 @@ void SVE_ALC::doTransformation_newVersion() {
 
 
 
+
     //fill blocks
     std::vector<Value *> *preALCBlockValues = fillPreALCBlock_newVersion(preALCBlock, preheader, alcHeader);
     Value *initialPredicates = formPredicate(header, preALCBlock, inductionVar, constZero); // initial predicates
@@ -84,16 +85,20 @@ void SVE_ALC::doTransformation_newVersion() {
                                                                             targetedBlock, header,
                                                                             (*laneGatherOutput)[0], inductionVar,
                                                                             (*headerOutputs)[0]);
+
     fillLinearizedBlock_newVersion(linearizedBlock, newLatch, targetedBlock, (*headerOutputs)[3],
                                    (*headerOutputs)[4],
                                    inductionVar, (*headerOutputs)[0]);
+
     std::vector<Value *> *joinBlockOutputs = fillJoinBlock(joinBlock, newLatch, uniformBlock, laneGatherBlock,
                                                            headerOutputs->front(),
                                                            laneGatherOutput, uniformBlockOutputs);
+
     std::vector<Value *> *latchOutputs = fillNewLatchBlock_newVersion(newLatch, alcHeader, middleBlock, joinBlock,
                                                                       linearizedBlock,
                                                                       headerOutputs, joinBlockOutputs,
                                                                       (*preALCBlockValues)[3]);
+
     fillMiddleBlock_newVersion(middleBlock, preheaderForRemainingBlock, exitBlock, (*preALCBlockValues)[2],
                                (*latchOutputs)[1],
                                (*latchOutputs)[2], inductionVar);
@@ -702,8 +707,11 @@ SVE_ALC::vectorizeInstructions(std::vector<Instruction *> *instructions, BasicBl
                 loadedData = intrinsicCallGenerator->createGatherLoadInstruction(IRB, ptr, predicates, indices);
             } else if (isPredicated) {
                 assert(isa<GEPOperator>(ptr) && "Expected LoadInst PointerOperand to be GetElementPtr!");
-                auto *GEP = static_cast<GEPOperator*>(ptr);
+                auto *GEP = static_cast<GEPOperator *>(ptr);
                 auto *SrcTy = GEP->getSourceElementType();
+                if (SrcTy->isArrayTy()) {
+                    SrcTy = SrcTy->getArrayElementType();
+                }
                 loadedData = intrinsicCallGenerator->createLoadInstruction(IRB, SrcTy, ptr, predicates);
             } else {
                 loadedData = IRB.CreateLoad(VectorType::get(instr->getType(), vectorizationFactor, true), ptr);

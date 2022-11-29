@@ -76,8 +76,6 @@ Value *IntrinsicCallGenerator::createLoadInstruction(IRBuilder<> &IRB,
     auto *Load = IRB.CreateMaskedLoad(
             VTy, ptr, Align(VF * AlignNumBytes),
             predicatedVector);
-    Load->print(errs());
-    errs() << '\n';
     return Load;
 }
 
@@ -98,8 +96,7 @@ void IntrinsicCallGenerator::createStoreInstruction(IRBuilder<> &IRB,
     IRB.CreateMaskedStore(
             elementsVector, ptr,
             Align(VF * (AlignNumBytes)),
-            predicatedVector)->print(errs());
-    errs() << '\n';
+            predicatedVector);
 }
 
 // TODO: handle double types by changing return type and operands
