@@ -77,22 +77,16 @@ void SVE_ALC::doTransformation_newVersion() {
                                                                         preALCBlockValues, header);
 
 
-    std::vector<Value *> *laneGatherOutput = fillLaneGatherBlock_newVersion(laneGatherBlock, uniformBlock, joinBlock,
-                                                                            (*headerOutputs)[1], (*headerOutputs)[3],
-                                                                            (*headerOutputs)[2],
-                                                                            (*headerOutputs)[4], (*headerOutputs)[5],
-                                                                            (*headerOutputs)[7]);
+    fillLaneGatherBlock_newVersion(laneGatherBlock, uniformBlock, joinBlock);
     std::vector<Value *> *uniformBlockOutputs = fillUniformBlock_newVersion(uniformBlock, joinBlock,
                                                                             targetedBlock, header,
-                                                                            (*laneGatherOutput)[0],
-                                                                            (*headerOutputs)[0]);
-
-    fillLinearizedBlock_newVersion(linearizedBlock, newLatch, targetedBlock, (*headerOutputs)[3],
-                                   (*headerOutputs)[4]);
+                                                                            PermutedIndices,
+                                                                            VectorLoopIndex);
+    fillLinearizedBlock_newVersion(linearizedBlock, newLatch, targetedBlock, IndexVectorOfSecondVector,
+                                   PredicatesOfSecondVector);
     std::vector<Value *> *joinBlockOutputs = fillJoinBlock(joinBlock, newLatch, uniformBlock, laneGatherBlock,
                                                            headerOutputs->front(),
-                                                           laneGatherOutput, uniformBlockOutputs);
-
+                                                           uniformBlockOutputs);
     std::vector<Value *> *latchOutputs = fillNewLatchBlock_newVersion(newLatch, alcHeader, middleBlock, joinBlock,
                                                                       linearizedBlock,
                                                                       headerOutputs, joinBlockOutputs,
@@ -140,18 +134,11 @@ void SVE_ALC::doTransformation_simpleVersion() {
     fillPreALCBlock_simpleVersion(preALCBlock, alcHeader);
     fillALCHeaderBlock_simpleVersion(alcHeader, laneGatherBlock, linearizedBlock,
                                                                            preALCBlock, header);
-    std::vector<Value *> *laneGatherOutputs = fillLaneGatherBlock_simpleVersion(laneGatherBlock, uniformBlock,
-                                                                                IndexVectorOfFirstVector,
-                                                                                IndexVectorOfSecondVector,
-                                                                                PredicatesOfFirstVector,
-                                                                                PredicatesOfSecondVector,
-                                                                                ActiveLanesInFirstVector,
-                                                                                ActiveLanesInBothVectors);
+    fillLaneGatherBlock_simpleVersion(laneGatherBlock, uniformBlock);
 
-    fillUniformBlock_simpleVersion(uniformBlock, newLatch, targetedBlock, (*laneGatherOutputs)[0], (*laneGatherOutputs)[1]);
+    fillUniformBlock_simpleVersion(uniformBlock, newLatch, targetedBlock);
 
-    fillLinearizedBlock_simpleVersion(linearizedBlock, newLatch, targetedBlock, PredicatesOfFirstVector,
-                                      PredicatesOfSecondVector);
+    fillLinearizedBlock_simpleVersion(linearizedBlock, newLatch, targetedBlock);
 
     std::vector<Value *> *newLatchOutputs = fillNewLatchBlock_simpleVersion(newLatch, alcHeader, middleBlock,
                                                                             VectorizedIterations);
@@ -165,22 +152,20 @@ void SVE_ALC::doTransformation_simpleVersion() {
 
 // TODO: problem in algorithm, in the case where the total number of active lanes is not enough to fill a vector, the result vector is not correct
 void
-SVE_ALC::insertPermutationLogic(BasicBlock *insertAt, Value *z0, Value *z1, Value *p0, Value *p1,
-                                Value *firstActives,
-                                Value *bothActives,
-                                Value **permutedZ0,
-                                Value **permutedPredicates) {
+SVE_ALC::insertPermutationLogic(BasicBlock *insertAt,
+                                Value *&permutedZ0,
+                                Value *&permutedPredicates) {
     // TODO: add code to compute predicates for uniform vector
 
     IRBuilder<> IRB(insertAt);
-    auto *constZero = ConstantInt::get(firstActives->getType(), 0);
+    auto *constZero = ConstantInt::get(ActiveLanesInFirstVector->getType(), 0);
 
     // gather active lanes
-    auto *z2 = intrinsicCallGenerator->createCompactInstruction(IRB, z0, p0);
-    auto *z3 = intrinsicCallGenerator->createCompactInstruction(IRB, z1, p1);
-    auto *p4 = intrinsicCallGenerator->createWhileltInstruction(IRB, constZero, firstActives);
-    *permutedZ0 = intrinsicCallGenerator->createSpliceInstruction(IRB, z2, z3, p4);
-    *permutedPredicates = intrinsicCallGenerator->createWhileltInstruction(IRB, constZero, bothActives);
+    auto *z2 = intrinsicCallGenerator->createCompactInstruction(IRB, IndexVectorOfFirstVector, PredicatesOfFirstVector);
+    auto *z3 = intrinsicCallGenerator->createCompactInstruction(IRB, IndexVectorOfSecondVector, PredicatesOfSecondVector);
+    auto *p4 = intrinsicCallGenerator->createWhileltInstruction(IRB, constZero, ActiveLanesInFirstVector);
+    permutedZ0 = intrinsicCallGenerator->createSpliceInstruction(IRB, z2, z3, p4);
+    permutedPredicates = intrinsicCallGenerator->createWhileltInstruction(IRB, constZero, ActiveLanesInBothVectors);
 }
 
 BasicBlock *SVE_ALC::findTargetedBlock() {
@@ -336,12 +321,12 @@ SVE_ALC::fillALCHeaderBlock_newVersion(BasicBlock *alcHeader, BasicBlock *laneGa
 
     // create phi for uniformVec
     Value *&initalUniformVec = (*initialValues)[0];
-    PHINode *uniformVec = builder.CreatePHI(initalUniformVec->getType(), 2, "uniform.vector");
-    uniformVec->addIncoming(initalUniformVec, preALC);
+    IndexVectorOfFirstVector = builder.CreatePHI(initalUniformVec->getType(), 2, "uniform.vector");
+    static_cast<PHINode*>(IndexVectorOfFirstVector)->addIncoming(initalUniformVec, preALC);
 
     // create phi for uniformVecPreds
-    PHINode *uniformVecPredicates = builder.CreatePHI(initialPredicates->getType(), 2, "uniform.vector.predicates");
-    uniformVecPredicates->addIncoming(initialPredicates, preALC);
+    PredicatesOfFirstVector = builder.CreatePHI(initialPredicates->getType(), 2, "uniform.vector.predicates");
+    static_cast<PHINode*>(PredicatesOfFirstVector)->addIncoming(initialPredicates, preALC);
 
     // count initial predicates inside the preALC
     IRBuilder<> preALCBuilder(alcHeader->getContext());
@@ -352,63 +337,53 @@ SVE_ALC::fillALCHeaderBlock_newVersion(BasicBlock *alcHeader, BasicBlock *laneGa
 
 
     // create phi for number of active lanes in uniform vec
-    PHINode *numberOfUniformVecActives = builder.CreatePHI(initialUniformVecActives->getType(), 2,
+    ActiveLanesInFirstVector = builder.CreatePHI(initialUniformVecActives->getType(), 2,
                                                            "uniform.vec.actives");
-    numberOfUniformVecActives->addIncoming(initialUniformVecActives, preALC);
+    static_cast<PHINode*>(ActiveLanesInFirstVector)->addIncoming(initialUniformVecActives, preALC);
 
     //next iteration index vec
     Constant *constOne = llvm::ConstantInt::get(VectorizedStepValue->getType(), 1, true);
-    Value *indexVector = intrinsicCallGenerator->createIndexInstruction(builder, VectorLoopIndex, constOne);
+    IndexVectorOfSecondVector = intrinsicCallGenerator->createIndexInstruction(builder, VectorLoopIndex, constOne);
 
     //form predicates
-    Value *indexVecPredicates = formPredicate(header, alcHeader, VectorLoopIndex);
+    PredicatesOfSecondVector = formPredicate(header, alcHeader, VectorLoopIndex);
 
     //form condition for the branch
-    Value *numberOfSecondActives = intrinsicCallGenerator->createCntpInstruction(builder, indexVecPredicates,
-                                                                                 indexVecPredicates);
-    Value *addResult = builder.CreateAdd(numberOfUniformVecActives, numberOfSecondActives);
-    Value *actualCondition = builder.CreateICmpULE(addResult, VectorizedStepValue, "condition");
+    ActiveLanesInSecondVector = intrinsicCallGenerator->createCntpInstruction(builder, PredicatesOfSecondVector,
+                                                                                 PredicatesOfSecondVector);
+    ActiveLanesInBothVectors = builder.CreateAdd(ActiveLanesInFirstVector, ActiveLanesInSecondVector);
+    Value *actualCondition = builder.CreateICmpULE(ActiveLanesInBothVectors, VectorizedStepValue, "condition");
     dyn_cast<BranchInst>(alcHeader->getTerminator())->setCondition(actualCondition);
 
 
     outputs->push_back(VectorLoopIndex);
-    outputs->push_back(uniformVec);
-    outputs->push_back(uniformVecPredicates);
-    outputs->push_back(indexVector);
-    outputs->push_back(indexVecPredicates);
-    outputs->push_back(numberOfUniformVecActives);
-    outputs->push_back(numberOfSecondActives);
-    outputs->push_back(addResult);
+    outputs->push_back(IndexVectorOfFirstVector);
+    outputs->push_back(PredicatesOfFirstVector);
+    outputs->push_back(IndexVectorOfSecondVector);
+    outputs->push_back(PredicatesOfSecondVector);
+    outputs->push_back(ActiveLanesInFirstVector);
+    outputs->push_back(ActiveLanesInSecondVector);
+    outputs->push_back(ActiveLanesInBothVectors);
     return outputs;
 
 }
 
-std::vector<Value *> *
-SVE_ALC::fillLaneGatherBlock_newVersion(BasicBlock *laneGather, BasicBlock *alcApplied, BasicBlock *joinBlock,
-                                        Value *z0,
-                                        Value *z1, Value *p0, Value *p1,
-                                        Value *firstActives,
-                                        Value *bothActives) {
-    auto *outputs = new std::vector<Value *>;
-    Value *permutedZ0;
-    Value *permutedPredicates;
+void SVE_ALC::fillLaneGatherBlock_newVersion(BasicBlock *laneGather,
+                                             BasicBlock *alcApplied,
+                                             BasicBlock *joinBlock) {
 
-    insertPermutationLogic(laneGather, z0, z1, p0, p1, firstActives, bothActives, &permutedZ0,
-                           &permutedPredicates);
+  insertPermutationLogic(laneGather, PermutedIndices, PermutedPredicates);
 
-    IRBuilder<> builder(laneGather->getContext());
-    builder.SetInsertPoint(laneGather);
+  IRBuilder<> builder(laneGather);
 
-    Value *activeCount = intrinsicCallGenerator->createCntpInstruction(builder, permutedPredicates, permutedPredicates);
+  ActiveElementsInPermutedVector =
+      intrinsicCallGenerator->createCntpInstruction(builder, PermutedPredicates,
+                                                    PermutedPredicates);
 
-    // check if z0 is uniform
-    Value *condition = builder.CreateICmpEQ(bothActives, VectorizedStepValue);
-    builder.CreateCondBr(condition, alcApplied, joinBlock);
-
-    outputs->push_back(permutedZ0);
-    outputs->push_back(permutedPredicates);
-    outputs->push_back(activeCount);
-    return outputs;
+  // check if z0 is uniform
+  Value *condition =
+      builder.CreateICmpEQ(ActiveLanesInBothVectors, VectorizedStepValue);
+  builder.CreateCondBr(condition, alcApplied, joinBlock);
 }
 
 std::vector<Value *> *
@@ -530,18 +505,12 @@ SVE_ALC::fillNewLatchBlock_newVersion(BasicBlock *newLatch, BasicBlock *alcHeade
 std::vector<Value *> *
 SVE_ALC::fillJoinBlock(BasicBlock *joinBlock, BasicBlock *newLatch, BasicBlock *uniformBlock,
                        BasicBlock *laneGather, Value *headerIndex,
-                       std::vector<Value *> *laneGatherOutputs, std::vector<Value *> *uniformBlockOutputs) {
+                       std::vector<Value *> *uniformBlockOutputs) {
 
     auto outputs = new std::vector<Value *>;
 
     IRBuilder<> builder(joinBlock->getContext());
     builder.SetInsertPoint(joinBlock);
-
-
-    Value *&oldUniformVec = (*laneGatherOutputs)[0];
-    Value *&oldPredicates = (*laneGatherOutputs)[1];
-    Value *&oldActiveCount = (*laneGatherOutputs)[2];
-
 
     Value *&nextIndex = (*uniformBlockOutputs)[0];
     Value *&nextUniformVec = (*uniformBlockOutputs)[1];
@@ -552,16 +521,16 @@ SVE_ALC::fillJoinBlock(BasicBlock *joinBlock, BasicBlock *newLatch, BasicBlock *
     indexPhi->addIncoming(headerIndex, laneGather);
     indexPhi->addIncoming(nextIndex, uniformBlock);
 
-    PHINode *uniformVecPhi = builder.CreatePHI(oldUniformVec->getType(), 2);
-    uniformVecPhi->addIncoming(oldUniformVec, laneGather);
+    PHINode *uniformVecPhi = builder.CreatePHI(PermutedIndices->getType(), 2);
+    uniformVecPhi->addIncoming(PermutedIndices, laneGather);
     uniformVecPhi->addIncoming(nextUniformVec, uniformBlock);
 
-    PHINode *predicatesPhi = builder.CreatePHI(oldPredicates->getType(), 2);
-    predicatesPhi->addIncoming(oldPredicates, laneGather);
+    PHINode *predicatesPhi = builder.CreatePHI(PermutedPredicates->getType(), 2);
+    predicatesPhi->addIncoming(PermutedPredicates, laneGather);
     predicatesPhi->addIncoming(nextPredicates, uniformBlock);
 
-    PHINode *activeLanesCountPhi = builder.CreatePHI(oldActiveCount->getType(), 2);
-    activeLanesCountPhi->addIncoming(oldActiveCount, laneGather);
+    PHINode *activeLanesCountPhi = builder.CreatePHI(ActiveElementsInPermutedVector->getType(), 2);
+    activeLanesCountPhi->addIncoming(ActiveElementsInPermutedVector, laneGather);
     activeLanesCountPhi->addIncoming(nextActiveLanesCount, uniformBlock);
 
     outputs->push_back(indexPhi);
@@ -926,64 +895,51 @@ SVE_ALC::fillPreALCBlock_simpleVersion(BasicBlock *preALCBlock, BasicBlock *alcH
     builder.CreateBr(alcHeader);
 }
 
-std::vector<Value *> *
-SVE_ALC::fillLaneGatherBlock_simpleVersion(BasicBlock *laneGather, BasicBlock *alcApplied,
-                                           Value *z0, Value *z1, Value *p0, Value *p1, Value *firstActives,
-                                           Value *bothActives) {
+void SVE_ALC::fillLaneGatherBlock_simpleVersion(BasicBlock *laneGather,
+                                                BasicBlock *alcApplied) {
+  insertPermutationLogic(laneGather, PermutedIndices, PermutedPredicates);
+  IRBuilder<> builder(laneGather);
 
-    auto *outputs = new std::vector<Value *>;
-    Value *permutedZ0;
-    Value *permutedPredicates;
+  ActiveElementsInPermutedVector =
+      intrinsicCallGenerator->createCntpInstruction(builder, PermutedPredicates,
+                                                    PermutedPredicates);
 
-    insertPermutationLogic(laneGather, z0, z1, p0, p1, firstActives, bothActives, &permutedZ0,
-                           &permutedPredicates);
-
-    IRBuilder<> builder(laneGather);
-
-    Value *activeCount = intrinsicCallGenerator->createCntpInstruction(builder, permutedPredicates, permutedPredicates);
-
-
-    builder.CreateBr(alcApplied);
-
-    outputs->push_back(permutedZ0);
-    outputs->push_back(permutedPredicates);
-    outputs->push_back(activeCount);
-    return outputs;
-
+  builder.CreateBr(alcApplied);
 }
 
-void
-SVE_ALC::fillUniformBlock_simpleVersion(BasicBlock *uniformBlock, BasicBlock *latch, BasicBlock *toBeVectorizedBlock,
-                                        Value *indices, Value *predicates) {
+void SVE_ALC::fillUniformBlock_simpleVersion(BasicBlock *uniformBlock,
+                                             BasicBlock *latch,
+                                             BasicBlock *toBeVectorizedBlock) {
 
-    IRBuilder<> builder(uniformBlock);
-    builder.CreateBr(latch);
+  IRBuilder<> builder(uniformBlock);
+  builder.CreateBr(latch);
 
-    std::vector<Instruction *> *clonedInstructions = cloneInstructions(toBeVectorizedBlock, uniformBlock,
-                                                                       ConstZeroOfIVTyVector);
+  std::vector<Instruction *> *clonedInstructions = cloneInstructions(
+      toBeVectorizedBlock, uniformBlock, ConstZeroOfIVTyVector);
 
-    vectorizeInstructions(clonedInstructions, uniformBlock, indices, VectorLoopIndex, predicates,
-                          true, true, nullptr);
-
+  vectorizeInstructions(clonedInstructions, uniformBlock, PermutedIndices,
+                        VectorLoopIndex, PermutedPredicates, true, true,
+                        nullptr);
 }
 
-void SVE_ALC::fillLinearizedBlock_simpleVersion(BasicBlock *linearized, BasicBlock *newLatch,
-                                                BasicBlock *toBeVectorizedBlock,
-                                                Value *firstPredicates, Value *secondPredicates) {
+void SVE_ALC::fillLinearizedBlock_simpleVersion(
+    BasicBlock *linearized, BasicBlock *newLatch,
+    BasicBlock *toBeVectorizedBlock) {
 
-    IRBuilder<> builder(linearized);
-    builder.CreateBr(newLatch);
+  IRBuilder<> builder(linearized);
+  builder.CreateBr(newLatch);
 
-    std::vector<Instruction *> *clonedInstructions = cloneInstructions(toBeVectorizedBlock, linearized,
-                                                                       VectorLoopIndex);
-    vectorizeInstructions(clonedInstructions, linearized, nullptr, VectorLoopIndex, firstPredicates,
-                          false, true, nullptr);
+  std::vector<Instruction *> *clonedInstructions =
+      cloneInstructions(toBeVectorizedBlock, linearized, VectorLoopIndex);
+  vectorizeInstructions(clonedInstructions, linearized, nullptr,
+                        VectorLoopIndex, PredicatesOfFirstVector, false, true,
+                        nullptr);
 
-    std::vector<Instruction *> *clonedInstructions2 = cloneInstructions(toBeVectorizedBlock, linearized,
-                                                                        VectorLoopNextIndex);
-    vectorizeInstructions(clonedInstructions2, linearized, nullptr, VectorLoopNextIndex,
-                          secondPredicates, false, true, nullptr);
-
+  std::vector<Instruction *> *clonedInstructions2 =
+      cloneInstructions(toBeVectorizedBlock, linearized, VectorLoopNextIndex);
+  vectorizeInstructions(clonedInstructions2, linearized, nullptr,
+                        VectorLoopNextIndex, PredicatesOfSecondVector, false,
+                        true, nullptr);
 }
 
 std::vector<Value *> *

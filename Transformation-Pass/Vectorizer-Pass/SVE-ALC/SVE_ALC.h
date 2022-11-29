@@ -49,6 +49,9 @@ private:
     Value *PredicatesOfSecondVector;
     Value *ActiveLanesInSecondVector;
     Value *ActiveLanesInBothVectors;
+    Value *PermutedIndices;
+    Value *PermutedPredicates;
+    Value *ActiveElementsInPermutedVector;
     Value *allTrue;
     Constant *ConstZeroOfIVTyVector;
     PHINode *ScalarIV;
@@ -72,10 +75,7 @@ private:
 
 private:
     void
-    insertPermutationLogic(BasicBlock *insertAt, Value *z0, Value *z1, Value *p0, Value *p1, Value *firstActives,
-                           Value *bothActives,
-                           Value **permutedZ0,
-                           Value **permutedPredicates);
+    insertPermutationLogic(BasicBlock *insertAt, Value *&permutedZ0, Value *&permutedPredicates);
 
 private:
     Value *computeTripCount(BasicBlock *latch, Value *inductionVar);
@@ -108,12 +108,8 @@ private:
                                   std::vector<Value *> *initialValues, BasicBlock *header);
 
 private:
-    std::vector<Value *> *
-    fillLaneGatherBlock_newVersion(BasicBlock *laneGather, BasicBlock *alcApplied, BasicBlock *joinBlock, Value *z0,
-                                   Value *z1,
-                                   Value *p0, Value *p1,
-                                   Value *firstActives,
-                                   Value *bothActives);
+    void
+    fillLaneGatherBlock_newVersion(BasicBlock *laneGather, BasicBlock *alcApplied, BasicBlock *joinBlock);
 
 private:
     std::vector<Value *> *
@@ -128,7 +124,7 @@ private:
 private:
     std::vector<Value *> *
     fillJoinBlock(BasicBlock *joinBlock, BasicBlock *newLatch, BasicBlock *uniformBlock, BasicBlock *laneGather,
-                  Value *headerIndex, std::vector<Value *> *laneGatherOutputs,
+                  Value *headerIndex,
                   std::vector<Value *> *uniformBlockOutputs);
 
 private:
@@ -169,21 +165,16 @@ private:
     void fillPreALCBlock_simpleVersion(BasicBlock *preALCBlock, BasicBlock *alcHeader);
 
 private:
-    std::vector<Value *> *
-    fillLaneGatherBlock_simpleVersion(BasicBlock *laneGather, BasicBlock *alcApplied, Value *z0,
-                                      Value *z1, Value *p0, Value *p1,
-                                      Value *firstActives,
-                                      Value *bothActives);
+    void
+    fillLaneGatherBlock_simpleVersion(BasicBlock *laneGather, BasicBlock *alcApplied);
 
 private:
     void
-    fillUniformBlock_simpleVersion(BasicBlock *uniformBlock, BasicBlock *latch, BasicBlock *toBeVectorizedBlock,
-                                   Value *indices, Value *predicates);
+    fillUniformBlock_simpleVersion(BasicBlock *uniformBlock, BasicBlock *latch, BasicBlock *toBeVectorizedBlock);
 
 private:
     void
-    fillLinearizedBlock_simpleVersion(BasicBlock *linearized, BasicBlock *newLatch, BasicBlock *toBeVectorizedBlock,
-                                      Value *firstPredicates, Value *secondPredicates);
+    fillLinearizedBlock_simpleVersion(BasicBlock *linearized, BasicBlock *newLatch, BasicBlock *toBeVectorizedBlock);
 
 private:
     std::vector<Value *> *
