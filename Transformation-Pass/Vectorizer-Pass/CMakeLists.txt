@@ -27,6 +27,11 @@ list(APPEND CMAKE_INSTALL_RPATH "${CMAKE_BINARY_DIR}/IntrinsicCallGenerator")
 # Export compile commands db.
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# Enable or disable clang tidy.
+if (NOT DISABLE_CLANG_TIDY)
+  set(CMAKE_CXX_CLANG_TIDY clang-tidy -checks=llvm-*)
+endif()
+
 # Collect MyLoopPass src.
 set(srcs
         "${CMAKE_CURRENT_SOURCE_DIR}/ALC_Vectorizer.cpp"
