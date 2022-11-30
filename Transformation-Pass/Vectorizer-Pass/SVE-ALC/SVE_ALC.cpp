@@ -66,11 +66,9 @@ void SVE_ALC::doTransformation_newVersion() {
   // fill blocks
   std::vector<Value *> *preALCBlockValues =
       fillPreALCBlock_newVersion(preALCBlock, preheader, alcHeader);
-  Value *initialPredicates = formPredicate(
-      header, preALCBlock, ConstZeroOfIVTyVector); // initial predicates
-  std::vector<Value *> *headerOutputs = fillALCHeaderBlock_newVersion(
+  fillALCHeaderBlock_newVersion(
       alcHeader, laneGatherBlock, linearizedBlock, preALCBlock,
-      initialPredicates, preALCBlockValues, header);
+      preALCBlockValues, header);
 
   fillLaneGatherBlock_newVersion(laneGatherBlock, uniformBlock, joinBlock);
   std::vector<Value *> *uniformBlockOutputs =
@@ -81,10 +79,10 @@ void SVE_ALC::doTransformation_newVersion() {
                                  PredicatesOfSecondVector);
   std::vector<Value *> *joinBlockOutputs =
       fillJoinBlock(joinBlock, newLatch, uniformBlock, laneGatherBlock,
-                    headerOutputs->front(), uniformBlockOutputs);
+                    VectorLoopIndex, uniformBlockOutputs);
   std::vector<Value *> *latchOutputs = fillNewLatchBlock_newVersion(
       newLatch, alcHeader, middleBlock, joinBlock, linearizedBlock,
-      headerOutputs, joinBlockOutputs, (*preALCBlockValues)[3]);
+      joinBlockOutputs, (*preALCBlockValues)[3]);
 
   fillMiddleBlock_newVersion(middleBlock, preheaderForRemainingBlock, exitBlock,
                              (*preALCBlockValues)[2], (*latchOutputs)[1],
@@ -300,12 +298,13 @@ void SVE_ALC::fillMiddleBlock_newVersion(BasicBlock *middleBlock,
                         uniformVecPredicates, true, false, nullptr);
 }
 
-std::vector<Value *> *SVE_ALC::fillALCHeaderBlock_newVersion(
+void SVE_ALC::fillALCHeaderBlock_newVersion(
     BasicBlock *alcHeader, BasicBlock *laneGatherBlock, BasicBlock *linearized,
-    BasicBlock *preALC, Value *initialPredicates,
+    BasicBlock *preALCBlock,
     std::vector<Value *> *initialValues, BasicBlock *header) {
 
-  auto outputs = new std::vector<Value *>;
+  Value *initialPredicates = formPredicate(
+      header, preALCBlock, ConstZeroOfIVTyVector); // initial predicates
 
   IRBuilder<> builder(alcHeader->getContext());
   builder.SetInsertPoint(alcHeader);
@@ -318,24 +317,24 @@ std::vector<Value *> *SVE_ALC::fillALCHeaderBlock_newVersion(
   // create phi node for loop index
   VectorLoopIndex =
       builder.CreatePHI(VectorizedStepValue->getType(), 2, "vector.loop.index");
-  VectorLoopIndex->addIncoming(VectorizedStepValue, preALC);
+  VectorLoopIndex->addIncoming(VectorizedStepValue, preALCBlock);
 
   // create phi for uniformVec
   Value *&initalUniformVec = (*initialValues)[0];
   IndexVectorOfFirstVector =
       builder.CreatePHI(initalUniformVec->getType(), 2, "uniform.vector");
   static_cast<PHINode *>(IndexVectorOfFirstVector)
-      ->addIncoming(initalUniformVec, preALC);
+      ->addIncoming(initalUniformVec, preALCBlock);
 
   // create phi for uniformVecPreds
   PredicatesOfFirstVector = builder.CreatePHI(initialPredicates->getType(), 2,
                                               "uniform.vector.predicates");
   static_cast<PHINode *>(PredicatesOfFirstVector)
-      ->addIncoming(initialPredicates, preALC);
+      ->addIncoming(initialPredicates, preALCBlock);
 
   // count initial predicates inside the preALC
   IRBuilder<> preALCBuilder(alcHeader->getContext());
-  preALCBuilder.SetInsertPoint(preALC->getTerminator());
+  preALCBuilder.SetInsertPoint(preALCBlock->getTerminator());
   Value *initialUniformVecActives =
       intrinsicCallGenerator->createCntpInstruction(
           preALCBuilder, initialPredicates, initialPredicates);
@@ -344,7 +343,7 @@ std::vector<Value *> *SVE_ALC::fillALCHeaderBlock_newVersion(
   ActiveLanesInFirstVector = builder.CreatePHI(
       initialUniformVecActives->getType(), 2, "uniform.vec.actives");
   static_cast<PHINode *>(ActiveLanesInFirstVector)
-      ->addIncoming(initialUniformVecActives, preALC);
+      ->addIncoming(initialUniformVecActives, preALCBlock);
 
   // next iteration index vec
   Constant *constOne =
@@ -364,16 +363,6 @@ std::vector<Value *> *SVE_ALC::fillALCHeaderBlock_newVersion(
       ActiveLanesInBothVectors, VectorizedStepValue, "condition");
   dyn_cast<BranchInst>(alcHeader->getTerminator())
       ->setCondition(actualCondition);
-
-  outputs->push_back(VectorLoopIndex);
-  outputs->push_back(IndexVectorOfFirstVector);
-  outputs->push_back(PredicatesOfFirstVector);
-  outputs->push_back(IndexVectorOfSecondVector);
-  outputs->push_back(PredicatesOfSecondVector);
-  outputs->push_back(ActiveLanesInFirstVector);
-  outputs->push_back(ActiveLanesInSecondVector);
-  outputs->push_back(ActiveLanesInBothVectors);
-  return outputs;
 }
 
 void SVE_ALC::fillLaneGatherBlock_newVersion(BasicBlock *laneGather,
@@ -449,7 +438,6 @@ void SVE_ALC::fillLinearizedBlock_newVersion(BasicBlock *linearized,
 std::vector<Value *> *SVE_ALC::fillNewLatchBlock_newVersion(
     BasicBlock *newLatch, BasicBlock *alcHeader, BasicBlock *middleBlock,
     BasicBlock *joinBlock, BasicBlock *linearizedBlock,
-    std::vector<Value *> *alcHeaderOutputs,
     std::vector<Value *> *joinBlockOutputs, Value *totalVecIterations) {
 
   auto outputs = new std::vector<Value *>;
@@ -462,27 +450,22 @@ std::vector<Value *> *SVE_ALC::fillNewLatchBlock_newVersion(
   Value *&joinBlockPredicates = (*joinBlockOutputs)[2];
   Value *&joinBlockActiveCount = (*joinBlockOutputs)[3];
 
-  Value *&headerIndex = (*alcHeaderOutputs)[0];
-  Value *&headerUniformVec = (*alcHeaderOutputs)[1];
-  Value *&headerPredicates = (*alcHeaderOutputs)[2];
-  Value *&headerActiveCount = (*alcHeaderOutputs)[5];
-
   PHINode *indexPhi = builder.CreatePHI(joinBlockIndex->getType(), 2);
   indexPhi->addIncoming(joinBlockIndex, joinBlock);
-  indexPhi->addIncoming(headerIndex, linearizedBlock);
+  indexPhi->addIncoming(VectorLoopIndex, linearizedBlock);
 
   PHINode *uniformVecPhi = builder.CreatePHI(joinBlockUniformVec->getType(), 2);
   uniformVecPhi->addIncoming(joinBlockUniformVec, joinBlock);
-  uniformVecPhi->addIncoming(headerUniformVec, linearizedBlock);
+  uniformVecPhi->addIncoming(IndexVectorOfFirstVector, linearizedBlock);
 
   PHINode *predicatesPhi = builder.CreatePHI(joinBlockPredicates->getType(), 2);
   predicatesPhi->addIncoming(joinBlockPredicates, joinBlock);
-  predicatesPhi->addIncoming(headerPredicates, linearizedBlock);
+  predicatesPhi->addIncoming(PredicatesOfFirstVector, linearizedBlock);
 
   PHINode *activeCountPhi =
       builder.CreatePHI(joinBlockActiveCount->getType(), 2);
   activeCountPhi->addIncoming(joinBlockActiveCount, joinBlock);
-  activeCountPhi->addIncoming(headerActiveCount, linearizedBlock);
+  activeCountPhi->addIncoming(ActiveLanesInFirstVector, linearizedBlock);
 
   // update phi nodes in header
   const BasicBlock::phi_iterator &headerIndexPhi = alcHeader->phis().begin();

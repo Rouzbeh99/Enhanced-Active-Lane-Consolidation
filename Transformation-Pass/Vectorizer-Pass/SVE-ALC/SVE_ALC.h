@@ -102,9 +102,9 @@ private:
                                   Value *uniformVecPredicates);
 
 private:
-  std::vector<Value *> *fillALCHeaderBlock_newVersion(
+  void fillALCHeaderBlock_newVersion(
       BasicBlock *alcHeader, BasicBlock *laneGatherBlock,
-      BasicBlock *linearized, BasicBlock *preALC, Value *initialPredicates,
+      BasicBlock *linearized, BasicBlock *preALC,
       std::vector<Value *> *initialValues, BasicBlock *header);
 
 private:
@@ -135,7 +135,6 @@ private:
   std::vector<Value *> *fillNewLatchBlock_newVersion(
       BasicBlock *newLatch, BasicBlock *alcHeader, BasicBlock *middleBlock,
       BasicBlock *joinBlock, BasicBlock *linearizedBlock,
-      std::vector<Value *> *alcHeaderOutputs,
       std::vector<Value *> *joinBlockOutputs, Value *totalVecIterations);
 
 private:
