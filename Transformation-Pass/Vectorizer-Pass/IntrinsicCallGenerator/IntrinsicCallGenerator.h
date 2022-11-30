@@ -23,57 +23,57 @@ using namespace llvm;
 class IntrinsicCallGenerator {
 
 private:
-    int VF;
-    Module *M;
+  int VF;
+  Module *M;
 
 public:
-    IntrinsicCallGenerator(int VF, Module *M) : VF(VF), M(M) {}
+  IntrinsicCallGenerator(int VF, Module *M) : VF(VF), M(M) {}
 
 public:
-    Value *createAllTruePredicates(IRBuilder<> &IRB);
+  Value *createAllTruePredicates(IRBuilder<> &IRB);
 
-    Value *createCompactInstruction(IRBuilder<> &IRB, Value *toBeCompacted,
-                                    Value *predicatedVector);
+  Value *createCompactInstruction(IRBuilder<> &IRB, Value *toBeCompacted,
+                                  Value *predicatedVector);
 
-    Value *createCntpInstruction(IRBuilder<> &IRB, Value *elements,
-                                 Value *predicatedVector);
+  Value *createCntpInstruction(IRBuilder<> &IRB, Value *elements,
+                               Value *predicatedVector);
 
-    Value *createWhileltInstruction(IRBuilder<> &IRB, Value *firstOp,
-                                    Value *secondOp);
-
-    Value *createSpliceInstruction(IRBuilder<> &IRB, Value *firstOp,
-                                   Value *secondOp, Value *predicatedVector);
-
-    Value *createSelInstruction(IRBuilder<> &IRB, Value *firstOp, Value *secondOp,
-                                Value *predicatedVector);
-
-    Value *createIndexInstruction(IRBuilder<> &IRB, Value *firstOp,
+  Value *createWhileltInstruction(IRBuilder<> &IRB, Value *firstOp,
                                   Value *secondOp);
 
-    Value *createGatherLoadInstruction(IRBuilder<> &IRB, Value *ptr,
-                                       Value *predicatedVector, Value *indices);
+  Value *createSpliceInstruction(IRBuilder<> &IRB, Value *firstOp,
+                                 Value *secondOp, Value *predicatedVector);
 
-    Value *createLoadInstruction(IRBuilder<> &IRB, Type *SrcTy, Value *ptr,
-                                 Value *predicatedVector);
+  Value *createSelInstruction(IRBuilder<> &IRB, Value *firstOp, Value *secondOp,
+                              Value *predicatedVector);
 
-    void createScatterStoreInstruction(IRBuilder<> &IRB, Value *elementsVector,
-                                       Value *ptr, Value *predicatedVector,
-                                       Value *indices);
+  Value *createIndexInstruction(IRBuilder<> &IRB, Value *firstOp,
+                                Value *secondOp);
 
-    void createStoreInstruction(IRBuilder<> &IRB, Value *elementsVector,
-                                Value *ptr, Value *predicatedVector);
+  Value *createGatherLoadInstruction(IRBuilder<> &IRB, Value *ptr,
+                                     Value *predicatedVector, Value *indices);
 
-    Value *createArithmeticInstruction(IRBuilder<> &IRB, unsigned int intrinsic,
-                                       Value *firstOp, Value *secondOp,
-                                       Value *predicatedVector);
+  Value *createLoadInstruction(IRBuilder<> &IRB, Type *SrcTy, Value *ptr,
+                               Value *predicatedVector);
 
-    Value *createVscale64Intrinsic(IRBuilder<> &IRB);
+  void createScatterStoreInstruction(IRBuilder<> &IRB, Value *elementsVector,
+                                     Value *ptr, Value *predicatedVector,
+                                     Value *indices);
 
-    Value *createVscale32Intrinsic(IRBuilder<> &IRB);
+  void createStoreInstruction(IRBuilder<> &IRB, Value *elementsVector,
+                              Value *ptr, Value *predicatedVector);
 
-    Value *createStepVector64Intrinsic(IRBuilder<> &IRB, std::string name);
+  Value *createArithmeticInstruction(IRBuilder<> &IRB, unsigned int intrinsic,
+                                     Value *firstOp, Value *secondOp,
+                                     Value *predicatedVector);
 
-    Value *createStepVector32Intrinsic(IRBuilder<> &IRB, std::string name);
+  Value *createVscale64Intrinsic(IRBuilder<> &IRB);
+
+  Value *createVscale32Intrinsic(IRBuilder<> &IRB);
+
+  Value *createStepVector64Intrinsic(IRBuilder<> &IRB, std::string name);
+
+  Value *createStepVector32Intrinsic(IRBuilder<> &IRB, std::string name);
 };
 
 #endif
