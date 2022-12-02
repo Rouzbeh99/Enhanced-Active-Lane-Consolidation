@@ -32,6 +32,7 @@ private:
   LoopStandardAnalysisResults &AR;
   LoopInfo *LI;
   Value *tripCount;
+  Type *TripCountTy;
   ScalarEvolution *SE;
   PHINode *VectorLoopIndex;
   Value *VectorLoopNextIndex;
@@ -50,7 +51,7 @@ private:
   Value *PermutedPredicates;
   Value *ActiveElementsInPermutedVector;
   Value *allTrue;
-  Constant *ConstZeroOfIVTyVector;
+  Constant *ConstZeroVectorOfTripCountTy;
   PHINode *ScalarIV;
   BasicBlock *targetedBlock;
   std::vector<Instruction *> *sharedInstructions;
@@ -102,9 +103,9 @@ private:
                                   Value *uniformVecPredicates);
 
 private:
-  std::vector<Value *> *fillALCHeaderBlock_newVersion(
+  void fillALCHeaderBlock_newVersion(
       BasicBlock *alcHeader, BasicBlock *laneGatherBlock,
-      BasicBlock *linearized, BasicBlock *preALC, Value *initialPredicates,
+      BasicBlock *linearized, BasicBlock *preALC,
       std::vector<Value *> *initialValues, BasicBlock *header);
 
 private:
@@ -135,7 +136,6 @@ private:
   std::vector<Value *> *fillNewLatchBlock_newVersion(
       BasicBlock *newLatch, BasicBlock *alcHeader, BasicBlock *middleBlock,
       BasicBlock *joinBlock, BasicBlock *linearizedBlock,
-      std::vector<Value *> *alcHeaderOutputs,
       std::vector<Value *> *joinBlockOutputs, Value *totalVecIterations);
 
 private:
