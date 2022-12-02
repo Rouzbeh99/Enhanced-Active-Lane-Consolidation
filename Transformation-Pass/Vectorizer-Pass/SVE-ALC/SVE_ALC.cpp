@@ -42,7 +42,7 @@ void SVE_ALC::doTransformation_newVersion() {
   auto *preheader = L->getLoopPreheader();
   auto *latch = L->getLoopLatch();
   auto *exitBlock = L->getExitBlock();
-  ConstZeroOfIVTyVector = llvm::ConstantInt::get(ScalarIV->getType(), 0, true);
+  ConstZeroVectorOfTripCountTy = llvm::ConstantInt::get(TripCountTy, 0, true);
 
   targetedBlock = findTargetedBlock();
   sharedInstructions =
@@ -100,7 +100,7 @@ void SVE_ALC::doTransformation_simpleVersion() {
   auto *preheader = L->getLoopPreheader();
   auto *latch = L->getLoopLatch();
   auto *exitBlock = L->getExitBlock();
-  ConstZeroOfIVTyVector = llvm::ConstantInt::get(ScalarIV->getType(), 0, true);
+  ConstZeroVectorOfTripCountTy = llvm::ConstantInt::get(TripCountTy, 0, true);
 
   targetedBlock = findTargetedBlock();
   sharedInstructions =
@@ -219,7 +219,7 @@ void SVE_ALC::refinePreheader(BasicBlock *preVecBlock,
   auto *Terminator = L->getLoopPreheader()->getTerminator();
   IRBuilder<> IRB(Terminator);
 
-  if (tripCount->getType() == IRB.getInt64Ty()) {
+  if (TripCountTy == IRB.getInt64Ty()) {
     VectorizedStepValue = intrinsicCallGenerator->createVscale64Intrinsic(IRB);
   } else {
     VectorizedStepValue = intrinsicCallGenerator->createVscale32Intrinsic(IRB);
@@ -250,8 +250,8 @@ std::vector<Value *> *SVE_ALC::fillPreALCBlock_newVersion(
   allTrue = intrinsicCallGenerator->createAllTruePredicates(builder);
 
   // create step vector
-  Constant *constZero = ConstantInt::get(tripCount->getType(), 0, false);
-  Constant *constOne = ConstantInt::get(tripCount->getType(), 1, false);
+  Constant *constZero = ConstantInt::get(TripCountTy, 0, false);
+  Constant *constOne = ConstantInt::get(TripCountTy, 1, false);
   Value *initialUniformVec = intrinsicCallGenerator->createIndexInstruction(
       builder, constZero, constOne);
   Value *stepVal = VectorizedStepValue;
@@ -303,10 +303,24 @@ void SVE_ALC::fillALCHeaderBlock_newVersion(
     BasicBlock *preALCBlock,
     std::vector<Value *> *initialValues, BasicBlock *header) {
 
-  Value *initialPredicates = formPredicate(
-      header, preALCBlock, ConstZeroOfIVTyVector); // initial predicates
+  IRBuilder<> builder(preALCBlock->getTerminator());
 
-  IRBuilder<> builder(alcHeader->getContext());
+  Value *initialPredicates = formPredicate(
+      header, preALCBlock, ConstZeroVectorOfTripCountTy); // initial predicates
+
+  // count initial predicates inside the preALC
+  IRBuilder<> preALCBuilder(alcHeader->getContext());
+  preALCBuilder.SetInsertPoint(preALCBlock->getTerminator());
+  Value *initialUniformVecActives =
+      intrinsicCallGenerator->createCntpInstruction(
+          preALCBuilder, initialPredicates, initialPredicates);
+
+  if (TripCountTy == builder.getInt32Ty()) {
+    initialUniformVecActives = builder.CreateTruncOrBitCast(
+        initialUniformVecActives, TripCountTy);
+  }
+
+  //IRBuilder<> builder(alcHeader->getContext());
   builder.SetInsertPoint(alcHeader);
 
   // temporary, to be replaced with actual condition
@@ -332,13 +346,6 @@ void SVE_ALC::fillALCHeaderBlock_newVersion(
   static_cast<PHINode *>(PredicatesOfFirstVector)
       ->addIncoming(initialPredicates, preALCBlock);
 
-  // count initial predicates inside the preALC
-  IRBuilder<> preALCBuilder(alcHeader->getContext());
-  preALCBuilder.SetInsertPoint(preALCBlock->getTerminator());
-  Value *initialUniformVecActives =
-      intrinsicCallGenerator->createCntpInstruction(
-          preALCBuilder, initialPredicates, initialPredicates);
-
   // create phi for number of active lanes in uniform vec
   ActiveLanesInFirstVector = builder.CreatePHI(
       initialUniformVecActives->getType(), 2, "uniform.vec.actives");
@@ -357,6 +364,11 @@ void SVE_ALC::fillALCHeaderBlock_newVersion(
   // form condition for the branch
   ActiveLanesInSecondVector = intrinsicCallGenerator->createCntpInstruction(
       builder, PredicatesOfSecondVector, PredicatesOfSecondVector);
+
+  if (TripCountTy == builder.getInt32Ty()) {
+    ActiveLanesInSecondVector = builder.CreateTruncOrBitCast(
+        ActiveLanesInSecondVector, TripCountTy);
+  }
   ActiveLanesInBothVectors =
       builder.CreateAdd(ActiveLanesInFirstVector, ActiveLanesInSecondVector);
   Value *actualCondition = builder.CreateICmpULE(
@@ -377,6 +389,11 @@ void SVE_ALC::fillLaneGatherBlock_newVersion(BasicBlock *laneGather,
       intrinsicCallGenerator->createCntpInstruction(builder, PermutedPredicates,
                                                     PermutedPredicates);
 
+  if (TripCountTy == builder.getInt32Ty()) {
+    ActiveElementsInPermutedVector = builder.CreateTruncOrBitCast(
+        ActiveElementsInPermutedVector, TripCountTy);
+  }
+
   // check if z0 is uniform
   Value *condition =
       builder.CreateICmpEQ(ActiveLanesInBothVectors, VectorizedStepValue);
@@ -395,14 +412,14 @@ std::vector<Value *> *SVE_ALC::fillUniformBlock_newVersion(
   builder.CreateBr(joinBlock);
   builder.SetInsertPoint(uniformBlock->getTerminator());
 
-  Constant *constOne = llvm::ConstantInt::get(ScalarIV->getType(), 1, true);
+  Constant *constOne = llvm::ConstantInt::get(TripCountTy, 1, true);
 
   std::vector<Instruction *> *clonedInstructions = cloneInstructions(
-      toBeVectorizedBlock, uniformBlock, ConstZeroOfIVTyVector);
+      toBeVectorizedBlock, uniformBlock, ConstZeroVectorOfTripCountTy);
 
   // TODO: handle cases where instruction uses 0 instead of induction var
   vectorizeInstructions(clonedInstructions, uniformBlock, indices,
-                        ConstZeroOfIVTyVector, allTrue, true, false, nullptr);
+                        ConstZeroVectorOfTripCountTy, allTrue, true, false, nullptr);
 
   // Form next iteration
   Value *nextItrIndex = builder.CreateAdd(indexPhi, VectorizedStepValue);
@@ -411,6 +428,10 @@ std::vector<Value *> *SVE_ALC::fillUniformBlock_newVersion(
   Value *nextPredicateVec = formPredicate(header, uniformBlock, nextItrIndex);
   Value *activeElements = intrinsicCallGenerator->createCntpInstruction(
       builder, nextPredicateVec, nextPredicateVec);
+
+  if (TripCountTy == builder.getInt32Ty()) {
+    activeElements = builder.CreateTruncOrBitCast(activeElements, TripCountTy);
+  }
 
   outputs->push_back(nextItrIndex);
   outputs->push_back(nextUniformVec);
@@ -577,7 +598,7 @@ std::map<const Value *, const Value *> *SVE_ALC::vectorizeInstructions(
   Instruction *insertionPoint = block->getTerminator();
   IRBuilder<> IRB(insertionPoint);
 
-  Constant *constOne = llvm::ConstantInt::get(ScalarIV->getType(), 1, true);
+  Constant *constOne = llvm::ConstantInt::get(TripCountTy, 1, true);
   if (indices == nullptr) {
     indices = intrinsicCallGenerator->createIndexInstruction(IRB, VectorIndex,
                                                              constOne);
@@ -851,10 +872,10 @@ void SVE_ALC::fillALCHeaderBlock_simpleVersion(BasicBlock *alcHeader,
   // create phi node for loop index
   VectorLoopIndex =
       builder.CreatePHI(VectorizedStepValue->getType(), 2, "index");
-  VectorLoopIndex->addIncoming(ConstZeroOfIVTyVector, preALC);
+  VectorLoopIndex->addIncoming(ConstZeroVectorOfTripCountTy, preALC);
 
   // index vec
-  Constant *constOne = llvm::ConstantInt::get(ScalarIV->getType(), 1, true);
+  Constant *constOne = llvm::ConstantInt::get(TripCountTy, 1, true);
   IndexVectorOfFirstVector = intrinsicCallGenerator->createIndexInstruction(
       builder, VectorLoopIndex, constOne);
 
@@ -865,6 +886,11 @@ void SVE_ALC::fillALCHeaderBlock_simpleVersion(BasicBlock *alcHeader,
   ActiveLanesInFirstVector = intrinsicCallGenerator->createCntpInstruction(
       builder, PredicatesOfFirstVector, PredicatesOfFirstVector);
 
+  if (TripCountTy == builder.getInt32Ty()) {
+    ActiveLanesInFirstVector = builder.CreateTruncOrBitCast(
+        ActiveLanesInFirstVector, TripCountTy);
+  }
+
   // nexr itr
   VectorLoopNextIndex = builder.CreateAdd(VectorLoopIndex, VectorizedStepValue);
   IndexVectorOfSecondVector =
@@ -873,6 +899,11 @@ void SVE_ALC::fillALCHeaderBlock_simpleVersion(BasicBlock *alcHeader,
       formPredicate(header, alcHeader, VectorLoopNextIndex);
   ActiveLanesInSecondVector = intrinsicCallGenerator->createCntpInstruction(
       builder, PredicatesOfSecondVector, PredicatesOfSecondVector);
+
+  if (TripCountTy == builder.getInt32Ty()) {
+    ActiveLanesInSecondVector = builder.CreateTruncOrBitCast(
+        ActiveLanesInSecondVector, TripCountTy);
+  }
 
   ActiveLanesInBothVectors =
       builder.CreateAdd(ActiveLanesInFirstVector, ActiveLanesInSecondVector);
@@ -932,7 +963,7 @@ void SVE_ALC::fillUniformBlock_simpleVersion(BasicBlock *uniformBlock,
   builder.CreateBr(latch);
 
   std::vector<Instruction *> *clonedInstructions = cloneInstructions(
-      toBeVectorizedBlock, uniformBlock, ConstZeroOfIVTyVector);
+      toBeVectorizedBlock, uniformBlock, ConstZeroVectorOfTripCountTy);
 
   vectorizeInstructions(clonedInstructions, uniformBlock, PermutedIndices,
                         VectorLoopIndex, PermutedPredicates, true, true,
@@ -1124,7 +1155,13 @@ Value *SVE_ALC::computeTripCount(BasicBlock *latch, Value *inductionVar) {
     if (flag) {
       continue;
     } else {
-      return conditionInst->getOperand(i);
+      auto *TC = conditionInst->getOperand(i);
+      // TODO: reverse the decision to choose VF based on the loop's trip-count type.
+      if (vectorizationFactor == 4)
+        if (auto *ZExt = dyn_cast_or_null<ZExtInst>(TC))
+          if (ZExt->getSrcTy() == Type::getInt32Ty(TC->getContext()))
+            TC = ZExt->getOperand(0);
+      return TC;
     }
   }
 
@@ -1156,4 +1193,5 @@ SVE_ALC::SVE_ALC(Loop *l, int vectorizationFactor,
       new IntrinsicCallGenerator(vectorizationFactor, module);
   tripCount =
       computeTripCount(L->getLoopLatch(), L->getCanonicalInductionVariable());
+  TripCountTy = tripCount->getType();
 }

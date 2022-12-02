@@ -32,6 +32,7 @@ private:
   LoopStandardAnalysisResults &AR;
   LoopInfo *LI;
   Value *tripCount;
+  Type *TripCountTy;
   ScalarEvolution *SE;
   PHINode *VectorLoopIndex;
   Value *VectorLoopNextIndex;
@@ -50,7 +51,7 @@ private:
   Value *PermutedPredicates;
   Value *ActiveElementsInPermutedVector;
   Value *allTrue;
-  Constant *ConstZeroOfIVTyVector;
+  Constant *ConstZeroVectorOfTripCountTy;
   PHINode *ScalarIV;
   BasicBlock *targetedBlock;
   std::vector<Instruction *> *sharedInstructions;
