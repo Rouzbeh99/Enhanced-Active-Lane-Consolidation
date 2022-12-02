@@ -647,9 +647,14 @@ std::map<const Value *, const Value *> *SVE_ALC::vectorizeInstructions(
       Value *loadedData = nullptr;
       assert(isa<GEPOperator>(ptr) &&
              "Expected LoadInst PointerOperand to be GetElementPtr!");
+      auto *GEP = static_cast<GEPOperator *>(ptr);
+      auto *SrcTy = GEP->getSourceElementType();
+      if (SrcTy->isArrayTy()) {
+        SrcTy = SrcTy->getArrayElementType();
+      }
       if (isPermuted) {
         loadedData = intrinsicCallGenerator->createGatherLoadInstruction(
-            IRB, ptr, predicates, indices);
+            IRB, SrcTy, ptr, predicates, indices);
       } else if (isPredicated) {
         assert(isa<GEPOperator>(ptr) &&
                "Expected LoadInst PointerOperand to be GetElementPtr!");
