@@ -50,7 +50,7 @@ public:
   Value *createIndexInstruction(IRBuilder<> &IRB, Value *firstOp,
                                 Value *secondOp);
 
-  Value *createGatherLoadInstruction(IRBuilder<> &IRB, Value *ptr,
+  Value *createGatherLoadInstruction(IRBuilder<> &IRB, Type *SrcTy, Value *ptr,
                                      Value *predicatedVector, Value *indices);
 
   Value *createLoadInstruction(IRBuilder<> &IRB, Type *SrcTy, Value *ptr,
