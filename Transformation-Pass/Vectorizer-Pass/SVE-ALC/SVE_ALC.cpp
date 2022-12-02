@@ -604,11 +604,6 @@ std::map<const Value *, const Value *> *SVE_ALC::vectorizeInstructions(
 
   std::map<Value *, Value *> vMap;
 
-  // TODO:
-  //  initialize vMap with headerInstructionsMap
-  //    for (auto pair: *headerInstructionsMap) {
-  //        vMap[(Value *) pair.first] = (Value *) pair.second;
-  //    }
 
   // Should be remove in FILO manner to prevent removing a value that is used in
   // following lines

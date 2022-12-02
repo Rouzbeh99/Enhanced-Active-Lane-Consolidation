@@ -28,7 +28,21 @@
     tabsize=2
 }
 
-\lstset{style=mystyle}
+
+\lstset{
+    style=mystyle,
+    columns=fullflexible,
+    basicstyle=\ttfamily,
+    frame=tlbr,
+    framerule=0pt,
+    xleftmargin=17pt,
+    framexleftmargin=17pt,
+    framexrightmargin=5pt,
+    framexbottommargin=4pt,
+    aboveskip=20pt,
+    belowskip=20pt
+}
+    
 
 \begin{document}
 
@@ -50,7 +64,7 @@ One of the larget obstacles for vectorization has always been control flow diver
 based on some conditions inside the code that could change dynamically. This is called divergence in the control flow of the program. Having divergence in the code, vectorization can not be simply applied,
 as different iterations of the loop might take different paths and as a result disabling the compiler to replace instructions with SIMD ones. 
 
-To deal with divergence in the code, a tranformation called "Control Flow Linearization" has been proposed. Modern Processors contain "predicated instructions". in predicated instructions, every single instruction is 
+To deal with divergence in the code, a tranformation called If-Conversion (also called Control Flow Linearization)  has been proposed. Modern Processors support "predicated instructions". in predicated instructions, every single instruction is 
 gaurded by a one bit predicate which could be either 1 or 0. The result of execution of the instruction will be committed only if that predicate bit is set to 1. Otherwise, the result will be discarded leaving no architectural(?) effect e.g: memory writes (?),... .
 Having "Predicated Vector instructions" in the processor, compilers will be able to vectorize codes with divergence by first Linearizing control flow and then replacing scalar instructions with vectorized ones.
 This is the most widely taken approach to vector such codes with divergence, But there are probelms with this approach.
@@ -73,14 +87,37 @@ To demonstrate possible shortcomings with this approach, let's follow a simple e
 % \end{algorithm}
 
 
-\begin{lstlisting}[language=C]
+\begin{lstlisting}[language=C, caption={Motivating Example}]
     for(i = 0; i < n; i++){
-        if(i%2 == 0){
+        if(a[i] > b[i]){
             a[i] = b[i] * c[i];
         }else{
-            b[i] = a[i] * c[i];
+            b[i] = a[i] + c[i];
         }
     }
 \end{lstlisting}
+
+There are two different paths inside the loop body which disable us to simply vectorize the code. As explaned before, we need to first linearize the control flow through if-conversion and then vectorized code. After doing so, resulting code 
+would look like this:(In this section we assume that vector length is 4.)
+
+\begin{lstlisting}[language=C]
+    for(i = 0; i < n; i+=4 ){
+        a_v = load_v(&a[i], 4);
+        b_v = load_v(&b[i], 4);
+        mask_v = a_v > b_v;
+        c_v = load_v(&c[i], 4);
+        mult_v = b_v * c_v;
+        masked_store_v(&a[i], mult_v, 4, mask_v);
+        mask_not_v = not_v(mask_v);
+        add_v = a_v + c_v;
+        masked_store_v(&b[i],add_v, 4, mask_not_v);
+    }
+\end{lstlisting}
+
+As you can see, when we apply if conversion, we are always executing codes in both if and else blocks and because the conditions for these two blocks are mutually exclusive, no matter how many true and false elements exists in 
+the mask vector, we always end up wastng half of vector lanes due to predication.
+
+// uniform true and false path solutions
+
     
 \end{document}
