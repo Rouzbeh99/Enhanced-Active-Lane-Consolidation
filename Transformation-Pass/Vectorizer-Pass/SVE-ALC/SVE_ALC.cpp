@@ -1156,11 +1156,13 @@ Value *SVE_ALC::computeTripCount(BasicBlock *latch, Value *inductionVar) {
       continue;
     } else {
       auto *TC = conditionInst->getOperand(i);
-      // TODO: reverse the decision to choose VF based on the loop's trip-count type.
-      if (vectorizationFactor == 4)
-        if (auto *ZExt = dyn_cast_or_null<ZExtInst>(TC))
-          if (ZExt->getSrcTy() == Type::getInt32Ty(TC->getContext()))
-            TC = ZExt->getOperand(0);
+      auto *I32 = Type::getInt32Ty(TC->getContext());
+      auto *I64 = Type::getInt64Ty(TC->getContext());
+      if (auto *ZExt = dyn_cast_or_null<ZExtInst>(TC))
+        if (ZExt->getSrcTy() == Type::getInt32Ty(TC->getContext()))
+          TC = ZExt->getOperand(0);
+      assert((TC->getType() == I32 || TC->getType() == I64) &&
+          "TripCountTy is neither i32 nor i64.");
       return TC;
     }
   }
@@ -1189,9 +1191,13 @@ SVE_ALC::SVE_ALC(Loop *l, int vectorizationFactor,
   LI = &AR.LI;
   SE = &AR.SE;
   module = L->getHeader()->getModule();
-  intrinsicCallGenerator =
-      new IntrinsicCallGenerator(vectorizationFactor, module);
   tripCount =
       computeTripCount(L->getLoopLatch(), L->getCanonicalInductionVariable());
   TripCountTy = tripCount->getType();
+  if (vectorizationFactor == 4 && TripCountTy == Type::getInt64Ty(tripCount->getContext())) {
+    errs() << "warning: Requested VF = 4 but TripCountTy is i64. Reverting VF to 2\n";
+    this->vectorizationFactor = 2;
+  }
+  intrinsicCallGenerator =
+      new IntrinsicCallGenerator(this->vectorizationFactor, module);
 }
