@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#include <gem5/m5ops.h>
+//#include <gem5/m5ops.h>
 
 #define __START_TRACE()                                                        \
   { asm volatile(".inst 0x2520e020"); }
@@ -14,18 +14,18 @@ void foo(int *__restrict__ a, int *__restrict__ b, int *__restrict__ c,
 
   //  __asm__ volatile("dmb sy\n\torr x3,x3,x3\n":: :"memory");
   //  __START_TRACE();
-  m5_reset_stats(0, 0);
+//  m5_reset_stats(0, 0);
 //#pragma unroll 2
 for(int j = 0; j<100; j++){
   for (int i = 0; i < n; ++i) {
     if (cond[i]) {
-      a[i] = (18 * a[i] + 2 * c[i]) - (b[i] - 4 * a[i]);
-      b[i] = 5 * b[i] * a[i];
-      c[i] = 2 * b[i] - 3 * a[i];
+      a[i] = (2 * a[i] - 2 * c[i]) + (b[i] - 2 * a[i]);
+      b[i] = 2 + b[i] + a[i];
+      c[i] = 2 * b[i] + 2 * a[i];
     }
   }
  }
-  m5_dump_stats(0, 0);
+//  m5_dump_stats(0, 0);
   //  __STOP_TRACE();
   //  __asm__ volatile("dmb sy\n\torr x4,x4,x4\n":: :"memory");
 }

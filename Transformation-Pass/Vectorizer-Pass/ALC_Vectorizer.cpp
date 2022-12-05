@@ -55,7 +55,7 @@ namespace {
 
         BasicBlock *initialLatch = L->getLoopLatch();
 
-        int factor = 2;
+        int factor = 4;
 
         auto *sve_alc = new SVE_ALC(L, factor, AR);
         auto *sve_vectorizer = new SVE_Vectorizer(L, factor, AR);
