@@ -101,23 +101,68 @@ There are two different paths inside the loop body which disable us to simply ve
 would look like this:(In this section we assume that vector length is 4.)
 
 \begin{lstlisting}[language=C]
-    for(i = 0; i < n; i+=4 ){
-        a_v = load_v(&a[i], 4);
-        b_v = load_v(&b[i], 4);
+    VLength= 4;
+    for(i = 0; i < n; i+=VLength ){
+        a_v = load_v(&a[i], VLength);
+        b_v = load_v(&b[i], VLength);
         mask_v = a_v > b_v;
-        c_v = load_v(&c[i], 4);
-        mult_v = b_v * c_v;
-        masked_store_v(&a[i], mult_v, 4, mask_v);
+        c_v = load_v(&c[i], VLength);
+        mult_v = masked_mul(b_v, c_v, mask_v);
+        masked_store_v(&a[i], mult_v, VLength, mask_v);
         mask_not_v = not_v(mask_v);
-        add_v = a_v + c_v;
-        masked_store_v(&b[i],add_v, 4, mask_not_v);
+        add_v = maked_add(a_v, b_v, mask_v)
+        masked_store_v(&b[i],add_v, VLength, mask_not_v);
     }
 \end{lstlisting}
 
-As you can see, when we apply if conversion, we are always executing codes in both if and else blocks and because the conditions for these two blocks are mutually exclusive, no matter how many true and false elements exists in 
+As you can see, when we apply if conversion, we are always executing codes in both if and else blocks and because the conditions for these two blocks are mutually exclusive, no matter how many true and false elements exist in 
 the mask vector, we always end up wastng half of vector lanes due to predication.
 
-// uniform true and false path solutions
+This problem has been studied for a while and recent works [cite] has proposed solutions for that. The main idea behind most of these solutions is to detect \textbf{Uniform True} and \textbf{Uniform False} paths.
 
-    
+A uniform path refers to the case where for one vector iterations, all predicates are either true or false which means all iterations are going to execute one path (in our motivating example either then block or else block). If such a uniform is detected, All we need to 
+do is to introduce a path (coressponding to the block it's going to execute) that all instructions are vectorized but not predicated. Doing so we will: 1- utilize full vector capacity to execute code and 2- avoid excessive overhead introduced by predicated 
+instructions.
+
+Having the idea of uniform paths, the main challenge is how to detect uniform vectors. As discussed above and we saw in the example[figure number], predicated vectors are formed from branch (in the example the if statement) conditions. The value for these conditions could be 
+either static or dynamic. In case of static, compiler could find its value at compile time and apply appropriate optimizations to produce the most performant(?) code however, in most cases the condition can only be determined at runtime and could change on each iteration and 
+a result static approaches are unable to detec uniformity. 
+
+Runtime checks are typical solutions to this problem. Compiler inserts some runtime checks to find if a vector is uniform in that execution time or not. Compiler also introduced some paths so that when a uniform vector is detected dynamically, the coressponding path will be executed.
+
+To demonstrate how this approach works, let's apply it on the code in figure [FIG number]:
+
+\begin{lstlisting}[language=C]
+    VLength= 4;
+    for(i = 0; i < n; i+=VLength ){
+        a_v = load_v(&a[i], VLength);
+        b_v = load_v(&b[i], VLength);
+        mask_v = a_v > b_v;
+        c_v = load_v(&c[i], VLength);
+        if(all_true(mask_v)){
+            /* uniform true path */
+            mult_v = b_v * c_v;
+            store(&a[i], mult_v, VLength);
+        } else if (all_false(mask_v)){
+            /* uniform false path */
+            add_v = a_v + c_v;
+            store(&b[i],add_v, VLength);
+        }else{
+            /* divergent path */
+            mult_v = masked_mul(b_v, c_v, mask_v);
+            masked_store_v(&a[i], mult_v, VLength, mask_v);
+            mask_not_v = not_v(mask_v);
+            add_v = maked_add(a_v, b_v, mask_v)
+            masked_store_v(&b[i],add_v, VLength, mask_not_v);
+        }
+    }
+\end{lstlisting}
+
+
+Although uniform paths could possibily lead to performace improvement, there are two things to consider about them: First, they introduce overheads due to runtime checks they add to the code and second, if the input is in a way that uniform vectors are unlikely to occur, then unifrom paths
+won't be executed often, thus no improvement will be gained.
+
+Wytte[cite] suggested the idea of \emph{forming} uniform vectors reather than \emph{waiting} for one to occur. He proposed Active-Lane-Consolidation (ALC) transformation to dynamically form such uniform vectors.
+
+
 \end{document}
