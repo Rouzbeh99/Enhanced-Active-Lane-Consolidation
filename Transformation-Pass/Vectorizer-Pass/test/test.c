@@ -19,12 +19,12 @@ void foo(int *__restrict__ a, int *__restrict__ b, int *__restrict__ c,
     for (int j = 0; j < 10; j++) {
         for (int i = 0; i < n; ++i) {
             if (cond[i]) {
-//                a[i] = (2 * a[i] - 2 * c[i]) + (b[i] - 2 * a[i]);
-                a[i] += 2 * i;
-//                b[i] = 2 - 2 * b[i] + (2 * a[i] - 2 * c[i]);
-//                b[i] -= 3 * i;
-//                c[i] = 2 * b[i] + 2 * a[i] - 3 * (2 * c[i] - 2 * b[i]);
-//                c[i] -= 2 * i;
+                a[i] = (2 * a[i] - 2 * c[i]) + (b[i] - 2 * a[i]);
+                a[i] += 2 * i + i * b[i];
+                b[i] = 2 - 2 * b[i] + (2 * a[i] - 2 * c[i]);
+                b[i] -= 3 * i + i * c[i];
+                c[i] = 2 * b[i] + 2 * a[i] - 3 * (2 * c[i] - 2 * b[i] + i * i);
+                c[i] -= 2 * i;
             }
         }
     }

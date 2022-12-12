@@ -622,7 +622,7 @@ std::map<const Value *, const Value *> *SVE_ALC::vectorizeInstructions(
     std::stack<Instruction *> toBeRemoved;
     // TODO: Complete the list
     for (auto instr: *instructions) {
-        
+
 
         if (auto *GEP = dyn_cast_or_null<GEPOperator>(instr)) {
             //            assert(GEP->getNumIndices() == 1 && "Expected GetElementPtr
