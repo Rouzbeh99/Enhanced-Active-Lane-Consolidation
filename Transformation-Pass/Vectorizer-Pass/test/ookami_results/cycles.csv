@@ -1,0 +1,7 @@
+inputs,cycles
+alc_itr_32,1212607683
+vectorized,763219286
+alc_simple_32,2338064466
+alc_itr_64,1307139244
+compiled_with_O3,2262351439
+alc_simple_64,2523829713

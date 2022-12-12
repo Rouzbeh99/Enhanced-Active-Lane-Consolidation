@@ -12,22 +12,25 @@
 void foo(int *__restrict__ a, int *__restrict__ b, int *__restrict__ c,
          bool *__restrict__ cond, int n) {
 
-  //  __asm__ volatile("dmb sy\n\torr x3,x3,x3\n":: :"memory");
-  //  __START_TRACE();
+    //  __asm__ volatile("dmb sy\n\torr x3,x3,x3\n":: :"memory");
+    //  __START_TRACE();
 //  m5_reset_stats(0, 0);
-//#pragma unroll 2
-for(int j = 0; j<100; j++){
-  for (int i = 0; i < n; ++i) {
-    if (cond[i]) {
-      a[i] = (2 * a[i] - 2 * c[i]) + (b[i] - 2 * a[i]);
-      b[i] = 2 + b[i] + a[i];
-      c[i] = 2 * b[i] + 2 * a[i];
+
+    for (int j = 0; j < 10; j++) {
+        for (int i = 0; i < n; ++i) {
+            if (cond[i]) {
+//                a[i] = (2 * a[i] - 2 * c[i]) + (b[i] - 2 * a[i]);
+                a[i] += 2 * i;
+//                b[i] = 2 - 2 * b[i] + (2 * a[i] - 2 * c[i]);
+//                b[i] -= 3 * i;
+//                c[i] = 2 * b[i] + 2 * a[i] - 3 * (2 * c[i] - 2 * b[i]);
+//                c[i] -= 2 * i;
+            }
+        }
     }
-  }
- }
 //  m5_dump_stats(0, 0);
-  //  __STOP_TRACE();
-  //  __asm__ volatile("dmb sy\n\torr x4,x4,x4\n":: :"memory");
+    //  __STOP_TRACE();
+    //  __asm__ volatile("dmb sy\n\torr x4,x4,x4\n":: :"memory");
 }
 
 int *a;
@@ -36,48 +39,48 @@ int *c;
 bool *cond;
 
 int *checked_malloc_int_array(int n) {
-  int *ptr = (int*)malloc(sizeof(int)*n);
-  if (ptr == NULL) {
-    printf("error: failed to allocate memory\n");
-    exit(1);
-  }
-  return ptr;
+    int *ptr = (int *) malloc(sizeof(int) * n);
+    if (ptr == NULL) {
+        printf("error: failed to allocate memory\n");
+        exit(1);
+    }
+    return ptr;
 }
 
 bool *checked_malloc_bool_array(int n) {
-  bool *ptr = (bool*)malloc(sizeof(bool)*n);
-  if (ptr == NULL) {
-    printf("error: failed to allocate memory\n");
-    exit(1);
-  }
-  return ptr;
+    bool *ptr = (bool *) malloc(sizeof(bool) * n);
+    if (ptr == NULL) {
+        printf("error: failed to allocate memory\n");
+        exit(1);
+    }
+    return ptr;
 }
 
 int main() {
 
-  int n = 200000;
+    int n = 5000000;
 
-  a = checked_malloc_int_array(n);
-  b = checked_malloc_int_array(n);
-  c = checked_malloc_int_array(n);
-  cond = checked_malloc_bool_array(n);
+    a = checked_malloc_int_array(n);
+    b = checked_malloc_int_array(n);
+    c = checked_malloc_int_array(n);
+    cond = checked_malloc_bool_array(n);
 
-  for (int i = 0; i < n; ++i) {
-    a[i] = i;
-    b[i] = 2;
-    c[i] = 0;
-    cond[i] = (i == 0 ? 0 : (i % 10 == 0));
-  }
+    for (int i = 0; i < n; ++i) {
+        a[i] = i;
+        b[i] = 2;
+        c[i] = 0;
+        cond[i] = (i == 0 ? 0 : (i % 10 == 0));
+    }
 
-  foo(a, b, c, cond, n);
+    foo(a, b, c, cond, n);
 
-  int sum = 0;
+    int sum = 0;
 
-  for (int i = 0; i < n; ++i) {
-    sum += c[i];
-  }
+    for (int i = 0; i < n; ++i) {
+        sum += c[i];
+    }
 
-  printf("%d \n", sum);
+    printf("%d \n", sum);
 
-  return 0;
+    return 0;
 }

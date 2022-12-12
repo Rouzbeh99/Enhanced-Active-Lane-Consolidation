@@ -89,7 +89,7 @@ To demonstrate possible shortcomings with this approach, let's follow a simple e
 
 \begin{lstlisting}[language=C, caption={Motivating Example}]
     for(i = 0; i < n; i++){
-        if(a[i] > b[i]){
+        if(cond[i]){
             a[i] = b[i] * c[i];
         }else{
             b[i] = a[i] + c[i];
@@ -105,8 +105,8 @@ would look like this:(In this section we assume that vector length is 4.)
     for(i = 0; i < n; i+=VLength ){
         a_v = load_v(&a[i], VLength);
         b_v = load_v(&b[i], VLength);
-        mask_v = a_v > b_v;
         c_v = load_v(&c[i], VLength);
+        mask_v = load_v(&cond[i], VLength);
         mult_v = masked_mul(b_v, c_v, mask_v);
         masked_store_v(&a[i], mult_v, VLength, mask_v);
         mask_not_v = not_v(mask_v);
@@ -115,7 +115,10 @@ would look like this:(In this section we assume that vector length is 4.)
     }
 \end{lstlisting}
 
-As you can see, when we apply if conversion, we are always executing codes in both if and else blocks and because the conditions for these two blocks are mutually exclusive, no matter how many true and false elements exist in 
+When we apply if conversion, all branches are eliminated and instead, all instruction are gaurded with predicates. In line 6 we have computed the mask for instructions that belong to if block. Then instructions in lines 7 and 8 use this mask vectore. Since here we have a simple if then else statement,
+the predicate for else block instructions will simply be negated(?) predicates we had for if block. So in line 9 we used not instruction to form mask vector for then block and used it for instructions in lines 10 and 11.
+
+As you can see, by applying if conversion, we are always executing codes in both if and else blocks and because the conditions for these two blocks are mutually exclusive, no matter how many true and false elements exist in 
 the mask vector, we always end up wastng half of vector lanes due to predication.
 
 This problem has been studied for a while and recent works [cite] has proposed solutions for that. The main idea behind most of these solutions is to detect \textbf{Uniform True} and \textbf{Uniform False} paths.
@@ -137,8 +140,8 @@ To demonstrate how this approach works, let's apply it on the code in figure [FI
     for(i = 0; i < n; i+=VLength ){
         a_v = load_v(&a[i], VLength);
         b_v = load_v(&b[i], VLength);
-        mask_v = a_v > b_v;
         c_v = load_v(&c[i], VLength);
+        mask_v = load_v(&cond[i], VLength);
         if(all_true(mask_v)){
             /* uniform true path */
             mult_v = b_v * c_v;
@@ -148,7 +151,7 @@ To demonstrate how this approach works, let's apply it on the code in figure [FI
             add_v = a_v + c_v;
             store(&b[i],add_v, VLength);
         }else{
-            /* divergent path */
+            /* Linearized Path */
             mult_v = masked_mul(b_v, c_v, mask_v);
             masked_store_v(&a[i], mult_v, VLength, mask_v);
             mask_not_v = not_v(mask_v);
@@ -158,11 +161,54 @@ To demonstrate how this approach works, let's apply it on the code in figure [FI
     }
 \end{lstlisting}
 
+Like before, we formed mask vector in line 6. Then we check to see if all elements in mask vector is true. If so, it means that we have detected a uniform vector coressponding to if blcok and we can execute if code without predication. But if the all elements of the mask are false, then we have detected 
+uniform vector coressponding to else block. So we can execute else code with no predicatation. Otherwise, it means that the vector is a combination of true and false elements which execute different paths in the code (some if block and some else). In this case we use predicated code in our linearized path as before.
 
 Although uniform paths could possibily lead to performace improvement, there are two things to consider about them: First, they introduce overheads due to runtime checks they add to the code and second, if the input is in a way that uniform vectors are unlikely to occur, then unifrom paths
 won't be executed often, thus no improvement will be gained.
 
-Wytte[cite] suggested the idea of \emph{forming} uniform vectors reather than \emph{waiting} for one to occur. He proposed Active-Lane-Consolidation (ALC) transformation to dynamically form such uniform vectors.
+Wytte[cite] suggested the idea of \emph{forming} uniform vectors reather than \emph{waiting} for one to occur. He proposed his transformation called Active-Lane-Consolidation (ALC) to dynamically form such uniform vectors. The main idea behind this transformation is to \emph{permute} loop indices
+so that eventually we have a uniform vector of indices which then executes the coressponding block without preication. 
+
+To see how it works let's apply it to our motivating example in figure[?]:
+\begin{lstlisting}[language=C]
+    VLength= 4;
+    /*Initialization*/
+    uniform_vec = index(0,VLength);
+    uniform_mask = load_v(&cond[0], VLength);
+    for(i = 0; i < n; i+=VLength ){
+        index_vec = index(i, VLength);
+        mask_vec = load_v(&cond[i], VLength);
+        uniform_vec, remaining_vec, uniform_mask, remaining_mask = Permute(uniform_vec, index_vec, uniform_mask, mask_vec);        
+        if(all_true(uniform_mask)){
+            /* execute if block without predication */
+            b_v = gather_load_v(&b, uniform_vec);
+            c_v = gather_load_v(&c, uniform_vec);
+            mul_v = b_v * c_v;
+            scatter_store(&a, uniform_vec, mul_v);
+
+            uniform_vec = remaining_vec;
+            uniform_mask = remaining_mask;
+        }else {     
+            /* execute else block without predication */
+            a_v = gather_load_v(&a, remaining_vec);
+            c_v = gather_load_v(&c, remaining_vec);
+            add_v = a_v + c_v;
+            scatter_store(&b, remaining_vec, add_v);
+        } 
+    }
+\end{lstlisting}
+
+In lines 3 and 4, the uniform vector (uniform\_vec) and its mask vector (unifrom\_mask) have been Initialized with indices 0 to VLength and the coressponding masks respectively.
+Then in each iteration of the loop, next vector of indices and its masked vector have been formed. The magic happens in line 11 where we call the permute function. It will put all active elements in uniform\_vec, the other elements in remaining\_vec and coressponding mask bits to uniform\_mask and remaining\_mask.
+After doing so we check if all mask bits in uniform\_mask is true. If this happens, it means that we have formed a uniform vector coressponding to then block and we can execute it with no predication. Otherwise, we are sure that all mask bits in remaining\_vec is false thus, without checking this condition we can 
+execute else block with indices stored in remaining\_vec vector, again with no predication.
+
+As we can see, using ALC, we always have a uniform (either uniform true for uniform false) vector in each iteration and there is no need to use predicated instructions anymore. 
+
+The only part of code that can affect the performace negatively is Permute function. If Implemented naively, it could result in even worse performace that predicated code. This is why Wytte propsed his transformation only for ARM architecture with SVE support. SVE (Scalable Vector Extention)[cite] is a vector extention
+proposed by ARM that provides special vector instructions that makes it possible to Implement different vector algorithms efficeintly. Using these instructions, Wytte proposed a fast algorithm for permutation [cite].
+
 
 
 \end{document}

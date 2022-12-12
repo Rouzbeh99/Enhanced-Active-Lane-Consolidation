@@ -1,0 +1,7 @@
+inputs,instructions
+alc_itr_32,756588331
+vectorized,853350413
+alc_simple_32,697537185
+alc_itr_64,1341002532
+compiled_with_O3,4803774157
+alc_simple_64,1228851204
