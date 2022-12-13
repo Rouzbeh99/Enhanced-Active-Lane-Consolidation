@@ -56,10 +56,10 @@ void SVE_ALC::doTransformation_newVersion() {
     BasicBlock *middleBlock = createEmptyBlock("middel.block", latch);
     BasicBlock *alcHeader = createEmptyBlock("alc.header", middleBlock);
     BasicBlock *laneGatherBlock = createEmptyBlock("lane.gather", middleBlock);
-    BasicBlock *uniformBlock = createEmptyBlock("uniform.block", middleBlock);
     BasicBlock *linearizedBlock = createEmptyBlock("linearized", middleBlock);
-    BasicBlock *newLatch = createEmptyBlock("new.latch", middleBlock);
-    BasicBlock *joinBlock = createEmptyBlock("join.block", newLatch);
+    BasicBlock *uniformBlock = createEmptyBlock("uniform.block", middleBlock);
+    BasicBlock *newLatch = createEmptyBlock("new.latch", uniformBlock);
+    BasicBlock *joinBlock = createEmptyBlock("join.block", linearizedBlock);
 
     refinePreheader(preALCBlock, preheaderForRemainingBlock);
 
@@ -396,8 +396,8 @@ void SVE_ALC::fillLaneGatherBlock_newVersion(BasicBlock *laneGather,
 
     // check if z0 is uniform
     Value *condition =
-            builder.CreateICmpEQ(ActiveLanesInBothVectors, VectorizedStepValue);
-    builder.CreateCondBr(condition, alcApplied, joinBlock);
+            builder.CreateICmpNE(ActiveLanesInBothVectors, VectorizedStepValue);
+    builder.CreateCondBr(condition, joinBlock, alcApplied);
 }
 
 std::vector<Value *> *SVE_ALC::fillUniformBlock_newVersion(
@@ -591,26 +591,31 @@ Value *SVE_ALC::formPredicate(BasicBlock *decisionBlock,
 }
 
 
-//////////////////// in header next index is created, now its use in vectorize instruction is causing problem
 std::map<const Value *, const Value *> *SVE_ALC::vectorizeInstructions(
         std::vector<Instruction *> *instructions, BasicBlock *block, Value *indices,
         Value *VectorIndex, Value *predicates, bool isPermuted, bool isPredicated) {
 
+    llvm::outs() << "Start vectorizing \n";
+    llvm::outs() << "Index is: ";
+    VectorIndex->print(outs());
+    llvm::outs() << "\n";
+
 
     Instruction *insertionPoint = block->getTerminator();
     IRBuilder<> IRB(insertionPoint);
-
     Constant *constOne = llvm::ConstantInt::get(TripCountTy, 1, true);
-    if (indices == nullptr) {
-        indices = intrinsicCallGenerator->createIndexInstruction(IRB, VectorIndex,
-                                                                 constOne);
+    Value *mutatedVectorIndex = VectorIndex;
+
+    // Move types to i32 so that it's compatible with other instruction types and can be used as operands if needed
+    // TODO: what if instruction operands were float??
+    if (vectorizationFactor == 2) {
+        constOne = llvm::ConstantInt::get(IRB.getInt32Ty(), 1, true);
+        mutatedVectorIndex = IRB.CreateTruncOrBitCast(VectorIndex, IRB.getInt32Ty());
     }
 
-    Value *NextItrIndices;
+    indices = intrinsicCallGenerator->createIndexInstruction(IRB, mutatedVectorIndex,
+                                                             constOne);
 
-    if (VectorLoopNextIndex) {
-        NextItrIndices = intrinsicCallGenerator->createIndexInstruction(IRB, VectorLoopNextIndex, constOne);
-    }
 
     auto outputMap = new std::map<const Value *, const Value *>;
 
@@ -622,7 +627,8 @@ std::map<const Value *, const Value *> *SVE_ALC::vectorizeInstructions(
     std::stack<Instruction *> toBeRemoved;
     // TODO: Complete the list
     for (auto instr: *instructions) {
-
+        instr->print(outs());
+        llvm::outs() << "\n";
 
         if (auto *GEP = dyn_cast_or_null<GEPOperator>(instr)) {
             //            assert(GEP->getNumIndices() == 1 && "Expected GetElementPtr
@@ -639,10 +645,8 @@ std::map<const Value *, const Value *> *SVE_ALC::vectorizeInstructions(
             Value *firstOp = nullptr;
             if (vMap.count(storeInstr->getOperand(0))) {
                 firstOp = vMap[storeInstr->getOperand(0)];
-            } else if (storeInstr->getOperand(0) == VectorLoopIndex) {
+            } else if (storeInstr->getOperand(0) == VectorIndex) {
                 firstOp = indices;
-            } else if (storeInstr->getOperand(0) == VectorLoopNextIndex) {
-                firstOp = NextItrIndices;
             } else {
                 // it's constant
                 auto *constValue = dyn_cast<Constant>(storeInstr->getOperand(0));
@@ -653,6 +657,8 @@ std::map<const Value *, const Value *> *SVE_ALC::vectorizeInstructions(
             if (vMap.count(ptr)) {
                 ptr = vMap[ptr];
             }
+
+
             assert(isa<GEPOperator>(ptr) &&
                    "Expected StoreInst PointerOperand to be GetElementPtr!");
             if (isPermuted) {
@@ -664,6 +670,7 @@ std::map<const Value *, const Value *> *SVE_ALC::vectorizeInstructions(
             } else {
                 IRB.CreateStore(firstOp, ptr);
             }
+
 
             toBeRemoved.push(instr);
         } else if (isa<LoadInst>(instr)) {
@@ -707,31 +714,30 @@ std::map<const Value *, const Value *> *SVE_ALC::vectorizeInstructions(
             if (vMap.count(truncInstr->getOperand(0))) {
                 operand = vMap[truncInstr->getOperand(0)];
             } else if (truncInstr->getOperand(0) ==
-                    VectorLoopIndex) { // TODO: is it safe?
+                    VectorIndex) {
                 operand = indices;
             } else if (auto *ConstantValue =
                     dyn_cast_or_null<Constant>(truncInstr->getOperand(0))) {
+
+                //TODO: doesn't work for floats
+                auto value = ConstantValue->getUniqueInteger().getLimitedValue();
+
+                ConstantValue = ConstantInt::get(truncInstr->getDestTy(), value);
                 operand =
                         createVectorOfConstants(ConstantValue, IRB, "first.operand");
-            } else if (truncInstr->getOperand(0) == VectorLoopNextIndex) {
-                operand = NextItrIndices;
             } else {
-                assert(0 && "first operand neither already vectorized nor Constant!");
+                assert(0 && "first operand of trunc neither already vectorized nor Constant!");
             }
 
-
-
             // No need to do the trunc, just do the mapping
-//            VectorType *destType = VectorType::get(truncInstr->getDestTy(), vectorizationFactor, true);
-//            Value *result = IRB.CreateTrunc(operand, destType);
-
             vMap[instr] = operand;
             outputMap->insert({instr, operand});
             toBeRemoved.push(instr);
 
 
         } else if (isa<BinaryOperator>(instr) ||
-                   isa<ICmpInst>(instr)) { // TODO: ICmp is not binary????
+                   isa<ICmpInst>(instr)) {
+
 
             Value *firstOp = nullptr;
             Value *secondOp = nullptr;
@@ -740,15 +746,13 @@ std::map<const Value *, const Value *> *SVE_ALC::vectorizeInstructions(
             if (vMap.count(instr->getOperand(0))) {
                 firstOp = vMap[instr->getOperand(0)];
             } else if (instr->getOperand(0) ==
-                    VectorLoopIndex) { // TODO: is it safe?
+                    VectorIndex) {
                 firstOp = indices;
             } else {
                 if (auto *ConstantValue =
                         dyn_cast_or_null<Constant>(instr->getOperand(0))) {
                     firstOp =
                             createVectorOfConstants(ConstantValue, IRB, "first.operand");
-                } else if (instr->getOperand(0) == VectorLoopNextIndex) {
-                    firstOp = NextItrIndices;
                 } else {
                     instr->getOperand(0)->print(outs());
                     assert(0 && "first operand neither already vectorized nor Constant!");
@@ -757,19 +761,18 @@ std::map<const Value *, const Value *> *SVE_ALC::vectorizeInstructions(
 
             if (vMap.count(instr->getOperand(1))) {
                 secondOp = vMap[instr->getOperand(1)];
-            } else if (instr->getOperand(1) == VectorLoopIndex) {
+            } else if (instr->getOperand(1) == VectorIndex) {
                 secondOp = indices;
             } else {
                 if (auto *ConstantValue =
                         dyn_cast_or_null<Constant>(instr->getOperand(1))) {
                     secondOp =
                             createVectorOfConstants(ConstantValue, IRB, "second.operand");
-                } else if (instr->getOperand(0) == VectorLoopNextIndex) {
-                    secondOp = NextItrIndices;
                 } else
                     assert(0 &&
                            "second operand neither already vectorized nor Constant!");
             }
+
 
             Value *result = nullptr;
             switch (instr->getOpcode()) {
@@ -872,13 +875,16 @@ std::map<const Value *, const Value *> *SVE_ALC::vectorizeInstructions(
             outputMap->insert({instr, result});
             toBeRemoved.push(instr);
         }
+
     }
+
 
     while (!toBeRemoved.empty()) {
         toBeRemoved.top()->eraseFromParent();
         toBeRemoved.pop();
     }
 
+    llvm::outs() << "----------------------------------------------------------------\n";
     return outputMap;
 }
 
@@ -935,6 +941,7 @@ void SVE_ALC::fillALCHeaderBlock_simpleVersion(BasicBlock *alcHeader,
     if (TripCountTy == builder.getInt32Ty()) {
         ActiveLanesInFirstVector = builder.CreateTruncOrBitCast(
                 ActiveLanesInFirstVector, TripCountTy);
+
     }
 
     // next itr
@@ -1205,8 +1212,8 @@ Value *SVE_ALC::computeTripCount(BasicBlock *latch, Value *inductionVar) {
             if (auto *ZExt = dyn_cast_or_null<ZExtInst>(TC))
                 if (ZExt->getSrcTy() == Type::getInt32Ty(TC->getContext()))
                     TC = ZExt->getOperand(0);
-            assert((TC->getType() == I32 || TC->getType() == I64) &&
-                   "TripCountTy is neither i32 nor i64.");
+                assert((TC->getType() == I32 || TC->getType() == I64) &&
+                       "TripCountTy is neither i32 nor i64.");
             return TC;
         }
     }
@@ -1218,14 +1225,18 @@ Value *SVE_ALC::computeTripCount(BasicBlock *latch, Value *inductionVar) {
 Value *SVE_ALC::createVectorOfConstants(Value *value, IRBuilder<> &builder,
                                         std::string name) {
 
+
     auto *vecType = VectorType::get(value->getType(), vectorizationFactor, true);
-    auto poisonVec = PoisonValue::get(vecType);
-    u_int64_t indexZero = 0;
-    Value *splatInsert = builder.CreateInsertElement(poisonVec, value, indexZero);
+
+    uint64_t indexZero = 0;
+    Value *UndefVec = UndefValue::get(vecType);
+
+    Value *splatInsert = builder.CreateInsertElement(UndefVec, value, indexZero);
 
     ConstantAggregateZero *zeroInitializer = ConstantAggregateZero::get(vecType);
 
-    return builder.CreateShuffleVector(splatInsert, poisonVec, zeroInitializer,
+
+    return builder.CreateShuffleVector(splatInsert, UndefVec, zeroInitializer,
                                        name);
 }
 

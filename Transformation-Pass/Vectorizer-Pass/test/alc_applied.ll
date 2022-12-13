@@ -81,7 +81,7 @@ if.then.us:                                       ; preds = %for.body4.us
   br label %for.inc.us, !dbg !81
 
 Preheader.for.remaining.iterations:               ; preds = %middel.block, %for.cond1.preheader.us
-  %13 = phi i64 [ 0, %for.cond1.preheader.us ], [ %137, %middel.block ]
+  %13 = phi i64 [ 0, %for.cond1.preheader.us ], [ %144, %middel.block ]
   br label %for.body4.us
 
 pre.alc:                                          ; preds = %for.cond1.preheader.us
@@ -99,10 +99,10 @@ pre.alc:                                          ; preds = %for.cond1.preheader
   br label %alc.header
 
 alc.header:                                       ; preds = %new.latch, %pre.alc
-  %vector.loop.index = phi i32 [ %1, %pre.alc ], [ %110, %new.latch ]
-  %uniform.vector = phi <vscale x 4 x i32> [ %15, %pre.alc ], [ %107, %new.latch ]
-  %uniform.vector.predicates = phi <vscale x 4 x i1> [ %21, %pre.alc ], [ %108, %new.latch ]
-  %uniform.vec.actives = phi i32 [ %23, %pre.alc ], [ %109, %new.latch ]
+  %vector.loop.index = phi i32 [ %1, %pre.alc ], [ %77, %new.latch ]
+  %uniform.vector = phi <vscale x 4 x i32> [ %15, %pre.alc ], [ %74, %new.latch ]
+  %uniform.vector.predicates = phi <vscale x 4 x i1> [ %21, %pre.alc ], [ %75, %new.latch ]
+  %uniform.vec.actives = phi i32 [ %23, %pre.alc ], [ %76, %new.latch ]
   %24 = call <vscale x 4 x i32> @llvm.aarch64.sve.index.nxv4i32(i32 %vector.loop.index, i32 1)
   %25 = getelementptr inbounds i8, ptr %cond, i32 %vector.loop.index, !dbg !51
   %26 = call <vscale x 4 x i32> @llvm.aarch64.sve.index.nxv4i32(i32 %vector.loop.index, i32 1)
@@ -123,129 +123,136 @@ lane.gather:                                      ; preds = %alc.header
   %37 = call <vscale x 4 x i1> @llvm.aarch64.sve.whilelt.nxv4i1.i32(i32 0, i32 %32)
   %38 = call i64 @llvm.aarch64.sve.cntp.nxv4i1(<vscale x 4 x i1> %37, <vscale x 4 x i1> %37)
   %39 = trunc i64 %38 to i32
-  %40 = icmp eq i32 %32, %1
-  br i1 %40, label %uniform.block, label %join.block
-
-uniform.block:                                    ; preds = %lane.gather
-  %41 = getelementptr inbounds i32, ptr %a, i32 0, !dbg !61
-  %42 = getelementptr inbounds i32, ptr %c, i32 0, !dbg !63
-  %43 = getelementptr inbounds i32, ptr %b, i32 0, !dbg !66
-  %44 = call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.gather.sxtw.index.nxv4i32(<vscale x 4 x i1> %14, ptr %42, <vscale x 4 x i32> %36)
-  %45 = call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.gather.sxtw.index.nxv4i32(<vscale x 4 x i1> %14, ptr %43, <vscale x 4 x i32> %36)
-  %46 = mul <vscale x 4 x i32> %45, zeroinitializer
-  %47 = mul <vscale x 4 x i32> %44, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> poison, i32 -2, i64 0), <vscale x 4 x i32> poison, <vscale x 4 x i32> zeroinitializer)
-  %48 = add <vscale x 4 x i32> %45, zeroinitializer
-  %49 = add <vscale x 4 x i32> %48, %46
-  %50 = add <vscale x 4 x i32> %49, %47
-  call void @llvm.aarch64.sve.st1.scatter.sxtw.index.nxv4i32(<vscale x 4 x i32> %50, <vscale x 4 x i1> %14, ptr %41, <vscale x 4 x i32> %36)
-  %51 = sub <vscale x 4 x i32> shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> poison, i32 -3, i64 0), <vscale x 4 x i32> poison, <vscale x 4 x i32> zeroinitializer), %44
-  %52 = mul <vscale x 4 x i32> %51, zeroinitializer
-  %53 = add <vscale x 4 x i32> %44, %45
-  %54 = sub <vscale x 4 x i32> %50, %53
-  %55 = shl <vscale x 4 x i32> %54, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> poison, i32 1, i64 0), <vscale x 4 x i32> poison, <vscale x 4 x i32> zeroinitializer)
-  %56 = add <vscale x 4 x i32> %52, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> poison, i32 2, i64 0), <vscale x 4 x i32> poison, <vscale x 4 x i32> zeroinitializer)
-  %57 = add <vscale x 4 x i32> %56, %55
-  call void @llvm.aarch64.sve.st1.scatter.sxtw.index.nxv4i32(<vscale x 4 x i32> %57, <vscale x 4 x i1> %14, ptr %43, <vscale x 4 x i32> %36)
-  %58 = add <vscale x 4 x i32> %57, %50
-  %59 = sub <vscale x 4 x i32> %44, %57
-  %60 = shl <vscale x 4 x i32> %59, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> poison, i32 1, i64 0), <vscale x 4 x i32> poison, <vscale x 4 x i32> zeroinitializer)
-  %61 = add <vscale x 4 x i32> %60, zeroinitializer
-  %62 = mul <vscale x 4 x i32> %61, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> poison, i32 -3, i64 0), <vscale x 4 x i32> poison, <vscale x 4 x i32> zeroinitializer)
-  %63 = sub <vscale x 4 x i32> %58, zeroinitializer
-  %64 = shl <vscale x 4 x i32> %63, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> poison, i32 1, i64 0), <vscale x 4 x i32> poison, <vscale x 4 x i32> zeroinitializer)
-  %65 = add <vscale x 4 x i32> %64, %62
-  call void @llvm.aarch64.sve.st1.scatter.sxtw.index.nxv4i32(<vscale x 4 x i32> %65, <vscale x 4 x i1> %14, ptr %42, <vscale x 4 x i32> %36)
-  %66 = add i32 %vector.loop.index, %1
-  %67 = call <vscale x 4 x i32> @llvm.aarch64.sve.index.nxv4i32(i32 %66, i32 1)
-  %68 = getelementptr inbounds i8, ptr %cond, i32 %66, !dbg !51
-  %69 = call <vscale x 4 x i32> @llvm.aarch64.sve.index.nxv4i32(i32 %66, i32 1)
-  %70 = load <vscale x 4 x i8>, ptr %68, align 4
-  %71 = icmp eq <vscale x 4 x i8> %70, zeroinitializer
-  %72 = xor <vscale x 4 x i1> %71, shufflevector (<vscale x 4 x i1> insertelement (<vscale x 4 x i1> poison, i1 true, i32 0), <vscale x 4 x i1> poison, <vscale x 4 x i32> zeroinitializer)
-  %73 = call i64 @llvm.aarch64.sve.cntp.nxv4i1(<vscale x 4 x i1> %72, <vscale x 4 x i1> %72)
-  %74 = trunc i64 %73 to i32
-  br label %join.block
-
-linearized:                                       ; preds = %alc.header
-  %75 = getelementptr inbounds i32, ptr %a, i32 %vector.loop.index, !dbg !61
-  %76 = getelementptr inbounds i32, ptr %c, i32 %vector.loop.index, !dbg !63
-  %77 = getelementptr inbounds i32, ptr %b, i32 %vector.loop.index, !dbg !66
-  %78 = call <vscale x 4 x i32> @llvm.masked.load.nxv4i32.p0(ptr %76, i32 16, <vscale x 4 x i1> %29, <vscale x 4 x i32> undef)
-  %79 = call <vscale x 4 x i32> @llvm.masked.load.nxv4i32.p0(ptr %77, i32 16, <vscale x 4 x i1> %29, <vscale x 4 x i32> undef)
-  %80 = mul <vscale x 4 x i32> %79, %24
-  %81 = mul <vscale x 4 x i32> %78, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> poison, i32 -2, i64 0), <vscale x 4 x i32> poison, <vscale x 4 x i32> zeroinitializer)
-  %82 = shl <vscale x 4 x i32> %24, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> poison, i32 1, i64 0), <vscale x 4 x i32> poison, <vscale x 4 x i32> zeroinitializer)
-  %83 = add <vscale x 4 x i32> %79, %82
-  %84 = add <vscale x 4 x i32> %83, %80
-  %85 = add <vscale x 4 x i32> %84, %81
-  call void @llvm.masked.store.nxv4i32.p0(<vscale x 4 x i32> %85, ptr %75, i32 16, <vscale x 4 x i1> %29)
-  %86 = sub <vscale x 4 x i32> shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> poison, i32 -3, i64 0), <vscale x 4 x i32> poison, <vscale x 4 x i32> zeroinitializer), %78
-  %87 = mul <vscale x 4 x i32> %86, %24
-  %88 = add <vscale x 4 x i32> %78, %79
-  %89 = sub <vscale x 4 x i32> %85, %88
-  %90 = shl <vscale x 4 x i32> %89, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> poison, i32 1, i64 0), <vscale x 4 x i32> poison, <vscale x 4 x i32> zeroinitializer)
-  %91 = add <vscale x 4 x i32> %87, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> poison, i32 2, i64 0), <vscale x 4 x i32> poison, <vscale x 4 x i32> zeroinitializer)
-  %92 = add <vscale x 4 x i32> %91, %90
-  call void @llvm.masked.store.nxv4i32.p0(<vscale x 4 x i32> %92, ptr %77, i32 16, <vscale x 4 x i1> %29)
-  %93 = add <vscale x 4 x i32> %92, %85
-  %94 = sub <vscale x 4 x i32> %78, %92
-  %95 = shl <vscale x 4 x i32> %94, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> poison, i32 1, i64 0), <vscale x 4 x i32> poison, <vscale x 4 x i32> zeroinitializer)
-  %96 = mul <vscale x 4 x i32> %24, %24
-  %97 = add <vscale x 4 x i32> %95, %96
-  %98 = mul <vscale x 4 x i32> %97, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> poison, i32 -3, i64 0), <vscale x 4 x i32> poison, <vscale x 4 x i32> zeroinitializer)
-  %99 = sub <vscale x 4 x i32> %93, %24
-  %100 = shl <vscale x 4 x i32> %99, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> poison, i32 1, i64 0), <vscale x 4 x i32> poison, <vscale x 4 x i32> zeroinitializer)
-  %101 = add <vscale x 4 x i32> %100, %98
-  call void @llvm.masked.store.nxv4i32.p0(<vscale x 4 x i32> %101, ptr %76, i32 16, <vscale x 4 x i1> %29)
-  br label %new.latch
+  %40 = icmp ne i32 %32, %1
+  br i1 %40, label %join.block, label %uniform.block
 
 join.block:                                       ; preds = %uniform.block, %lane.gather
-  %102 = phi i32 [ %vector.loop.index, %lane.gather ], [ %66, %uniform.block ]
-  %103 = phi <vscale x 4 x i32> [ %36, %lane.gather ], [ %67, %uniform.block ]
-  %104 = phi <vscale x 4 x i1> [ %37, %lane.gather ], [ %72, %uniform.block ]
-  %105 = phi i32 [ %39, %lane.gather ], [ %74, %uniform.block ]
+  %41 = phi i32 [ %vector.loop.index, %lane.gather ], [ %107, %uniform.block ]
+  %42 = phi <vscale x 4 x i32> [ %36, %lane.gather ], [ %108, %uniform.block ]
+  %43 = phi <vscale x 4 x i1> [ %37, %lane.gather ], [ %113, %uniform.block ]
+  %44 = phi i32 [ %39, %lane.gather ], [ %115, %uniform.block ]
+  br label %new.latch
+
+linearized:                                       ; preds = %alc.header
+  %45 = getelementptr inbounds i32, ptr %a, i32 %vector.loop.index, !dbg !61
+  %46 = getelementptr inbounds i32, ptr %c, i32 %vector.loop.index, !dbg !63
+  %47 = getelementptr inbounds i32, ptr %b, i32 %vector.loop.index, !dbg !66
+  %48 = call <vscale x 4 x i32> @llvm.aarch64.sve.index.nxv4i32(i32 %vector.loop.index, i32 1)
+  %49 = call <vscale x 4 x i32> @llvm.masked.load.nxv4i32.p0(ptr %46, i32 16, <vscale x 4 x i1> %29, <vscale x 4 x i32> undef)
+  %50 = call <vscale x 4 x i32> @llvm.masked.load.nxv4i32.p0(ptr %47, i32 16, <vscale x 4 x i1> %29, <vscale x 4 x i32> undef)
+  %51 = mul <vscale x 4 x i32> %50, %48
+  %52 = mul <vscale x 4 x i32> %49, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 -2, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %53 = shl <vscale x 4 x i32> %48, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %54 = add <vscale x 4 x i32> %50, %53
+  %55 = add <vscale x 4 x i32> %54, %51
+  %56 = add <vscale x 4 x i32> %55, %52
+  call void @llvm.masked.store.nxv4i32.p0(<vscale x 4 x i32> %56, ptr %45, i32 16, <vscale x 4 x i1> %29)
+  %57 = sub <vscale x 4 x i32> shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 -3, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer), %49
+  %58 = mul <vscale x 4 x i32> %57, %48
+  %59 = add <vscale x 4 x i32> %49, %50
+  %60 = sub <vscale x 4 x i32> %56, %59
+  %61 = shl <vscale x 4 x i32> %60, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %62 = add <vscale x 4 x i32> %58, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 2, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %63 = add <vscale x 4 x i32> %62, %61
+  call void @llvm.masked.store.nxv4i32.p0(<vscale x 4 x i32> %63, ptr %47, i32 16, <vscale x 4 x i1> %29)
+  %64 = add <vscale x 4 x i32> %63, %56
+  %65 = sub <vscale x 4 x i32> %49, %63
+  %66 = shl <vscale x 4 x i32> %65, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %67 = mul <vscale x 4 x i32> %48, %48
+  %68 = add <vscale x 4 x i32> %66, %67
+  %69 = mul <vscale x 4 x i32> %68, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 -3, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %70 = sub <vscale x 4 x i32> %64, %48
+  %71 = shl <vscale x 4 x i32> %70, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %72 = add <vscale x 4 x i32> %71, %69
+  call void @llvm.masked.store.nxv4i32.p0(<vscale x 4 x i32> %72, ptr %46, i32 16, <vscale x 4 x i1> %29)
   br label %new.latch
 
 new.latch:                                        ; preds = %join.block, %linearized
-  %106 = phi i32 [ %102, %join.block ], [ %vector.loop.index, %linearized ]
-  %107 = phi <vscale x 4 x i32> [ %103, %join.block ], [ %uniform.vector, %linearized ]
-  %108 = phi <vscale x 4 x i1> [ %104, %join.block ], [ %uniform.vector.predicates, %linearized ]
-  %109 = phi i32 [ %105, %join.block ], [ %uniform.vec.actives, %linearized ]
-  %110 = add i32 %106, %1
-  %111 = icmp uge i32 %110, %total.iterations.to.be.vectorized
-  br i1 %111, label %middel.block, label %alc.header
+  %73 = phi i32 [ %41, %join.block ], [ %vector.loop.index, %linearized ]
+  %74 = phi <vscale x 4 x i32> [ %42, %join.block ], [ %uniform.vector, %linearized ]
+  %75 = phi <vscale x 4 x i1> [ %43, %join.block ], [ %uniform.vector.predicates, %linearized ]
+  %76 = phi i32 [ %44, %join.block ], [ %uniform.vec.actives, %linearized ]
+  %77 = add i32 %73, %1
+  %78 = icmp uge i32 %77, %total.iterations.to.be.vectorized
+  br i1 %78, label %middel.block, label %alc.header
+
+uniform.block:                                    ; preds = %lane.gather
+  %79 = getelementptr inbounds i32, ptr %a, i32 0, !dbg !61
+  %80 = getelementptr inbounds i32, ptr %c, i32 0, !dbg !63
+  %81 = getelementptr inbounds i32, ptr %b, i32 0, !dbg !66
+  %82 = call <vscale x 4 x i32> @llvm.aarch64.sve.index.nxv4i32(i32 0, i32 1)
+  %83 = call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.gather.sxtw.index.nxv4i32(<vscale x 4 x i1> %14, ptr %80, <vscale x 4 x i32> %82)
+  %84 = call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.gather.sxtw.index.nxv4i32(<vscale x 4 x i1> %14, ptr %81, <vscale x 4 x i32> %82)
+  %85 = mul <vscale x 4 x i32> %84, %82
+  %86 = mul <vscale x 4 x i32> %83, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 -2, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %87 = shl <vscale x 4 x i32> %82, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %88 = add <vscale x 4 x i32> %84, %87
+  %89 = add <vscale x 4 x i32> %88, %85
+  %90 = add <vscale x 4 x i32> %89, %86
+  call void @llvm.aarch64.sve.st1.scatter.sxtw.index.nxv4i32(<vscale x 4 x i32> %90, <vscale x 4 x i1> %14, ptr %79, <vscale x 4 x i32> %82)
+  %91 = sub <vscale x 4 x i32> shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 -3, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer), %83
+  %92 = mul <vscale x 4 x i32> %91, %82
+  %93 = add <vscale x 4 x i32> %83, %84
+  %94 = sub <vscale x 4 x i32> %90, %93
+  %95 = shl <vscale x 4 x i32> %94, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %96 = add <vscale x 4 x i32> %92, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 2, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %97 = add <vscale x 4 x i32> %96, %95
+  call void @llvm.aarch64.sve.st1.scatter.sxtw.index.nxv4i32(<vscale x 4 x i32> %97, <vscale x 4 x i1> %14, ptr %81, <vscale x 4 x i32> %82)
+  %98 = add <vscale x 4 x i32> %97, %90
+  %99 = sub <vscale x 4 x i32> %83, %97
+  %100 = shl <vscale x 4 x i32> %99, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %101 = mul <vscale x 4 x i32> %82, %82
+  %102 = add <vscale x 4 x i32> %100, %101
+  %103 = mul <vscale x 4 x i32> %102, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 -3, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %104 = sub <vscale x 4 x i32> %98, %82
+  %105 = shl <vscale x 4 x i32> %104, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %106 = add <vscale x 4 x i32> %105, %103
+  call void @llvm.aarch64.sve.st1.scatter.sxtw.index.nxv4i32(<vscale x 4 x i32> %106, <vscale x 4 x i1> %14, ptr %80, <vscale x 4 x i32> %82)
+  %107 = add i32 %vector.loop.index, %1
+  %108 = call <vscale x 4 x i32> @llvm.aarch64.sve.index.nxv4i32(i32 %107, i32 1)
+  %109 = getelementptr inbounds i8, ptr %cond, i32 %107, !dbg !51
+  %110 = call <vscale x 4 x i32> @llvm.aarch64.sve.index.nxv4i32(i32 %107, i32 1)
+  %111 = load <vscale x 4 x i8>, ptr %109, align 4
+  %112 = icmp eq <vscale x 4 x i8> %111, zeroinitializer
+  %113 = xor <vscale x 4 x i1> %112, shufflevector (<vscale x 4 x i1> insertelement (<vscale x 4 x i1> poison, i1 true, i32 0), <vscale x 4 x i1> poison, <vscale x 4 x i32> zeroinitializer)
+  %114 = call i64 @llvm.aarch64.sve.cntp.nxv4i1(<vscale x 4 x i1> %113, <vscale x 4 x i1> %113)
+  %115 = trunc i64 %114 to i32
+  br label %join.block
 
 middel.block:                                     ; preds = %new.latch
   %condition1 = icmp eq i32 %16, 0
-  %112 = getelementptr inbounds i32, ptr %a, i32 0, !dbg !61
-  %113 = getelementptr inbounds i32, ptr %c, i32 0, !dbg !63
-  %114 = getelementptr inbounds i32, ptr %b, i32 0, !dbg !66
-  %115 = call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.gather.sxtw.index.nxv4i32(<vscale x 4 x i1> %108, ptr %113, <vscale x 4 x i32> %107)
-  %116 = call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.gather.sxtw.index.nxv4i32(<vscale x 4 x i1> %108, ptr %114, <vscale x 4 x i32> %107)
-  %117 = mul <vscale x 4 x i32> %116, zeroinitializer
-  %118 = mul <vscale x 4 x i32> %115, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> poison, i32 -2, i64 0), <vscale x 4 x i32> poison, <vscale x 4 x i32> zeroinitializer)
-  %119 = add <vscale x 4 x i32> %116, zeroinitializer
-  %120 = add <vscale x 4 x i32> %119, %117
-  %121 = add <vscale x 4 x i32> %120, %118
-  call void @llvm.aarch64.sve.st1.scatter.sxtw.index.nxv4i32(<vscale x 4 x i32> %121, <vscale x 4 x i1> %108, ptr %112, <vscale x 4 x i32> %107)
-  %122 = sub <vscale x 4 x i32> shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> poison, i32 -3, i64 0), <vscale x 4 x i32> poison, <vscale x 4 x i32> zeroinitializer), %115
-  %123 = mul <vscale x 4 x i32> %122, zeroinitializer
-  %124 = add <vscale x 4 x i32> %115, %116
-  %125 = sub <vscale x 4 x i32> %121, %124
-  %126 = shl <vscale x 4 x i32> %125, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> poison, i32 1, i64 0), <vscale x 4 x i32> poison, <vscale x 4 x i32> zeroinitializer)
-  %127 = add <vscale x 4 x i32> %123, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> poison, i32 2, i64 0), <vscale x 4 x i32> poison, <vscale x 4 x i32> zeroinitializer)
-  %128 = add <vscale x 4 x i32> %127, %126
-  call void @llvm.aarch64.sve.st1.scatter.sxtw.index.nxv4i32(<vscale x 4 x i32> %128, <vscale x 4 x i1> %108, ptr %114, <vscale x 4 x i32> %107)
-  %129 = add <vscale x 4 x i32> %128, %121
-  %130 = sub <vscale x 4 x i32> %115, %128
-  %131 = shl <vscale x 4 x i32> %130, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> poison, i32 1, i64 0), <vscale x 4 x i32> poison, <vscale x 4 x i32> zeroinitializer)
-  %132 = add <vscale x 4 x i32> %131, zeroinitializer
-  %133 = mul <vscale x 4 x i32> %132, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> poison, i32 -3, i64 0), <vscale x 4 x i32> poison, <vscale x 4 x i32> zeroinitializer)
-  %134 = sub <vscale x 4 x i32> %129, zeroinitializer
-  %135 = shl <vscale x 4 x i32> %134, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> poison, i32 1, i64 0), <vscale x 4 x i32> poison, <vscale x 4 x i32> zeroinitializer)
-  %136 = add <vscale x 4 x i32> %135, %133
-  call void @llvm.aarch64.sve.st1.scatter.sxtw.index.nxv4i32(<vscale x 4 x i32> %136, <vscale x 4 x i1> %108, ptr %113, <vscale x 4 x i32> %107)
-  %137 = zext i32 %110 to i64
+  %116 = getelementptr inbounds i32, ptr %a, i32 0, !dbg !61
+  %117 = getelementptr inbounds i32, ptr %c, i32 0, !dbg !63
+  %118 = getelementptr inbounds i32, ptr %b, i32 0, !dbg !66
+  %119 = call <vscale x 4 x i32> @llvm.aarch64.sve.index.nxv4i32(i32 0, i32 1)
+  %120 = call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.gather.sxtw.index.nxv4i32(<vscale x 4 x i1> %75, ptr %117, <vscale x 4 x i32> %119)
+  %121 = call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.gather.sxtw.index.nxv4i32(<vscale x 4 x i1> %75, ptr %118, <vscale x 4 x i32> %119)
+  %122 = mul <vscale x 4 x i32> %121, %119
+  %123 = mul <vscale x 4 x i32> %120, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 -2, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %124 = shl <vscale x 4 x i32> %119, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %125 = add <vscale x 4 x i32> %121, %124
+  %126 = add <vscale x 4 x i32> %125, %122
+  %127 = add <vscale x 4 x i32> %126, %123
+  call void @llvm.aarch64.sve.st1.scatter.sxtw.index.nxv4i32(<vscale x 4 x i32> %127, <vscale x 4 x i1> %75, ptr %116, <vscale x 4 x i32> %119)
+  %128 = sub <vscale x 4 x i32> shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 -3, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer), %120
+  %129 = mul <vscale x 4 x i32> %128, %119
+  %130 = add <vscale x 4 x i32> %120, %121
+  %131 = sub <vscale x 4 x i32> %127, %130
+  %132 = shl <vscale x 4 x i32> %131, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %133 = add <vscale x 4 x i32> %129, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 2, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %134 = add <vscale x 4 x i32> %133, %132
+  call void @llvm.aarch64.sve.st1.scatter.sxtw.index.nxv4i32(<vscale x 4 x i32> %134, <vscale x 4 x i1> %75, ptr %118, <vscale x 4 x i32> %119)
+  %135 = add <vscale x 4 x i32> %134, %127
+  %136 = sub <vscale x 4 x i32> %120, %134
+  %137 = shl <vscale x 4 x i32> %136, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %138 = mul <vscale x 4 x i32> %119, %119
+  %139 = add <vscale x 4 x i32> %137, %138
+  %140 = mul <vscale x 4 x i32> %139, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 -3, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %141 = sub <vscale x 4 x i32> %135, %119
+  %142 = shl <vscale x 4 x i32> %141, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %143 = add <vscale x 4 x i32> %142, %140
+  call void @llvm.aarch64.sve.st1.scatter.sxtw.index.nxv4i32(<vscale x 4 x i32> %143, <vscale x 4 x i1> %75, ptr %117, <vscale x 4 x i32> %119)
+  %144 = zext i32 %77 to i64
   br i1 %condition1, label %for.cond1.for.cond.cleanup3_crit_edge.us, label %Preheader.for.remaining.iterations
 
 for.inc.us:                                       ; preds = %if.then.us, %for.body4.us

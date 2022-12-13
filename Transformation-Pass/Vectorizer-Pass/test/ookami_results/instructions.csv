@@ -1,7 +1,5 @@
 inputs,instructions
-alc_itr_32,756588331
-vectorized,853350413
-alc_simple_32,697537185
-alc_itr_64,1341002532
-compiled_with_O3,4803774157
-alc_simple_64,1228851204
+alc_simple,162665631
+vectorized,200130507
+alc_itr,168555205
+compiled_with_O3,693301887
