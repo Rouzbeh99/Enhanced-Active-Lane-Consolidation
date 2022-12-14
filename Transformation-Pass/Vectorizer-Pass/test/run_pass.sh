@@ -16,12 +16,12 @@ make
 cd ../test
 
 $LLVM_BUILD_DIR/bin/clang -g -O3 -target aarch64-unknown-linux-gnu -DSVE_INTRINSICS -fno-inline -fno-vectorize -fno-slp-vectorize -fno-unroll-loops -S -emit-llvm -I $GEM5_PATH/include $1 -o compiled_with_O3.ll
-$LLVM_BUILD_DIR/bin/opt -S -load-pass-plugin ../build/ALC_Vectorizer.so -passes="alc-vectorizer" compiled_with_O3.ll -o alc_applied.ll
-$LLVM_BUILD_DIR/bin/clang -g -O3 -target aarch64-unknown-linux-gnu -DSVE_INTRINSICS -fno-inline -fno-vectorize -fno-slp-vectorize -fno-unroll-loops -S -emit-llvm alc_applied.ll -o alc_applied_O3.ll
+$LLVM_BUILD_DIR/bin/opt -S -load-pass-plugin ../build/ALC_Vectorizer.so -passes="alc-vectorizer" compiled_with_O3.ll -o $2.ll
+$LLVM_BUILD_DIR/bin/clang -g -O3 -target aarch64-unknown-linux-gnu -DSVE_INTRINSICS -fno-inline -fno-vectorize -fno-slp-vectorize -fno-unroll-loops -S -emit-llvm $2.ll -o $2_O3.ll
 
-$LLVM_BUILD_DIR/bin/llc -O3 -mtriple=aarch64-linux-gnu -mattr=sve -filetype=obj alc_applied_O3.ll -o $2.o
+$LLVM_BUILD_DIR/bin/llc -O3 -mtriple=aarch64-linux-gnu -mattr=sve -filetype=obj $2_O3.ll -o $2.o
 $LLVM_BUILD_DIR/bin/llc -O3 -mtriple=aarch64-linux-gnu -mattr=sve -filetype=obj compiled_with_O3.ll -o compiled_with_O3.o
-$LLVM_BUILD_DIR/bin/llc -O3  -mtriple=aarch64-linux-gnu -mattr=sve -mcpu=cortex-a710 -filetype=asm alc_applied_O3.ll -o alc_applied_O3.s
+#$LLVM_BUILD_DIR/bin/llc -O3  -mtriple=aarch64-linux-gnu -mattr=sve -mcpu=cortex-a710 -filetype=asm alc_applied_O3.ll -o alc_applied_O3.s
 #$LLVM_BUILD_DIR/bin/llc -O3  -mtriple=aarch64-linux-gnu -mattr=sve -mcpu=cortex-a710 -filetype=asm compiled_with_O3.ll -o compiled_with_O3.s
 
 #$LLVM_BUILD_DIR/bin/clang -target aarch64-none-linux-gnu --gcc-toolchain=$GCC_TOOLCHAIN --sysroot=$GCC_TOOLCHAIN/aarch64-none-linux-gnu/libc  -march=armv8.2-a+sve alc_applied_O3.o -o alc_applied.x

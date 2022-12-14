@@ -1,5 +1,7 @@
 inputs,cache-misses
-alc_simple,2956861
-vectorized,2953021
-alc_itr,2952801
-compiled_with_O3,2955719
+alc_itr_32,428584
+vectorized,664639
+alc_simple_32,664667
+alc_itr_64,428683
+compiled_with_O3,664858
+alc_simple_64,664432

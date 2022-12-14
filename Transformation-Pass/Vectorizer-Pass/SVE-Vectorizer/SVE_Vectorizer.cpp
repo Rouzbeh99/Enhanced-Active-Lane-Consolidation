@@ -38,7 +38,6 @@
 
 // TODO: What if trip count is NOT a multiple of vscale * VFactor ???
 
-//////////////// do backtracking on header instructions
 
 void SVE_Vectorizer::doVectorization() {
 
@@ -160,10 +159,11 @@ void SVE_Vectorizer::fillPreVecBlock(BasicBlock *preVecBlock) {
 
     auto *VTy =
             VectorType::get(TripCountTy, vectorizationFactor, /*Scalable*/ true);
-    StepVector = IRB.CreateStepVector(VTy, "step.vector");
+    initialStepVector = IRB.CreateStepVector(VTy, "step.vector");
+    StepVectorUpdateValue = createVectorOfConstants(VectorizedStepValue, IRB, "stepVector.updated.value");
     VectorizedTripCount =
             createVectorOfConstants(tripCount, IRB, "vectorized.trip.count");
-    VectorIVPredicateInit = IRB.CreateICmpUGT(VectorizedTripCount, StepVector);
+    VectorIVPredicateInit = IRB.CreateICmpUGT(VectorizedTripCount, initialStepVector);
 }
 
 void SVE_Vectorizer::fillVectorizingBlock(BasicBlock *vectorizingBlock,
@@ -179,9 +179,14 @@ void SVE_Vectorizer::fillVectorizingBlock(BasicBlock *vectorizingBlock,
     VectorLoopIndex = IRB.CreatePHI(indexUpdatedValueType, 2);
     VectorLoopIndex->addIncoming(contZero, preVec);
 
-    // create phi for step vector
+    // create phi for loop index and step vector
     VectorIVPredicate = IRB.CreatePHI(VectorIVPredicateInit->getType(), 2);
     VectorIVPredicate->addIncoming(VectorIVPredicateInit, preVec);
+
+    PHINode *LoopStepVectorPhi = IRB.CreatePHI(initialStepVector->getType(), 2, "loop.StepVec");
+    LoopStepVectorPhi->addIncoming(initialStepVector, preVec);
+
+    LoopStepVector = LoopStepVectorPhi;
 
     //// vectorizing header and then bodies /////
     BasicBlock *targetedBlock = findTargetedBlock();
@@ -200,12 +205,12 @@ void SVE_Vectorizer::fillVectorizingBlock(BasicBlock *vectorizingBlock,
     VectorLoopIndex->addIncoming(updatedIndex, vectorizingBlock);
 
     // updated step vector
-    auto *VectorUpdatedIndex =
-            createVectorOfConstants(updatedIndex, IRB, "vector.updated.index");
-    auto *NextStepVector = IRB.CreateAdd(VectorUpdatedIndex, StepVector);
+
+    auto *NextStepVector = IRB.CreateAdd(StepVectorUpdateValue, LoopStepVectorPhi);
     Value *NextVectorIVPredicate = IRB.CreateICmpULT(
             NextStepVector, VectorizedTripCount, "next.vector.iv.predicate");
     VectorIVPredicate->addIncoming(NextVectorIVPredicate, vectorizingBlock);
+    LoopStepVectorPhi->addIncoming(NextStepVector, vectorizingBlock);
 
     // vectorizing block termination condition
     Value *VecTermCond =
@@ -503,6 +508,8 @@ SVE_Vectorizer::vectorizeInstructions_nonePredicated(
                 case Instruction::URem:
                     NewInst = IRB.CreateURem(FirstOp, SecondOp);
                     break;
+                case Instruction::SRem:
+                    NewInst = IRB.CreateSRem(FirstOp, SecondOp);
                 case Instruction::And:
                     NewInst = IRB.CreateAnd(FirstOp, SecondOp);
                     break;
@@ -523,7 +530,7 @@ SVE_Vectorizer::vectorizeInstructions_nonePredicated(
                 operand = vMap[truncInstr->getOperand(0)];
             } else if (truncInstr->getOperand(0) ==
                        VectorLoopIndex) {
-                operand = StepVector;
+                operand = LoopStepVector;
             } else if (auto *ConstantValue =
                     dyn_cast_or_null<Constant>(truncInstr->getOperand(0))) {
                 operand =
@@ -591,6 +598,7 @@ void SVE_Vectorizer::vectorizeInstructions_Predicated(
         Value *predicates,
         std::map<const Value *, const Value *> *headerInstructionsMap) {
 
+
     IRBuilder<> IRB(block->getTerminator());
 
     std::map<Value *, Value *> vMap;
@@ -608,8 +616,6 @@ void SVE_Vectorizer::vectorizeInstructions_Predicated(
     // TODO: Complete the list
     for (auto Inst: *instructions) {
 
-        Inst->print(outs());
-        llvm::outs() << "\n";
 
         if (auto *GEP = dyn_cast_or_null<GEPOperator>(Inst)) {
             //        assert(GEP->getNumIndices() == 1 && "Expected GetElementPtr with
@@ -737,7 +743,7 @@ void SVE_Vectorizer::vectorizeInstructions_Predicated(
                     FirstOp = createVectorOfConstants(ConstantValue, IRB,
                                                       "binop.first.operand");
                 } else if (BinOp->getOperand(0) == ScalarIV) {
-                    FirstOp = StepVector;
+                    FirstOp = LoopStepVector;
                 } else
                     assert(0 && "BinaryOperator first operand neither already vectorized "
                                 "nor Constant!");
@@ -749,7 +755,7 @@ void SVE_Vectorizer::vectorizeInstructions_Predicated(
                     SecondOp = createVectorOfConstants(ConstantValue, IRB,
                                                        "binop.second.operand");
                 } else if (BinOp->getOperand(1) == ScalarIV) {
-                    FirstOp = StepVector;
+                    FirstOp = LoopStepVector;
                 } else
                     assert(0 && "BinaryOperator second operand neither already "
                                 "vectorized nor Constant!");
@@ -769,8 +775,10 @@ void SVE_Vectorizer::vectorizeInstructions_Predicated(
                     NewInst = IRB.CreateSDiv(FirstOp, SecondOp);
                     break;
                 case Instruction::URem:
-                    // TODO
+                    NewInst = IRB.CreateURem(FirstOp, SecondOp);
                     break;
+                case Instruction::SRem:
+                    NewInst = IRB.CreateSRem(FirstOp, SecondOp);
                 case Instruction::And:
                     // TODO
                     break;
@@ -781,6 +789,7 @@ void SVE_Vectorizer::vectorizeInstructions_Predicated(
             assert(NewInst && "Unhandled BinaryOperator!");
             vMap[Inst] = NewInst;
             toBeRemoved.push(Inst);
+
         } else if (isa<TruncInst>(Inst)) {
 
             auto *truncInstr = dyn_cast<TruncInst>(Inst);
@@ -790,14 +799,12 @@ void SVE_Vectorizer::vectorizeInstructions_Predicated(
             if (vMap.count(truncInstr->getOperand(0))) {
                 operand = vMap[truncInstr->getOperand(0)];
             } else if (truncInstr->getOperand(0) ==
-                    ScalarIV) {
-                operand = StepVector;
+                       ScalarIV) {
+                operand = LoopStepVector;
             } else if (auto *ConstantValue =
                     dyn_cast_or_null<Constant>(truncInstr->getOperand(0))) {
                 operand =
                         createVectorOfConstants(ConstantValue, IRB, "first.operand");
-            }else if (truncInstr->getOperand(0) == ScalarIV) {
-                operand = StepVector;
             } else {
                 assert(0 && "first operand neither already vectorized nor Constant!");
             }

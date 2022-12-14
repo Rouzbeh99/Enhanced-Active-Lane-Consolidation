@@ -1,3 +1,3 @@
 #!/bin/bash
 
-scp *.o  rpaktinatkel@login.ookami.stonybrook.edu:/lustre/home/rpaktinatkel
+scp *.o test.c rpaktinatkel@login.ookami.stonybrook.edu:/lustre/home/rpaktinatkel
