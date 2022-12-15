@@ -58,8 +58,8 @@ void SVE_ALC::doTransformation_newVersion() {
     BasicBlock *laneGatherBlock = createEmptyBlock("lane.gather", middleBlock);
     BasicBlock *linearizedBlock = createEmptyBlock("linearized", middleBlock);
     BasicBlock *uniformBlock = createEmptyBlock("uniform.block", middleBlock);
-    BasicBlock *newLatch = createEmptyBlock("new.latch", uniformBlock);
-    BasicBlock *joinBlock = createEmptyBlock("join.block", linearizedBlock);
+    BasicBlock *newLatch = createEmptyBlock("new.latch", middleBlock);
+    BasicBlock *joinBlock = createEmptyBlock("join.block", middleBlock);
 
     refinePreheader(preALCBlock, preheaderForRemainingBlock);
 
@@ -417,6 +417,7 @@ std::vector<Value *> *SVE_ALC::fillUniformBlock_newVersion(
     std::vector<Instruction *> *clonedInstructions = cloneInstructions(
             toBeVectorizedBlock, uniformBlock, ConstZeroVectorOfTripCountTy);
 
+
     // TODO: handle cases where instruction uses 0 instead of induction var
     vectorizeInstructions(clonedInstructions, uniformBlock, indices,
                           ConstZeroVectorOfTripCountTy, allTrue, true, false);
@@ -595,15 +596,11 @@ std::map<const Value *, const Value *> *SVE_ALC::vectorizeInstructions(
         std::vector<Instruction *> *instructions, BasicBlock *block, Value *indices,
         Value *VectorIndex, Value *predicates, bool isPermuted, bool isPredicated) {
 
-    llvm::outs() << "Start vectorizing \n";
-    llvm::outs() << "Index is: ";
-    VectorIndex->print(outs());
-    llvm::outs() << "\n";
-
 
     Instruction *insertionPoint = block->getTerminator();
     IRBuilder<> IRB(insertionPoint);
     Constant *constOne = llvm::ConstantInt::get(TripCountTy, 1, true);
+    Constant *constZero = llvm::ConstantInt::get(TripCountTy, 0, true);
     Value *mutatedVectorIndex = VectorIndex;
 
     // Move types to i32 so that it's compatible with other instruction types and can be used as operands if needed
@@ -613,8 +610,14 @@ std::map<const Value *, const Value *> *SVE_ALC::vectorizeInstructions(
         mutatedVectorIndex = IRB.CreateTruncOrBitCast(VectorIndex, IRB.getInt32Ty());
     }
 
-    indices = intrinsicCallGenerator->createIndexInstruction(IRB, mutatedVectorIndex,
-                                                             constOne);
+    if (isPermuted) {
+       ////////////////////////////////////////////// need to change uniform vector elements type to i32
+    }else{
+        indices = intrinsicCallGenerator->createIndexInstruction(IRB, mutatedVectorIndex,
+                                                                 constOne);
+    }
+
+    llvm::outs() << "----------------------------------------------------------------\n";
 
 
     auto outputMap = new std::map<const Value *, const Value *>;
@@ -627,6 +630,7 @@ std::map<const Value *, const Value *> *SVE_ALC::vectorizeInstructions(
     std::stack<Instruction *> toBeRemoved;
     // TODO: Complete the list
     for (auto instr: *instructions) {
+
         instr->print(outs());
         llvm::outs() << "\n";
 
@@ -635,7 +639,11 @@ std::map<const Value *, const Value *> *SVE_ALC::vectorizeInstructions(
             //            with one index operand!");
             for (int i = 0; i < instr->getNumOperands(); ++i) {
                 if (instr->getOperand(i) == ScalarIV) {
-                    instr->setOperand(i, VectorIndex);
+                    if (isPermuted) {
+                        instr->setOperand(i, constZero);
+                    } else {
+                        instr->setOperand(i, VectorIndex);
+                    }
                 }
             }
         } else if (isa<StoreInst>(instr)) {
@@ -709,12 +717,13 @@ std::map<const Value *, const Value *> *SVE_ALC::vectorizeInstructions(
             toBeRemoved.push(instr);
         } else if (auto *truncInstr = dyn_cast_or_null<TruncInst>(instr)) {
 
+
             Value *operand = nullptr;
 
             if (vMap.count(truncInstr->getOperand(0))) {
                 operand = vMap[truncInstr->getOperand(0)];
             } else if (truncInstr->getOperand(0) ==
-                    VectorIndex) {
+                       VectorIndex) {
                 operand = indices;
             } else if (auto *ConstantValue =
                     dyn_cast_or_null<Constant>(truncInstr->getOperand(0))) {
@@ -746,7 +755,7 @@ std::map<const Value *, const Value *> *SVE_ALC::vectorizeInstructions(
             if (vMap.count(instr->getOperand(0))) {
                 firstOp = vMap[instr->getOperand(0)];
             } else if (instr->getOperand(0) ==
-                    VectorIndex) {
+                       VectorIndex) {
                 firstOp = indices;
             } else {
                 if (auto *ConstantValue =
@@ -773,6 +782,12 @@ std::map<const Value *, const Value *> *SVE_ALC::vectorizeInstructions(
                            "second operand neither already vectorized nor Constant!");
             }
 
+            firstOp->print(outs());
+            llvm::outs()<<"\n";
+            secondOp->print(outs());
+            llvm::outs()<<"\n";
+            llvm::outs()<<".............\n";
+
 
             Value *result = nullptr;
             switch (instr->getOpcode()) {
@@ -790,6 +805,9 @@ std::map<const Value *, const Value *> *SVE_ALC::vectorizeInstructions(
                     break;
                 case Instruction::URem:
                     result = IRB.CreateURem(firstOp, secondOp);
+                    break;
+                case Instruction::SRem:
+                    result = IRB.CreateSRem(firstOp, secondOp);
                     break;
                 case Instruction::And:
                     result = IRB.CreateAnd(firstOp, secondOp);
@@ -884,7 +902,7 @@ std::map<const Value *, const Value *> *SVE_ALC::vectorizeInstructions(
         toBeRemoved.pop();
     }
 
-    llvm::outs() << "----------------------------------------------------------------\n";
+
     return outputMap;
 }
 
@@ -1015,11 +1033,12 @@ void SVE_ALC::fillUniformBlock_simpleVersion(BasicBlock *uniformBlock,
     IRBuilder<> builder(uniformBlock);
     builder.CreateBr(latch);
 
+
     std::vector<Instruction *> *clonedInstructions = cloneInstructions(
             toBeVectorizedBlock, uniformBlock, ConstZeroVectorOfTripCountTy);
 
     vectorizeInstructions(clonedInstructions, uniformBlock, PermutedIndices,
-                          VectorLoopIndex, PermutedPredicates, true, true);
+                          ConstZeroVectorOfTripCountTy, PermutedPredicates, true, true);
 }
 
 void SVE_ALC::fillLinearizedBlock_simpleVersion(
@@ -1209,11 +1228,12 @@ Value *SVE_ALC::computeTripCount(BasicBlock *latch, Value *inductionVar) {
             auto *TC = conditionInst->getOperand(i);
             auto *I32 = Type::getInt32Ty(TC->getContext());
             auto *I64 = Type::getInt64Ty(TC->getContext());
-            if (auto *ZExt = dyn_cast_or_null<ZExtInst>(TC))
-                if (ZExt->getSrcTy() == Type::getInt32Ty(TC->getContext()))
-                    TC = ZExt->getOperand(0);
-                assert((TC->getType() == I32 || TC->getType() == I64) &&
-                       "TripCountTy is neither i32 nor i64.");
+            if (vectorizationFactor == 4)
+                if (auto *ZExt = dyn_cast_or_null<ZExtInst>(TC))
+                    if (ZExt->getSrcTy() == Type::getInt32Ty(TC->getContext()))
+                        TC = ZExt->getOperand(0);
+            assert((TC->getType() == I32 || TC->getType() == I64) &&
+                   "TripCountTy is neither i32 nor i64.");
             return TC;
         }
     }

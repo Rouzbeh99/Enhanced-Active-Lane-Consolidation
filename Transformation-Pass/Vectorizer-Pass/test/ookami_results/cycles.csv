@@ -1,7 +1,5 @@
 inputs,cycles
-alc_itr_32,82473603
-vectorized,87089485
-alc_simple_32,97990640
-alc_itr_64,86045201
-compiled_with_O3,99786162
-alc_simple_64,103016807
+alc_simple,112828687
+vectorized,96042148
+alc_itr,96238494
+compiled_with_O3,115176407
