@@ -1,3 +1,6 @@
 [submodule "Benchmarks/TSVC_2"]
 	path = Benchmarks/TSVC_2
 	url = https://github.com/UoB-HPC/TSVC_2.git
+[submodule "PAPI/papi"]
+	path = PAPI/papi
+	url = https://bitbucket.org/icl/papi.git
