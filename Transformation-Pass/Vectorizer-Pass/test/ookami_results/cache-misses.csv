@@ -1,5 +1,0 @@
-inputs,cache-misses
-alc_simple,670542
-vectorized,670717
-alc_itr,670707
-compiled_with_O3,671169

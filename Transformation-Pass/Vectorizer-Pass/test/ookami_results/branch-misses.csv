@@ -1,5 +1,0 @@
-inputs,branch-misses
-alc_simple,51748
-vectorized,51575
-alc_itr,53147
-compiled_with_O3,51662

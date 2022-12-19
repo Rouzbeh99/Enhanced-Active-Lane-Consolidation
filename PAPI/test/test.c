@@ -23,7 +23,7 @@ int EventSet = PAPI_NULL;
 #define NUMEVENTS 2
 long long int CounterValues[NUMEVENTS] = {0};
 /* Event code names/availability can be queried with papi_avail command */
-int EventCodes[NUMEVENTS] = {PAPI_TOT_INS, PAPI_TOT_CYC};
+int EventCodes[NUMEVENTS] = {PAPI_TOT_INS, PAPI_TOT_CYC, PAPI_L1_DCM, PAPI_BR_MSP};
 double ExecutionTime = 0.0;
 
 void foo(int *__restrict__ a, int *__restrict__ b, int *__restrict__ c,
@@ -127,6 +127,8 @@ int main() {
 
   printf("\nTotal instructions executed: %lld\n", CounterValues[0]);
   printf("Total cycles: %lld\n", CounterValues[1]);
+  printf("Total L1 data cache misses: %lld\n", CounterValues[2]);
+  printf("Total branch mispredicted: %lld\n", CounterValues[3]);
   printf("Execution time: %lf ms\n", ExecutionTime);
 
   if ((status = PAPI_remove_events(EventSet, EventCodes, NUMEVENTS)) != PAPI_OK)

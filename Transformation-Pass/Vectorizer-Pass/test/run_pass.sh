@@ -4,7 +4,7 @@ GEM5_PATH=/home/rouzbeh/Graduate/LLVM/GEM5/gem5-arm-sve/gem5
 GCC_TOOLCHAIN=/home/rouzbeh/Graduate/LLVM/ARM/arm-gnu-toolchain-11.3.rel1-x86_64-aarch64-none-linux-gnu
 M5_BUILD_PATH=build/arm64/out/m5
 M5_LIB_PATH=$GEM5_PATH/util/m5/${M5_BUILD_PATH/\/m5/}
-PAPI_DIR=/home/rouzbeh/Graduate/LLVM/PAPI/papi/src/install
+PAPI_DIR=/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/PAPI/papi-install
 #PATH=${PAPI_DIR}/bin:$PATH
 #LD_LIBRARY_PATH=${PAPI_DIR}/lib:$LD_LIBRARY_PATH
 
