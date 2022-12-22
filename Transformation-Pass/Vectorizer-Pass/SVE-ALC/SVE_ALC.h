@@ -16,6 +16,7 @@
 #include "llvm/Passes/PassPlugin.h"
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
 #include "llvm/Transforms/Utils/Cloning.h"
+#include "llvm/IR/Metadata.h"
 
 #ifndef SVE_PERMUTE_SVE_PERMUTE_H
 #define SVE_PERMUTE_SVE_PERMUTE_H
@@ -199,6 +200,9 @@ private:
     std::vector<Instruction *> *
     findHeaderInstructionsRequiredInThenBlock(BasicBlock *header,
                                               BasicBlock *thenBlock);
+
+private:
+    void addBranchHint(BranchInst* branchInst);
 };
 
 #endif // SVE_PERMUTE_SVE_PERMUTE_H

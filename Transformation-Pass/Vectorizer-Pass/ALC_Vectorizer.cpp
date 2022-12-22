@@ -60,9 +60,9 @@ namespace {
         auto *sve_alc = new SVE_ALC(L, factor, AR);
         auto *sve_vectorizer = new SVE_Vectorizer(L, factor, AR);
 
-//        sve_vectorizer->doVectorization();
-//        sve_alc->doTransformation_newVersion();
-        sve_alc->doTransformation_simpleVersion();
+        // sve_vectorizer->doVectorization();
+       sve_alc->doTransformation_newVersion();
+//        sve_alc->doTransformation_simpleVersion();
 
         printAllBlocks(L);
 

@@ -43,8 +43,11 @@ for i in range(sqrt):
         # confidence = [x / 2 for x in list(map(add, conf_low, conf_high))]
         std_deviation = df["standard deviation"].values.tolist()
         df.drop(df.columns[[1, 2, 3]], axis=1, inplace=True)
+        tag = metric
+        if "branch" in tag or "cache" in tag:
+        	tag = tag + " misses"
         df.plot.bar(yerr=std_deviation, ax=axes[i, j], rot=0,
-                    title="Number of " + metric, color={metric: colors[i * sqrt + j]})
+                    title="Number of " + tag, color={metric: colors[i * sqrt + j]})
         axes[i, j].xaxis.label.set_visible(False)
         axes[i, j].axhline(y=baseline_value, xmin=-3, xmax=20, color='black', linestyle='dashed',
                            linewidth=1)

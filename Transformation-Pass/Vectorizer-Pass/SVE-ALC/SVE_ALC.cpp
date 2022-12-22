@@ -373,6 +373,16 @@ void SVE_ALC::fillALCHeaderBlock_newVersion(
             builder.CreateAdd(ActiveLanesInFirstVector, ActiveLanesInSecondVector);
     Value *actualCondition = builder.CreateICmpULE(
             ActiveLanesInBothVectors, VectorizedStepValue, "condition");
+
+    // hint the branch
+    Intrinsic::IndependentIntrinsics expectIntr = llvm::Intrinsic::expect;
+    Constant *constZeroI1 = llvm::ConstantInt::get(builder.getInt1Ty(), 0, true);
+
+    CallInst *condition_with_hint = builder.CreateIntrinsic(expectIntr, builder.getInt1Ty(), {actualCondition, constZeroI1});
+
+    dyn_cast<BranchInst>(alcHeader->getTerminator())
+            ->setCondition(condition_with_hint);
+
     dyn_cast<BranchInst>(alcHeader->getTerminator())
             ->setCondition(actualCondition);
 }
@@ -382,6 +392,8 @@ void SVE_ALC::fillLaneGatherBlock_newVersion(BasicBlock *laneGather,
                                              BasicBlock *joinBlock) {
 
     insertPermutationLogic(laneGather, PermutedIndices, PermutedPredicates);
+    
+    
 
     IRBuilder<> builder(laneGather);
 
@@ -396,8 +408,10 @@ void SVE_ALC::fillLaneGatherBlock_newVersion(BasicBlock *laneGather,
 
     // check if z0 is uniform
     Value *condition =
-            builder.CreateICmpNE(ActiveLanesInBothVectors, VectorizedStepValue);
-    builder.CreateCondBr(condition, joinBlock, alcApplied);
+            builder.CreateICmpULT(ActiveLanesInBothVectors, VectorizedStepValue);
+
+    BranchInst *brInstr = builder.CreateCondBr(condition, joinBlock, alcApplied);
+
 }
 
 std::vector<Value *> *SVE_ALC::fillUniformBlock_newVersion(
@@ -611,13 +625,11 @@ std::map<const Value *, const Value *> *SVE_ALC::vectorizeInstructions(
     }
 
     if (isPermuted) {
-       ////////////////////////////////////////////// need to change uniform vector elements type to i32
-    }else{
+        ////////////////////////////////////////////// need to change uniform vector elements type to i32
+    } else {
         indices = intrinsicCallGenerator->createIndexInstruction(IRB, mutatedVectorIndex,
                                                                  constOne);
     }
-
-    llvm::outs() << "----------------------------------------------------------------\n";
 
 
     auto outputMap = new std::map<const Value *, const Value *>;
@@ -631,8 +643,6 @@ std::map<const Value *, const Value *> *SVE_ALC::vectorizeInstructions(
     // TODO: Complete the list
     for (auto instr: *instructions) {
 
-        instr->print(outs());
-        llvm::outs() << "\n";
 
         if (auto *GEP = dyn_cast_or_null<GEPOperator>(instr)) {
             //            assert(GEP->getNumIndices() == 1 && "Expected GetElementPtr
@@ -781,12 +791,6 @@ std::map<const Value *, const Value *> *SVE_ALC::vectorizeInstructions(
                     assert(0 &&
                            "second operand neither already vectorized nor Constant!");
             }
-
-            firstOp->print(outs());
-            llvm::outs()<<"\n";
-            secondOp->print(outs());
-            llvm::outs()<<"\n";
-            llvm::outs()<<".............\n";
 
 
             Value *result = nullptr;
@@ -1241,6 +1245,25 @@ Value *SVE_ALC::computeTripCount(BasicBlock *latch, Value *inductionVar) {
     // TODO: raise error
     return nullptr;
 }
+
+void SVE_ALC::addBranchHint(BranchInst *branchInst) {
+
+    Function &F = *targetedBlock->getParent();
+    LLVMContext &C = F.getContext();
+    LLVMContext &context = branchInst->getContext();
+    llvm::IntegerType *Int32Ty = llvm::Type::getInt32Ty(context);
+
+    MDString *mdString = MDString::get(context, "branch_weights");
+
+    ConstantAsMetadata *trueProbability = llvm::ConstantAsMetadata::get(llvm::ConstantInt::get(Int32Ty, 10));
+    ConstantAsMetadata *falseProbability = llvm::ConstantAsMetadata::get(llvm::ConstantInt::get(Int32Ty, 90));
+
+    MDTuple *md = MDNode::get(context, {mdString,trueProbability, falseProbability});
+    branchInst->setMetadata(LLVMContext::MD_prof, md);
+
+
+}
+
 
 Value *SVE_ALC::createVectorOfConstants(Value *value, IRBuilder<> &builder,
                                         std::string name) {
