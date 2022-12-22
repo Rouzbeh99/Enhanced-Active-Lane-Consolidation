@@ -383,8 +383,6 @@ void SVE_ALC::fillALCHeaderBlock_newVersion(
     dyn_cast<BranchInst>(alcHeader->getTerminator())
             ->setCondition(condition_with_hint);
 
-    dyn_cast<BranchInst>(alcHeader->getTerminator())
-            ->setCondition(actualCondition);
 }
 
 void SVE_ALC::fillLaneGatherBlock_newVersion(BasicBlock *laneGather,
@@ -410,7 +408,12 @@ void SVE_ALC::fillLaneGatherBlock_newVersion(BasicBlock *laneGather,
     Value *condition =
             builder.CreateICmpULT(ActiveLanesInBothVectors, VectorizedStepValue);
 
-    BranchInst *brInstr = builder.CreateCondBr(condition, joinBlock, alcApplied);
+    Intrinsic::IndependentIntrinsics expectIntr = llvm::Intrinsic::expect;
+    Constant *constZeroI1 = llvm::ConstantInt::get(builder.getInt1Ty(), 0, true);
+
+    CallInst *condition_with_hint = builder.CreateIntrinsic(expectIntr, builder.getInt1Ty(), {condition, constZeroI1});
+
+    BranchInst *brInstr = builder.CreateCondBr(condition_with_hint, joinBlock, alcApplied);
 
 }
 
