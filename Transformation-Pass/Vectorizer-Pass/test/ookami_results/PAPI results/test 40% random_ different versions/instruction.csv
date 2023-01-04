@@ -1,0 +1,6 @@
+inputs,instruction,standard deviation,confidence_low,confidence_high
+alc_simple,84125809,0,84125809,84125809
+vectorized,100000786,0,100000786,100000786
+alc_itr_no_hint,83625939,0,83625939,83625939
+compiled_with_O3,1010000811,0,1010000811,1010000811
+alc_itr_with_hint,83625939,0,83625939,83625939

@@ -61,7 +61,7 @@ public:
     SVE_ALC(Loop *l, int vectorizationFactor, LoopStandardAnalysisResults &ar);
 
 public:
-    void doTransformation_newVersion();
+    void doTransformation_itr();
 
 public:
     void doTransformation_simpleVersion();
@@ -88,7 +88,7 @@ private:
                          BasicBlock *preHeaderForRemaining);
 
 private:
-    std::vector<Value *> *fillPreALCBlock_newVersion(BasicBlock *preALCBlock,
+    std::vector<Value *> *fillPreALCBlock_itr(BasicBlock *preALCBlock,
                                                      BasicBlock *preheader,
                                                      BasicBlock *alcHeader);
 
@@ -97,32 +97,32 @@ private:
                                    std::string name);
 
 private:
-    void fillMiddleBlock_newVersion(BasicBlock *middleBlock,
+    void fillMiddleBlock_itr(BasicBlock *middleBlock,
                                     BasicBlock *preheaderForRemaining,
                                     BasicBlock *exitBlock, Value *remResult,
                                     Value *uniformVec,
                                     Value *uniformVecPredicates);
 
 private:
-    void fillALCHeaderBlock_newVersion(
+    void fillALCHeaderBlock_itr(
             BasicBlock *alcHeader, BasicBlock *laneGatherBlock,
             BasicBlock *linearized, BasicBlock *preALC,
             std::vector<Value *> *initialValues, BasicBlock *header);
 
 private:
-    void fillLaneGatherBlock_newVersion(BasicBlock *laneGather,
+    void fillLaneGatherBlock_itr(BasicBlock *laneGather,
                                         BasicBlock *alcApplied,
                                         BasicBlock *joinBlock);
 
 private:
     std::vector<Value *> *
-    fillUniformBlock_newVersion(BasicBlock *uniformBlock, BasicBlock *joinBlock,
+    fillUniformBlock_itr(BasicBlock *uniformBlock, BasicBlock *joinBlock,
                                 BasicBlock *toBeVectorizedBlock,
                                 BasicBlock *header, Value *indices,
                                 Value *indexPhi);
 
 private:
-    void fillLinearizedBlock_newVersion(BasicBlock *linearized,
+    void fillLinearizedBlock_itr(BasicBlock *linearized,
                                         BasicBlock *newLatch,
                                         BasicBlock *toBeVectorizedBlock,
                                         Value *indexVec, Value *predicates);
@@ -134,7 +134,7 @@ private:
                   Value *headerIndex, std::vector<Value *> *uniformBlockOutputs);
 
 private:
-    std::vector<Value *> *fillNewLatchBlock_newVersion(
+    std::vector<Value *> *fillNewLatchBlock_itr(
             BasicBlock *newLatch, BasicBlock *alcHeader, BasicBlock *middleBlock,
             BasicBlock *joinBlock, BasicBlock *linearizedBlock,
             std::vector<Value *> *joinBlockOutputs, Value *totalVecIterations);

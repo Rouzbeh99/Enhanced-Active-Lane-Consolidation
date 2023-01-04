@@ -33,7 +33,7 @@
  *
  */
 
-void SVE_ALC::doTransformation_newVersion() {
+void SVE_ALC::doTransformation_itr() {
 
     auto *header = L->getHeader();
     auto &context = header->getContext();
@@ -65,28 +65,28 @@ void SVE_ALC::doTransformation_newVersion() {
 
     // fill blocks
     std::vector<Value *> *preALCBlockValues =
-            fillPreALCBlock_newVersion(preALCBlock, preheader, alcHeader);
-    fillALCHeaderBlock_newVersion(
+            fillPreALCBlock_itr(preALCBlock, preheader, alcHeader);
+    fillALCHeaderBlock_itr(
             alcHeader, laneGatherBlock, linearizedBlock, preALCBlock,
             preALCBlockValues, header);
 
-    fillLaneGatherBlock_newVersion(laneGatherBlock, uniformBlock, joinBlock);
+    fillLaneGatherBlock_itr(laneGatherBlock, uniformBlock, joinBlock);
     std::vector<Value *> *uniformBlockOutputs =
-            fillUniformBlock_newVersion(uniformBlock, joinBlock, targetedBlock,
-                                        header, PermutedIndices, VectorLoopIndex);
-    fillLinearizedBlock_newVersion(linearizedBlock, newLatch, targetedBlock,
-                                   IndexVectorOfSecondVector,
-                                   PredicatesOfSecondVector);
+            fillUniformBlock_itr(uniformBlock, joinBlock, targetedBlock,
+                                 header, PermutedIndices, VectorLoopIndex);
+    fillLinearizedBlock_itr(linearizedBlock, newLatch, targetedBlock,
+                            IndexVectorOfSecondVector,
+                            PredicatesOfSecondVector);
     std::vector<Value *> *joinBlockOutputs =
             fillJoinBlock(joinBlock, newLatch, uniformBlock, laneGatherBlock,
                           VectorLoopIndex, uniformBlockOutputs);
-    std::vector<Value *> *latchOutputs = fillNewLatchBlock_newVersion(
+    std::vector<Value *> *latchOutputs = fillNewLatchBlock_itr(
             newLatch, alcHeader, middleBlock, joinBlock, linearizedBlock,
             joinBlockOutputs, (*preALCBlockValues)[3]);
 
-    fillMiddleBlock_newVersion(middleBlock, preheaderForRemainingBlock, exitBlock,
-                               (*preALCBlockValues)[2], (*latchOutputs)[1],
-                               (*latchOutputs)[2]);
+    fillMiddleBlock_itr(middleBlock, preheaderForRemainingBlock, exitBlock,
+                        (*preALCBlockValues)[2], (*latchOutputs)[1],
+                        (*latchOutputs)[2]);
 
     refinePreHeaderForRemaining(preheaderForRemainingBlock, middleBlock,
                                 (*latchOutputs)[0]);
@@ -237,7 +237,7 @@ void SVE_ALC::refinePreheader(BasicBlock *preVecBlock,
     Terminator->eraseFromParent();
 }
 
-std::vector<Value *> *SVE_ALC::fillPreALCBlock_newVersion(
+std::vector<Value *> *SVE_ALC::fillPreALCBlock_itr(
         BasicBlock *preALCBlock, BasicBlock *preheader, BasicBlock *alcHeader) {
     auto *results = new std::vector<Value *>;
 
@@ -273,11 +273,11 @@ std::vector<Value *> *SVE_ALC::fillPreALCBlock_newVersion(
     return results;
 }
 
-void SVE_ALC::fillMiddleBlock_newVersion(BasicBlock *middleBlock,
-                                         BasicBlock *preheaderForRemaining,
-                                         BasicBlock *exitBlock,
-                                         Value *remResult, Value *uniformVec,
-                                         Value *uniformVecPredicates) {
+void SVE_ALC::fillMiddleBlock_itr(BasicBlock *middleBlock,
+                                  BasicBlock *preheaderForRemaining,
+                                  BasicBlock *exitBlock,
+                                  Value *remResult, Value *uniformVec,
+                                  Value *uniformVecPredicates) {
 
     IRBuilder<> builder(preheaderForRemaining->getContext());
     builder.SetInsertPoint(middleBlock);
@@ -298,7 +298,7 @@ void SVE_ALC::fillMiddleBlock_newVersion(BasicBlock *middleBlock,
                           uniformVecPredicates, true, false);
 }
 
-void SVE_ALC::fillALCHeaderBlock_newVersion(
+void SVE_ALC::fillALCHeaderBlock_itr(
         BasicBlock *alcHeader, BasicBlock *laneGatherBlock, BasicBlock *linearized,
         BasicBlock *preALCBlock,
         std::vector<Value *> *initialValues, BasicBlock *header) {
@@ -375,23 +375,26 @@ void SVE_ALC::fillALCHeaderBlock_newVersion(
             ActiveLanesInBothVectors, VectorizedStepValue, "condition");
 
     // hint the branch
-    Intrinsic::IndependentIntrinsics expectIntr = llvm::Intrinsic::expect;
-    Constant *constZeroI1 = llvm::ConstantInt::get(builder.getInt1Ty(), 0, true);
-
-    CallInst *condition_with_hint = builder.CreateIntrinsic(expectIntr, builder.getInt1Ty(), {actualCondition, constZeroI1});
+//    Intrinsic::IndependentIntrinsics expectIntr = llvm::Intrinsic::expect;
+//    Constant *constZeroI1 = llvm::ConstantInt::get(builder.getInt1Ty(), 0, true);
+//
+//    CallInst *condition_with_hint = builder.CreateIntrinsic(expectIntr, builder.getInt1Ty(),
+//                                                            {actualCondition, constZeroI1});
+//
+//    dyn_cast<BranchInst>(alcHeader->getTerminator())
+//            ->setCondition(condition_with_hint);
 
     dyn_cast<BranchInst>(alcHeader->getTerminator())
-            ->setCondition(condition_with_hint);
+            ->setCondition(actualCondition);
 
 }
 
-void SVE_ALC::fillLaneGatherBlock_newVersion(BasicBlock *laneGather,
-                                             BasicBlock *alcApplied,
-                                             BasicBlock *joinBlock) {
+void SVE_ALC::fillLaneGatherBlock_itr(BasicBlock *laneGather,
+                                      BasicBlock *alcApplied,
+                                      BasicBlock *joinBlock) {
 
     insertPermutationLogic(laneGather, PermutedIndices, PermutedPredicates);
-    
-    
+
 
     IRBuilder<> builder(laneGather);
 
@@ -407,17 +410,18 @@ void SVE_ALC::fillLaneGatherBlock_newVersion(BasicBlock *laneGather,
     // check if z0 is uniform
     Value *condition =
             builder.CreateICmpULT(ActiveLanesInBothVectors, VectorizedStepValue);
-
-    Intrinsic::IndependentIntrinsics expectIntr = llvm::Intrinsic::expect;
-    Constant *constZeroI1 = llvm::ConstantInt::get(builder.getInt1Ty(), 0, true);
-
-    CallInst *condition_with_hint = builder.CreateIntrinsic(expectIntr, builder.getInt1Ty(), {condition, constZeroI1});
-
-    BranchInst *brInstr = builder.CreateCondBr(condition_with_hint, joinBlock, alcApplied);
+//
+//    Intrinsic::IndependentIntrinsics expectIntr = llvm::Intrinsic::expect;
+//    Constant *constZeroI1 = llvm::ConstantInt::get(builder.getInt1Ty(), 0, true);
+//
+//    CallInst *condition_with_hint = builder.CreateIntrinsic(expectIntr, builder.getInt1Ty(), {condition, constZeroI1});
+//
+//    BranchInst *brInstr = builder.CreateCondBr(condition_with_hint, joinBlock, alcApplied);
+    BranchInst *brInstr = builder.CreateCondBr(condition, joinBlock, alcApplied);
 
 }
 
-std::vector<Value *> *SVE_ALC::fillUniformBlock_newVersion(
+std::vector<Value *> *SVE_ALC::fillUniformBlock_itr(
         BasicBlock *uniformBlock, BasicBlock *joinBlock,
         BasicBlock *toBeVectorizedBlock, BasicBlock *header, Value *indices,
         Value *indexPhi) {
@@ -459,11 +463,11 @@ std::vector<Value *> *SVE_ALC::fillUniformBlock_newVersion(
     return outputs;
 }
 
-void SVE_ALC::fillLinearizedBlock_newVersion(BasicBlock *linearized,
-                                             BasicBlock *newLatch,
-                                             BasicBlock *toBeVectorizedBlock,
-                                             Value *indexVec,
-                                             Value *predicates) {
+void SVE_ALC::fillLinearizedBlock_itr(BasicBlock *linearized,
+                                      BasicBlock *newLatch,
+                                      BasicBlock *toBeVectorizedBlock,
+                                      Value *indexVec,
+                                      Value *predicates) {
     IRBuilder<> builder(linearized->getContext());
     builder.SetInsertPoint(linearized);
     builder.CreateBr(newLatch);
@@ -474,7 +478,7 @@ void SVE_ALC::fillLinearizedBlock_newVersion(BasicBlock *linearized,
                           VectorLoopIndex, predicates, false, true);
 }
 
-std::vector<Value *> *SVE_ALC::fillNewLatchBlock_newVersion(
+std::vector<Value *> *SVE_ALC::fillNewLatchBlock_itr(
         BasicBlock *newLatch, BasicBlock *alcHeader, BasicBlock *middleBlock,
         BasicBlock *joinBlock, BasicBlock *linearizedBlock,
         std::vector<Value *> *joinBlockOutputs, Value *totalVecIterations) {
@@ -1261,7 +1265,7 @@ void SVE_ALC::addBranchHint(BranchInst *branchInst) {
     ConstantAsMetadata *trueProbability = llvm::ConstantAsMetadata::get(llvm::ConstantInt::get(Int32Ty, 10));
     ConstantAsMetadata *falseProbability = llvm::ConstantAsMetadata::get(llvm::ConstantInt::get(Int32Ty, 90));
 
-    MDTuple *md = MDNode::get(context, {mdString,trueProbability, falseProbability});
+    MDTuple *md = MDNode::get(context, {mdString, trueProbability, falseProbability});
     branchInst->setMetadata(LLVMContext::MD_prof, md);
 
 

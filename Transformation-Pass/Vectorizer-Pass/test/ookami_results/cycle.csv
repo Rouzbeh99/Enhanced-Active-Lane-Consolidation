@@ -1,7 +1,0 @@
-inputs,cycle,standard deviation,confidence_low,confidence_high
-alc_itr_laneGather_1_header_1,9112754,32609,9106330,9119177
-alc_itr_laneGather_0_header_1,9128675,29668,9122831,9134519
-alc_itr_laneGather_1_header_0,9097918,29015,9092202,9103633
-alc_itr_no_hint,9187912,34648,9181087,9194737
-alc_itr_laneGather_0_header_0,9024487,14168,9021696,9027278
-compiled_with_O3,25904230,19499,25900389,25908071

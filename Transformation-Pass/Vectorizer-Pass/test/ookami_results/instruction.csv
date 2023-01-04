@@ -1,7 +1,0 @@
-inputs,instruction,standard deviation,confidence_low,confidence_high
-alc_itr_laneGather_1_header_1,6563257,0,6563257,6563257
-alc_itr_laneGather_0_header_1,6782007,0,6782007,6782007
-alc_itr_laneGather_1_header_0,6813257,0,6813257,6813257
-alc_itr_no_hint,6813257,0,6813257,6813257
-alc_itr_laneGather_0_header_0,6813257,0,6813257,6813257
-compiled_with_O3,59000725,0,59000725,59000725

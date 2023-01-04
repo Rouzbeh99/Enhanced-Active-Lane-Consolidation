@@ -33,11 +33,11 @@ void foo(int *__restrict__ a, int *__restrict__ b, int *__restrict__ c,
 
     double t = getTimeMiliSeconds();
     /* Start counting */
-   if ((status = PAPI_start(EventSet)) != PAPI_OK) ERROR_RETURN(status);
+    if ((status = PAPI_start(EventSet)) != PAPI_OK) ERROR_RETURN(status);
 
+    for (int j = 0; j < 10; ++j) {
         for (int i = 0; i < n; ++i) {
             if (cond[i]) {
-            //if(__builtin_expect(cond[i],0)){
                 a[i] = (2 * a[i] - 2 * c[i]) + (b[i] - 2 * a[i]);
                 a[i] += 2 * i + i * b[i];
                 b[i] = 2 - 2 * b[i] + (2 * a[i] - 2 * c[i]);
@@ -45,8 +45,8 @@ void foo(int *__restrict__ a, int *__restrict__ b, int *__restrict__ c,
                 c[i] = 2 * b[i] + 2 * a[i] - 3 * (2 * c[i] - 2 * b[i] + i * i);
                 c[i] -= 2 * i;
             }
-            //}
         }
+    }
 
     /* Stop counting, this reads from the counter as well as stop it. */
     if ((status = PAPI_stop(EventSet, CounterValues)) != PAPI_OK) ERROR_RETURN(status);
@@ -107,7 +107,7 @@ int main() {
         a[i] = i;
         b[i] = 2;
         c[i] = 0;
-        cond[i] = (i% 10 == 0);
+        cond[i] = (i % 100 < 40);
     }
 
     foo(a, b, c, cond, n);

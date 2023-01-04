@@ -1,0 +1,6 @@
+inputs,branch,standard deviation,confidence_low,confidence_high
+alc_simple,69,5,68,70
+vectorized,59,2,58,59
+alc_itr_no_hint,11430,618,11308,11552
+compiled_with_O3,109,39,101,117
+alc_itr_with_hint,133,21,128,137
