@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(SVE_ALC)
+project(Simple_ALC)
 
 
 # Add LLVM to build.
@@ -14,8 +14,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Collect MyLoopPass src.
 set(srcs
-        "${CMAKE_CURRENT_SOURCE_DIR}/SVE_ALC.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/Simple_ALC.cpp"
         )
 
 # Create the MyLoopPass library.
-add_llvm_component_library(LLVMSVE_ALC SHARED ${srcs})
+add_llvm_component_library(LLVMSimple_ALC SHARED ${srcs})

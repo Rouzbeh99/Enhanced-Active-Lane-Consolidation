@@ -38,4 +38,8 @@ public:
 
     bool containsOutputDependency();
 
+    bool isSingleIfCase();
+
+    bool isPerfectIfNest();
+
 };

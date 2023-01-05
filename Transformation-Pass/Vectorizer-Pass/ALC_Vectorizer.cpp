@@ -6,7 +6,8 @@
 #include "llvm/Passes/OptimizationLevel.h"
 #include "llvm/Passes/PassPlugin.h"
 #include "llvm/Transforms/Utils/Cloning.h"
-#include "SVE-ALC/SVE_ALC.h"
+#include "Iterative_ALC/Iterative_ALC.h"
+#include "Simple_ALC/Simple_ALC.h"
 #include "SVE-Vectorizer/SVE_Vectorizer.h"
 #include "ALC_Analysis/ALC_Analysis.h"
 
@@ -46,6 +47,7 @@ namespace {
         if (!L->getSubLoops().empty()) {
             return PreservedAnalyses::all();
         }
+        llvm::outs() << "\n----------------------------------------------------------------\n";
         llvm::outs() << "In Function : " << L->getHeader()->getParent()->getName()
                      << "\n";
         const ArrayRef<BasicBlock *> &allBlocks = L->getBlocks();
@@ -60,18 +62,22 @@ namespace {
         alc_analysis->doAnalysis();
 
 
-        auto *sve_alc = new SVE_ALC(L, factor, AR);
         auto *sve_vectorizer = new SVE_Vectorizer(L, factor, AR);
+        auto *simple_alc = new Simple_ALC(L, factor, AR);
+        auto *alc_itr = new Iterative_ALC(L, factor, AR);
 
+//        simple_alc->doTransformation();
 //         sve_vectorizer->doVectorization();
-        sve_alc->doTransformation_itr();
-//        sve_alc->doTransformation_simpleVersion();
+//       alc_itr->doTransformation_itr_singleIf_simple();
 
 //        printAllBlocks(L);
 
         delete alc_analysis;
-        delete sve_alc;
+        delete simple_alc;
+        delete alc_itr;
         delete sve_vectorizer;
+
+        llvm::outs() << "\n";
 
         return llvm::PreservedAnalyses::none();
     }

@@ -5,6 +5,9 @@ bool ALC_Analysis::doAnalysis() {
     bool functionCall = containsFunctionCall();
     bool vectorizable = isVectorizable();
     bool outputDependency = containsOutputDependency();
+    bool singleIfCase = isSingleIfCase();
+    bool perfectIfNest = isPerfectIfNest();
+
 
     const ArrayRef<BasicBlock *> &allBlocks = L->getBlocks();
 
@@ -24,6 +27,14 @@ bool ALC_Analysis::doAnalysis() {
         llvm::outs() << "Loop contains output dependency" << '\n';
     } else {
         llvm::outs() << "Loop doesn't contain output dependency" << '\n';
+    }
+
+    if (singleIfCase) {
+        llvm::outs() << "Single if case \n";
+    }
+
+    if (isPerfectIfNest()) {
+        llvm::outs() << "Perfect if nest \n";
     }
 
 
@@ -66,7 +77,6 @@ void ALC_Analysis::countNumberOfPaths(BasicBlock *const &src, BasicBlock *const 
     }
     visited[src] = false;
 }
-
 
 
 bool ALC_Analysis::containsFunctionCall() {
@@ -118,6 +128,46 @@ bool ALC_Analysis::containsOutputDependency() {
 }
 
 
+bool ALC_Analysis::isSingleIfCase() {
+    for (auto BB: successors(L->getHeader())) {
+        if (BB == L->getLoopLatch()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool ALC_Analysis::isPerfectIfNest() {
+
+    //TODO: should check each then block to make sure there is nor instruction other than next if
+
+    BasicBlock *latch = L->getLoopLatch();
+    BasicBlock *BB = L->getHeader();
+
+    while (true) {
+        bool hasLatchSuccessor = false;
+        BasicBlock *nextBB = BB;
+        for (auto succ: successors(BB)) {
+            if (succ == latch) {
+                hasLatchSuccessor = true;
+            } else {
+                nextBB = succ;
+            }
+        }
+
+        if (!hasLatchSuccessor) {
+            return false;
+        }
+
+        if (nextBB == BB) {   // BB is the innermost if body
+            return true;
+        }
+
+        BB = nextBB;
+
+    }
+
+}
 
 ALC_Analysis::ALC_Analysis(Loop *l, LoopAnalysisManager &am, LoopStandardAnalysisResults &lar) : L(l), AM(am),
                                                                                                  LAR(lar) {}

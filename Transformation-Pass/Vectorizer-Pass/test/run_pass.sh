@@ -6,8 +6,7 @@ M5_BUILD_PATH=build/arm64/out/m5
 M5_LIB_PATH=$GEM5_PATH/util/m5/${M5_BUILD_PATH/\/m5/}
 PAPI_DIR=/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/PAPI/papi-install
 PASS_DIR=/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation-Pass/Vectorizer-Pass
-#PATH=${PAPI_DIR}/bin:$PATH
-#LD_LIBRARY_PATH=${PAPI_DIR}/lib:$LD_LIBRARY_PATH
+
 
 cd ../build
 cmake -DCMAKE_VERBOSE_MAKEFILE=ON \
@@ -35,9 +34,13 @@ $LLVM_BUILD_DIR/bin/clang -g -O3 -target aarch64-unknown-linux-gnu -DSVE_INTRINS
 
 
 
-#opt --disable-output -dot-cfg --cfg-dot-filename-prefix=cfg alc_applied_O3.ll
-#dot -Tpdf cfg.foo.dot -o cfg.pdf
-# dot -Tpdf cfg.s253.dot -o cfg.pdf
+opt --disable-output -dot-cfg --cfg-dot-filename-prefix=cfg $2_O3.ll
+dot -Tpdf cfg.simple_if.dot -o simple_if.pdf
+dot -Tpdf cfg.nested_if_case_1.dot -o nested_if_case_1.pdf
+dot -Tpdf cfg.nested_if_case_2.dot -o nested_if_case_2.pdf
+dot -Tpdf cfg.perfect_nested_if_case_1.dot -o perfect_nested_if_case_1.pdf
+dot -Tpdf cfg.perfect_nested_if_case_2.dot -o perfect_nested_if_case_2.pdf
+
 
 
 rm *.dot

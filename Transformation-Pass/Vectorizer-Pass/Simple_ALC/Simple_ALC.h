@@ -18,12 +18,13 @@
 #include "llvm/Transforms/Utils/Cloning.h"
 #include "llvm/IR/Metadata.h"
 
-#ifndef SVE_PERMUTE_SVE_PERMUTE_H
-#define SVE_PERMUTE_SVE_PERMUTE_H
+
+#ifndef SIMPLE_ALC
+#define SIMPLE_ALC
 
 using namespace llvm;
 
-class SVE_ALC {
+class Simple_ALC {
 
 private:
     Loop *L;
@@ -58,13 +59,11 @@ private:
     std::vector<Instruction *> *sharedInstructions;
 
 public:
-    SVE_ALC(Loop *l, int vectorizationFactor, LoopStandardAnalysisResults &ar);
+    Simple_ALC(Loop *l, int vectorizationFactor, LoopStandardAnalysisResults &ar);
 
 public:
-    void doTransformation_itr();
 
-public:
-    void doTransformation_simpleVersion();
+    void doTransformation();
 
 private:
     BasicBlock *findTargetedBlock();
@@ -86,58 +85,6 @@ private:
 private:
     void refinePreheader(BasicBlock *preVecBlock,
                          BasicBlock *preHeaderForRemaining);
-
-private:
-    std::vector<Value *> *fillPreALCBlock_itr(BasicBlock *preALCBlock,
-                                                     BasicBlock *preheader,
-                                                     BasicBlock *alcHeader);
-
-private:
-    Value *createVectorOfConstants(Value *value, IRBuilder<> &builder,
-                                   std::string name);
-
-private:
-    void fillMiddleBlock_itr(BasicBlock *middleBlock,
-                                    BasicBlock *preheaderForRemaining,
-                                    BasicBlock *exitBlock, Value *remResult,
-                                    Value *uniformVec,
-                                    Value *uniformVecPredicates);
-
-private:
-    void fillALCHeaderBlock_itr(
-            BasicBlock *alcHeader, BasicBlock *laneGatherBlock,
-            BasicBlock *linearized, BasicBlock *preALC,
-            std::vector<Value *> *initialValues, BasicBlock *header);
-
-private:
-    void fillLaneGatherBlock_itr(BasicBlock *laneGather,
-                                        BasicBlock *alcApplied,
-                                        BasicBlock *joinBlock);
-
-private:
-    std::vector<Value *> *
-    fillUniformBlock_itr(BasicBlock *uniformBlock, BasicBlock *joinBlock,
-                                BasicBlock *toBeVectorizedBlock,
-                                BasicBlock *header, Value *indices,
-                                Value *indexPhi);
-
-private:
-    void fillLinearizedBlock_itr(BasicBlock *linearized,
-                                        BasicBlock *newLatch,
-                                        BasicBlock *toBeVectorizedBlock,
-                                        Value *indexVec, Value *predicates);
-
-private:
-    std::vector<Value *> *
-    fillJoinBlock(BasicBlock *joinBlock, BasicBlock *newLatch,
-                  BasicBlock *uniformBlock, BasicBlock *laneGather,
-                  Value *headerIndex, std::vector<Value *> *uniformBlockOutputs);
-
-private:
-    std::vector<Value *> *fillNewLatchBlock_itr(
-            BasicBlock *newLatch, BasicBlock *alcHeader, BasicBlock *middleBlock,
-            BasicBlock *joinBlock, BasicBlock *linearizedBlock,
-            std::vector<Value *> *joinBlockOutputs, Value *totalVecIterations);
 
 private:
     void refinePreHeaderForRemaining(BasicBlock *preHeaderForRemaining,
@@ -203,6 +150,8 @@ private:
 
 private:
     void addBranchHint(BranchInst* branchInst);
+private:
+    Value *createVectorOfConstants(Value *value, IRBuilder<> &builder, std::string name);
 };
 
-#endif // SVE_PERMUTE_SVE_PERMUTE_H
+#endif
