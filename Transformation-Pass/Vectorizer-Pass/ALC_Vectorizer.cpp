@@ -1,13 +1,14 @@
-#include "SVE-ALC/SVE_ALC.h"
-#include "SVE-Vectorizer/SVE_Vectorizer.h"
-#include "Unroller/Unroller.h"
 #include "llvm/Analysis/LoopAnalysisManager.h"
 #include "llvm/Analysis/ScalarEvolution.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/PassManager.h"
 #include "llvm/Passes/PassBuilder.h"
+#include "llvm/Passes/OptimizationLevel.h"
 #include "llvm/Passes/PassPlugin.h"
 #include "llvm/Transforms/Utils/Cloning.h"
+#include "SVE-ALC/SVE_ALC.h"
+#include "SVE-Vectorizer/SVE_Vectorizer.h"
+#include "ALC_Analysis/ALC_Analysis.h"
 
 using namespace llvm;
 
@@ -45,7 +46,6 @@ namespace {
         if (!L->getSubLoops().empty()) {
             return PreservedAnalyses::all();
         }
-
         llvm::outs() << "In Function : " << L->getHeader()->getParent()->getName()
                      << "\n";
         const ArrayRef<BasicBlock *> &allBlocks = L->getBlocks();
@@ -53,25 +53,32 @@ namespace {
                 allBlocks.front()->getFirstNonPHIOrDbg()->getDebugLoc();
         llvm::outs() << "Loop at line number: " << location.getLine() - 1 << "\n";
 
-        BasicBlock *initialLatch = L->getLoopLatch();
-
         int factor = 4;
+
+        auto *alc_analysis = new ALC_Analysis(L, AM, AR);
+
+        alc_analysis->doAnalysis();
+
 
         auto *sve_alc = new SVE_ALC(L, factor, AR);
         auto *sve_vectorizer = new SVE_Vectorizer(L, factor, AR);
 
 //         sve_vectorizer->doVectorization();
-       sve_alc->doTransformation_itr();
+        sve_alc->doTransformation_itr();
 //        sve_alc->doTransformation_simpleVersion();
 
-        printAllBlocks(L);
+//        printAllBlocks(L);
+
+        delete alc_analysis;
+        delete sve_alc;
+        delete sve_vectorizer;
 
         return llvm::PreservedAnalyses::none();
     }
 
     void printLoop(Loop *L) {
 
-        for (auto BB: L->getBlocks()) {
+        for (auto *BB: L->getBlocks()) {
             BB->print(outs());
         }
         llvm::outs() << "\n";
@@ -110,6 +117,12 @@ llvmGetPassPluginInfo() {
                                 return true;
                             }
                             return false;
+                        });
+
+                PB.registerLoopOptimizerEndEPCallback(
+                        [](LoopPassManager &LPM, OptimizationLevel OptLevel) {
+                            LPM.addPass(alc_vectorizer());
+                            return true;
                         });
             }};
 }
