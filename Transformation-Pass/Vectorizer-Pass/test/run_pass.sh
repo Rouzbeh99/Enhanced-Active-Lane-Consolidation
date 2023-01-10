@@ -18,31 +18,28 @@ make
 
 cd ../test
 
-$LLVM_BUILD_DIR/bin/clang -g -O3 -target aarch64-unknown-linux-gnu -DSVE_INTRINSICS -fno-inline -fno-vectorize -fno-slp-vectorize -fno-unroll-loops -S -emit-llvm -I $GEM5_PATH/include -I ${PAPI_DIR}/include -L ${PAPI_DIR}/lib $1 -o compiled_with_O3.ll
-$LLVM_BUILD_DIR/bin/clang -g -O0 -target aarch64-unknown-linux-gnu -DSVE_INTRINSICS -fpass-plugin=$PASS_DIR/build/ALC_Vectorizer.so -S -emit-llvm -I $GEM5_PATH/include -I ${PAPI_DIR}/include -L ${PAPI_DIR}/lib  compiled_with_O3.ll -o $2.ll
-#$LLVM_BUILD_DIR/bin/opt -S -load-pass-plugin ../build/ALC_Vectorizer.so -passes="alc-vectorizer" compiled_with_O3.ll -o $2.ll
-$LLVM_BUILD_DIR/bin/clang -g -O3 -target aarch64-unknown-linux-gnu -DSVE_INTRINSICS -fno-inline -fno-vectorize -fno-slp-vectorize -fno-unroll-loops -S -emit-llvm $2.ll -o $2_O3.ll
+
+$LLVM_BUILD_DIR/bin/clang -O0 -fpass-plugin=$PASS_DIR/build/ALC_Vectorizer.so -S -emit-llvm $1 -o tmp.ll
+
+#$LLVM_BUILD_DIR/bin/clang -g -O3 -target aarch64-unknown-linux-gnu -DSVE_INTRINSICS -fno-inline -fno-vectorize -fno-slp-vectorize -fno-unroll-loops -S -emit-llvm -I $GEM5_PATH/include -I ${PAPI_DIR}/include -L ${PAPI_DIR}/lib $1 -o compiled_with_O3.ll
+#$LLVM_BUILD_DIR/bin/clang -g -O0 -target aarch64-unknown-linux-gnu -DSVE_INTRINSICS -fpass-plugin=$PASS_DIR/build/ALC_Vectorizer.so -S -emit-llvm -I $GEM5_PATH/include -I ${PAPI_DIR}/include -L ${PAPI_DIR}/lib  compiled_with_O3.ll -o $2.ll
+#$LLVM_BUILD_DIR/bin/clang -g -O3 -target aarch64-unknown-linux-gnu -DSVE_INTRINSICS -fno-inline -fno-vectorize -fno-slp-vectorize -fno-unroll-loops -S -emit-llvm $2.ll -o $2_O3.ll
+
 
 #$LLVM_BUILD_DIR/bin/llc -O3 -mtriple=aarch64-linux-gnu -mattr=sve -filetype=obj $2_O3.ll -o $2.o
 #$LLVM_BUILD_DIR/bin/llc -O3 -mtriple=aarch64-linux-gnu -mattr=sve -filetype=obj compiled_with_O3.ll -o compiled_with_O3.o
 #$LLVM_BUILD_DIR/bin/llc -O3  -mtriple=aarch64-linux-gnu -mattr=sve -mcpu=cortex-a710 -filetype=asm $2_O3.ll -o $2_O3.s
-# $LLVM_BUILD_DIR/bin/llc -O3  -mtriple=aarch64-linux-gnu -mattr=sve -mcpu=cortex-a710 -filetype=asm compiled_with_O3.ll -o compiled_with_O3.s
 
+
+#opt --disable-output -dot-cfg --cfg-dot-filename-prefix=cfg $2_O3.ll
+#dot -Tpdf cfg.simple_if.dot -o simple_if.pdf
+#dot -Tpdf cfg.nested_if_case_1.dot -o nested_if_case_1.pdf
+#dot -Tpdf cfg.nested_if_case_2.dot -o nested_if_case_2.pdf
+#dot -Tpdf cfg.perfect_nested_if_case_1.dot -o perfect_nested_if_case_1.pdf
+#dot -Tpdf cfg.perfect_nested_if_case_2.dot -o perfect_nested_if_case_2.pdf
+# rm *.dot
+
+
+#$LLVM_BUILD_DIR/bin/opt -S -load-pass-plugin ../build/ALC_Vectorizer.so -passes="alc-vectorizer" compiled_with_O3.ll -o $2.ll
 #$LLVM_BUILD_DIR/bin/clang -target aarch64-none-linux-gnu --gcc-toolchain=$GCC_TOOLCHAIN --sysroot=$GCC_TOOLCHAIN/aarch64-none-linux-gnu/libc  -march=armv8.2-a+sve alc_applied_O3.o -o alc_applied.x
 #$LLVM_BUILD_DIR/bin/clang -target aarch64-none-linux-gnu --gcc-toolchain=$GCC_TOOLCHAIN --sysroot=$GCC_TOOLCHAIN/aarch64-none-linux-gnu/libc  -march=armv8.2-a+sve compiled_with_O3.o -o compiled_with_O3.x
-
-
-
-
-opt --disable-output -dot-cfg --cfg-dot-filename-prefix=cfg $2_O3.ll
-dot -Tpdf cfg.simple_if.dot -o simple_if.pdf
-dot -Tpdf cfg.nested_if_case_1.dot -o nested_if_case_1.pdf
-dot -Tpdf cfg.nested_if_case_2.dot -o nested_if_case_2.pdf
-dot -Tpdf cfg.perfect_nested_if_case_1.dot -o perfect_nested_if_case_1.pdf
-dot -Tpdf cfg.perfect_nested_if_case_2.dot -o perfect_nested_if_case_2.pdf
-
-
-
-rm *.dot
-#rm *.o
-# rm compiled_with_O3.*

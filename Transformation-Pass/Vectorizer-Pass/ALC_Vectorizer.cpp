@@ -47,35 +47,41 @@ namespace {
         if (!L->getSubLoops().empty()) {
             return PreservedAnalyses::all();
         }
+
+
+
         llvm::outs() << "\n----------------------------------------------------------------\n";
         llvm::outs() << "In Function : " << L->getHeader()->getParent()->getName()
                      << "\n";
         const ArrayRef<BasicBlock *> &allBlocks = L->getBlocks();
         const DebugLoc &location =
                 allBlocks.front()->getFirstNonPHIOrDbg()->getDebugLoc();
-        llvm::outs() << "Loop at line number: " << location.getLine() - 1 << "\n";
+        if (location.isImplicitCode()) {
+            llvm::outs() << "Implicit code, can't get location \n";
+        } else {
+            llvm::outs() << "Loop at line number: " << location.getLine() - 1 << "\n";
+        }
 
         int factor = 4;
 
         auto *alc_analysis = new ALC_Analysis(L, AM, AR);
+//        auto *sve_vectorizer = new SVE_Vectorizer(L, factor, AR);
+//        auto *simple_alc = new Simple_ALC(L, factor, AR);
+//        auto *alc_itr = new Iterative_ALC(L, factor, AR);
+
 
         alc_analysis->doAnalysis();
-
-
-        auto *sve_vectorizer = new SVE_Vectorizer(L, factor, AR);
-        auto *simple_alc = new Simple_ALC(L, factor, AR);
-        auto *alc_itr = new Iterative_ALC(L, factor, AR);
-
 //        simple_alc->doTransformation();
 //         sve_vectorizer->doVectorization();
 //       alc_itr->doTransformation_itr_singleIf_simple();
+//       alc_itr->doTransformation_itr_singleIf_nested();
 
 //        printAllBlocks(L);
 
         delete alc_analysis;
-        delete simple_alc;
-        delete alc_itr;
-        delete sve_vectorizer;
+//        delete simple_alc;
+//        delete alc_itr;
+//        delete sve_vectorizer;
 
         llvm::outs() << "\n";
 

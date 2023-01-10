@@ -2,11 +2,12 @@
 
 
 bool ALC_Analysis::doAnalysis() {
+
+    int numberOfBlocks = L->getBlocks().size();
     bool functionCall = containsFunctionCall();
     bool vectorizable = isVectorizable();
     bool outputDependency = containsOutputDependency();
     bool singleIfCase = isSingleIfCase();
-    bool perfectIfNest = isPerfectIfNest();
 
 
     const ArrayRef<BasicBlock *> &allBlocks = L->getBlocks();
@@ -42,10 +43,25 @@ bool ALC_Analysis::doAnalysis() {
     BasicBlock *const &loopLatch = L->getLoopLatch();  //supposing to have only one exiting node
 
     int numberOfPaths = 0;
+    auto *allPaths = new std::vector<std::vector<BasicBlock *>>;
+    BasicBlock *path[allBlocks.size()];
     std::map<BasicBlock *const, bool> visited;
 
-    countNumberOfPaths(firstNode, loopLatch, numberOfPaths, visited, allBlocks);
-    llvm::outs() << "Number of paths: " << numberOfPaths << '\n';
+    if (numberOfBlocks > 10) {
+        numberOfPaths = -1;   // too many paths
+    } else {
+        int index = 0;
+        countNumberOfPaths(firstNode, loopLatch, index, path, visited, allBlocks, allPaths);
+        numberOfPaths = allPaths->size();
+
+    }
+    llvm::outs() << "Number of paths: " << numberOfPaths << "\n";
+    for (auto P: *allPaths) {
+        for (auto BB: P) {
+            llvm::outs() << BB->getName() << " --> ";
+        }
+        llvm::outs() << " total instructions in the path: " << countInstructions(&P) << "\n";
+    }
 
 
     if (!functionCall && !outputDependency && vectorizable && (numberOfPaths > 1)) {
@@ -58,11 +74,19 @@ bool ALC_Analysis::doAnalysis() {
 
 }
 
-void ALC_Analysis::countNumberOfPaths(BasicBlock *const &src, BasicBlock *const &dest, int &path_count,
-                                      std::map<BasicBlock *const, bool> &visited, ArrayRef<BasicBlock *> allBlocks) {
+void ALC_Analysis::countNumberOfPaths(BasicBlock *const &src, BasicBlock *const &dest, int &index, BasicBlock *path[],
+                                      std::map<BasicBlock *const, bool> &visited, ArrayRef<BasicBlock *> allBlocks,
+                                      std::vector<std::vector<BasicBlock *>> *result) {
+
+
     visited[src] = true;
+    path[index] = src;
+    index++;
+
     if (src == dest) {
-        path_count++;
+        std::vector<BasicBlock *> blocks;
+        blocks.assign(path, path + index);
+        result->push_back(blocks);
     } else {
         for (BasicBlock *succ: successors(src)) {
             if (!visited[succ]) {
@@ -71,11 +95,12 @@ void ALC_Analysis::countNumberOfPaths(BasicBlock *const &src, BasicBlock *const 
                                                      return item == succ;
                                                  });
                 if (belongsToLoop)
-                    countNumberOfPaths(succ, dest, path_count, visited, allBlocks);
+                    countNumberOfPaths(succ, dest, index, path, visited, allBlocks, result);
             }
         }
     }
     visited[src] = false;
+    index--;
 }
 
 
@@ -93,6 +118,10 @@ bool ALC_Analysis::containsFunctionCall() {
             }
 
             if (isa<CallInst>(instr)) {
+                Function *calledFunction = cast<CallInst>(instr).getCalledFunction();
+                if (!calledFunction) {
+                    return false; // Could not get function
+                }
                 if (cast<CallInst>(instr).getCalledFunction()->isIntrinsic()) { // it's an LLVM function
                     I = I->getNextNonDebugInstruction();
                     continue;
@@ -112,6 +141,7 @@ bool ALC_Analysis::isVectorizable() {
     return info.canVectorizeMemory();
 
 }
+
 
 bool ALC_Analysis::containsOutputDependency() {
 
@@ -167,6 +197,23 @@ bool ALC_Analysis::isPerfectIfNest() {
 
     }
 
+}
+
+int ALC_Analysis::countInstructions(std::vector<BasicBlock *> *path) {
+    int result = 0;
+    for (auto BB: *path) {
+        for (auto &instr: BB->instructionsWithoutDebug()) {
+            if (isa<PHINode>(instr)) {
+                continue;
+            }
+            if (&instr == BB->getTerminator()) {
+                break;
+            }
+            result++;
+        }
+    }
+
+    return result;
 }
 
 ALC_Analysis::ALC_Analysis(Loop *l, LoopAnalysisManager &am, LoopStandardAnalysisResults &lar) : L(l), AM(am),

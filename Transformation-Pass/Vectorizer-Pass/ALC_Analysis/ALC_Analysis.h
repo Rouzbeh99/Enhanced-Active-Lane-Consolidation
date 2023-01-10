@@ -29,8 +29,8 @@ public:
 public:
     bool doAnalysis();
 
-    void countNumberOfPaths(BasicBlock *const &src, BasicBlock *const &dest, int &path_count,
-                            std::map<BasicBlock *const, bool> &visited, ArrayRef<BasicBlock *> allBlocks);
+    void countNumberOfPaths(BasicBlock *const &src, BasicBlock *const &dest, int &index, BasicBlock *path[],
+                            std::map<BasicBlock *const, bool> &visited, ArrayRef<BasicBlock *> allBlocks, std::vector<std::vector<BasicBlock*>> *result);
 
     bool containsFunctionCall();
 
@@ -41,5 +41,7 @@ public:
     bool isSingleIfCase();
 
     bool isPerfectIfNest();
+
+    int countInstructions(std::vector<BasicBlock*> *path);
 
 };

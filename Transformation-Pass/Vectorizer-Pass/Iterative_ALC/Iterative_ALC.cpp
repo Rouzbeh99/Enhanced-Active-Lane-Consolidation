@@ -71,10 +71,6 @@ void Iterative_ALC::doTransformation_itr_singleIf_nested() {
 
 
 
-
-
-
-
 // TODO: problem in algorithm, in the case where the total number of active
 // lanes is not enough to fill a vector, the result vector is not correct
 void Iterative_ALC::insertPermutationLogic(BasicBlock *insertAt, Value *&permutedZ0,

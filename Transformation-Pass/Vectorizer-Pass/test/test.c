@@ -65,7 +65,7 @@ void nested_if_case_1(int *__restrict__ a, int *__restrict__ b, int *__restrict_
     /* Start counting */
     if ((status = PAPI_start(EventSet)) != PAPI_OK) ERROR_RETURN(status);
 
-//    for (int j = 0; j < 10; ++j) {
+    for (int j = 0; j < 10; ++j) {
     for (int i = 0; i < n; ++i) {
         if (cond[i]) {
             a[i] = c[i] + 4;
@@ -75,11 +75,10 @@ void nested_if_case_1(int *__restrict__ a, int *__restrict__ b, int *__restrict_
             c[i] = a[i] + b[i];
         }
     }
-//    }
+    }
 
     /* Stop counting, this reads from the counter as well as stop it. */
     if ((status = PAPI_stop(EventSet, CounterValues)) != PAPI_OK) ERROR_RETURN(status);
-
     ExecutionTime = getTimeMiliSeconds() - t;
 }
 
@@ -101,7 +100,7 @@ void nested_if_case_2(int *__restrict__ a, int *__restrict__ b, int *__restrict_
             } else {
                 b[i] = b[i] * c[i];
                 if (b[i] > a[i]) {
-                    b[i] = 0;
+                    b[i] = c[i] - 76;
                 }
             }
             c[i] = a[i] + b[i];
