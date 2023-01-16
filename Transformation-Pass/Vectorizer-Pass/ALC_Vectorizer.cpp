@@ -49,8 +49,8 @@ namespace {
         }
 
 
-
-        llvm::outs() << "\n----------------------------------------------------------------\n";
+        llvm::outs()
+                << "\n----------------------------------------------------------------------------------------------------\n";
         llvm::outs() << "In Function : " << L->getHeader()->getParent()->getName()
                      << "\n";
         const ArrayRef<BasicBlock *> &allBlocks = L->getBlocks();
@@ -67,16 +67,16 @@ namespace {
         auto *alc_analysis = new ALC_Analysis(L, AM, AR);
 //        auto *sve_vectorizer = new SVE_Vectorizer(L, factor, AR);
 //        auto *simple_alc = new Simple_ALC(L, factor, AR);
-//        auto *alc_itr = new Iterative_ALC(L, factor, AR);
+        auto *alc_itr = new Iterative_ALC(L, factor, AR);
 
 
         alc_analysis->doAnalysis();
 //        simple_alc->doTransformation();
 //         sve_vectorizer->doVectorization();
-//       alc_itr->doTransformation_itr_singleIf_simple();
-//       alc_itr->doTransformation_itr_singleIf_nested();
+       alc_itr->doTransformation_itr_singleIf_simple();
+//        alc_itr->doTransformation_itr_singleIf_full_permutation();
 
-//        printAllBlocks(L);
+        printLoop(L);
 
         delete alc_analysis;
 //        delete simple_alc;

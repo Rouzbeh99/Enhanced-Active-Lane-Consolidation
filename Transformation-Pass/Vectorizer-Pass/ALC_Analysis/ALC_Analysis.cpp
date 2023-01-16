@@ -202,6 +202,9 @@ bool ALC_Analysis::isPerfectIfNest() {
 int ALC_Analysis::countInstructions(std::vector<BasicBlock *> *path) {
     int result = 0;
     for (auto BB: *path) {
+        if (BB == L->getLoopLatch()) {
+            break;
+        }
         for (auto &instr: BB->instructionsWithoutDebug()) {
             if (isa<PHINode>(instr)) {
                 continue;

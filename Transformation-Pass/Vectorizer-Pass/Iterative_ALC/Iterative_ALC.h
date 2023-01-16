@@ -37,7 +37,7 @@ private:
     ScalarEvolution *SE;
     PHINode *VectorLoopIndex;
     Value *VectorLoopNextIndex = nullptr;
-    Value *VectorizedStepValue;
+    Value *VscaleFactor;
     Value *NonVectorizedIterations;
     Value *VectorizedIterations;
     Value *StepVector;
@@ -48,8 +48,10 @@ private:
     Value *PredicatesOfSecondVector;
     Value *ActiveLanesInSecondVector;
     Value *ActiveLanesInBothVectors;
-    Value *PermutedIndices;
-    Value *PermutedPredicates;
+    Value *MergedIndices;
+    Value *MergedPredicates;
+    Value *RemainingIndices;
+    Value *RemainingPredicates;
     Value *ActiveElementsInPermutedVector;
     Value *allTrue;
     Constant *ConstZeroVectorOfTripCountTy;
@@ -64,6 +66,8 @@ public:
     void doTransformation_itr_singleIf_simple();
 
     void doTransformation_itr_singleIf_nested();
+
+    void doTransformation_itr_singleIf_full_permutation();
 
 private:
     BasicBlock *findTargetedBlock();
@@ -88,8 +92,8 @@ private:
 
 private:
     std::vector<Value *> *fillPreALCBlock_itr(BasicBlock *preALCBlock,
-                                                     BasicBlock *preheader,
-                                                     BasicBlock *alcHeader);
+                                              BasicBlock *preheader,
+                                              BasicBlock *alcHeader);
 
 private:
     Value *createVectorOfConstants(Value *value, IRBuilder<> &builder,
@@ -97,10 +101,10 @@ private:
 
 private:
     void fillMiddleBlock_itr(BasicBlock *middleBlock,
-                                    BasicBlock *preheaderForRemaining,
-                                    BasicBlock *exitBlock, Value *remResult,
-                                    Value *uniformVec,
-                                    Value *uniformVecPredicates);
+                             BasicBlock *preheaderForRemaining,
+                             BasicBlock *exitBlock, Value *remResult,
+                             Value *uniformVec,
+                             Value *uniformVecPredicates);
 
 private:
     void fillALCHeaderBlock_itr(
@@ -110,21 +114,21 @@ private:
 
 private:
     void fillLaneGatherBlock_itr(BasicBlock *laneGather,
-                                        BasicBlock *alcApplied,
-                                        BasicBlock *joinBlock);
+                                 BasicBlock *alcApplied,
+                                 BasicBlock *joinBlock);
 
 private:
     std::vector<Value *> *
     fillUniformBlock_itr(BasicBlock *uniformBlock, BasicBlock *joinBlock,
-                                BasicBlock *toBeVectorizedBlock,
-                                BasicBlock *header, Value *indices,
-                                Value *indexPhi);
+                         BasicBlock *toBeVectorizedBlock,
+                         BasicBlock *header, Value *indices,
+                         Value *indexPhi);
 
 private:
     void fillLinearizedBlock_itr(BasicBlock *linearized,
-                                        BasicBlock *newLatch,
-                                        BasicBlock *toBeVectorizedBlock,
-                                        Value *indexVec, Value *predicates);
+                                 BasicBlock *newLatch,
+                                 BasicBlock *toBeVectorizedBlock,
+                                 Value *indexVec, Value *predicates);
 
 private:
     std::vector<Value *> *
@@ -167,7 +171,28 @@ private:
                                               BasicBlock *thenBlock);
 
 private:
-    void addBranchHint(BranchInst* branchInst);
+    void addBranchHint(BranchInst *branchInst);
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////
+private:
+    void fillALCHeader_full_permutation(BasicBlock *alcHeader, BasicBlock *laneGatherBlock,
+                                        BasicBlock *preALCBlock,
+                                        std::vector<Value *> *initialValues, BasicBlock *header);
+
+    void fillLaneGather_full_permutation(BasicBlock *laneGather, BasicBlock *uniformBlock, BasicBlock *latch);
+
+    void insertPermutationLogic_full_permutation(BasicBlock *insertAt, Value *&permutedZ0, Value *&permutedZ1,
+                                                 Value *&permutedP0, Value *&permutedP1);
+
+    std::vector<Value *> *fillNewLatchBlock_full_permutation(
+            BasicBlock *newLatch, BasicBlock *alcHeader, BasicBlock *middleBlock, BasicBlock *laneGather,
+            BasicBlock *uniformBlock, Value *totalVecIterations);
+
+    void
+    fillUniformBlock_full_permutation(BasicBlock *uniformBlock, BasicBlock *latch,
+                                      BasicBlock *toBeVectorizedBlock,
+                                      BasicBlock *header, Value *indices);
+
 };
 
 #endif // SVE_PERMUTE_SVE_PERMUTE_H
