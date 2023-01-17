@@ -294,7 +294,7 @@ int main() {
     /* Add the array of events PAPI_TOT_INS and PAPI_TOT_CYC to the eventset*/
     if ((status = PAPI_add_events(EventSet, EventCodes, NUMEVENTS)) != PAPI_OK) ERROR_RETURN(status);
 
-    int n = 3332342 ; //// until 159 they are like each other
+    int n = 333234352 ;
 
     a = checked_malloc_int_array(n);
     b = checked_malloc_int_array(n);

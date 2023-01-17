@@ -165,7 +165,7 @@ void permutation_c_sve_intrinsics(svint32_t z0, svint32_t z1, svint32_t *result0
 //gather others to z1
     uint32_t x1 = svcntp_b32(allActive, p1);
     svbool_t p5 = svwhilelt_b32_s32(0, x1);
-    z2 = svsplice_s32(p5, z3, z5);  // contains active ... inactive
+    z2 = svsplice_s32(p5, z3, z5);  // contains active ... inactive of z1
     uint32_t x2 = svcntp_b32(allActive, p2);
     p2 = svwhilelt_b32_s32(0, x2);
     *result1 = svsel_s32(p2, z4, z2);

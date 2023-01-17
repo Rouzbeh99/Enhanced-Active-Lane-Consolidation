@@ -200,11 +200,12 @@ void Iterative_ALC::refinePreheader(BasicBlock *preVecBlock,
         VscaleFactor = intrinsicCallGenerator->createVscale32Intrinsic(IRB);
     }
 
+
     // check if there are iterations
     Constant *contTwo = llvm::ConstantInt::get(VscaleFactor->getType(), 2);
-    Value *add = IRB.CreateMul(VscaleFactor, contTwo);
+    Value *mul = IRB.CreateMul(VscaleFactor, contTwo);
     Value *condition =
-            IRB.CreateICmpUGE(tripCount, add); // if true, there are enough iterations
+            IRB.CreateICmpUGE(tripCount, mul); // if true, there are enough iterations
 
     IRB.CreateCondBr(condition, preVecBlock, preHeaderForRemaining);
 
@@ -227,25 +228,28 @@ std::vector<Value *> *Iterative_ALC::fillPreALCBlock_itr(
     // create step vector
     Constant *constZero = ConstantInt::get(TripCountTy, 0, false);
     Constant *constOne = ConstantInt::get(TripCountTy, 1, false);
-    Constant *constThree = ConstantInt::get(TripCountTy, 3, false);
+    Constant *constTwo = ConstantInt::get(TripCountTy, 2, false);
     Value *initialUniformVec = intrinsicCallGenerator->createIndexInstruction(
             builder, constZero, constOne);
-    Value *stepVal = builder.CreateMul(VscaleFactor, constThree);
+//    Value *stepVal = builder.CreateMul(VscaleFactor, constTwo);
+    Value *stepVal = VscaleFactor;
+    ActualVectorLength = stepVal;
 
     // vectorizing block termination condition: index > n - (n % stepValue)
     // forming n - (n % stepValue)
-    
+
 
     Value *remResult = builder.CreateURem(tripCount, stepVal);
-    Value *mul = builder.CreateMul(remResult, constThree);
-    Value *totalIterationsToVectorize = builder.CreateSub(tripCount, mul,
+    Value *mul = builder.CreateMul(stepVal, constTwo);
+    Value *add = builder.CreateAdd(mul, remResult);
+    Value *totalIterationsToVectorize = builder.CreateSub(tripCount, add,
                                                           "total.iterations.to.be.vectorized");
 
     builder.CreateBr(alcHeader);
 
     results->push_back(initialUniformVec);
     results->push_back(stepVal);
-    results->push_back(mul);
+    results->push_back(add);
     results->push_back(totalIterationsToVectorize);
 
     return results;
@@ -1215,12 +1219,13 @@ Iterative_ALC::insertPermutationLogic_full_permutation(BasicBlock *insertAt, Val
     p2 = intrinsicCallGenerator->createWhileltInstruction(IRB, constZero64, x2);
     permutedZ1 = intrinsicCallGenerator->createSelInstruction(IRB, z4, z2, p2);
 
-    auto *p1 = IRB.CreateNot(p2);
-    Value *x3 = intrinsicCallGenerator->createCntpInstruction(IRB, p1, p1);
-    p2 = intrinsicCallGenerator->createWhileltInstruction(IRB, constZero64,
-                                                          IRB.CreateAdd(IRB.CreateSub(x1, x2), x3));
-    p5 = IRB.CreateNot(p2);
-    permutedP1 = IRB.CreateOr(IRB.CreateAnd(IRB.CreateNot(p5), p1), IRB.CreateAnd({p1, p5, p2}));
+
+    Value *p6 = IRB.CreateNot(p2);      // mask based on first vector false elements
+    Value *x3 = intrinsicCallGenerator->createCntpInstruction(IRB, p3, p3);
+    Value *truncResult = IRB.CreateSExt(ActualVectorLength, x3->getType());
+    Value *subResult = IRB.CreateSub(truncResult, x3);
+    Value *p7 = intrinsicCallGenerator->createWhileltInstruction(IRB, constZero64, subResult);  // mask based on second vector false elements
+    permutedP1 = IRB.CreateAnd(p6, p7);
 
 }
 

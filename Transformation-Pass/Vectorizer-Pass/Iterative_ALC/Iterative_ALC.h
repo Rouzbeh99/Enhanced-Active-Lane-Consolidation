@@ -36,11 +36,8 @@ private:
     Type *TripCountTy;
     ScalarEvolution *SE;
     PHINode *VectorLoopIndex;
-    Value *VectorLoopNextIndex = nullptr;
     Value *VscaleFactor;
-    Value *NonVectorizedIterations;
-    Value *VectorizedIterations;
-    Value *StepVector;
+    Value* ActualVectorLength;
     Value *IndexVectorOfFirstVector;
     Value *PredicatesOfFirstVector;
     Value *ActiveLanesInFirstVector;
