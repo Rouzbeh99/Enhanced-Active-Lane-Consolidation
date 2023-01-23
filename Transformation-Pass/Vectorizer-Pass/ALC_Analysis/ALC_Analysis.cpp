@@ -2,7 +2,7 @@
 #include "ALC_Analysis.h"
 
 
-ALCAnalysisResult * ALC_Analysis::doAnalysis() {
+ALCAnalysisResult *ALC_Analysis::doAnalysis() {
 
     int numberOfBlocks = L->getBlocks().size();
     bool functionCall = containsFunctionCall();
@@ -50,6 +50,7 @@ ALCAnalysisResult * ALC_Analysis::doAnalysis() {
 
     if (numberOfBlocks > 10) {
         numberOfPaths = -1;   // too many paths
+        llvm::outs() << "number of blocks: " << numberOfBlocks << "\n";
     } else {
         int index = 0;
         countNumberOfPaths(firstNode, loopLatch, index, path, visited, allBlocks, allPaths);
@@ -61,13 +62,16 @@ ALCAnalysisResult * ALC_Analysis::doAnalysis() {
         for (auto BB: P) {
             llvm::outs() << BB->getName() << " --> ";
         }
-        std::pair<int, int> *pair = computeInstructionRatioInThePath(&P);
-        if (pair->first == 0) {
-            pair->first = 1;
+        int memoryInstructions = countMemoryInstructions(&P);
+        int allInstructions = countInstructions(&P);
+
+        if (allInstructions < 1) {
+            allInstructions = 1;
         }
-        llvm::outs() << " total instructions in the path: " << countInstructions(&P)
-                     << " , noneMem/Mem instruction ratio: "
-                     << pair->second / (double) pair->first
+
+        llvm::outs() << " total instructions in the path: " << allInstructions
+                     << " , Memory instructions percentage: "
+                     << (memoryInstructions * 100) / allInstructions << "%"
                      << "\n";
     }
 
@@ -227,9 +231,8 @@ int ALC_Analysis::countInstructions(std::vector<BasicBlock *> *path) {
     return result;
 }
 
-std::pair<int, int> *ALC_Analysis::computeInstructionRatioInThePath(std::vector<BasicBlock *> *path) {
+int ALC_Analysis::countMemoryInstructions(std::vector<BasicBlock *> *path) {
     int memoryInst = 0;
-    int nonMemInst = 0;
     for (auto BB: *path) {
         if (BB == L->getLoopLatch()) {
             break;
@@ -244,12 +247,10 @@ std::pair<int, int> *ALC_Analysis::computeInstructionRatioInThePath(std::vector<
 
             if (isa<LoadInst>(instr) || isa<StoreInst>(instr)) {
                 memoryInst++;
-            } else {
-                nonMemInst++;
             }
         }
     }
-    return new std::pair<int, int>(memoryInst, nonMemInst);
+    return memoryInst;
 }
 
 

@@ -20,10 +20,14 @@ for dir in os.listdir(specDir):
             records = splited[i].split('\\n')
             canBeApplied = False
             pathCount = 0
+            function = ""
             singleIf = False
             line = 0
             paths = []
             for t in records:
+
+                if "In Function" in t:
+                    function = (t.split(":")[1]).strip()
                 if "line" in t:
                     line = t.split(":")[1].strip()
                 if "Single if" in t:
@@ -36,11 +40,11 @@ for dir in os.listdir(specDir):
                     tokens = t.split("-->")
                     splitted = tokens[len(tokens) - 1].split(":")
                     instructions = int(splitted[1].split(",")[0].strip())
-                    ratio = float("{:.3f}".format(float(splitted[2])))
+                    ratio =splitted[2]
                     path_length = len(tokens) - 1
                     paths.append({"length": path_length,
                                   "number of instructions": instructions,
-                                  "nonMem/mem instruction ratio": ratio
+                                  "memory instructions percentage": ratio
                                   })
 
             if canBeApplied:
@@ -50,6 +54,7 @@ for dir in os.listdir(specDir):
                 result.append({
                     "App": dir,
                     "file": filename,
+                    "function": function,
                     "loop at line": line,
                     "number of paths": pathCount,
                     "is single if statement": singleIf,

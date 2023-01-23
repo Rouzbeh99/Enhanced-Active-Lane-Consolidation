@@ -47,7 +47,7 @@ public:
 
     int countInstructions(std::vector<BasicBlock *> *path);
 
-    std::pair<int, int> *computeInstructionRatioInThePath(std::vector<BasicBlock *> *path);
+    int countMemoryInstructions(std::vector<BasicBlock *> *path);
 
 };
 
