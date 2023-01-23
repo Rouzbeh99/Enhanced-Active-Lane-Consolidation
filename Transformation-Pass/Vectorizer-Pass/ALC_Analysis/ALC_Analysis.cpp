@@ -1,7 +1,8 @@
+#include <iomanip>
 #include "ALC_Analysis.h"
 
 
-bool ALC_Analysis::doAnalysis() {
+ALCAnalysisResult * ALC_Analysis::doAnalysis() {
 
     int numberOfBlocks = L->getBlocks().size();
     bool functionCall = containsFunctionCall();
@@ -34,9 +35,9 @@ bool ALC_Analysis::doAnalysis() {
         llvm::outs() << "Single if case \n";
     }
 
-    if (isPerfectIfNest()) {
-        llvm::outs() << "Perfect if nest \n";
-    }
+//    if (isPerfectIfNest()) {
+//        llvm::outs() << "Perfect if nest \n";
+//    }
 
 
     BasicBlock *const &firstNode = L->getHeader();
@@ -60,17 +61,24 @@ bool ALC_Analysis::doAnalysis() {
         for (auto BB: P) {
             llvm::outs() << BB->getName() << " --> ";
         }
-        llvm::outs() << " total instructions in the path: " << countInstructions(&P) << "\n";
+        std::pair<int, int> *pair = computeInstructionRatioInThePath(&P);
+        if (pair->first == 0) {
+            pair->first = 1;
+        }
+        llvm::outs() << " total instructions in the path: " << countInstructions(&P)
+                     << " , noneMem/Mem instruction ratio: "
+                     << pair->second / (double) pair->first
+                     << "\n";
     }
 
 
     if (!functionCall && !outputDependency && vectorizable && (numberOfPaths > 1)) {
         llvm::outs() << "ALC can be applied \n";
-        return true;
     } else {
         llvm::outs() << "ALC can NOT be applied \n";
-        return false;
     }
+
+    return new ALCAnalysisResult(true, true, ALCAnalysisResult::DIVERGENCE_TYPE::IF_THEN_ELSE);
 
 }
 
@@ -219,5 +227,47 @@ int ALC_Analysis::countInstructions(std::vector<BasicBlock *> *path) {
     return result;
 }
 
+std::pair<int, int> *ALC_Analysis::computeInstructionRatioInThePath(std::vector<BasicBlock *> *path) {
+    int memoryInst = 0;
+    int nonMemInst = 0;
+    for (auto BB: *path) {
+        if (BB == L->getLoopLatch()) {
+            break;
+        }
+        for (auto &instr: BB->instructionsWithoutDebug()) {
+            if (isa<PHINode>(instr)) {
+                continue;
+            }
+            if (&instr == BB->getTerminator()) {
+                break;
+            }
+
+            if (isa<LoadInst>(instr) || isa<StoreInst>(instr)) {
+                memoryInst++;
+            } else {
+                nonMemInst++;
+            }
+        }
+    }
+    return new std::pair<int, int>(memoryInst, nonMemInst);
+}
+
+
 ALC_Analysis::ALC_Analysis(Loop *l, LoopAnalysisManager &am, LoopStandardAnalysisResults &lar) : L(l), AM(am),
                                                                                                  LAR(lar) {}
+
+
+ALCAnalysisResult::ALCAnalysisResult(bool isLegal, bool isProfitable, ALCAnalysisResult::DIVERGENCE_TYPE divergenceType)
+        : isLegal(isLegal), isProfitable(isProfitable), divergenceType(divergenceType) {}
+
+bool ALCAnalysisResult::isLegal1() const {
+    return isLegal;
+}
+
+bool ALCAnalysisResult::isProfitable1() const {
+    return isProfitable;
+}
+
+ALCAnalysisResult::DIVERGENCE_TYPE ALCAnalysisResult::getDivergenceType() const {
+    return divergenceType;
+}

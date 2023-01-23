@@ -39,13 +39,12 @@ void simple_if(int *__restrict__ a, int *__restrict__ b, int *__restrict__ c,
 //    for (int j = 0; j < 10; ++j) {
     for (int i = 0; i < n; ++i) {
         if (cond[i]) {
-//            a[i] = (2 * a[i] - 2 * c[i]) + (b[i] - 2 * a[i]);
-//            a[i] += 2 * i + i * b[i];
-//            b[i] = 2 - 2 * b[i] + (2 * a[i] - 2 * c[i]);
-//            b[i] -= 3 * i + i * c[i];
-//            c[i] = 2 * b[i] + 2 * a[i] - 3 * (2 * c[i] - 2 * b[i] + i * i);
-//            c[i] -= 2 * i;
-            c[i] = a[i] + b[i] + c[i];
+            a[i] = (2 * a[i] - 2 * c[i]) + (b[i] - 2 * a[i]);
+            a[i] += 2 * i + i * b[i];
+            b[i] = 2 - 2 * b[i] + (2 * a[i] - 2 * c[i]);
+            b[i] -= 3 * i + i * c[i];
+            c[i] = 2 * b[i] + 2 * a[i] - 3 * (2 * c[i] - 2 * b[i] + i * i);
+            c[i] -= 2 * i;
         }
     }
 //    }
@@ -294,7 +293,7 @@ int main() {
     /* Add the array of events PAPI_TOT_INS and PAPI_TOT_CYC to the eventset*/
     if ((status = PAPI_add_events(EventSet, EventCodes, NUMEVENTS)) != PAPI_OK) ERROR_RETURN(status);
 
-    int n = 333234352 ;
+    int n = 5000000;
 
     a = checked_malloc_int_array(n);
     b = checked_malloc_int_array(n);

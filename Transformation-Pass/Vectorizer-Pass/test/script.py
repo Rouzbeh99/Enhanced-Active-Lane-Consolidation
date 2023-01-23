@@ -6,6 +6,7 @@ specDir = 'spec'
 allPathCount = []
 result = []
 
+
 for dir in os.listdir(specDir):
     print("------------------------------------------------------------")
     print("Application : " + dir)
@@ -13,32 +14,34 @@ for dir in os.listdir(specDir):
         print("File : " + filename)
         cmd = ['./run_pass.sh', specDir + "/" + dir + "/" + filename]
         output = subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0]
-
         output = str(output)
         splited = output.split("----------------------------------------------------------------")
         for i in range(1, len(splited)):
-            record = splited[i].split('\\n')
+            records = splited[i].split('\\n')
             canBeApplied = False
             pathCount = 0
             singleIf = False
             line = 0
             paths = []
-            for t in record:
+            for t in records:
                 if "line" in t:
                     line = t.split(":")[1].strip()
                 if "Single if" in t:
                     singleIf = True
                 if "paths" in t:
-                    pathCount = int(t.split(":")[1].strip())
+                    pathCount = int (t.split(":")[1].strip())
                 if "ALC" in t and not "NOT" in t:
                     canBeApplied = True
                 if "total" in t:
                     tokens = t.split("-->")
-                    instructions = tokens[len(tokens) - 1].split(":")[1].strip()
+                    splitted = tokens[len(tokens) - 1].split(":")
+                    instructions = int(splitted[1].split(",")[0].strip())
+                    ratio = float("{:.3f}".format(float(splitted[2])))
                     path_length = len(tokens) - 1
                     paths.append({"length": path_length,
-                                  "number of instructions": instructions}
-                                 )
+                                  "number of instructions": instructions,
+                                  "nonMem/mem instruction ratio": ratio
+                                  })
 
             if canBeApplied:
                 if pathCount != 2:
@@ -53,15 +56,15 @@ for dir in os.listdir(specDir):
                     "paths": paths
                 })
 
-for record in result:
+for records in result:
     print("\n------------------------------------------------------------\n")
-    for key in record:
+    for key in records:
         if key == "paths":
             print(key + ": ")
-            for value in record[key]:
+            for value in records[key]:
                 print("\t" + str(value))
         else:
-            print(key + ": " + str(record[key]))
+            print(key + ": " + str(records[key]))
 
 print("\n\n******************************************************************")
 print("************************SUMMARY***********************************")
@@ -72,16 +75,16 @@ for i in range(2, max(allPathCount) + 1):
     summary.append({i: 0})
 
 for t in allPathCount:
-    for record in summary:
-        for key in record:
+    for records in summary:
+        for key in records:
             if key == t:
-                record[key] = record[key] + 1
+                records[key] = records[key] + 1
 
 print("Number of paths inside loop" + "    " + " number of occurrence")
-for record in summary:
-    for key in record:
+for records in summary:
+    for key in records:
         if key < 10:
-            print("             " + str(key) + "                          " + str(record[key]))
+            print("             " + str(key) + "                          " + str(records[key]))
         else:
-            print("             " + str(key) + "                         " + str(record[key]))
+            print("             " + str(key) + "                         " + str(records[key]))
 print("\n******************************************************************\n")

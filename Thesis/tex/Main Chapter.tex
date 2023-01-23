@@ -221,6 +221,32 @@ In this work we propose a compiler pass that automatically applies ALC tranforma
 we improve ALC algorithm by proposing different versions of it. Analyzing Wytte's results we found that the same approach for ALC is not able to provide benefits for every case however, small modifications to the algorithm and new versions of it could provide good performance improvements. So we tried to first deivide input codes structures to different categories and
 propose different versions of ALC each specialized for that category.
 
-Having the analysis phase and different versions of ALC, we combine them togethere to offer a solid recipe for ALC tranformation that can now automatically be applied on every input code and expect importants.
+Having the analysis phase and different versions of ALC, we combine them together to offer a solid recipe for ALC tranformation that can now automatically be applied on every input code and expect improvements.
+
+\section{Analysis Phase}
+
+The analysis has three major roles:
+\begin{enumerate}
+    \item To make sure that for the given loop we are allowed to apply ALC.
+    \item How does the structure of CFG look like and chooses the right approach for Apply ALC.
+    \item Based on the information it gathers, is it benefitial to do the tranformation or not.
+\end{enumerate}
+
+As Wytte explained in his work, in order to be alowed to apply ALC which means that we need to make sure that the generated will be correct and the result of the execution will be exactly the same as the result for exectuing scalar code, we must make sure that the loop has no function calls, no loop carried dependecy and there exists at least two paths inside the loop. The first responsiblity of the analysis is to check these restrictions.
+
+Providing a general recipe to do the tranformations for any input code requires gathering infromation about exact structure of control flow, so that we can classify any sort of divergence in a pre-defined category. To attain this goal we first define three categories of divergence
+which will cover all possible shapes of control flow. Having them classifed, we can then propose techniques and algorithms for applying ALC in each case. The three categories are followings:
+
+\begin{enumerate}
+    \item Single if statement.
+    \item Single if-then-else statement.
+    \item Any divergene with more that 2 control flow paths.
+\end{enumerate}
+
+There are different experimental factor that lead us to these three categories which include the level of difficulty to apply the pass and expected improvement for each case. The recipe to apply the transfromation on each case is explaned in next chapters.
+
+Finally, After making sure that we are allowed to apply ALC and finding the right categoriy for the loop, we need to make the dicision of whether it's benefitial to do the tranformation or not. This is one the most challenging parts since the improvement that comes from the ALC depends on the runtime aspects of the code which can not be detected at compile time. One of these aspects is the probability for 
+each path to be taken. Let's go back to our motivating example [].Suppose we know at runtime, then block is executed most of iterations. // TODO: is there any difference ??  
+
 
 \end{document}

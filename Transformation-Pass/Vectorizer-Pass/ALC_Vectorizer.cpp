@@ -67,18 +67,21 @@ namespace {
         auto *alc_analysis = new ALC_Analysis(L, AM, AR);
 //        auto *sve_vectorizer = new SVE_Vectorizer(L, factor, AR);
 //        auto *simple_alc = new Simple_ALC(L, factor, AR);
-        auto *alc_itr = new Iterative_ALC(L, factor, AR);
+//        auto *alc_itr = new Iterative_ALC(L, factor, AR);
+
+        ALCAnalysisResult *analysisResult = alc_analysis->doAnalysis();
 
 
-        alc_analysis->doAnalysis();
 //        simple_alc->doTransformation();
 //         sve_vectorizer->doVectorization();
-       alc_itr->doTransformation_itr_singleIf_simple();
+//       alc_itr->doTransformation_itr_singleIf_simple();
 //        alc_itr->doTransformation_itr_singleIf_full_permutation();
 
-        printLoop(L);
+//        printLoop(L);
 
         delete alc_analysis;
+
+
 //        delete simple_alc;
 //        delete alc_itr;
 //        delete sve_vectorizer;

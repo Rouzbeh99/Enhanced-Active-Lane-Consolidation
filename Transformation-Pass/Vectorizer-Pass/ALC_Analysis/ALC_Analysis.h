@@ -15,6 +15,8 @@
 using namespace llvm;
 
 
+class ALCAnalysisResult;
+
 class ALC_Analysis {
 
 private:
@@ -27,10 +29,11 @@ public:
     ALC_Analysis(Loop *l, LoopAnalysisManager &am, LoopStandardAnalysisResults &lar);
 
 public:
-    bool doAnalysis();
+    ALCAnalysisResult *doAnalysis();
 
     void countNumberOfPaths(BasicBlock *const &src, BasicBlock *const &dest, int &index, BasicBlock *path[],
-                            std::map<BasicBlock *const, bool> &visited, ArrayRef<BasicBlock *> allBlocks, std::vector<std::vector<BasicBlock*>> *result);
+                            std::map<BasicBlock *const, bool> &visited, ArrayRef<BasicBlock *> allBlocks,
+                            std::vector<std::vector<BasicBlock *>> *result);
 
     bool containsFunctionCall();
 
@@ -42,6 +45,37 @@ public:
 
     bool isPerfectIfNest();
 
-    int countInstructions(std::vector<BasicBlock*> *path);
+    int countInstructions(std::vector<BasicBlock *> *path);
+
+    std::pair<int, int> *computeInstructionRatioInThePath(std::vector<BasicBlock *> *path);
 
 };
+
+class ALCAnalysisResult {
+
+public:
+    enum DIVERGENCE_TYPE {
+        SINGLE_IF, IF_THEN_ELSE, MULTI_PATH
+    };
+
+private:
+    bool isLegal;
+    bool isProfitable;
+    DIVERGENCE_TYPE divergenceType;
+
+
+public:
+
+    bool isLegal1() const;
+
+    bool isProfitable1() const;
+
+    DIVERGENCE_TYPE getDivergenceType() const;
+
+public:
+
+    ALCAnalysisResult(bool isLegal, bool isProfitable, DIVERGENCE_TYPE divergenceType);
+
+};
+
+

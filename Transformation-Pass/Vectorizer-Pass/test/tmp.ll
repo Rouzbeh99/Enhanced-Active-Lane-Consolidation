@@ -1,7 +1,7 @@
-; ModuleID = 'compiled_with_O3.ll'
+; ModuleID = 'spec/PERL_BENCH/av.c.bc.ll'
 source_filename = "/home/rouzbeh/Graduate/LLVM/spec2017cpu-cmake/apps/500.perlbench_r/src/av.c"
-target datalayout = "e-m:e-i8:8:32-i16:16:32-i64:64-i128:128-n32:64-S128"
-target triple = "aarch64-unknown-linux-gnu"
+target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"
+target triple = "x86_64-unknown-linux-gnu"
 
 %struct.sv = type { ptr, i32, i32, %union.anon }
 %union.anon = type { ptr }
@@ -67,36 +67,31 @@ while.body.lr.ph:                                 ; preds = %if.end
   %sv_u = getelementptr inbounds %struct.av, ptr %av, i64 0, i32 3
   br label %while.body, !dbg !728
 
-while.cond3.preheader.loopexit:                   ; preds = %while.body
-  %dec.lcssa = phi i64 [ %dec, %while.body ], !dbg !729
-  %.lcssa = phi ptr [ %6, %while.body ], !dbg !726
-  br label %while.cond3.preheader, !dbg !730
-
-while.cond3.preheader:                            ; preds = %while.cond3.preheader.loopexit, %if.end
-  %4 = phi ptr [ %1, %if.end ], [ %.lcssa, %while.cond3.preheader.loopexit ]
-  %key.0.lcssa = phi i64 [ %add, %if.end ], [ %dec.lcssa, %while.cond3.preheader.loopexit ], !dbg !720
+while.cond3.preheader:                            ; preds = %while.body, %if.end
+  %4 = phi ptr [ %1, %if.end ], [ %6, %while.body ]
+  %key.0.lcssa = phi i64 [ %add, %if.end ], [ %dec, %while.body ], !dbg !720
   call void @llvm.dbg.value(metadata i64 %key.0.lcssa, metadata !717, metadata !DIExpression()), !dbg !720
-  %tobool4.not49 = icmp eq i64 %key.0.lcssa, 0, !dbg !730
-  br i1 %tobool4.not49, label %while.end15, label %while.body5.lr.ph, !dbg !730
+  %tobool4.not49 = icmp eq i64 %key.0.lcssa, 0, !dbg !729
+  br i1 %tobool4.not49, label %while.end15, label %while.body5.lr.ph, !dbg !729
 
 while.body5.lr.ph:                                ; preds = %while.cond3.preheader
   %sv_u6 = getelementptr inbounds %struct.av, ptr %av, i64 0, i32 3
-  br label %while.body5, !dbg !730
+  br label %while.body5, !dbg !729
 
 while.body:                                       ; preds = %while.body, %while.body.lr.ph
   %key.048 = phi i64 [ %add, %while.body.lr.ph ], [ %dec, %while.body ]
   call void @llvm.dbg.value(metadata i64 %key.048, metadata !717, metadata !DIExpression()), !dbg !720
-  %5 = load ptr, ptr %sv_u, align 8, !dbg !731
-  %dec = add nsw i64 %key.048, -1, !dbg !729
+  %5 = load ptr, ptr %sv_u, align 8, !dbg !730
+  %dec = add nsw i64 %key.048, -1, !dbg !731
   call void @llvm.dbg.value(metadata i64 %dec, metadata !717, metadata !DIExpression()), !dbg !720
-  %arrayidx = getelementptr inbounds ptr, ptr %5, i64 %dec, !dbg !731
+  %arrayidx = getelementptr inbounds ptr, ptr %5, i64 %dec, !dbg !730
   store ptr null, ptr %arrayidx, align 8, !dbg !732
   %6 = load ptr, ptr %av, align 8, !dbg !726
   %xav_fill = getelementptr inbounds %struct.xpvav, ptr %6, i64 0, i32 2, !dbg !726
   %7 = load i64, ptr %xav_fill, align 8, !dbg !726
   %add2 = add nsw i64 %7, 1, !dbg !733
   %cmp = icmp sgt i64 %dec, %add2, !dbg !727
-  br i1 %cmp, label %while.body, label %while.cond3.preheader.loopexit, !dbg !728, !llvm.loop !734
+  br i1 %cmp, label %while.body, label %while.cond3.preheader, !dbg !728, !llvm.loop !734
 
 while.body5:                                      ; preds = %if.end14, %while.body5.lr.ph
   %key.150 = phi i64 [ %key.0.lcssa, %while.body5.lr.ph ], [ %dec7, %if.end14 ]
@@ -121,8 +116,8 @@ if.then12:                                        ; preds = %while.body5
 
 if.end14:                                         ; preds = %if.then12, %while.body5
   call void @llvm.dbg.value(metadata i64 %dec7, metadata !717, metadata !DIExpression()), !dbg !720
-  %tobool4.not = icmp eq i64 %dec7, 0, !dbg !730
-  br i1 %tobool4.not, label %while.end15.loopexit, label %while.body5, !dbg !730, !llvm.loop !747
+  %tobool4.not = icmp eq i64 %dec7, 0, !dbg !729
+  br i1 %tobool4.not, label %while.end15.loopexit, label %while.body5, !dbg !729, !llvm.loop !747
 
 while.end15.loopexit:                             ; preds = %if.end14
   %.pre = load ptr, ptr %av, align 8, !dbg !749
@@ -152,13 +147,10 @@ while.body20.preheader:                           ; preds = %while.end15
   %arrayidx2456 = getelementptr inbounds ptr, ptr %13, i64 %dec2355, !dbg !754
   store ptr null, ptr %arrayidx2456, align 8, !dbg !755
   %tobool19.not57 = icmp eq i64 %dec2355, 0, !dbg !751
-  br i1 %tobool19.not57, label %while.end25, label %while.body20.while.body20_crit_edge.preheader, !dbg !751, !llvm.loop !756
+  br i1 %tobool19.not57, label %while.end25, label %while.body20.while.body20_crit_edge, !dbg !751, !llvm.loop !756
 
-while.body20.while.body20_crit_edge.preheader:    ; preds = %while.body20.preheader
-  br label %while.body20.while.body20_crit_edge, !dbg !751
-
-while.body20.while.body20_crit_edge:              ; preds = %while.body20.while.body20_crit_edge.preheader, %while.body20.while.body20_crit_edge
-  %dec2358 = phi i64 [ %dec23, %while.body20.while.body20_crit_edge ], [ %dec2355, %while.body20.while.body20_crit_edge.preheader ]
+while.body20.while.body20_crit_edge:              ; preds = %while.body20.preheader, %while.body20.while.body20_crit_edge
+  %dec2358 = phi i64 [ %dec23, %while.body20.while.body20_crit_edge ], [ %dec2355, %while.body20.preheader ]
   %.pre53 = load ptr, ptr %av, align 8, !dbg !754
   %xav_alloc22.phi.trans.insert = getelementptr inbounds %struct.xpvav, ptr %.pre53, i64 0, i32 4
   %.pre54 = load ptr, ptr %xav_alloc22.phi.trans.insert, align 8, !dbg !754
@@ -168,12 +160,9 @@ while.body20.while.body20_crit_edge:              ; preds = %while.body20.while.
   %arrayidx24 = getelementptr inbounds ptr, ptr %.pre54, i64 %dec23, !dbg !754
   store ptr null, ptr %arrayidx24, align 8, !dbg !755
   %tobool19.not = icmp eq i64 %dec23, 0, !dbg !751
-  br i1 %tobool19.not, label %while.end25.loopexit, label %while.body20.while.body20_crit_edge, !dbg !751, !llvm.loop !756
+  br i1 %tobool19.not, label %while.end25, label %while.body20.while.body20_crit_edge, !dbg !751, !llvm.loop !756
 
-while.end25.loopexit:                             ; preds = %while.body20.while.body20_crit_edge
-  br label %while.end25, !dbg !758
-
-while.end25:                                      ; preds = %while.end25.loopexit, %while.body20.preheader, %while.end15
+while.end25:                                      ; preds = %while.body20.while.body20_crit_edge, %while.body20.preheader, %while.end15
   %14 = load i32, ptr %sv_flags, align 4, !dbg !758
   %and27 = and i32 %14, 1073741823, !dbg !758
   %or = or i32 %and27, 1073741824, !dbg !759
@@ -406,10 +395,10 @@ if.end59:                                         ; preds = %if.end57, %if.end, 
   ret void, !dbg !898
 }
 
-; Function Attrs: argmemonly nofree nounwind willreturn
+; Function Attrs: argmemonly mustprogress nofree nounwind willreturn
 declare void @llvm.memmove.p0.p0.i64(ptr nocapture writeonly, ptr nocapture readonly, i64, i1 immarg) #3
 
-; Function Attrs: nocallback nofree nosync nounwind readnone speculatable willreturn
+; Function Attrs: mustprogress nocallback nofree nosync nounwind readnone speculatable willreturn
 declare void @llvm.dbg.label(metadata) #4
 
 declare !dbg !899 ptr @Perl_safesysrealloc(ptr noundef, i64 noundef) local_unnamed_addr #2
@@ -896,36 +885,31 @@ while.body.lr.ph.i:                               ; preds = %if.end.i
   %sv_u.i = getelementptr inbounds %struct.av, ptr %av, i64 0, i32 3
   br label %while.body.i, !dbg !1096
 
-while.cond3.preheader.i.loopexit:                 ; preds = %while.body.i
-  %dec.i.lcssa = phi i64 [ %dec.i, %while.body.i ], !dbg !1097
-  %.lcssa2 = phi ptr [ %17, %while.body.i ], !dbg !1094
-  br label %while.cond3.preheader.i, !dbg !1098
-
-while.cond3.preheader.i:                          ; preds = %while.cond3.preheader.i.loopexit, %if.end.i
-  %15 = phi ptr [ %12, %if.end.i ], [ %.lcssa2, %while.cond3.preheader.i.loopexit ]
-  %key.0.lcssa.i = phi i64 [ %add.i, %if.end.i ], [ %dec.i.lcssa, %while.cond3.preheader.i.loopexit ], !dbg !1090
+while.cond3.preheader.i:                          ; preds = %while.body.i, %if.end.i
+  %15 = phi ptr [ %12, %if.end.i ], [ %17, %while.body.i ]
+  %key.0.lcssa.i = phi i64 [ %add.i, %if.end.i ], [ %dec.i, %while.body.i ], !dbg !1090
   call void @llvm.dbg.value(metadata i64 %key.0.lcssa.i, metadata !717, metadata !DIExpression()), !dbg !1090
-  %tobool4.not49.i = icmp eq i64 %key.0.lcssa.i, 0, !dbg !1098
-  br i1 %tobool4.not49.i, label %while.end15.i, label %while.body5.lr.ph.i, !dbg !1098
+  %tobool4.not49.i = icmp eq i64 %key.0.lcssa.i, 0, !dbg !1097
+  br i1 %tobool4.not49.i, label %while.end15.i, label %while.body5.lr.ph.i, !dbg !1097
 
 while.body5.lr.ph.i:                              ; preds = %while.cond3.preheader.i
   %sv_u6.i = getelementptr inbounds %struct.av, ptr %av, i64 0, i32 3
-  br label %while.body5.i, !dbg !1098
+  br label %while.body5.i, !dbg !1097
 
 while.body.i:                                     ; preds = %while.body.i, %while.body.lr.ph.i
   %key.048.i = phi i64 [ %add.i, %while.body.lr.ph.i ], [ %dec.i, %while.body.i ]
   call void @llvm.dbg.value(metadata i64 %key.048.i, metadata !717, metadata !DIExpression()), !dbg !1090
-  %16 = load ptr, ptr %sv_u.i, align 8, !dbg !1099
-  %dec.i = add nsw i64 %key.048.i, -1, !dbg !1097
+  %16 = load ptr, ptr %sv_u.i, align 8, !dbg !1098
+  %dec.i = add nsw i64 %key.048.i, -1, !dbg !1099
   call void @llvm.dbg.value(metadata i64 %dec.i, metadata !717, metadata !DIExpression()), !dbg !1090
-  %arrayidx.i = getelementptr inbounds ptr, ptr %16, i64 %dec.i, !dbg !1099
+  %arrayidx.i = getelementptr inbounds ptr, ptr %16, i64 %dec.i, !dbg !1098
   store ptr null, ptr %arrayidx.i, align 8, !dbg !1100
   %17 = load ptr, ptr %av, align 8, !dbg !1094
   %xav_fill.i = getelementptr inbounds %struct.xpvav, ptr %17, i64 0, i32 2, !dbg !1094
   %18 = load i64, ptr %xav_fill.i, align 8, !dbg !1094
   %add2.i = add nsw i64 %18, 1, !dbg !1101
   %cmp.i = icmp sgt i64 %dec.i, %add2.i, !dbg !1095
-  br i1 %cmp.i, label %while.body.i, label %while.cond3.preheader.i.loopexit, !dbg !1096, !llvm.loop !1102
+  br i1 %cmp.i, label %while.body.i, label %while.cond3.preheader.i, !dbg !1096, !llvm.loop !1102
 
 while.body5.i:                                    ; preds = %if.end14.i, %while.body5.lr.ph.i
   %key.150.i = phi i64 [ %key.0.lcssa.i, %while.body5.lr.ph.i ], [ %dec7.i, %if.end14.i ]
@@ -950,8 +934,8 @@ if.then12.i:                                      ; preds = %while.body5.i
 
 if.end14.i:                                       ; preds = %if.then12.i, %while.body5.i
   call void @llvm.dbg.value(metadata i64 %dec7.i, metadata !717, metadata !DIExpression()), !dbg !1090
-  %tobool4.not.i = icmp eq i64 %dec7.i, 0, !dbg !1098
-  br i1 %tobool4.not.i, label %while.end15.loopexit.i, label %while.body5.i, !dbg !1098, !llvm.loop !1110
+  %tobool4.not.i = icmp eq i64 %dec7.i, 0, !dbg !1097
+  br i1 %tobool4.not.i, label %while.end15.loopexit.i, label %while.body5.i, !dbg !1097, !llvm.loop !1110
 
 while.end15.loopexit.i:                           ; preds = %if.end14.i
   %.pre.i = load ptr, ptr %av, align 8, !dbg !1112
@@ -981,13 +965,10 @@ while.body20.preheader.i:                         ; preds = %while.end15.i
   %arrayidx24.i189 = getelementptr inbounds ptr, ptr %24, i64 %dec23.i188, !dbg !1117
   store ptr null, ptr %arrayidx24.i189, align 8, !dbg !1118
   %tobool19.not.i190 = icmp eq i64 %dec23.i188, 0, !dbg !1114
-  br i1 %tobool19.not.i190, label %Perl_av_reify.exit, label %while.body20.while.body20_crit_edge.i.preheader, !dbg !1114, !llvm.loop !1119
+  br i1 %tobool19.not.i190, label %Perl_av_reify.exit, label %while.body20.while.body20_crit_edge.i, !dbg !1114, !llvm.loop !1119
 
-while.body20.while.body20_crit_edge.i.preheader:  ; preds = %while.body20.preheader.i
-  br label %while.body20.while.body20_crit_edge.i, !dbg !1114
-
-while.body20.while.body20_crit_edge.i:            ; preds = %while.body20.while.body20_crit_edge.i.preheader, %while.body20.while.body20_crit_edge.i
-  %dec23.i191 = phi i64 [ %dec23.i, %while.body20.while.body20_crit_edge.i ], [ %dec23.i188, %while.body20.while.body20_crit_edge.i.preheader ]
+while.body20.while.body20_crit_edge.i:            ; preds = %while.body20.preheader.i, %while.body20.while.body20_crit_edge.i
+  %dec23.i191 = phi i64 [ %dec23.i, %while.body20.while.body20_crit_edge.i ], [ %dec23.i188, %while.body20.preheader.i ]
   %.pre53.i = load ptr, ptr %av, align 8, !dbg !1117
   %xav_alloc22.phi.trans.insert.i = getelementptr inbounds %struct.xpvav, ptr %.pre53.i, i64 0, i32 4
   %.pre54.i = load ptr, ptr %xav_alloc22.phi.trans.insert.i, align 8, !dbg !1117
@@ -997,12 +978,9 @@ while.body20.while.body20_crit_edge.i:            ; preds = %while.body20.while.
   %arrayidx24.i = getelementptr inbounds ptr, ptr %.pre54.i, i64 %dec23.i, !dbg !1117
   store ptr null, ptr %arrayidx24.i, align 8, !dbg !1118
   %tobool19.not.i = icmp eq i64 %dec23.i, 0, !dbg !1114
-  br i1 %tobool19.not.i, label %Perl_av_reify.exit.loopexit, label %while.body20.while.body20_crit_edge.i, !dbg !1114, !llvm.loop !1119
+  br i1 %tobool19.not.i, label %Perl_av_reify.exit, label %while.body20.while.body20_crit_edge.i, !dbg !1114, !llvm.loop !1119
 
-Perl_av_reify.exit.loopexit:                      ; preds = %while.body20.while.body20_crit_edge.i
-  br label %Perl_av_reify.exit, !dbg !1121
-
-Perl_av_reify.exit:                               ; preds = %Perl_av_reify.exit.loopexit, %while.body20.preheader.i, %while.end15.i
+Perl_av_reify.exit:                               ; preds = %while.body20.while.body20_crit_edge.i, %while.body20.preheader.i, %while.end15.i
   %25 = load i32, ptr %sv_flags, align 4, !dbg !1121
   %and27.i = and i32 %25, 1073741823, !dbg !1121
   %or.i = or i32 %and27.i, 1073741824, !dbg !1122
@@ -1069,7 +1047,7 @@ do.body.preheader:                                ; preds = %if.then73, %land.lh
   %.ph20 = phi ptr [ %.pre198.pre, %if.then73 ], [ %30, %land.lhs.true70 ], [ %30, %if.then67 ]
   br label %do.body, !dbg !1154
 
-do.body:                                          ; preds = %do.body, %do.body.preheader
+do.body:                                          ; preds = %do.body.preheader, %do.body
   %36 = phi i64 [ %39, %do.body ], [ %.ph, %do.body.preheader ], !dbg !1152
   %37 = phi ptr [ %38, %do.body ], [ %.ph20, %do.body.preheader ], !dbg !1150
   %xav_fill76 = getelementptr inbounds %struct.xpvav, ptr %37, i64 0, i32 2, !dbg !1150
@@ -1082,14 +1060,10 @@ do.body:                                          ; preds = %do.body, %do.body.p
   %39 = load i64, ptr %xav_fill78, align 8, !dbg !1157
   call void @llvm.dbg.value(metadata i64 %6, metadata !1038, metadata !DIExpression()), !dbg !1048
   %cmp79 = icmp slt i64 %39, %6, !dbg !1158
-  br i1 %cmp79, label %do.body, label %if.end81.loopexit, !dbg !1159, !llvm.loop !1160
+  br i1 %cmp79, label %do.body, label %if.end81, !dbg !1159, !llvm.loop !1160
 
-if.end81.loopexit:                                ; preds = %do.body
-  %.lcssa = phi ptr [ %38, %do.body ], !dbg !1157
-  br label %if.end81, !dbg !1162
-
-if.end81:                                         ; preds = %if.end81.loopexit, %if.then63
-  %40 = phi ptr [ %30, %if.then63 ], [ %.lcssa, %if.end81.loopexit ], !dbg !1162
+if.end81:                                         ; preds = %do.body, %if.then63
+  %40 = phi ptr [ %30, %if.then63 ], [ %38, %do.body ], !dbg !1162
   call void @llvm.dbg.value(metadata i64 %6, metadata !1038, metadata !DIExpression()), !dbg !1048
   %xav_fill83 = getelementptr inbounds %struct.xpvav, ptr %40, i64 0, i32 2, !dbg !1162
   store i64 %6, ptr %xav_fill83, align 8, !dbg !1163
@@ -1143,17 +1117,11 @@ if.then95:                                        ; preds = %if.end90
 for.body.lr.ph:                                   ; preds = %if.then95
   %tobool104.not = icmp eq ptr %val, null
   %conv123 = trunc i64 %6 to i32
-  br i1 %tobool104.not, label %for.body.us.preheader, label %for.body.preheader, !dbg !1198
+  br i1 %tobool104.not, label %for.body.us, label %for.body, !dbg !1198
 
-for.body.preheader:                               ; preds = %for.body.lr.ph
-  br label %for.body, !dbg !1196
-
-for.body.us.preheader:                            ; preds = %for.body.lr.ph
-  br label %for.body.us, !dbg !1196
-
-for.body.us:                                      ; preds = %for.body.us.preheader, %for.inc.us
-  %mg.0195.us = phi ptr [ %mg.0.us, %for.inc.us ], [ %mg.0192, %for.body.us.preheader ]
-  %set.0194.us = phi i8 [ %set.1.us, %for.inc.us ], [ 1, %for.body.us.preheader ]
+for.body.us:                                      ; preds = %for.body.lr.ph, %for.inc.us
+  %mg.0195.us = phi ptr [ %mg.0.us, %for.inc.us ], [ %mg.0192, %for.body.lr.ph ]
+  %set.0194.us = phi i8 [ %set.1.us, %for.inc.us ], [ 1, %for.body.lr.ph ]
   call void @llvm.dbg.value(metadata i8 %set.0194.us, metadata !1047, metadata !DIExpression()), !dbg !1195
   %mg_type.us = getelementptr inbounds %struct.magic, ptr %mg.0195.us, i64 0, i32 3, !dbg !1201
   %45 = load i8, ptr %mg_type.us, align 2, !dbg !1201
@@ -1184,11 +1152,11 @@ for.inc.us:                                       ; preds = %if.then132.us, %if.
   %mg.0.us = load ptr, ptr %mg.0195.us, align 8, !dbg !1195
   call void @llvm.dbg.value(metadata ptr %mg.0.us, metadata !1044, metadata !DIExpression()), !dbg !1195
   %tobool97.not.us = icmp eq ptr %mg.0.us, null, !dbg !1196
-  br i1 %tobool97.not.us, label %for.end.loopexit, label %for.body.us, !dbg !1196, !llvm.loop !1210
+  br i1 %tobool97.not.us, label %for.end, label %for.body.us, !dbg !1196, !llvm.loop !1210
 
-for.body:                                         ; preds = %for.body.preheader, %for.inc
-  %mg.0195 = phi ptr [ %mg.0, %for.inc ], [ %mg.0192, %for.body.preheader ]
-  %set.0194 = phi i8 [ %set.1, %for.inc ], [ 1, %for.body.preheader ]
+for.body:                                         ; preds = %for.body.lr.ph, %for.inc
+  %mg.0195 = phi ptr [ %mg.0, %for.inc ], [ %mg.0192, %for.body.lr.ph ]
+  %set.0194 = phi i8 [ %set.1, %for.inc ], [ 1, %for.body.lr.ph ]
   call void @llvm.dbg.value(metadata i8 %set.0194, metadata !1047, metadata !DIExpression()), !dbg !1195
   %mg_type = getelementptr inbounds %struct.magic, ptr %mg.0195, i64 0, i32 3, !dbg !1201
   %49 = load i8, ptr %mg_type, align 2, !dbg !1201
@@ -1226,18 +1194,10 @@ for.inc:                                          ; preds = %if.then132, %land.l
   %mg.0 = load ptr, ptr %mg.0195, align 8, !dbg !1195
   call void @llvm.dbg.value(metadata ptr %mg.0, metadata !1044, metadata !DIExpression()), !dbg !1195
   %tobool97.not = icmp eq ptr %mg.0, null, !dbg !1196
-  br i1 %tobool97.not, label %for.end.loopexit1, label %for.body, !dbg !1196, !llvm.loop !1210
+  br i1 %tobool97.not, label %for.end, label %for.body, !dbg !1196, !llvm.loop !1210
 
-for.end.loopexit:                                 ; preds = %for.inc.us
-  %set.1.us.lcssa = phi i8 [ %set.1.us, %for.inc.us ], !dbg !1195
-  br label %for.end, !dbg !1218
-
-for.end.loopexit1:                                ; preds = %for.inc
-  %set.1.lcssa = phi i8 [ %set.1, %for.inc ], !dbg !1195
-  br label %for.end, !dbg !1218
-
-for.end:                                          ; preds = %for.end.loopexit1, %for.end.loopexit
-  %set.0.lcssa = phi i8 [ %set.1.us.lcssa, %for.end.loopexit ], [ %set.1.lcssa, %for.end.loopexit1 ], !dbg !1195
+for.end:                                          ; preds = %for.inc, %for.inc.us
+  %set.0.lcssa = phi i8 [ %set.1.us, %for.inc.us ], [ %set.1, %for.inc ], !dbg !1195
   %54 = and i8 %set.0.lcssa, 1, !dbg !1218
   %tobool136.not = icmp eq i8 %54, 0, !dbg !1218
   br i1 %tobool136.not, label %cleanup142, label %if.then137, !dbg !1220
@@ -1290,14 +1250,11 @@ if.then:                                          ; preds = %entry
   call void @llvm.dbg.value(metadata i64 0, metadata !1248, metadata !DIExpression()), !dbg !1254
   call void @llvm.dbg.value(metadata ptr %strp, metadata !1242, metadata !DIExpression()), !dbg !1249
   %cmp32 = icmp sgt i64 %size, 0, !dbg !1266
-  br i1 %cmp32, label %for.body.preheader, label %for.end, !dbg !1269
+  br i1 %cmp32, label %for.body, label %for.end, !dbg !1269
 
-for.body.preheader:                               ; preds = %if.then
-  br label %for.body, !dbg !1269
-
-for.body:                                         ; preds = %for.body.preheader, %land.end
-  %i.034 = phi i64 [ %inc11, %land.end ], [ 0, %for.body.preheader ]
-  %strp.addr.033 = phi ptr [ %incdec.ptr, %land.end ], [ %strp, %for.body.preheader ]
+for.body:                                         ; preds = %if.then, %land.end
+  %i.034 = phi i64 [ %inc11, %land.end ], [ 0, %if.then ]
+  %strp.addr.033 = phi ptr [ %incdec.ptr, %land.end ], [ %strp, %if.then ]
   call void @llvm.dbg.value(metadata i64 %i.034, metadata !1248, metadata !DIExpression()), !dbg !1254
   call void @llvm.dbg.value(metadata ptr %strp.addr.033, metadata !1242, metadata !DIExpression()), !dbg !1249
   %3 = load ptr, ptr %strp.addr.033, align 8, !dbg !1270
@@ -1327,12 +1284,9 @@ land.end:                                         ; preds = %land.rhs, %for.body
   %inc11 = add nuw nsw i64 %i.034, 1, !dbg !1279
   call void @llvm.dbg.value(metadata i64 %inc11, metadata !1248, metadata !DIExpression()), !dbg !1254
   %exitcond.not = icmp eq i64 %inc11, %size, !dbg !1266
-  br i1 %exitcond.not, label %for.end.loopexit, label %for.body, !dbg !1269, !llvm.loop !1280
+  br i1 %exitcond.not, label %for.end, label %for.body, !dbg !1269, !llvm.loop !1280
 
-for.end.loopexit:                                 ; preds = %land.end
-  br label %for.end, !dbg !1282
-
-for.end:                                          ; preds = %for.end.loopexit, %if.then
+for.end:                                          ; preds = %land.end, %if.then
   %sv_refcnt = getelementptr inbounds %struct.sv, ptr %call, i64 0, i32 1, !dbg !1282
   %8 = load i32, ptr %sv_refcnt, align 8, !dbg !1282
   %inc12 = add i32 %8, 1, !dbg !1282
@@ -1433,13 +1387,10 @@ if.then24:                                        ; preds = %if.end19
   tail call void @Perl_save_pushptr(ptr noundef nonnull %av, i32 noundef 11) #6, !dbg !1344
   call void @llvm.dbg.value(metadata i64 %add, metadata !1311, metadata !DIExpression()), !dbg !1340
   %tobool26.not66 = icmp eq i64 %add, 0, !dbg !1345
-  br i1 %tobool26.not66, label %if.end28, label %while.body.preheader, !dbg !1345
+  br i1 %tobool26.not66, label %if.end28, label %while.body, !dbg !1345
 
-while.body.preheader:                             ; preds = %if.then24
-  br label %while.body, !dbg !1345
-
-while.body:                                       ; preds = %while.body.preheader, %S_SvREFCNT_dec.exit
-  %index.067 = phi i64 [ %dec, %S_SvREFCNT_dec.exit ], [ %add, %while.body.preheader ]
+while.body:                                       ; preds = %if.then24, %S_SvREFCNT_dec.exit
+  %index.067 = phi i64 [ %dec, %S_SvREFCNT_dec.exit ], [ %add, %if.then24 ]
   call void @llvm.dbg.value(metadata i64 %index.067, metadata !1311, metadata !DIExpression()), !dbg !1340
   %dec = add nsw i64 %index.067, -1, !dbg !1346
   call void @llvm.dbg.value(metadata i64 %dec, metadata !1311, metadata !DIExpression()), !dbg !1340
@@ -1470,12 +1421,9 @@ if.else.i:                                        ; preds = %if.then.i
 S_SvREFCNT_dec.exit:                              ; preds = %if.else.i, %if.then4.i, %while.body
   call void @llvm.dbg.value(metadata i64 %dec, metadata !1311, metadata !DIExpression()), !dbg !1340
   %tobool26.not = icmp eq i64 %dec, 0, !dbg !1345
-  br i1 %tobool26.not, label %if.end28.loopexit, label %while.body, !dbg !1345, !llvm.loop !1362
+  br i1 %tobool26.not, label %if.end28, label %while.body, !dbg !1345, !llvm.loop !1362
 
-if.end28.loopexit:                                ; preds = %S_SvREFCNT_dec.exit
-  br label %if.end28, !dbg !1364
-
-if.end28:                                         ; preds = %if.end28.loopexit, %if.then24, %if.end19
+if.end28:                                         ; preds = %S_SvREFCNT_dec.exit, %if.then24, %if.end19
   %sv_u29 = getelementptr inbounds %struct.av, ptr %av, i64 0, i32 3, !dbg !1364
   %15 = load ptr, ptr %sv_u29, align 8, !dbg !1364
   %16 = load ptr, ptr %av, align 8, !dbg !1365
@@ -1598,12 +1546,9 @@ if.else.i:                                        ; preds = %if.then.i
 S_SvREFCNT_dec.exit:                              ; preds = %if.else.i, %if.then4.i, %while.body
   call void @llvm.dbg.value(metadata i64 %dec, metadata !1387, metadata !DIExpression()), !dbg !1400
   %tobool7.not = icmp eq i64 %dec, 0, !dbg !1403
-  br i1 %tobool7.not, label %if.end8.loopexit, label %while.body, !dbg !1403, !llvm.loop !1417
+  br i1 %tobool7.not, label %if.end8, label %while.body, !dbg !1403, !llvm.loop !1417
 
-if.end8.loopexit:                                 ; preds = %S_SvREFCNT_dec.exit
-  br label %if.end8, !dbg !1418
-
-if.end8:                                          ; preds = %if.end8.loopexit, %if.then6, %if.end
+if.end8:                                          ; preds = %S_SvREFCNT_dec.exit, %if.then6, %if.end
   %8 = load ptr, ptr %av, align 8, !dbg !1418
   %xav_alloc = getelementptr inbounds %struct.xpvav, ptr %8, i64 0, i32 4, !dbg !1418
   %9 = load ptr, ptr %xav_alloc, align 8, !dbg !1418
@@ -1701,10 +1646,7 @@ if.then13:                                        ; preds = %if.end11
 
 while.cond.preheader:                             ; preds = %if.then13
   %cmp1964 = icmp slt i64 %0, %5, !dbg !1466
-  br i1 %cmp1964, label %while.body.preheader, label %if.end26, !dbg !1468
-
-while.body.preheader:                             ; preds = %while.cond.preheader
-  br label %while.body, !dbg !1468
+  br i1 %cmp1964, label %while.body, label %if.end26, !dbg !1468
 
 while.cond21.preheader:                           ; preds = %if.then13
   %cmp2266 = icmp sgt i64 %0, %5, !dbg !1469
@@ -1721,8 +1663,8 @@ while.body23.preheader:                           ; preds = %while.cond21.prehea
   call void @llvm.dbg.value(metadata i32 undef, metadata !1443, metadata !DIExpression(DW_OP_plus_uconst, 1, DW_OP_stack_value)), !dbg !1461
   br label %if.end26, !dbg !1473
 
-while.body:                                       ; preds = %while.body.preheader, %S_SvREFCNT_dec.exit
-  %key.065 = phi i64 [ %dec, %S_SvREFCNT_dec.exit ], [ %5, %while.body.preheader ]
+while.body:                                       ; preds = %while.cond.preheader, %S_SvREFCNT_dec.exit
+  %key.065 = phi i64 [ %dec, %S_SvREFCNT_dec.exit ], [ %5, %while.cond.preheader ]
   call void @llvm.dbg.value(metadata i64 %key.065, metadata !1443, metadata !DIExpression()), !dbg !1461
   %arrayidx = getelementptr inbounds ptr, ptr %6, i64 %key.065, !dbg !1474
   %12 = load ptr, ptr %arrayidx, align 8, !dbg !1474
@@ -1751,12 +1693,9 @@ S_SvREFCNT_dec.exit:                              ; preds = %if.else.i, %if.then
   call void @llvm.dbg.value(metadata i64 %dec, metadata !1443, metadata !DIExpression()), !dbg !1461
   store ptr null, ptr %arrayidx, align 8, !dbg !1489
   %cmp19 = icmp sgt i64 %dec, %0, !dbg !1466
-  br i1 %cmp19, label %while.body, label %if.end26.loopexit, !dbg !1468, !llvm.loop !1490
+  br i1 %cmp19, label %while.body, label %if.end26, !dbg !1468, !llvm.loop !1490
 
-if.end26.loopexit:                                ; preds = %S_SvREFCNT_dec.exit
-  br label %if.end26, !dbg !1473
-
-if.end26:                                         ; preds = %if.end26.loopexit, %while.body23.preheader, %while.cond21.preheader, %while.cond.preheader
+if.end26:                                         ; preds = %S_SvREFCNT_dec.exit, %while.body23.preheader, %while.cond21.preheader, %while.cond.preheader
   %14 = load ptr, ptr %av, align 8, !dbg !1473
   %xav_fill28 = getelementptr inbounds %struct.xpvav, ptr %14, i64 0, i32 2, !dbg !1473
   store i64 %0, ptr %xav_fill28, align 8, !dbg !1492
@@ -2058,36 +1997,31 @@ while.body.lr.ph.i:                               ; preds = %if.end.i
   %sv_u.i = getelementptr inbounds %struct.av, ptr %av, i64 0, i32 3
   br label %while.body.i, !dbg !1635
 
-while.cond3.preheader.i.loopexit:                 ; preds = %while.body.i
-  %dec.i.lcssa = phi i64 [ %dec.i, %while.body.i ], !dbg !1636
-  %.lcssa = phi ptr [ %10, %while.body.i ], !dbg !1633
-  br label %while.cond3.preheader.i, !dbg !1637
-
-while.cond3.preheader.i:                          ; preds = %while.cond3.preheader.i.loopexit, %if.end.i
-  %8 = phi ptr [ %5, %if.end.i ], [ %.lcssa, %while.cond3.preheader.i.loopexit ]
-  %key.0.lcssa.i = phi i64 [ %add.i, %if.end.i ], [ %dec.i.lcssa, %while.cond3.preheader.i.loopexit ], !dbg !1629
+while.cond3.preheader.i:                          ; preds = %while.body.i, %if.end.i
+  %8 = phi ptr [ %5, %if.end.i ], [ %10, %while.body.i ]
+  %key.0.lcssa.i = phi i64 [ %add.i, %if.end.i ], [ %dec.i, %while.body.i ], !dbg !1629
   call void @llvm.dbg.value(metadata i64 %key.0.lcssa.i, metadata !717, metadata !DIExpression()), !dbg !1629
-  %tobool4.not49.i = icmp eq i64 %key.0.lcssa.i, 0, !dbg !1637
-  br i1 %tobool4.not49.i, label %while.end15.i, label %while.body5.lr.ph.i, !dbg !1637
+  %tobool4.not49.i = icmp eq i64 %key.0.lcssa.i, 0, !dbg !1636
+  br i1 %tobool4.not49.i, label %while.end15.i, label %while.body5.lr.ph.i, !dbg !1636
 
 while.body5.lr.ph.i:                              ; preds = %while.cond3.preheader.i
   %sv_u6.i = getelementptr inbounds %struct.av, ptr %av, i64 0, i32 3
-  br label %while.body5.i, !dbg !1637
+  br label %while.body5.i, !dbg !1636
 
 while.body.i:                                     ; preds = %while.body.i, %while.body.lr.ph.i
   %key.048.i = phi i64 [ %add.i, %while.body.lr.ph.i ], [ %dec.i, %while.body.i ]
   call void @llvm.dbg.value(metadata i64 %key.048.i, metadata !717, metadata !DIExpression()), !dbg !1629
-  %9 = load ptr, ptr %sv_u.i, align 8, !dbg !1638
-  %dec.i = add nsw i64 %key.048.i, -1, !dbg !1636
+  %9 = load ptr, ptr %sv_u.i, align 8, !dbg !1637
+  %dec.i = add nsw i64 %key.048.i, -1, !dbg !1638
   call void @llvm.dbg.value(metadata i64 %dec.i, metadata !717, metadata !DIExpression()), !dbg !1629
-  %arrayidx.i = getelementptr inbounds ptr, ptr %9, i64 %dec.i, !dbg !1638
+  %arrayidx.i = getelementptr inbounds ptr, ptr %9, i64 %dec.i, !dbg !1637
   store ptr null, ptr %arrayidx.i, align 8, !dbg !1639
   %10 = load ptr, ptr %av, align 8, !dbg !1633
   %xav_fill.i = getelementptr inbounds %struct.xpvav, ptr %10, i64 0, i32 2, !dbg !1633
   %11 = load i64, ptr %xav_fill.i, align 8, !dbg !1633
   %add2.i = add nsw i64 %11, 1, !dbg !1640
   %cmp.i = icmp sgt i64 %dec.i, %add2.i, !dbg !1634
-  br i1 %cmp.i, label %while.body.i, label %while.cond3.preheader.i.loopexit, !dbg !1635, !llvm.loop !1641
+  br i1 %cmp.i, label %while.body.i, label %while.cond3.preheader.i, !dbg !1635, !llvm.loop !1641
 
 while.body5.i:                                    ; preds = %if.end14.i, %while.body5.lr.ph.i
   %key.150.i = phi i64 [ %key.0.lcssa.i, %while.body5.lr.ph.i ], [ %dec7.i, %if.end14.i ]
@@ -2112,8 +2046,8 @@ if.then12.i:                                      ; preds = %while.body5.i
 
 if.end14.i:                                       ; preds = %if.then12.i, %while.body5.i
   call void @llvm.dbg.value(metadata i64 %dec7.i, metadata !717, metadata !DIExpression()), !dbg !1629
-  %tobool4.not.i = icmp eq i64 %dec7.i, 0, !dbg !1637
-  br i1 %tobool4.not.i, label %while.end15.loopexit.i, label %while.body5.i, !dbg !1637, !llvm.loop !1649
+  %tobool4.not.i = icmp eq i64 %dec7.i, 0, !dbg !1636
+  br i1 %tobool4.not.i, label %while.end15.loopexit.i, label %while.body5.i, !dbg !1636, !llvm.loop !1649
 
 while.end15.loopexit.i:                           ; preds = %if.end14.i
   %.pre.i = load ptr, ptr %av, align 8, !dbg !1651
@@ -2143,13 +2077,10 @@ while.body20.preheader.i:                         ; preds = %while.end15.i
   %arrayidx24.i115 = getelementptr inbounds ptr, ptr %17, i64 %dec23.i114, !dbg !1656
   store ptr null, ptr %arrayidx24.i115, align 8, !dbg !1657
   %tobool19.not.i116 = icmp eq i64 %dec23.i114, 0, !dbg !1653
-  br i1 %tobool19.not.i116, label %Perl_av_reify.exit, label %while.body20.while.body20_crit_edge.i.preheader, !dbg !1653, !llvm.loop !1658
+  br i1 %tobool19.not.i116, label %Perl_av_reify.exit, label %while.body20.while.body20_crit_edge.i, !dbg !1653, !llvm.loop !1658
 
-while.body20.while.body20_crit_edge.i.preheader:  ; preds = %while.body20.preheader.i
-  br label %while.body20.while.body20_crit_edge.i, !dbg !1653
-
-while.body20.while.body20_crit_edge.i:            ; preds = %while.body20.while.body20_crit_edge.i.preheader, %while.body20.while.body20_crit_edge.i
-  %dec23.i117 = phi i64 [ %dec23.i, %while.body20.while.body20_crit_edge.i ], [ %dec23.i114, %while.body20.while.body20_crit_edge.i.preheader ]
+while.body20.while.body20_crit_edge.i:            ; preds = %while.body20.preheader.i, %while.body20.while.body20_crit_edge.i
+  %dec23.i117 = phi i64 [ %dec23.i, %while.body20.while.body20_crit_edge.i ], [ %dec23.i114, %while.body20.preheader.i ]
   %.pre53.i = load ptr, ptr %av, align 8, !dbg !1656
   %xav_alloc22.phi.trans.insert.i = getelementptr inbounds %struct.xpvav, ptr %.pre53.i, i64 0, i32 4
   %.pre54.i = load ptr, ptr %xav_alloc22.phi.trans.insert.i, align 8, !dbg !1656
@@ -2159,12 +2090,9 @@ while.body20.while.body20_crit_edge.i:            ; preds = %while.body20.while.
   %arrayidx24.i = getelementptr inbounds ptr, ptr %.pre54.i, i64 %dec23.i, !dbg !1656
   store ptr null, ptr %arrayidx24.i, align 8, !dbg !1657
   %tobool19.not.i = icmp eq i64 %dec23.i, 0, !dbg !1653
-  br i1 %tobool19.not.i, label %Perl_av_reify.exit.loopexit, label %while.body20.while.body20_crit_edge.i, !dbg !1653, !llvm.loop !1658
+  br i1 %tobool19.not.i, label %Perl_av_reify.exit, label %while.body20.while.body20_crit_edge.i, !dbg !1653, !llvm.loop !1658
 
-Perl_av_reify.exit.loopexit:                      ; preds = %while.body20.while.body20_crit_edge.i
-  br label %Perl_av_reify.exit, !dbg !1660
-
-Perl_av_reify.exit:                               ; preds = %Perl_av_reify.exit.loopexit, %while.body20.preheader.i, %while.end15.i
+Perl_av_reify.exit:                               ; preds = %while.body20.while.body20_crit_edge.i, %while.body20.preheader.i, %while.end15.i
   %18 = load i32, ptr %sv_flags, align 4, !dbg !1660
   %and27.i = and i32 %18, 1073741823, !dbg !1660
   %or.i = or i32 %and27.i, 1073741824, !dbg !1661
@@ -2542,36 +2470,31 @@ while.body.lr.ph.i:                               ; preds = %if.end.i
   %sv_u.i = getelementptr inbounds %struct.av, ptr %av, i64 0, i32 3
   br label %while.body.i, !dbg !1836
 
-while.cond3.preheader.i.loopexit:                 ; preds = %while.body.i
-  %dec.i.lcssa = phi i64 [ %dec.i, %while.body.i ], !dbg !1837
-  %.lcssa = phi ptr [ %15, %while.body.i ], !dbg !1838
-  br label %while.cond3.preheader.i, !dbg !1839
-
-while.cond3.preheader.i:                          ; preds = %while.cond3.preheader.i.loopexit, %if.end.i
-  %13 = phi ptr [ %8, %if.end.i ], [ %.lcssa, %while.cond3.preheader.i.loopexit ]
-  %key.0.lcssa.i = phi i64 [ %add.i, %if.end.i ], [ %dec.i.lcssa, %while.cond3.preheader.i.loopexit ], !dbg !1831
+while.cond3.preheader.i:                          ; preds = %while.body.i, %if.end.i
+  %13 = phi ptr [ %8, %if.end.i ], [ %15, %while.body.i ]
+  %key.0.lcssa.i = phi i64 [ %add.i, %if.end.i ], [ %dec.i, %while.body.i ], !dbg !1831
   call void @llvm.dbg.value(metadata i64 %key.0.lcssa.i, metadata !717, metadata !DIExpression()), !dbg !1831
-  %tobool4.not49.i = icmp eq i64 %key.0.lcssa.i, 0, !dbg !1839
-  br i1 %tobool4.not49.i, label %while.end15.i, label %while.body5.lr.ph.i, !dbg !1839
+  %tobool4.not49.i = icmp eq i64 %key.0.lcssa.i, 0, !dbg !1837
+  br i1 %tobool4.not49.i, label %while.end15.i, label %while.body5.lr.ph.i, !dbg !1837
 
 while.body5.lr.ph.i:                              ; preds = %while.cond3.preheader.i
   %sv_u6.i = getelementptr inbounds %struct.av, ptr %av, i64 0, i32 3
-  br label %while.body5.i, !dbg !1839
+  br label %while.body5.i, !dbg !1837
 
 while.body.i:                                     ; preds = %while.body.i, %while.body.lr.ph.i
   %key.048.i = phi i64 [ %add.i, %while.body.lr.ph.i ], [ %dec.i, %while.body.i ]
   call void @llvm.dbg.value(metadata i64 %key.048.i, metadata !717, metadata !DIExpression()), !dbg !1831
-  %14 = load ptr, ptr %sv_u.i, align 8, !dbg !1840
-  %dec.i = add nsw i64 %key.048.i, -1, !dbg !1837
+  %14 = load ptr, ptr %sv_u.i, align 8, !dbg !1838
+  %dec.i = add nsw i64 %key.048.i, -1, !dbg !1839
   call void @llvm.dbg.value(metadata i64 %dec.i, metadata !717, metadata !DIExpression()), !dbg !1831
-  %arrayidx.i = getelementptr inbounds ptr, ptr %14, i64 %dec.i, !dbg !1840
-  store ptr null, ptr %arrayidx.i, align 8, !dbg !1841
-  %15 = load ptr, ptr %av, align 8, !dbg !1838
-  %xav_fill.i = getelementptr inbounds %struct.xpvav, ptr %15, i64 0, i32 2, !dbg !1838
-  %16 = load i64, ptr %xav_fill.i, align 8, !dbg !1838
+  %arrayidx.i = getelementptr inbounds ptr, ptr %14, i64 %dec.i, !dbg !1838
+  store ptr null, ptr %arrayidx.i, align 8, !dbg !1840
+  %15 = load ptr, ptr %av, align 8, !dbg !1841
+  %xav_fill.i = getelementptr inbounds %struct.xpvav, ptr %15, i64 0, i32 2, !dbg !1841
+  %16 = load i64, ptr %xav_fill.i, align 8, !dbg !1841
   %add2.i = add nsw i64 %16, 1, !dbg !1842
   %cmp.i = icmp sgt i64 %dec.i, %add2.i, !dbg !1835
-  br i1 %cmp.i, label %while.body.i, label %while.cond3.preheader.i.loopexit, !dbg !1836, !llvm.loop !1843
+  br i1 %cmp.i, label %while.body.i, label %while.cond3.preheader.i, !dbg !1836, !llvm.loop !1843
 
 while.body5.i:                                    ; preds = %if.end14.i, %while.body5.lr.ph.i
   %key.150.i = phi i64 [ %key.0.lcssa.i, %while.body5.lr.ph.i ], [ %dec7.i, %if.end14.i ]
@@ -2596,8 +2519,8 @@ if.then12.i:                                      ; preds = %while.body5.i
 
 if.end14.i:                                       ; preds = %if.then12.i, %while.body5.i
   call void @llvm.dbg.value(metadata i64 %dec7.i, metadata !717, metadata !DIExpression()), !dbg !1831
-  %tobool4.not.i = icmp eq i64 %dec7.i, 0, !dbg !1839
-  br i1 %tobool4.not.i, label %while.end15.loopexit.i, label %while.body5.i, !dbg !1839, !llvm.loop !1851
+  %tobool4.not.i = icmp eq i64 %dec7.i, 0, !dbg !1837
+  br i1 %tobool4.not.i, label %while.end15.loopexit.i, label %while.body5.i, !dbg !1837, !llvm.loop !1851
 
 while.end15.loopexit.i:                           ; preds = %if.end14.i
   %.pre.i = load ptr, ptr %av, align 8, !dbg !1853
@@ -2627,13 +2550,10 @@ while.body20.preheader.i:                         ; preds = %while.end15.i
   %arrayidx24.i133 = getelementptr inbounds ptr, ptr %22, i64 %dec23.i132, !dbg !1858
   store ptr null, ptr %arrayidx24.i133, align 8, !dbg !1859
   %tobool19.not.i134 = icmp eq i64 %dec23.i132, 0, !dbg !1855
-  br i1 %tobool19.not.i134, label %Perl_av_reify.exit, label %while.body20.while.body20_crit_edge.i.preheader, !dbg !1855, !llvm.loop !1860
+  br i1 %tobool19.not.i134, label %Perl_av_reify.exit, label %while.body20.while.body20_crit_edge.i, !dbg !1855, !llvm.loop !1860
 
-while.body20.while.body20_crit_edge.i.preheader:  ; preds = %while.body20.preheader.i
-  br label %while.body20.while.body20_crit_edge.i, !dbg !1855
-
-while.body20.while.body20_crit_edge.i:            ; preds = %while.body20.while.body20_crit_edge.i.preheader, %while.body20.while.body20_crit_edge.i
-  %dec23.i135 = phi i64 [ %dec23.i, %while.body20.while.body20_crit_edge.i ], [ %dec23.i132, %while.body20.while.body20_crit_edge.i.preheader ]
+while.body20.while.body20_crit_edge.i:            ; preds = %while.body20.preheader.i, %while.body20.while.body20_crit_edge.i
+  %dec23.i135 = phi i64 [ %dec23.i, %while.body20.while.body20_crit_edge.i ], [ %dec23.i132, %while.body20.preheader.i ]
   %.pre53.i = load ptr, ptr %av, align 8, !dbg !1858
   %xav_alloc22.phi.trans.insert.i = getelementptr inbounds %struct.xpvav, ptr %.pre53.i, i64 0, i32 4
   %.pre54.i = load ptr, ptr %xav_alloc22.phi.trans.insert.i, align 8, !dbg !1858
@@ -2643,12 +2563,9 @@ while.body20.while.body20_crit_edge.i:            ; preds = %while.body20.while.
   %arrayidx24.i = getelementptr inbounds ptr, ptr %.pre54.i, i64 %dec23.i, !dbg !1858
   store ptr null, ptr %arrayidx24.i, align 8, !dbg !1859
   %tobool19.not.i = icmp eq i64 %dec23.i, 0, !dbg !1855
-  br i1 %tobool19.not.i, label %Perl_av_reify.exit.loopexit, label %while.body20.while.body20_crit_edge.i, !dbg !1855, !llvm.loop !1860
+  br i1 %tobool19.not.i, label %Perl_av_reify.exit, label %while.body20.while.body20_crit_edge.i, !dbg !1855, !llvm.loop !1860
 
-Perl_av_reify.exit.loopexit:                      ; preds = %while.body20.while.body20_crit_edge.i
-  br label %Perl_av_reify.exit, !dbg !1862
-
-Perl_av_reify.exit:                               ; preds = %Perl_av_reify.exit.loopexit, %while.body20.preheader.i, %while.end15.i
+Perl_av_reify.exit:                               ; preds = %while.body20.while.body20_crit_edge.i, %while.body20.preheader.i, %while.end15.i
   %23 = load i32, ptr %sv_flags, align 4, !dbg !1862
   %and27.i = and i32 %23, 1073741823, !dbg !1862
   %or.i = or i32 %and27.i, 1073741824, !dbg !1863
@@ -2674,19 +2591,16 @@ do.body.preheader:                                ; preds = %if.end53
   store i64 %dec142, ptr %xav_fill57, align 8, !dbg !1871
   call void @llvm.dbg.value(metadata i64 %key.addr.promoted, metadata !1768, metadata !DIExpression(DW_OP_constu, 1, DW_OP_minus, DW_OP_stack_value)), !dbg !1777
   %cmp64144 = icmp sgt i64 %key.addr.promoted, 0, !dbg !1874
-  br i1 %cmp64144, label %land.rhs.preheader, label %if.end69.loopexit, !dbg !1875
+  br i1 %cmp64144, label %land.rhs, label %if.end69.loopexit, !dbg !1875
 
-land.rhs.preheader:                               ; preds = %do.body.preheader
-  br label %land.rhs, !dbg !1876
-
-land.rhs:                                         ; preds = %land.rhs.preheader, %land.rhs.do.body_crit_edge
-  %dec63145.in = phi i64 [ %dec63145, %land.rhs.do.body_crit_edge ], [ %key.addr.promoted, %land.rhs.preheader ]
-  %dec63145 = add nsw i64 %dec63145.in, -1, !dbg !1877
-  %28 = load ptr, ptr %sv_u, align 8, !dbg !1878
-  %arrayidx67 = getelementptr inbounds ptr, ptr %28, i64 %dec63145, !dbg !1878
-  %29 = load ptr, ptr %arrayidx67, align 8, !dbg !1878
-  %tobool68.not = icmp eq ptr %29, null, !dbg !1879
-  br i1 %tobool68.not, label %land.rhs.do.body_crit_edge, label %if.end69.loopexit.loopexit, !dbg !1876, !llvm.loop !1880
+land.rhs:                                         ; preds = %do.body.preheader, %land.rhs.do.body_crit_edge
+  %dec63145.in = phi i64 [ %dec63145, %land.rhs.do.body_crit_edge ], [ %key.addr.promoted, %do.body.preheader ]
+  %dec63145 = add nsw i64 %dec63145.in, -1, !dbg !1876
+  %28 = load ptr, ptr %sv_u, align 8, !dbg !1877
+  %arrayidx67 = getelementptr inbounds ptr, ptr %28, i64 %dec63145, !dbg !1877
+  %29 = load ptr, ptr %arrayidx67, align 8, !dbg !1877
+  %tobool68.not = icmp eq ptr %29, null, !dbg !1878
+  br i1 %tobool68.not, label %land.rhs.do.body_crit_edge, label %if.end69.loopexit, !dbg !1879, !llvm.loop !1880
 
 land.rhs.do.body_crit_edge:                       ; preds = %land.rhs
   %.pre139 = load ptr, ptr %av, align 8, !dbg !1883
@@ -2696,15 +2610,11 @@ land.rhs.do.body_crit_edge:                       ; preds = %land.rhs
   store i64 %dec, ptr %xav_fill62.phi.trans.insert, align 8, !dbg !1871
   call void @llvm.dbg.value(metadata i64 %dec63145, metadata !1768, metadata !DIExpression(DW_OP_constu, 1, DW_OP_minus, DW_OP_stack_value)), !dbg !1777
   %cmp64 = icmp ugt i64 %dec63145.in, 1, !dbg !1874
-  br i1 %cmp64, label %land.rhs, label %if.end69.loopexit.loopexit, !dbg !1875
+  br i1 %cmp64, label %land.rhs, label %if.end69.loopexit, !dbg !1875
 
-if.end69.loopexit.loopexit:                       ; preds = %land.rhs, %land.rhs.do.body_crit_edge
-  %dec63.lcssa.ph = phi i64 [ -1, %land.rhs.do.body_crit_edge ], [ %dec63145, %land.rhs ]
-  br label %if.end69.loopexit, !dbg !1877
-
-if.end69.loopexit:                                ; preds = %if.end69.loopexit.loopexit, %do.body.preheader
-  %dec63.lcssa = phi i64 [ -1, %do.body.preheader ], [ %dec63.lcssa.ph, %if.end69.loopexit.loopexit ], !dbg !1877
-  store i64 %dec63.lcssa, ptr %key.addr, align 8, !dbg !1877
+if.end69.loopexit:                                ; preds = %land.rhs.do.body_crit_edge, %land.rhs, %do.body.preheader
+  %dec63.lcssa = phi i64 [ -1, %do.body.preheader ], [ %dec63145, %land.rhs ], [ -1, %land.rhs.do.body_crit_edge ], !dbg !1876
+  store i64 %dec63.lcssa, ptr %key.addr, align 8, !dbg !1876
   br label %if.end69, !dbg !1884
 
 if.end69:                                         ; preds = %if.end69.loopexit, %if.end53
@@ -3059,24 +2969,24 @@ declare !dbg !2061 void @Perl_sv_free2(ptr noundef, i32 noundef) local_unnamed_a
 
 declare !dbg !2064 ptr @Perl_sv_magicext(ptr noundef, ptr noundef, i32 noundef, ptr noundef, ptr noundef, i32 noundef) local_unnamed_addr #2
 
-; Function Attrs: nocallback nofree nosync nounwind readnone speculatable willreturn
+; Function Attrs: mustprogress nocallback nofree nosync nounwind readnone speculatable willreturn
 declare void @llvm.dbg.value(metadata, metadata, metadata) #4
 
-; Function Attrs: nocallback nofree nosync nounwind readnone speculatable willreturn
+; Function Attrs: mustprogress nocallback nofree nosync nounwind readnone speculatable willreturn
 declare i64 @llvm.smax.i64(i64, i64) #4
 
-; Function Attrs: argmemonly nofree nounwind willreturn writeonly
+; Function Attrs: argmemonly mustprogress nofree nounwind willreturn writeonly
 declare void @llvm.memset.p0.i64(ptr nocapture writeonly, i8, i64, i1 immarg) #5
 
-; Function Attrs: nocallback nofree nosync nounwind readnone speculatable willreturn
+; Function Attrs: mustprogress nocallback nofree nosync nounwind readnone speculatable willreturn
 declare i64 @llvm.smin.i64(i64, i64) #4
 
 attributes #0 = { nofree norecurse nosync nounwind uwtable "frame-pointer"="none" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "tune-cpu"="generic" }
 attributes #1 = { nounwind uwtable "frame-pointer"="none" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "tune-cpu"="generic" }
 attributes #2 = { "frame-pointer"="none" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "tune-cpu"="generic" }
-attributes #3 = { argmemonly nofree nounwind willreturn }
-attributes #4 = { nocallback nofree nosync nounwind readnone speculatable willreturn }
-attributes #5 = { argmemonly nofree nounwind willreturn writeonly }
+attributes #3 = { argmemonly mustprogress nofree nounwind willreturn }
+attributes #4 = { mustprogress nocallback nofree nosync nounwind readnone speculatable willreturn }
+attributes #5 = { argmemonly mustprogress nofree nounwind willreturn writeonly }
 attributes #6 = { nounwind }
 
 !llvm.dbg.cu = !{!0}
@@ -3812,9 +3722,9 @@ attributes #6 = { nounwind }
 !726 = !DILocation(line: 41, column: 18, scope: !711)
 !727 = !DILocation(line: 41, column: 16, scope: !711)
 !728 = !DILocation(line: 41, column: 5, scope: !711)
-!729 = !DILocation(line: 42, column: 14, scope: !711)
-!730 = !DILocation(line: 43, column: 5, scope: !711)
-!731 = !DILocation(line: 42, column: 2, scope: !711)
+!729 = !DILocation(line: 43, column: 5, scope: !711)
+!730 = !DILocation(line: 42, column: 2, scope: !711)
+!731 = !DILocation(line: 42, column: 14, scope: !711)
 !732 = !DILocation(line: 42, column: 21, scope: !711)
 !733 = !DILocation(line: 41, column: 30, scope: !711)
 !734 = distinct !{!734, !728, !735, !736, !737}
@@ -3830,7 +3740,7 @@ attributes #6 = { nounwind }
 !744 = !DILocation(line: 46, column: 6, scope: !745)
 !745 = distinct !DILexicalBlock(scope: !746, file: !712, line: 46, column: 6)
 !746 = distinct !DILexicalBlock(scope: !742, file: !712, line: 46, column: 6)
-!747 = distinct !{!747, !730, !748, !736, !737}
+!747 = distinct !{!747, !729, !748, !736, !737}
 !748 = !DILocation(line: 47, column: 5, scope: !711)
 !749 = !DILocation(line: 48, column: 25, scope: !711)
 !750 = !DILocation(line: 48, column: 11, scope: !711)
@@ -4180,9 +4090,9 @@ attributes #6 = { nounwind }
 !1094 = !DILocation(line: 41, column: 18, scope: !711, inlinedAt: !1091)
 !1095 = !DILocation(line: 41, column: 16, scope: !711, inlinedAt: !1091)
 !1096 = !DILocation(line: 41, column: 5, scope: !711, inlinedAt: !1091)
-!1097 = !DILocation(line: 42, column: 14, scope: !711, inlinedAt: !1091)
-!1098 = !DILocation(line: 43, column: 5, scope: !711, inlinedAt: !1091)
-!1099 = !DILocation(line: 42, column: 2, scope: !711, inlinedAt: !1091)
+!1097 = !DILocation(line: 43, column: 5, scope: !711, inlinedAt: !1091)
+!1098 = !DILocation(line: 42, column: 2, scope: !711, inlinedAt: !1091)
+!1099 = !DILocation(line: 42, column: 14, scope: !711, inlinedAt: !1091)
 !1100 = !DILocation(line: 42, column: 21, scope: !711, inlinedAt: !1091)
 !1101 = !DILocation(line: 41, column: 30, scope: !711, inlinedAt: !1091)
 !1102 = distinct !{!1102, !1096, !1103, !736, !737}
@@ -4193,7 +4103,7 @@ attributes #6 = { nounwind }
 !1107 = !DILocation(line: 45, column: 9, scope: !742, inlinedAt: !1091)
 !1108 = !DILocation(line: 45, column: 6, scope: !719, inlinedAt: !1091)
 !1109 = !DILocation(line: 46, column: 6, scope: !745, inlinedAt: !1091)
-!1110 = distinct !{!1110, !1098, !1111, !736, !737}
+!1110 = distinct !{!1110, !1097, !1111, !736, !737}
 !1111 = !DILocation(line: 47, column: 5, scope: !711, inlinedAt: !1091)
 !1112 = !DILocation(line: 48, column: 25, scope: !711, inlinedAt: !1091)
 !1113 = !DILocation(line: 48, column: 11, scope: !711, inlinedAt: !1091)
@@ -4719,9 +4629,9 @@ attributes #6 = { nounwind }
 !1633 = !DILocation(line: 41, column: 18, scope: !711, inlinedAt: !1630)
 !1634 = !DILocation(line: 41, column: 16, scope: !711, inlinedAt: !1630)
 !1635 = !DILocation(line: 41, column: 5, scope: !711, inlinedAt: !1630)
-!1636 = !DILocation(line: 42, column: 14, scope: !711, inlinedAt: !1630)
-!1637 = !DILocation(line: 43, column: 5, scope: !711, inlinedAt: !1630)
-!1638 = !DILocation(line: 42, column: 2, scope: !711, inlinedAt: !1630)
+!1636 = !DILocation(line: 43, column: 5, scope: !711, inlinedAt: !1630)
+!1637 = !DILocation(line: 42, column: 2, scope: !711, inlinedAt: !1630)
+!1638 = !DILocation(line: 42, column: 14, scope: !711, inlinedAt: !1630)
 !1639 = !DILocation(line: 42, column: 21, scope: !711, inlinedAt: !1630)
 !1640 = !DILocation(line: 41, column: 30, scope: !711, inlinedAt: !1630)
 !1641 = distinct !{!1641, !1635, !1642, !736, !737}
@@ -4732,7 +4642,7 @@ attributes #6 = { nounwind }
 !1646 = !DILocation(line: 45, column: 9, scope: !742, inlinedAt: !1630)
 !1647 = !DILocation(line: 45, column: 6, scope: !719, inlinedAt: !1630)
 !1648 = !DILocation(line: 46, column: 6, scope: !745, inlinedAt: !1630)
-!1649 = distinct !{!1649, !1637, !1650, !736, !737}
+!1649 = distinct !{!1649, !1636, !1650, !736, !737}
 !1650 = !DILocation(line: 47, column: 5, scope: !711, inlinedAt: !1630)
 !1651 = !DILocation(line: 48, column: 25, scope: !711, inlinedAt: !1630)
 !1652 = !DILocation(line: 48, column: 11, scope: !711, inlinedAt: !1630)
@@ -4920,11 +4830,11 @@ attributes #6 = { nounwind }
 !1834 = !DILocation(line: 40, column: 21, scope: !711, inlinedAt: !1832)
 !1835 = !DILocation(line: 41, column: 16, scope: !711, inlinedAt: !1832)
 !1836 = !DILocation(line: 41, column: 5, scope: !711, inlinedAt: !1832)
-!1837 = !DILocation(line: 42, column: 14, scope: !711, inlinedAt: !1832)
-!1838 = !DILocation(line: 41, column: 18, scope: !711, inlinedAt: !1832)
-!1839 = !DILocation(line: 43, column: 5, scope: !711, inlinedAt: !1832)
-!1840 = !DILocation(line: 42, column: 2, scope: !711, inlinedAt: !1832)
-!1841 = !DILocation(line: 42, column: 21, scope: !711, inlinedAt: !1832)
+!1837 = !DILocation(line: 43, column: 5, scope: !711, inlinedAt: !1832)
+!1838 = !DILocation(line: 42, column: 2, scope: !711, inlinedAt: !1832)
+!1839 = !DILocation(line: 42, column: 14, scope: !711, inlinedAt: !1832)
+!1840 = !DILocation(line: 42, column: 21, scope: !711, inlinedAt: !1832)
+!1841 = !DILocation(line: 41, column: 18, scope: !711, inlinedAt: !1832)
 !1842 = !DILocation(line: 41, column: 30, scope: !711, inlinedAt: !1832)
 !1843 = distinct !{!1843, !1836, !1844, !736, !737}
 !1844 = !DILocation(line: 42, column: 23, scope: !711, inlinedAt: !1832)
@@ -4934,7 +4844,7 @@ attributes #6 = { nounwind }
 !1848 = !DILocation(line: 45, column: 9, scope: !742, inlinedAt: !1832)
 !1849 = !DILocation(line: 45, column: 6, scope: !719, inlinedAt: !1832)
 !1850 = !DILocation(line: 46, column: 6, scope: !745, inlinedAt: !1832)
-!1851 = distinct !{!1851, !1839, !1852, !736, !737}
+!1851 = distinct !{!1851, !1837, !1852, !736, !737}
 !1852 = !DILocation(line: 47, column: 5, scope: !711, inlinedAt: !1832)
 !1853 = !DILocation(line: 48, column: 25, scope: !711, inlinedAt: !1832)
 !1854 = !DILocation(line: 48, column: 11, scope: !711, inlinedAt: !1832)
@@ -4959,10 +4869,10 @@ attributes #6 = { nounwind }
 !1873 = distinct !DILexicalBlock(scope: !1868, file: !712, line: 898, column: 26)
 !1874 = !DILocation(line: 901, column: 21, scope: !1873)
 !1875 = !DILocation(line: 901, column: 26, scope: !1873)
-!1876 = !DILocation(line: 901, column: 6, scope: !1872)
-!1877 = !DILocation(line: 901, column: 15, scope: !1873)
-!1878 = !DILocation(line: 901, column: 30, scope: !1873)
-!1879 = !DILocation(line: 901, column: 29, scope: !1873)
+!1876 = !DILocation(line: 901, column: 15, scope: !1873)
+!1877 = !DILocation(line: 901, column: 30, scope: !1873)
+!1878 = !DILocation(line: 901, column: 29, scope: !1873)
+!1879 = !DILocation(line: 901, column: 6, scope: !1872)
 !1880 = distinct !{!1880, !1881, !1882, !736, !737}
 !1881 = !DILocation(line: 899, column: 6, scope: !1873)
 !1882 = !DILocation(line: 901, column: 46, scope: !1873)
