@@ -1311,13 +1311,12 @@ Value *Iterative_ALC::createVectorOfConstants(Value *value, IRBuilder<> &builder
 }
 
 Iterative_ALC::Iterative_ALC(Loop *l, int vectorizationFactor,
-                             LoopStandardAnalysisResults &ar)
-        : L(l), vectorizationFactor(vectorizationFactor), AR(ar) {
+                             LoopStandardAnalysisResults &ar, Value *tripCount)
+        : L(l), vectorizationFactor(vectorizationFactor), AR(ar), tripCount(tripCount) {
     LI = &AR.LI;
     SE = &AR.SE;
     module = L->getHeader()->getModule();
-    tripCount =
-            computeTripCount(L->getLoopLatch(), L->getCanonicalInductionVariable());
+
     TripCountTy = tripCount->getType();
     if (vectorizationFactor == 4 && TripCountTy == Type::getInt64Ty(tripCount->getContext())) {
         errs() << "warning: Requested VF = 4 but TripCountTy is i64. Reverting VF to 2\n";
@@ -1326,6 +1325,7 @@ Iterative_ALC::Iterative_ALC(Loop *l, int vectorizationFactor,
     intrinsicCallGenerator =
             new IntrinsicCallGenerator(this->vectorizationFactor, module);
 }
+
 
 
 

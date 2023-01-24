@@ -50,6 +50,8 @@ private:
     Value *ActiveLanesInSecondVector;
     Value *ActiveLanesInBothVectors;
     Value *PermutedIndices;
+
+private:
     Value *PermutedPredicates;
     Value *ActiveElementsInPermutedVector;
     Value *allTrue;
@@ -59,7 +61,8 @@ private:
     std::vector<Instruction *> *sharedInstructions;
 
 public:
-    Simple_ALC(Loop *l, int vectorizationFactor, LoopStandardAnalysisResults &ar);
+    Simple_ALC(Loop *l, int vectorizationFactor,
+               LoopStandardAnalysisResults &ar, Value *tripCount);
 
 public:
 

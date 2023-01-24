@@ -27,6 +27,8 @@ namespace {
 
     void printAllBlocks(Loop *L);
 
+    Value *findLoopTripCount(Loop *L, int vectorizationFactor);
+
 //-----------------------------------------------------------------------------
 // alc_vectorizer implementation
 //-----------------------------------------------------------------------------
@@ -62,14 +64,33 @@ namespace {
             llvm::outs() << "Loop at line number: " << location.getLine() - 1 << "\n";
         }
 
+        auto *alc_analysis = new ALC_Analysis(L, AM, AR);
+        ALCAnalysisResult *analysisResult = alc_analysis->doAnalysis();
+
         int factor = 4;
 
-        auto *alc_analysis = new ALC_Analysis(L, AM, AR);
-//        auto *sve_vectorizer = new SVE_Vectorizer(L, factor, AR);
-//        auto *simple_alc = new Simple_ALC(L, factor, AR);
-//        auto *alc_itr = new Iterative_ALC(L, factor, AR);
+        if (!L->getCanonicalInductionVariable()) {
+            llvm::outs() << "Can't determine induction variable" << "\n";
+            return PreservedAnalyses::all();
+        }
 
-        ALCAnalysisResult *analysisResult = alc_analysis->doAnalysis();
+        Value *tripCount = findLoopTripCount(L, factor);
+
+        if (!tripCount) {
+            llvm::outs() << "Can not determine loop trip count or its type is not proper." << "\n";
+            return PreservedAnalyses::all();
+        }
+
+
+        auto *sve_vectorizer = new SVE_Vectorizer(L, factor, AR);
+        auto *simple_alc = new Simple_ALC(L, factor, AR, tripCount);
+        auto *alc_itr = new Iterative_ALC(L, factor, AR, tripCount);
+
+
+        if (analysisResult->isLegal1() && analysisResult->isProfitable1() &&
+            analysisResult->getDivergenceType() == ALCAnalysisResult::SINGLE_IF) {
+            llvm::outs() << "Found a case !!! \n";
+        }
 
 
 //        simple_alc->doTransformation();
@@ -80,11 +101,9 @@ namespace {
 //        printLoop(L);
 
         delete alc_analysis;
-
-
-//        delete simple_alc;
-//        delete alc_itr;
-//        delete sve_vectorizer;
+        delete simple_alc;
+        delete alc_itr;
+        delete sve_vectorizer;
 
         llvm::outs() << "\n";
 
@@ -115,6 +134,48 @@ namespace {
             BB.print(outs());
         }
         llvm::outs() << "\n";
+    }
+
+    Value *findLoopTripCount(Loop *L, int vectorizationFactor) {
+
+        BasicBlock *latch = L->getLoopLatch();
+        PHINode *inductionVar = L->getCanonicalInductionVariable();
+
+
+        auto *brIns = dyn_cast<BranchInst>(latch->getTerminator());
+        if (!brIns->isConditional()) {
+            return nullptr;
+        }
+        auto *conditionInst = dyn_cast<Instruction>(brIns->getCondition());
+
+
+        // one of the operands is the induction var and the other one is trip count
+        for (int i = 0; i < conditionInst->getNumOperands(); ++i) {
+            bool flag = false;
+            for (auto user: inductionVar->users()) {
+                if (user == conditionInst->getOperand(i)) {
+                    flag = true;
+                }
+            }
+            if (flag) {
+                continue;
+            } else {
+                auto *TC = conditionInst->getOperand(i);
+                auto *I32 = Type::getInt32Ty(TC->getContext());
+                auto *I64 = Type::getInt64Ty(TC->getContext());
+                if (vectorizationFactor == 4)
+                    if (auto *ZExt = dyn_cast_or_null<ZExtInst>(TC))
+                        if (ZExt->getSrcTy() == Type::getInt32Ty(TC->getContext()))
+                            TC = ZExt->getOperand(0);
+                if (TC->getType() != I32 && TC->getType() != I64) {
+                    llvm::outs() << "TripCountTy is neither i32 nor i64." << "\n";
+                    return nullptr;
+                }
+                return TC;
+            }
+        }
+
+        return nullptr;
     }
 
 } // namespace

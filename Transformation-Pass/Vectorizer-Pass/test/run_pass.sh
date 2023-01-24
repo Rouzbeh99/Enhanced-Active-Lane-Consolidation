@@ -22,7 +22,7 @@ cd ../test
 
 
 
-$LLVM_BUILD_DIR/bin/clang -g -O3 -fpass-plugin=$PASS_DIR/build/ALC_Vectorizer.so  -S -emit-llvm $1 -o tmp.ll
+$LLVM_BUILD_DIR/bin/clang -g -O3  -fno-inline -fno-vectorize -fno-slp-vectorize -fno-unroll-loops -fpass-plugin=$PASS_DIR/build/ALC_Vectorizer.so  -S -emit-llvm $1 -o tmp.ll
 #$LLVM_BUILD_DIR/bin/clang -g -O3 -mllvm -debug-only=loop-accesses  -fpass-plugin=$PASS_DIR/build/ALC_Vectorizer.so  -S -emit-llvm $1 -o tmp.ll
 
 

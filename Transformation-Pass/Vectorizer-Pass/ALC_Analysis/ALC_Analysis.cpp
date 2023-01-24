@@ -5,7 +5,7 @@
 ALCAnalysisResult *ALC_Analysis::doAnalysis() {
 
     int numberOfBlocks = L->getBlocks().size();
-    bool functionCall = containsFunctionCall();
+    bool hasFunctionCall = containsFunctionCall();
     bool vectorizable = isVectorizable();
     bool outputDependency = containsOutputDependency();
     bool singleIfCase = isSingleIfCase();
@@ -13,7 +13,7 @@ ALCAnalysisResult *ALC_Analysis::doAnalysis() {
 
     const ArrayRef<BasicBlock *> &allBlocks = L->getBlocks();
 
-    if (functionCall) {
+    if (hasFunctionCall) {
         llvm::outs() << "Loop contains function call" << '\n';
     } else {
         llvm::outs() << "Loop doesn't contain function call" << '\n';
@@ -75,14 +75,22 @@ ALCAnalysisResult *ALC_Analysis::doAnalysis() {
                      << "\n";
     }
 
+    bool isLegal = vectorizable && !hasFunctionCall && numberOfPaths > 1;
+    bool isProfitable = false;
+    if (numberOfPaths == 2) {
+        isProfitable = true;
+    }
+    ALCAnalysisResult::DIVERGENCE_TYPE type = isSingleIfCase() ? ALCAnalysisResult::DIVERGENCE_TYPE::SINGLE_IF
+                                                               : ALCAnalysisResult::DIVERGENCE_TYPE::IF_THEN_ELSE;
 
-    if (!functionCall && !outputDependency && vectorizable && (numberOfPaths > 1)) {
+
+    if (!hasFunctionCall && !outputDependency && vectorizable && (numberOfPaths > 1)) {
         llvm::outs() << "ALC can be applied \n";
     } else {
         llvm::outs() << "ALC can NOT be applied \n";
     }
 
-    return new ALCAnalysisResult(true, true, ALCAnalysisResult::DIVERGENCE_TYPE::IF_THEN_ELSE);
+    return new ALCAnalysisResult(isLegal, isProfitable, type);
 
 }
 

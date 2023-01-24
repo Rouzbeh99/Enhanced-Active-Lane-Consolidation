@@ -33,6 +33,9 @@ private:
     LoopStandardAnalysisResults &AR;
     LoopInfo *LI;
     Value *tripCount;
+
+
+private:
     Type *TripCountTy;
     ScalarEvolution *SE;
     PHINode *VectorLoopIndex;
@@ -57,7 +60,8 @@ private:
     std::vector<Instruction *> *sharedInstructions;
 
 public:
-    Iterative_ALC(Loop *l, int vectorizationFactor, LoopStandardAnalysisResults &ar);
+    Iterative_ALC(Loop *l, int vectorizationFactor,
+                  LoopStandardAnalysisResults &ar, Value *tripCount);
 
 public:
     void doTransformation_itr_singleIf_simple();

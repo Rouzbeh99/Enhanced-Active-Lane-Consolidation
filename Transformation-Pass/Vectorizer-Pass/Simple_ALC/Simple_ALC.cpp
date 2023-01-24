@@ -9,8 +9,6 @@
 
 void Simple_ALC::doTransformation() {
     auto *header = L->getHeader();
-    auto &context = header->getContext();
-    ScalarIV = L->getCanonicalInductionVariable();
     assert(isa<PHINode>(ScalarIV) && "Induction variable must be a PHINode!");
     auto *preheader = L->getLoopPreheader();
     auto *latch = L->getLoopLatch();
@@ -799,6 +797,7 @@ Value *Simple_ALC::computeTripCount(BasicBlock *latch, Value *inductionVar) {
     auto *brIns = dyn_cast<BranchInst>(latch->getTerminator());
     auto *conditionInst = dyn_cast<Instruction>(brIns->getCondition());
 
+
     // one of the operands is the induction var and the other one is trip count
     for (int i = 0; i < conditionInst->getNumOperands(); ++i) {
         bool flag = false;
@@ -817,6 +816,8 @@ Value *Simple_ALC::computeTripCount(BasicBlock *latch, Value *inductionVar) {
                 if (auto *ZExt = dyn_cast_or_null<ZExtInst>(TC))
                     if (ZExt->getSrcTy() == Type::getInt32Ty(TC->getContext()))
                         TC = ZExt->getOperand(0);
+            TC->print(outs());
+            llvm::outs()<<"\n";
             assert((TC->getType() == I32 || TC->getType() == I64) &&
                    "TripCountTy is neither i32 nor i64.");
             return TC;
@@ -865,14 +866,14 @@ Value* Simple_ALC::createVectorOfConstants(Value *value, IRBuilder<> &builder,
 }
 
 Simple_ALC::Simple_ALC(Loop *l, int vectorizationFactor,
-                 LoopStandardAnalysisResults &ar)
-        : L(l), vectorizationFactor(vectorizationFactor), AR(ar) {
+                 LoopStandardAnalysisResults &ar, Value *tripCount)
+        : L(l), vectorizationFactor(vectorizationFactor), AR(ar), tripCount(tripCount) {
     LI = &AR.LI;
     SE = &AR.SE;
     module = L->getHeader()->getModule();
-    tripCount =
-            computeTripCount(L->getLoopLatch(), L->getCanonicalInductionVariable());
+    ScalarIV = L->getCanonicalInductionVariable();
     TripCountTy = tripCount->getType();
+
     if (vectorizationFactor == 4 && TripCountTy == Type::getInt64Ty(tripCount->getContext())) {
         errs() << "warning: Requested VF = 4 but TripCountTy is i64. Reverting VF to 2\n";
         this->vectorizationFactor = 2;
@@ -880,4 +881,5 @@ Simple_ALC::Simple_ALC(Loop *l, int vectorizationFactor,
     intrinsicCallGenerator =
             new IntrinsicCallGenerator(this->vectorizationFactor, module);
 }
+
 
