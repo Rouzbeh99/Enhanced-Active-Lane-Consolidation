@@ -1038,37 +1038,6 @@ bool Iterative_ALC::usesInductionVar(Value *value, Value *inductionVar) {
     return false;
 }
 
-Value *Iterative_ALC::computeTripCount(BasicBlock *latch, Value *inductionVar) {
-    auto *brIns = dyn_cast<BranchInst>(latch->getTerminator());
-    auto *conditionInst = dyn_cast<Instruction>(brIns->getCondition());
-
-    // one of the operands is the induction var and the other one is trip count
-    for (int i = 0; i < conditionInst->getNumOperands(); ++i) {
-        bool flag = false;
-        for (auto user: inductionVar->users()) {
-            if (user == conditionInst->getOperand(i)) {
-                flag = true;
-            }
-        }
-        if (flag) {
-            continue;
-        } else {
-            auto *TC = conditionInst->getOperand(i);
-            auto *I32 = Type::getInt32Ty(TC->getContext());
-            auto *I64 = Type::getInt64Ty(TC->getContext());
-            if (vectorizationFactor == 4)
-                if (auto *ZExt = dyn_cast_or_null<ZExtInst>(TC))
-                    if (ZExt->getSrcTy() == Type::getInt32Ty(TC->getContext()))
-                        TC = ZExt->getOperand(0);
-            assert((TC->getType() == I32 || TC->getType() == I64) &&
-                   "TripCountTy is neither i32 nor i64.");
-            return TC;
-        }
-    }
-
-    // TODO: raise error
-    return nullptr;
-}
 
 void Iterative_ALC::addBranchHint(BranchInst *branchInst) {
 

@@ -78,9 +78,6 @@ private:
                                 Value *&permutedPredicates);
 
 private:
-    Value *computeTripCount(BasicBlock *latch, Value *inductionVar);
-
-private:
     BasicBlock *createEmptyBlock(const std::string &name,
                                  BasicBlock *insertBefore);
 
