@@ -32,6 +32,8 @@ private:
     int vectorizationFactor;
     LoopStandardAnalysisResults &AR;
     LoopInfo *LI;
+    DominatorTree *DT;
+    std::vector<DominatorTree::UpdateType> DTUpdates;
     Value *tripCount;
 
 

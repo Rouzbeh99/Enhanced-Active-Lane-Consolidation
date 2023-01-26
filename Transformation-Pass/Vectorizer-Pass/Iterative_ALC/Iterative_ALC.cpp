@@ -63,6 +63,9 @@ void Iterative_ALC::doTransformation_itr_singleIf_simple() {
 
     refinePreHeaderForRemaining(preheaderForRemainingBlock, middleBlock,
                                 (*latchOutputs)[0]);
+
+    DT->applyUpdates(DTUpdates);
+    DTUpdates.clear();
 }
 
 void Iterative_ALC::doTransformation_itr_singleIf_full_permutation() {
@@ -169,6 +172,7 @@ BasicBlock *Iterative_ALC::createPreheaderForRemainingIterations() {
             L->getHeader()->getParent(), L->getLoopLatch());
     // branch to loop header
     BranchInst::Create(L->getHeader(), block);
+    DTUpdates.push_back({DT->Insert, L->getHeader(), block});
 
     // add to loop
     L->addBasicBlockToLoop(block, *LI);
@@ -211,6 +215,8 @@ void Iterative_ALC::refinePreheader(BasicBlock *preVecBlock,
             IRB.CreateICmpUGE(tripCount, mul); // if true, there are enough iterations
 
     IRB.CreateCondBr(condition, preVecBlock, preHeaderForRemaining);
+    DTUpdates.push_back({DT->Insert, L->getLoopPreheader(), preVecBlock});
+    DTUpdates.push_back({DT->Insert, L->getLoopPreheader(), preHeaderForRemaining});
 
     // remove previous terminator
     Terminator->eraseFromParent();
@@ -418,6 +424,7 @@ std::vector<Value *> *Iterative_ALC::fillUniformBlock_itr(
     IRBuilder<> builder(uniformBlock->getContext());
     builder.SetInsertPoint(uniformBlock);
     builder.CreateBr(joinBlock);
+    DTUpdates.push_back({DT->Insert, uniformBlock, joinBlock});
     builder.SetInsertPoint(uniformBlock->getTerminator());
 
     Constant *constOne = llvm::ConstantInt::get(TripCountTy, 1, true);
@@ -460,6 +467,7 @@ void Iterative_ALC::fillLinearizedBlock_itr(BasicBlock *linearized,
     IRBuilder<> builder(linearized->getContext());
     builder.SetInsertPoint(linearized);
     builder.CreateBr(newLatch);
+    DTUpdates.push_back({DT->Insert, linearized, newLatch});
 
     std::vector<Instruction *> *clonedInstructions =
             cloneInstructions(toBeVectorizedBlock, linearized, VectorLoopIndex);
@@ -565,6 +573,7 @@ Iterative_ALC::fillJoinBlock(BasicBlock *joinBlock, BasicBlock *newLatch,
     outputs->push_back(activeLanesCountPhi);
 
     builder.CreateBr(newLatch);
+    DTUpdates.push_back({DT->Insert, joinBlock, newLatch});
 
     return outputs;
 }
@@ -1182,6 +1191,7 @@ void Iterative_ALC::fillALCHeader_full_permutation(BasicBlock *alcHeader, BasicB
     builder.SetInsertPoint(alcHeader);
 
     builder.CreateBr(laneGatherBlock);
+    DTUpdates.push_back({DT->Insert, alcHeader, laneGatherBlock});
     builder.SetInsertPoint(alcHeader->getTerminator());
 
     // create phi node for loop index
@@ -1305,6 +1315,7 @@ void Iterative_ALC::fillUniformBlock_full_permutation(BasicBlock *uniformBlock, 
     IRBuilder<> builder(uniformBlock->getContext());
     builder.SetInsertPoint(uniformBlock);
     builder.CreateBr(latch);
+    DTUpdates.push_back({DT->Insert, uniformBlock, latch});
     builder.SetInsertPoint(uniformBlock->getTerminator());
 
     Constant *constOne = llvm::ConstantInt::get(TripCountTy, 1, true);
@@ -1385,6 +1396,7 @@ Iterative_ALC::Iterative_ALC(Loop *l, int vectorizationFactor,
         : L(l), vectorizationFactor(vectorizationFactor), AR(ar), tripCount(tripCount) {
     LI = &AR.LI;
     SE = &AR.SE;
+    DT = &AR.DT;
     module = L->getHeader()->getModule();
 
     TripCountTy = tripCount->getType();
