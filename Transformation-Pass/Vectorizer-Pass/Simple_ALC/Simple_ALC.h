@@ -74,7 +74,7 @@ private:
 private:
     void insertPermutationLogic(BasicBlock *insertAt, Value *&permutedZ0,
                                 Value *&permutedPredicates);
-    
+
 
 private:
     BasicBlock *createEmptyBlock(const std::string &name,

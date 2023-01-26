@@ -13,6 +13,7 @@ ALCAnalysisResult *ALC_Analysis::doAnalysis() {
 
     const ArrayRef<BasicBlock *> &allBlocks = L->getBlocks();
 
+
     if (hasFunctionCall) {
         llvm::outs() << "Loop contains function call" << '\n';
     } else {
@@ -75,6 +76,7 @@ ALCAnalysisResult *ALC_Analysis::doAnalysis() {
                      << "\n";
     }
 
+//    bool isLegal = vectorizable && !hasFunctionCall && !outputDependency && numberOfPaths > 1;
     bool isLegal = vectorizable && !hasFunctionCall && numberOfPaths > 1;
     bool isProfitable = false;
     if (numberOfPaths == 2) {
@@ -168,9 +170,12 @@ bool ALC_Analysis::containsOutputDependency() {
     // If this PHINode is not in the header block, then we know that we
     // can convert it to select during if-conversion.
     int counter = 0;
-    for (const auto &instr: L->getHeader()->getInstList()) {
-        if (isa<PHINode>(instr)) {
-            counter++;
+
+    for(auto BB: L->getBlocks()) {
+        for (const auto &instr: BB->instructionsWithoutDebug()) {
+            if (isa<PHINode>(instr)) {
+                counter++;
+            }
         }
     }
     return counter > 1;

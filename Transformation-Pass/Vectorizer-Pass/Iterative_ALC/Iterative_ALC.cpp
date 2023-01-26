@@ -18,7 +18,8 @@ void Iterative_ALC::doTransformation_itr_singleIf_simple() {
 
     targetedBlock = findTargetedBlock();
     sharedInstructions =
-            findHeaderInstructionsRequiredInThenBlock(header, targetedBlock);
+            findHeaderAndPreheaderInstructionsRequiredInThenBlock(header, preheader,
+                                                                  targetedBlock);
 
     BasicBlock *preheaderForRemainingBlock =
             createPreheaderForRemainingIterations();
@@ -76,7 +77,7 @@ void Iterative_ALC::doTransformation_itr_singleIf_full_permutation() {
 
     targetedBlock = findTargetedBlock();
     sharedInstructions =
-            findHeaderInstructionsRequiredInThenBlock(header, targetedBlock);
+            findHeaderAndPreheaderInstructionsRequiredInThenBlock(header, preheader, targetedBlock);
 
     BasicBlock *preheaderForRemainingBlock =
             createPreheaderForRemainingIterations();
@@ -109,11 +110,13 @@ void Iterative_ALC::doTransformation_itr_singleIf_full_permutation() {
                                 (*latchOutputs)[0]);
 }
 
+
+void Iterative_ALC::doTransformation_itr_if_then_else() {
+
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Iterative_ALC::doTransformation_itr_singleIf_nested() {
-    llvm::outs() << "HELLO \n";
-}
 
 
 // TODO: problem in algorithm, in the case where the total number of active
@@ -576,7 +579,7 @@ Value *Iterative_ALC::formPredicate(BasicBlock *decisionBlock,
             decisionBlock, predicateHolderBlock, inductionVarInitialValue);
 
     predicates_scalar = clonedInstructions->back();
-    predicates_scalar = clonedInstructions->back();
+
 
     // now we should vectorize clonedInstructions
     std::map<const Value *, const Value *> *instructionsMap =
@@ -630,12 +633,25 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
     std::map<Value *, Value *> vMap;
 
 
+    // create vector instructions from function arguments
+    Function *function = block->getParent();
+
+    for (auto &arg: function->args()) {
+        if (arg.getType()->isIntegerTy() || arg.getType()->isFloatTy() || arg.getType()->isDoubleTy()) {
+
+            Value *vector = createVectorOfConstants(dyn_cast<Value>(&arg), IRB, "vector.arg");
+            vMap[&arg] = vector;
+        }
+    }
+
+
     // Should be remove in FILO manner to prevent removing a value that is used in
     // following lines
     std::stack<Instruction *> toBeRemoved;
+
+
     // TODO: Complete the list
     for (auto instr: *instructions) {
-
 
         if (auto *GEP = dyn_cast_or_null<GEPOperator>(instr)) {
             //            assert(GEP->getNumIndices() == 1 && "Expected GetElementPtr
@@ -649,6 +665,7 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
                     }
                 }
             }
+
         } else if (isa<StoreInst>(instr)) {
 
             auto storeInstr = dyn_cast<StoreInst>(instr);
@@ -691,24 +708,46 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
                 ptr = vMap[ptr];
             }
             Value *loadedData = nullptr;
+
+            if (instr->getType()->isPointerTy()) {
+                outputMap->insert({instr, instr});
+                continue;
+            }
+
             assert(isa<GEPOperator>(ptr) &&
                    "Expected LoadInst PointerOperand to be GetElementPtr!");
+
             auto *GEP = static_cast<GEPOperator *>(ptr);
+
             auto *SrcTy = GEP->getSourceElementType();
-            if (SrcTy->isArrayTy()) {
-                SrcTy = SrcTy->getArrayElementType();
-            }
+
+//            // the first two ones are always type and base address
+//            bool isConstantMemoryLocation = true;
+//            for (int i = 2; i < GEP->getNumOperands(); ++i) {
+//                if (!isa<Constant>(GEP->getOperand(i))) {
+//                    isConstantMemoryLocation = false;
+//                }
+//            }
+
+
             if (isPermuted) {
+                // need to determine source type
+                if (SrcTy->isArrayTy() || SrcTy->isStructTy()) {
+                    SrcTy = GEP->getResultElementType();
+                }
+
                 loadedData = intrinsicCallGenerator->createGatherLoadInstruction(
                         IRB, SrcTy, ptr, predicates, indices);
+
             } else if (isPredicated) {
-                assert(isa<GEPOperator>(ptr) &&
-                       "Expected LoadInst PointerOperand to be GetElementPtr!");
-                auto *GEP = static_cast<GEPOperator *>(ptr);
-                auto *SrcTy = GEP->getSourceElementType();
-                if (SrcTy->isArrayTy()) {
-                    SrcTy = SrcTy->getArrayElementType();
+
+                if (SrcTy->isArrayTy() || SrcTy->isStructTy()) {
+                    llvm::outs()<<"HERE \n";
+                    instr->print(outs());
+                    llvm::outs()<<"\n";
+                    SrcTy = GEP->getResultElementType();
                 }
+
                 loadedData = intrinsicCallGenerator->createLoadInstruction(
                         IRB, SrcTy, ptr, predicates);
             } else {
@@ -718,8 +757,8 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
 
             vMap[instr] = loadedData;
             toBeRemoved.push(instr);
-        } else if (auto *truncInstr = dyn_cast_or_null<TruncInst>(instr)) {
 
+        } else if (auto *truncInstr = dyn_cast_or_null<TruncInst>(instr)) {
 
             Value *operand = nullptr;
 
@@ -780,9 +819,12 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
                         dyn_cast_or_null<Constant>(instr->getOperand(1))) {
                     secondOp =
                             createVectorOfConstants(ConstantValue, IRB, "second.operand");
-                } else
+                } else {
+                    instr->getOperand(1)->print(outs());
+                    llvm::outs() << "\n";
                     assert(0 &&
                            "second operand neither already vectorized nor Constant!");
+                }
             }
 
 
@@ -813,8 +855,22 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
                     result = IRB.CreateShl(firstOp, secondOp);
                     break;
                 case Instruction::Trunc:
-                    IRB.CreateTruncOrBitCast(firstOp, destinationType);
+                    result = IRB.CreateTruncOrBitCast(firstOp, destinationType);
                     break;
+                case Instruction::FAdd:
+                    result = IRB.CreateFAdd(firstOp, secondOp);
+                    break;
+                case Instruction::FSub:
+                    result = IRB.CreateFSub(firstOp, secondOp);
+                    break;
+                case Instruction::FMul:
+                    result = IRB.CreateFMul(firstOp, secondOp);
+                    break;
+                case Instruction::FDiv:
+                    result = IRB.CreateFDiv(firstOp, secondOp);
+                    break;
+                case Instruction::FRem:
+                    result = IRB.CreateFRem(firstOp, secondOp);
                 case Instruction::ICmp: {
                     switch (dyn_cast<ICmpInst>(instr)->getPredicate()) {
                         // TODO: handle other cases
@@ -934,6 +990,8 @@ std::vector<Instruction *> *Iterative_ALC::cloneInstructions(BasicBlock *From,
     auto *clonedInstructions = new std::vector<Instruction *>;
 
     // initialize clonedInstructions with sharedInstruction from header
+
+
     for (auto instr: *sharedInstructions) {
         Instruction *clonedInstr = instr->clone();
         clonedInstr->insertBefore(to->getTerminator());
@@ -976,8 +1034,10 @@ std::vector<Instruction *> *Iterative_ALC::cloneInstructions(BasicBlock *From,
 }
 
 std::vector<Instruction *> *
-Iterative_ALC::findHeaderInstructionsRequiredInThenBlock(BasicBlock *header,
-                                                         BasicBlock *thenBlock) {
+Iterative_ALC::findHeaderAndPreheaderInstructionsRequiredInThenBlock(BasicBlock *header, BasicBlock *preheader,
+                                                                     BasicBlock *thenBlock) {
+
+
     auto output = new std::vector<Instruction *>();
     for (auto &thenInstr: thenBlock->instructionsWithoutDebug()) {
 
@@ -994,7 +1054,7 @@ Iterative_ALC::findHeaderInstructionsRequiredInThenBlock(BasicBlock *header,
             }
             auto *instruction = dyn_cast<Instruction>(operand);
 
-            if (instruction->getParent() == header &&
+            if ((instruction->getParent() == header || instruction->getParent() == preheader) &&
                 (std::find(output->begin(), output->end(), instruction) ==
                  output->end())) {
                 output->push_back(instruction);
@@ -1004,11 +1064,51 @@ Iterative_ALC::findHeaderInstructionsRequiredInThenBlock(BasicBlock *header,
             for (int k = 0; k < toCheckOperands.size(); ++k) {
                 for (int j = 0; j < toCheckOperands[k]->getNumOperands(); ++j) {
                     Value *innerOp = toCheckOperands[k]->getOperand(j);
-                    if (innerOp == ScalarIV || isa<Constant>(innerOp)) {
+                    if (innerOp == ScalarIV || !isa<Instruction>(innerOp)) {
                         continue;
                     }
                     auto opInstr = dyn_cast<Instruction>(innerOp);
-                    if (opInstr->getParent() == header &&
+                    if ((opInstr->getParent() == header || instruction->getParent() == preheader) &&
+                        (std::find(output->begin(), output->end(), opInstr) ==
+                         output->end())) {
+                        output->push_back(opInstr);
+                        toCheckOperands.push_back(opInstr);
+                    }
+                }
+            }
+        }
+    }
+
+    for (auto &headerInstr: header->instructionsWithoutDebug()) {
+
+        if (&headerInstr == thenBlock->getTerminator()) {
+            break;
+        }
+
+        for (int i = 0; i < headerInstr.getNumOperands(); ++i) {
+
+            std::vector<Instruction *> toCheckOperands;
+            auto operand = headerInstr.getOperand(i);
+            if (operand == ScalarIV || !isa<Instruction>(operand)) {
+                continue;
+            }
+            auto *instruction = dyn_cast<Instruction>(operand);
+
+            if ((instruction->getParent() == preheader) &&
+                (std::find(output->begin(), output->end(), instruction) ==
+                 output->end())) {
+                output->push_back(instruction);
+                toCheckOperands.push_back(instruction);
+            }
+
+            for (int k = 0; k < toCheckOperands.size(); ++k) {
+                for (int j = 0; j < toCheckOperands[k]->getNumOperands(); ++j) {
+                    Value *innerOp = toCheckOperands[k]->getOperand(j);
+                    if (innerOp == ScalarIV || !isa<Instruction>(innerOp)) {
+                        continue;
+                    }
+                    auto opInstr = dyn_cast<Instruction>(innerOp);
+                    if ((instruction->getParent() == preheader) &&
                         (std::find(output->begin(), output->end(), opInstr) ==
                          output->end())) {
                         output->push_back(opInstr);
@@ -1193,7 +1293,8 @@ Iterative_ALC::insertPermutationLogic_full_permutation(BasicBlock *insertAt, Val
     Value *x3 = intrinsicCallGenerator->createCntpInstruction(IRB, p3, p3);
     Value *truncResult = IRB.CreateSExt(ActualVectorLength, x3->getType());
     Value *subResult = IRB.CreateSub(truncResult, x3);
-    Value *p7 = intrinsicCallGenerator->createWhileltInstruction(IRB, constZero64, subResult);  // mask based on second vector false elements
+    Value *p7 = intrinsicCallGenerator->createWhileltInstruction(IRB, constZero64,
+                                                                 subResult);  // mask based on second vector false elements
     permutedP1 = IRB.CreateAnd(p6, p7);
 
 }
@@ -1294,6 +1395,8 @@ Iterative_ALC::Iterative_ALC(Loop *l, int vectorizationFactor,
     intrinsicCallGenerator =
             new IntrinsicCallGenerator(this->vectorizationFactor, module);
 }
+
+
 
 
 

@@ -36,24 +36,48 @@ void simple_if(int *__restrict__ a, int *__restrict__ b, int *__restrict__ c,
     /* Start counting */
     if ((status = PAPI_start(EventSet)) != PAPI_OK) ERROR_RETURN(status);
 
-//    for (int j = 0; j < 10; ++j) {
-    for (int i = 0; i < n; ++i) {
-        if (cond[i]) {
-            a[i] = (2 * a[i] - 2 * c[i]) + (b[i] - 2 * a[i]);
-            a[i] += 2 * i + i * b[i];
-            b[i] = 2 - 2 * b[i] + (2 * a[i] - 2 * c[i]);
-            b[i] -= 3 * i + i * c[i];
-            c[i] = 2 * b[i] + 2 * a[i] - 3 * (2 * c[i] - 2 * b[i] + i * i);
-            c[i] -= 2 * i;
+    for (int j = 0; j < 10; ++j) {
+        for (int i = 0; i < n; ++i) {
+            if (cond[i]) {
+                a[i] = (2 * a[i] - 2 * c[i]) + (b[i] - 2 * a[i]);
+                a[i] += 2 * i + i * b[i];
+                b[i] = 2 - 2 * b[i] + (2 * a[i] - 2 * c[i]);
+                b[i] -= 3 * i + i * c[i];
+                c[i] = 2 * b[i] + 2 * a[i] - 3 * (2 * c[i] - 2 * b[i] + i * i);
+                c[i] -= 2 * i;
+            }
         }
     }
-//    }
 
     /* Stop counting, this reads from the counter as well as stop it. */
     if ((status = PAPI_stop(EventSet, CounterValues)) != PAPI_OK) ERROR_RETURN(status);
 
     ExecutionTime = getTimeMiliSeconds() - t;
 }
+
+
+struct InnerStruct {
+    int A;
+    int array[100];
+    int B;
+};
+
+struct OuterStruct {
+    int C;
+    struct InnerStruct innerStruct;
+};
+
+void test_struct(struct OuterStruct outerStruct,
+                 bool *__restrict__ cond, int n) {
+    for (int j = 0; j < 10; ++j) {
+        for (int i = 0; i < n; ++i) {
+            if (cond[i]) {
+                outerStruct.innerStruct.array[22] = 34;
+            }
+        }
+    }
+}
+
 
 
 //void nested_if_case_1(int *__restrict__ a, int *__restrict__ b, int *__restrict__ c,
@@ -311,7 +335,7 @@ int main() {
         cond[i] = (i % 10 == 0);
     }
 
-    simple_if(a, b, c, cond, n);
+//    simple_if(a, b, c, cond, n);
 //    nested_if_case_1(a, b, c, cond, n);
 //    nested_if_case_2(a, b, c, cond, n);
 

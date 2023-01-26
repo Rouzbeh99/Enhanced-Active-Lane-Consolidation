@@ -33,7 +33,6 @@ namespace {
 // alc_vectorizer implementation
 //-----------------------------------------------------------------------------
 
-// TODO: TSVC tests are changed to int, make the pass work for float as well
 
     PreservedAnalyses alc_vectorizer::run(Loop &loop, LoopAnalysisManager &AM,
                                           LoopStandardAnalysisResults &AR,
@@ -42,12 +41,15 @@ namespace {
         Loop *L = &loop;
 
         if (L->getHeader()->getParent()->getName() == "main") {
-            return PreservedAnalyses::all();
+            return llvm::PreservedAnalyses::all();
         }
+
 
         // only apply the pass on innermost loop
         if (!L->getSubLoops().empty()) {
-            return PreservedAnalyses::all();
+
+            llvm::outs()<<"Problem HERE! \n";
+            return llvm::PreservedAnalyses::all();
         }
 
 
@@ -89,25 +91,20 @@ namespace {
 
         if (analysisResult->isLegal1() && analysisResult->isProfitable1() &&
             analysisResult->getDivergenceType() == ALCAnalysisResult::SINGLE_IF) {
-            llvm::outs() << "Found a case !!! \n";
+            llvm::outs() << "Applying iterative ALC \n";
+            alc_itr->doTransformation_itr_singleIf_simple();
+            printLoop(L);
         }
 
-
-//        simple_alc->doTransformation();
-//         sve_vectorizer->doVectorization();
-//       alc_itr->doTransformation_itr_singleIf_simple();
-//        alc_itr->doTransformation_itr_singleIf_full_permutation();
-
-//        printLoop(L);
 
         delete alc_analysis;
         delete simple_alc;
         delete alc_itr;
         delete sve_vectorizer;
 
-        llvm::outs() << "\n";
 
         return llvm::PreservedAnalyses::none();
+
     }
 
     void printLoop(Loop *L) {

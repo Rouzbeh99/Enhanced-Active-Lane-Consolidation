@@ -28,19 +28,19 @@ for dir in os.listdir(specDir):
 
                 if "In Function" in t:
                     function = (t.split(":")[1]).strip()
-                if "line" in t:
+                if "Loop at line number" in t:
                     line = t.split(":")[1].strip()
                 if "Single if" in t:
                     singleIf = True
                 if "paths" in t:
-                    pathCount = int (t.split(":")[1].strip())
+                    pathCount = int(t.split(":")[1].strip())
                 if "ALC" in t and not "NOT" in t:
                     canBeApplied = True
-                if "total" in t:
+                if "total instructions" in t:
                     tokens = t.split("-->")
                     splitted = tokens[len(tokens) - 1].split(":")
                     instructions = int(splitted[1].split(",")[0].strip())
-                    ratio =splitted[2]
+                    ratio = splitted[2]
                     path_length = len(tokens) - 1
                     paths.append({"length": path_length,
                                   "number of instructions": instructions,

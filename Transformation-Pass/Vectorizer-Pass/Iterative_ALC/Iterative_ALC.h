@@ -66,9 +66,9 @@ public:
 public:
     void doTransformation_itr_singleIf_simple();
 
-    void doTransformation_itr_singleIf_nested();
-
     void doTransformation_itr_singleIf_full_permutation();
+
+    void doTransformation_itr_if_then_else();
 
 private:
     BasicBlock *findTargetedBlock();
@@ -165,8 +165,8 @@ private:
 
 private:
     std::vector<Instruction *> *
-    findHeaderInstructionsRequiredInThenBlock(BasicBlock *header,
-                                              BasicBlock *thenBlock);
+    findHeaderAndPreheaderInstructionsRequiredInThenBlock(BasicBlock *header, BasicBlock* preheader,
+                                                          BasicBlock *thenBlock);
 
 private:
     void addBranchHint(BranchInst *branchInst);
