@@ -261,6 +261,8 @@ std::vector<Value *> *Iterative_ALC::fillPreALCBlock_itr(
     results->push_back(add);
     results->push_back(totalIterationsToVectorize);
 
+    fillHoistedInstructionsWithLoadsFromConstantMemoryAddress(preALCBlock);
+
     return results;
 }
 
@@ -380,6 +382,7 @@ void Iterative_ALC::fillALCHeaderBlock_itr(
     dyn_cast<BranchInst>(alcHeader->getTerminator())
             ->setCondition(actualCondition);
 
+
 }
 
 void Iterative_ALC::fillLaneGatherBlock_itr(BasicBlock *laneGather,
@@ -418,6 +421,7 @@ std::vector<Value *> *Iterative_ALC::fillUniformBlock_itr(
         BasicBlock *uniformBlock, BasicBlock *joinBlock,
         BasicBlock *toBeVectorizedBlock, BasicBlock *header, Value *indices,
         Value *indexPhi) {
+
 
     auto outputs = new std::vector<Value *>;
 
@@ -468,6 +472,7 @@ void Iterative_ALC::fillLinearizedBlock_itr(BasicBlock *linearized,
     builder.SetInsertPoint(linearized);
     builder.CreateBr(newLatch);
     DTUpdates.push_back({DT->Insert, linearized, newLatch});
+
 
     std::vector<Instruction *> *clonedInstructions =
             cloneInstructions(toBeVectorizedBlock, linearized, VectorLoopIndex);
@@ -643,12 +648,14 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
 
 
     // create vector instructions from function arguments
+    //TODO: move it to the header
+
     Function *function = block->getParent();
 
     for (auto &arg: function->args()) {
         if (arg.getType()->isIntegerTy() || arg.getType()->isFloatTy() || arg.getType()->isDoubleTy()) {
 
-            Value *vector = createVectorOfConstants(dyn_cast<Value>(&arg), IRB, "vector.arg");
+            Value *vector = createVectorOfValues(dyn_cast<Value>(&arg), IRB, "vector.arg");
             vMap[&arg] = vector;
         }
     }
@@ -658,11 +665,19 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
     // following lines
     std::stack<Instruction *> toBeRemoved;
 
+    llvm::outs() << "--------------------------------------\n";
+    llvm::outs() << "In block " << block->getName() << "\n";
+
 
     // TODO: Complete the list
     for (auto instr: *instructions) {
 
-        if (auto *GEP = dyn_cast_or_null<GEPOperator>(instr)) {
+        instr->print(outs());
+        llvm::outs() << "\n";
+
+        if (hoistedInstructions.count(instr)) {
+            vMap[instr] = hoistedInstructions[instr];
+        } else if (auto *GEP = dyn_cast_or_null<GEPOperator>(instr)) {
             //            assert(GEP->getNumIndices() == 1 && "Expected GetElementPtr
             //            with one index operand!");
             for (int i = 0; i < instr->getNumOperands(); ++i) {
@@ -687,7 +702,7 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
             } else {
                 // it's constant
                 auto *constValue = dyn_cast<Constant>(storeInstr->getOperand(0));
-                firstOp = createVectorOfConstants(constValue, IRB, "store.values");
+                firstOp = createVectorOfValues(constValue, IRB, "store.values");
                 // TODO: is there any other case ?
             }
             auto ptr = instr->getOperand(1);
@@ -698,6 +713,13 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
 
             assert(isa<GEPOperator>(ptr) &&
                    "Expected StoreInst PointerOperand to be GetElementPtr!");
+            auto GEP = dyn_cast<GEPOperator>(ptr);
+
+            //TODO: analysis pass should check this
+//            if (isConstantMemoryLocation) {
+//                assert(0 && "can not vectorize storing to the same memory address");
+//        }
+
             if (isPermuted) {
                 intrinsicCallGenerator->createScatterStoreInstruction(
                         IRB, firstOp, ptr, predicates, indices);
@@ -730,30 +752,22 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
 
             auto *SrcTy = GEP->getSourceElementType();
 
-//            // the first two ones are always type and base address
-//            bool isConstantMemoryLocation = true;
-//            for (int i = 2; i < GEP->getNumOperands(); ++i) {
-//                if (!isa<Constant>(GEP->getOperand(i))) {
-//                    isConstantMemoryLocation = false;
-//                }
+
+//            bool isConstantMemoryLocation = findIfAccessingSameMemAddress(GEP);
+//            if (isConstantMemoryLocation) {
+//                assert(0 && "should have been hoisted!!");
 //            }
-
-
             if (isPermuted) {
                 // need to determine source type
                 if (SrcTy->isArrayTy() || SrcTy->isStructTy()) {
                     SrcTy = GEP->getResultElementType();
                 }
-
                 loadedData = intrinsicCallGenerator->createGatherLoadInstruction(
                         IRB, SrcTy, ptr, predicates, indices);
 
             } else if (isPredicated) {
 
                 if (SrcTy->isArrayTy() || SrcTy->isStructTy()) {
-                    llvm::outs()<<"HERE \n";
-                    instr->print(outs());
-                    llvm::outs()<<"\n";
                     SrcTy = GEP->getResultElementType();
                 }
 
@@ -765,6 +779,7 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
             }
 
             vMap[instr] = loadedData;
+
             toBeRemoved.push(instr);
 
         } else if (auto *truncInstr = dyn_cast_or_null<TruncInst>(instr)) {
@@ -784,7 +799,7 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
 
                 ConstantValue = ConstantInt::get(truncInstr->getDestTy(), value);
                 operand =
-                        createVectorOfConstants(ConstantValue, IRB, "first.operand");
+                        createVectorOfValues(ConstantValue, IRB, "first.operand");
             } else {
                 assert(0 && "first operand of trunc neither already vectorized nor Constant!");
             }
@@ -812,7 +827,7 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
                 if (auto *ConstantValue =
                         dyn_cast_or_null<Constant>(instr->getOperand(0))) {
                     firstOp =
-                            createVectorOfConstants(ConstantValue, IRB, "first.operand");
+                            createVectorOfValues(ConstantValue, IRB, "first.operand");
                 } else {
                     instr->getOperand(0)->print(outs());
                     assert(0 && "first operand neither already vectorized nor Constant!");
@@ -827,7 +842,7 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
                 if (auto *ConstantValue =
                         dyn_cast_or_null<Constant>(instr->getOperand(1))) {
                     secondOp =
-                            createVectorOfConstants(ConstantValue, IRB, "second.operand");
+                            createVectorOfValues(ConstantValue, IRB, "second.operand");
                 } else {
                     instr->getOperand(1)->print(outs());
                     llvm::outs() << "\n";
@@ -958,7 +973,6 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
 
     }
 
-
     while (!toBeRemoved.empty()) {
         toBeRemoved.top()->eraseFromParent();
         toBeRemoved.pop();
@@ -1013,6 +1027,12 @@ std::vector<Instruction *> *Iterative_ALC::cloneInstructions(BasicBlock *From,
             break;
         }
         if (isa<PHINode>(instr)) {
+            continue;
+        }
+
+        if (hoistedInstructions.count(&instr)) {
+            vMap[&instr] = &instr;
+            clonedInstructions->push_back(&instr);
             continue;
         }
 
@@ -1373,8 +1393,8 @@ Iterative_ALC::fillNewLatchBlock_full_permutation(BasicBlock *newLatch, BasicBlo
     return outputs;
 }
 
-Value *Iterative_ALC::createVectorOfConstants(Value *value, IRBuilder<> &builder,
-                                              std::string name) {
+Value *Iterative_ALC::createVectorOfValues(Value *value, IRBuilder<> &builder,
+                                           std::string name) {
 
 
     auto *vecType = VectorType::get(value->getType(), vectorizationFactor, true);
@@ -1389,6 +1409,52 @@ Value *Iterative_ALC::createVectorOfConstants(Value *value, IRBuilder<> &builder
 
     return builder.CreateShuffleVector(splatInsert, UndefVec, zeroInitializer,
                                        name);
+}
+
+void Iterative_ALC::fillHoistedInstructionsWithLoadsFromConstantMemoryAddress(BasicBlock *preALC) {
+
+    IRBuilder<> builder(preALC->getContext());
+    builder.SetInsertPoint(preALC->getTerminator());
+
+
+    for (auto &instr: targetedBlock->instructionsWithoutDebug()) {
+        if (auto loadInstr = dyn_cast<LoadInst>(&instr)) {
+            Value *ptr = loadInstr->getPointerOperand();
+            if (auto GEP = dyn_cast<GEPOperator>(ptr)) {
+
+                if (findIfAccessingSameMemAddress(GEP)) {
+                    // clone GEP and load to the header
+                    Instruction *clonedGEP = dyn_cast<Instruction>(GEP)->clone();
+                    clonedGEP->insertBefore(
+                            preALC->getTerminator()); // we are sure that we do not need to change operands
+                    Instruction *clonedLdr = loadInstr->clone();
+                    clonedLdr->insertBefore(preALC->getTerminator());
+                    clonedLdr->setOperand(0, clonedGEP);
+
+                    // create vector
+                    Value *vectorOfValues = createVectorOfValues(clonedLdr, builder, "hoisted.load");
+                    hoistedInstructions[&instr] = dyn_cast<Instruction>(vectorOfValues);
+                }
+            }
+        }
+    }
+}
+
+bool Iterative_ALC::findIfAccessingSameMemAddress(GEPOperator *GEP) {
+    bool isConstantMemoryLocation = true;
+    for (int i = 1; i < GEP->getNumOperands(); ++i) {
+        if (!isa<Constant>(GEP->getOperand(i))) {
+            if (auto GEPOpInstr = dyn_cast<Instruction>(GEP->getOperand(i))) {
+                if (!L->contains(GEPOpInstr->getParent())) {
+                    continue;
+                }
+            }
+            isConstantMemoryLocation = false;
+        }
+    }
+
+    return isConstantMemoryLocation;
+
 }
 
 Iterative_ALC::Iterative_ALC(Loop *l, int vectorizationFactor,
@@ -1406,6 +1472,7 @@ Iterative_ALC::Iterative_ALC(Loop *l, int vectorizationFactor,
     }
     intrinsicCallGenerator =
             new IntrinsicCallGenerator(this->vectorizationFactor, module);
+
 }
 
 

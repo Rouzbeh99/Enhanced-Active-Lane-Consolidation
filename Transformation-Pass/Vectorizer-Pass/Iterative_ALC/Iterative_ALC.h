@@ -42,7 +42,7 @@ private:
     ScalarEvolution *SE;
     PHINode *VectorLoopIndex;
     Value *VscaleFactor;
-    Value* ActualVectorLength;
+    Value *ActualVectorLength;
     Value *IndexVectorOfFirstVector;
     Value *PredicatesOfFirstVector;
     Value *ActiveLanesInFirstVector;
@@ -60,6 +60,7 @@ private:
     PHINode *ScalarIV;
     BasicBlock *targetedBlock;
     std::vector<Instruction *> *sharedInstructions;
+    std::map<Instruction *, Instruction *> hoistedInstructions;
 
 public:
     Iterative_ALC(Loop *l, int vectorizationFactor,
@@ -96,8 +97,8 @@ private:
                                               BasicBlock *alcHeader);
 
 private:
-    Value *createVectorOfConstants(Value *value, IRBuilder<> &builder,
-                                   std::string name);
+    Value *createVectorOfValues(Value *value, IRBuilder<> &builder,
+                                std::string name);
 
 private:
     void fillMiddleBlock_itr(BasicBlock *middleBlock,
@@ -167,7 +168,7 @@ private:
 
 private:
     std::vector<Instruction *> *
-    findHeaderAndPreheaderInstructionsRequiredInThenBlock(BasicBlock *header, BasicBlock* preheader,
+    findHeaderAndPreheaderInstructionsRequiredInThenBlock(BasicBlock *header, BasicBlock *preheader,
                                                           BasicBlock *thenBlock);
 
 private:
@@ -192,6 +193,10 @@ private:
     fillUniformBlock_full_permutation(BasicBlock *uniformBlock, BasicBlock *latch,
                                       BasicBlock *toBeVectorizedBlock,
                                       BasicBlock *header, Value *indices);
+
+    bool findIfAccessingSameMemAddress(GEPOperator *GEP);
+
+    void fillHoistedInstructionsWithLoadsFromConstantMemoryAddress(BasicBlock *preALC);
 
 };
 

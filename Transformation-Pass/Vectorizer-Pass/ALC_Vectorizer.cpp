@@ -47,8 +47,6 @@ namespace {
 
         // only apply the pass on innermost loop
         if (!L->getSubLoops().empty()) {
-
-            llvm::outs()<<"Problem HERE! \n";
             return llvm::PreservedAnalyses::all();
         }
 

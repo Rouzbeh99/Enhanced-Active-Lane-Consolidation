@@ -36,9 +36,6 @@ ALCAnalysisResult *ALC_Analysis::doAnalysis() {
         llvm::outs() << "Single if case \n";
     }
 
-//    if (isPerfectIfNest()) {
-//        llvm::outs() << "Perfect if nest \n";
-//    }
 
 
     BasicBlock *const &firstNode = L->getHeader();
@@ -76,8 +73,7 @@ ALCAnalysisResult *ALC_Analysis::doAnalysis() {
                      << "\n";
     }
 
-//    bool isLegal = vectorizable && !hasFunctionCall && !outputDependency && numberOfPaths > 1;
-    bool isLegal = vectorizable && !hasFunctionCall && numberOfPaths > 1;
+    bool isLegal = vectorizable && !hasFunctionCall && !outputDependency && numberOfPaths > 1;
     bool isProfitable = false;
     if (numberOfPaths == 2) {
         isProfitable = true;
