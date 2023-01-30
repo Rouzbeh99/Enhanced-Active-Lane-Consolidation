@@ -65,7 +65,7 @@ void Iterative_ALC::doTransformation_itr_singleIf_simple() {
 
     refinePreHeaderForRemaining(preheaderForRemainingBlock, middleBlock,
                                 (*latchOutputs)[0]);
-    
+
 
     DT->applyUpdates(DTUpdates);
     DTUpdates.clear();

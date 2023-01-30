@@ -108,7 +108,6 @@ namespace {
                 break;
         }
 
-        alc_itr->doTransformation_itr_singleIf_simple();
 
 
         printLoop(L);

@@ -1,4 +1,4 @@
-; ModuleID = 'test.c'
+; ModuleID = 'compiled_with_O3.ll'
 source_filename = "test.c"
 target datalayout = "e-m:e-i8:8:32-i16:16:32-i64:64-i128:128-n32:64-S128"
 target triple = "aarch64-unknown-linux-gnu"
@@ -29,9 +29,9 @@ target triple = "aarch64-unknown-linux-gnu"
 define dso_local double @getTimeMiliSeconds() local_unnamed_addr #0 !dbg !43 {
 entry:
   %ts = alloca %struct.timespec, align 8
-  call void @llvm.lifetime.start.p0(i64 16, ptr nonnull %ts) #11, !dbg !57
+  call void @llvm.lifetime.start.p0(i64 16, ptr nonnull %ts) #10, !dbg !57
   call void @llvm.dbg.declare(metadata ptr %ts, metadata !47, metadata !DIExpression()), !dbg !58
-  %call = call i32 @clock_gettime(i32 noundef 2, ptr noundef nonnull %ts) #11, !dbg !59
+  %call = call i32 @clock_gettime(i32 noundef 2, ptr noundef nonnull %ts) #10, !dbg !59
   %0 = load i64, ptr %ts, align 8, !dbg !60, !tbaa !61
   %conv = sitofp i64 %0 to double, !dbg !66
   %tv_nsec = getelementptr inbounds %struct.timespec, ptr %ts, i64 0, i32 1, !dbg !67
@@ -39,23 +39,23 @@ entry:
   %conv1 = sitofp i64 %1 to double, !dbg !69
   %mul2 = fmul double %conv1, 0x3EB0C6F7A0B5ED8D, !dbg !70
   %2 = call double @llvm.fmuladd.f64(double %conv, double 1.000000e+03, double %mul2), !dbg !71
-  call void @llvm.lifetime.end.p0(i64 16, ptr nonnull %ts) #11, !dbg !72
+  call void @llvm.lifetime.end.p0(i64 16, ptr nonnull %ts) #10, !dbg !72
   ret double %2, !dbg !73
 }
 
-; Function Attrs: argmemonly mustprogress nocallback nofree nosync nounwind willreturn
+; Function Attrs: argmemonly nocallback nofree nosync nounwind willreturn
 declare void @llvm.lifetime.start.p0(i64 immarg, ptr nocapture) #1
 
-; Function Attrs: mustprogress nocallback nofree nosync nounwind readnone speculatable willreturn
+; Function Attrs: nocallback nofree nosync nounwind readnone speculatable willreturn
 declare void @llvm.dbg.declare(metadata, metadata, metadata) #2
 
 ; Function Attrs: nounwind
 declare !dbg !74 i32 @clock_gettime(i32 noundef, ptr noundef) local_unnamed_addr #3
 
-; Function Attrs: mustprogress nocallback nofree nosync nounwind readnone speculatable willreturn
+; Function Attrs: nocallback nofree nosync nounwind readnone speculatable willreturn
 declare double @llvm.fmuladd.f64(double, double, double) #2
 
-; Function Attrs: argmemonly mustprogress nocallback nofree nosync nounwind willreturn
+; Function Attrs: argmemonly nocallback nofree nosync nounwind willreturn
 declare void @llvm.lifetime.end.p0(i64 immarg, ptr nocapture) #1
 
 ; Function Attrs: noinline nounwind uwtable
@@ -69,7 +69,7 @@ entry:
   %call = tail call double @getTimeMiliSeconds(), !dbg !99
   call void @llvm.dbg.value(metadata double %call, metadata !95, metadata !DIExpression()), !dbg !98
   %0 = load i32, ptr @EventSet, align 4, !dbg !100, !tbaa !102
-  %call1 = tail call i32 @PAPI_start(i32 noundef %0) #11, !dbg !104
+  %call1 = tail call i32 @PAPI_start(i32 noundef %0) #10, !dbg !104
   call void @llvm.dbg.value(metadata i32 %call1, metadata !94, metadata !DIExpression()), !dbg !98
   %cmp.not = icmp eq i32 %call1, 0, !dbg !105
   br i1 %cmp.not, label %for.cond.preheader, label %if.then, !dbg !106
@@ -85,18 +85,21 @@ for.body.preheader:                               ; preds = %for.cond.preheader
 
 if.then:                                          ; preds = %entry
   %1 = load ptr, ptr @stderr, align 8, !dbg !111, !tbaa !113
-  %call2 = tail call i32 (ptr, ptr, ...) @fprintf(ptr noundef %1, ptr noundef nonnull @.str, i32 noundef %call1, ptr noundef nonnull @.str.1, i32 noundef 65) #12, !dbg !111
-  tail call void @exit(i32 noundef %call1) #13, !dbg !111
+  %call2 = tail call i32 (ptr, ptr, ...) @fprintf(ptr noundef %1, ptr noundef nonnull @.str, i32 noundef %call1, ptr noundef nonnull @.str.1, i32 noundef 65) #11, !dbg !111
+  tail call void @exit(i32 noundef %call1) #12, !dbg !111
   unreachable, !dbg !111
 
-for.cond.cleanup:                                 ; preds = %for.inc, %for.cond.preheader
+for.cond.cleanup.loopexit:                        ; preds = %for.inc
+  br label %for.cond.cleanup, !dbg !115
+
+for.cond.cleanup:                                 ; preds = %for.cond.cleanup.loopexit, %for.cond.preheader
   %2 = load i32, ptr @EventSet, align 4, !dbg !115, !tbaa !102
-  %call18 = tail call i32 @PAPI_stop(i32 noundef %2, ptr noundef nonnull @CounterValues) #11, !dbg !117
+  %call18 = tail call i32 @PAPI_stop(i32 noundef %2, ptr noundef nonnull @CounterValues) #10, !dbg !117
   call void @llvm.dbg.value(metadata i32 %call18, metadata !94, metadata !DIExpression()), !dbg !98
   %cmp19.not = icmp eq i32 %call18, 0, !dbg !118
   br i1 %cmp19.not, label %if.end22, label %if.then20, !dbg !119
 
-for.body:                                         ; preds = %for.body.preheader, %for.inc
+for.body:                                         ; preds = %for.inc, %for.body.preheader
   %indvars.iv = phi i64 [ 0, %for.body.preheader ], [ %indvars.iv.next, %for.inc ]
   call void @llvm.dbg.value(metadata i64 %indvars.iv, metadata !96, metadata !DIExpression()), !dbg !107
   %arrayidx = getelementptr inbounds i8, ptr %cond, i64 %indvars.iv, !dbg !120
@@ -119,16 +122,16 @@ if.else:                                          ; preds = %for.body
   store i32 %sub, ptr %arrayidx12, align 4, !dbg !135, !tbaa !102
   br label %for.inc
 
-for.inc:                                          ; preds = %if.then4, %if.else
+for.inc:                                          ; preds = %if.else, %if.then4
   %indvars.iv.next = add nuw nsw i64 %indvars.iv, 1, !dbg !136
   call void @llvm.dbg.value(metadata i64 %indvars.iv.next, metadata !96, metadata !DIExpression()), !dbg !107
   %exitcond.not = icmp eq i64 %indvars.iv.next, %wide.trip.count, !dbg !108
-  br i1 %exitcond.not, label %for.cond.cleanup, label %for.body, !dbg !110, !llvm.loop !137
+  br i1 %exitcond.not, label %for.cond.cleanup.loopexit, label %for.body, !dbg !110, !llvm.loop !137
 
 if.then20:                                        ; preds = %for.cond.cleanup
   %6 = load ptr, ptr @stderr, align 8, !dbg !141, !tbaa !113
-  %call21 = tail call i32 (ptr, ptr, ...) @fprintf(ptr noundef %6, ptr noundef nonnull @.str, i32 noundef %call18, ptr noundef nonnull @.str.1, i32 noundef 78) #12, !dbg !141
-  tail call void @exit(i32 noundef %call18) #13, !dbg !141
+  %call21 = tail call i32 (ptr, ptr, ...) @fprintf(ptr noundef %6, ptr noundef nonnull @.str, i32 noundef %call18, ptr noundef nonnull @.str.1, i32 noundef 78) #11, !dbg !141
+  tail call void @exit(i32 noundef %call18) #12, !dbg !141
   unreachable, !dbg !141
 
 if.end22:                                         ; preds = %for.cond.cleanup
@@ -154,14 +157,14 @@ entry:
   call void @llvm.dbg.value(metadata i32 %n, metadata !161, metadata !DIExpression()), !dbg !163
   %conv = sext i32 %n to i64, !dbg !164
   %mul = shl nsw i64 %conv, 2, !dbg !165
-  %call = tail call noalias ptr @malloc(i64 noundef %mul) #14, !dbg !166
+  %call = tail call noalias ptr @malloc(i64 noundef %mul) #13, !dbg !166
   call void @llvm.dbg.value(metadata ptr %call, metadata !162, metadata !DIExpression()), !dbg !163
   %cmp = icmp eq ptr %call, null, !dbg !167
   br i1 %cmp, label %if.then, label %if.end, !dbg !169
 
 if.then:                                          ; preds = %entry
   %puts = tail call i32 @puts(ptr nonnull @str.10), !dbg !170
-  tail call void @exit(i32 noundef 1) #13, !dbg !172
+  tail call void @exit(i32 noundef 1) #12, !dbg !172
   unreachable, !dbg !172
 
 if.end:                                           ; preds = %entry
@@ -179,14 +182,14 @@ define dso_local noalias ptr @checked_malloc_bool_array(i32 noundef %n) local_un
 entry:
   call void @llvm.dbg.value(metadata i32 %n, metadata !178, metadata !DIExpression()), !dbg !180
   %conv = sext i32 %n to i64, !dbg !181
-  %call = tail call noalias ptr @malloc(i64 noundef %conv) #14, !dbg !182
+  %call = tail call noalias ptr @malloc(i64 noundef %conv) #13, !dbg !182
   call void @llvm.dbg.value(metadata ptr %call, metadata !179, metadata !DIExpression()), !dbg !180
   %cmp = icmp eq ptr %call, null, !dbg !183
   br i1 %cmp, label %if.then, label %if.end, !dbg !185
 
 if.then:                                          ; preds = %entry
   %puts = tail call i32 @puts(ptr nonnull @str.10), !dbg !186
-  tail call void @exit(i32 noundef 1) #13, !dbg !188
+  tail call void @exit(i32 noundef 1) #12, !dbg !188
   unreachable, !dbg !188
 
 if.end:                                           ; preds = %entry
@@ -197,41 +200,41 @@ if.end:                                           ; preds = %entry
 define dso_local i32 @main() local_unnamed_addr #0 !dbg !190 {
 entry:
   %errstring = alloca [128 x i8], align 1
-  call void @llvm.lifetime.start.p0(i64 128, ptr nonnull %errstring) #11, !dbg !206
+  call void @llvm.lifetime.start.p0(i64 128, ptr nonnull %errstring) #10, !dbg !206
   call void @llvm.dbg.declare(metadata ptr %errstring, metadata !195, metadata !DIExpression()), !dbg !207
-  %call = tail call i32 @PAPI_library_init(i32 noundef 117440512) #11, !dbg !208
+  %call = tail call i32 @PAPI_library_init(i32 noundef 117440512) #10, !dbg !208
   %cmp.not = icmp eq i32 %call, 117440512, !dbg !210
   br i1 %cmp.not, label %if.end, label %if.then, !dbg !211
 
 if.then:                                          ; preds = %entry
   %0 = load ptr, ptr @stderr, align 8, !dbg !212, !tbaa !113
-  %call1 = call i32 (ptr, ptr, ...) @fprintf(ptr noundef %0, ptr noundef nonnull @.str.3, ptr noundef nonnull %errstring) #12, !dbg !214
-  call void @exit(i32 noundef 1) #13, !dbg !215
+  %call1 = call i32 (ptr, ptr, ...) @fprintf(ptr noundef %0, ptr noundef nonnull @.str.3, ptr noundef nonnull %errstring) #11, !dbg !214
+  call void @exit(i32 noundef 1) #12, !dbg !215
   unreachable, !dbg !215
 
 if.end:                                           ; preds = %entry
-  %call2 = tail call i32 @PAPI_create_eventset(ptr noundef nonnull @EventSet) #11, !dbg !216
+  %call2 = tail call i32 @PAPI_create_eventset(ptr noundef nonnull @EventSet) #10, !dbg !216
   call void @llvm.dbg.value(metadata i32 %call2, metadata !194, metadata !DIExpression()), !dbg !218
   %cmp3.not = icmp eq i32 %call2, 0, !dbg !219
   br i1 %cmp3.not, label %if.end6, label %if.then4, !dbg !220
 
 if.then4:                                         ; preds = %if.end
   %1 = load ptr, ptr @stderr, align 8, !dbg !221, !tbaa !113
-  %call5 = tail call i32 (ptr, ptr, ...) @fprintf(ptr noundef %1, ptr noundef nonnull @.str, i32 noundef %call2, ptr noundef nonnull @.str.1, i32 noundef 293) #12, !dbg !221
-  tail call void @exit(i32 noundef %call2) #13, !dbg !221
+  %call5 = tail call i32 (ptr, ptr, ...) @fprintf(ptr noundef %1, ptr noundef nonnull @.str, i32 noundef %call2, ptr noundef nonnull @.str.1, i32 noundef 293) #11, !dbg !221
+  tail call void @exit(i32 noundef %call2) #12, !dbg !221
   unreachable, !dbg !221
 
 if.end6:                                          ; preds = %if.end
   %2 = load i32, ptr @EventSet, align 4, !dbg !223, !tbaa !102
-  %call7 = tail call i32 @PAPI_add_events(i32 noundef %2, ptr noundef nonnull @EventCodes, i32 noundef 4) #11, !dbg !225
+  %call7 = tail call i32 @PAPI_add_events(i32 noundef %2, ptr noundef nonnull @EventCodes, i32 noundef 4) #10, !dbg !225
   call void @llvm.dbg.value(metadata i32 %call7, metadata !194, metadata !DIExpression()), !dbg !218
   %cmp8.not = icmp eq i32 %call7, 0, !dbg !226
   br i1 %cmp8.not, label %if.end11, label %if.then9, !dbg !227
 
 if.then9:                                         ; preds = %if.end6
   %3 = load ptr, ptr @stderr, align 8, !dbg !228, !tbaa !113
-  %call10 = tail call i32 (ptr, ptr, ...) @fprintf(ptr noundef %3, ptr noundef nonnull @.str, i32 noundef %call7, ptr noundef nonnull @.str.1, i32 noundef 296) #12, !dbg !228
-  tail call void @exit(i32 noundef %call7) #13, !dbg !228
+  %call10 = tail call i32 (ptr, ptr, ...) @fprintf(ptr noundef %3, ptr noundef nonnull @.str, i32 noundef %call7, ptr noundef nonnull @.str.1, i32 noundef 296) #11, !dbg !228
+  tail call void @exit(i32 noundef %call7) #12, !dbg !228
   unreachable, !dbg !228
 
 if.end11:                                         ; preds = %if.end6
@@ -245,9 +248,9 @@ if.end11:                                         ; preds = %if.end6
   %call15 = tail call ptr @checked_malloc_bool_array(i32 noundef 1000), !dbg !236
   store ptr %call15, ptr @cond, align 8, !dbg !237, !tbaa !113
   store i8 0, ptr %call15, align 1, !dbg !238, !tbaa !123
-  %call16 = tail call i64 @time(ptr noundef null) #11, !dbg !239
+  %call16 = tail call i64 @time(ptr noundef null) #10, !dbg !239
   %conv = trunc i64 %call16 to i32, !dbg !239
-  tail call void @srand(i32 noundef %conv) #11, !dbg !240
+  tail call void @srand(i32 noundef %conv) #10, !dbg !240
   call void @llvm.dbg.value(metadata i32 0, metadata !201, metadata !DIExpression()), !dbg !241
   %4 = load ptr, ptr @a, align 8, !tbaa !113
   %5 = load ptr, ptr @b, align 8, !tbaa !113
@@ -256,7 +259,7 @@ if.end11:                                         ; preds = %if.end6
   call void @llvm.dbg.value(metadata i32 0, metadata !201, metadata !DIExpression()), !dbg !241
   br label %for.body, !dbg !242
 
-for.body:                                         ; preds = %if.end11, %for.body
+for.body:                                         ; preds = %for.body, %if.end11
   %indvars.iv = phi i64 [ 0, %if.end11 ], [ %indvars.iv.next, %for.body ]
   %indvars83 = trunc i64 %indvars.iv to i32
   call void @llvm.dbg.value(metadata i64 %indvars.iv, metadata !201, metadata !DIExpression()), !dbg !241
@@ -275,69 +278,73 @@ for.body:                                         ; preds = %if.end11, %for.body
   %indvars.iv.next = add nuw nsw i64 %indvars.iv, 1, !dbg !255
   call void @llvm.dbg.value(metadata i64 %indvars.iv.next, metadata !201, metadata !DIExpression()), !dbg !241
   %exitcond.not = icmp eq i64 %indvars.iv.next, 1000, !dbg !256
-  br i1 %exitcond.not, label %for.body33, label %for.body, !dbg !242, !llvm.loop !257
+  br i1 %exitcond.not, label %for.body33.preheader, label %for.body, !dbg !242, !llvm.loop !257
+
+for.body33.preheader:                             ; preds = %for.body
+  br label %for.body33, !dbg !259
 
 for.cond.cleanup32:                               ; preds = %for.body33
-  %call39 = tail call i32 (ptr, ...) @printf(ptr noundef nonnull @.str.4, i32 noundef %add), !dbg !259
-  %8 = load ptr, ptr @a, align 8, !dbg !260, !tbaa !113
-  tail call void @free(ptr noundef %8) #11, !dbg !261
-  %9 = load ptr, ptr @b, align 8, !dbg !262, !tbaa !113
-  tail call void @free(ptr noundef %9) #11, !dbg !263
-  %10 = load ptr, ptr @c, align 8, !dbg !264, !tbaa !113
-  tail call void @free(ptr noundef %10) #11, !dbg !265
-  %11 = load ptr, ptr @cond, align 8, !dbg !266, !tbaa !113
-  tail call void @free(ptr noundef %11) #11, !dbg !267
-  %12 = load i64, ptr @CounterValues, align 8, !dbg !268, !tbaa !269
-  %call40 = tail call i32 (ptr, ...) @printf(ptr noundef nonnull @.str.5, i64 noundef %12), !dbg !271
-  %13 = load i64, ptr getelementptr inbounds ([4 x i64], ptr @CounterValues, i64 0, i64 1), align 8, !dbg !272, !tbaa !269
-  %call41 = tail call i32 (ptr, ...) @printf(ptr noundef nonnull @.str.6, i64 noundef %13), !dbg !273
-  %14 = load i64, ptr getelementptr inbounds ([4 x i64], ptr @CounterValues, i64 0, i64 2), align 8, !dbg !274, !tbaa !269
-  %call42 = tail call i32 (ptr, ...) @printf(ptr noundef nonnull @.str.7, i64 noundef %14), !dbg !275
-  %15 = load i64, ptr getelementptr inbounds ([4 x i64], ptr @CounterValues, i64 0, i64 3), align 8, !dbg !276, !tbaa !269
-  %call43 = tail call i32 (ptr, ...) @printf(ptr noundef nonnull @.str.8, i64 noundef %15), !dbg !277
-  %16 = load double, ptr @ExecutionTime, align 8, !dbg !278, !tbaa !146
-  %call44 = tail call i32 (ptr, ...) @printf(ptr noundef nonnull @.str.9, double noundef %16), !dbg !279
-  %17 = load i32, ptr @EventSet, align 4, !dbg !280, !tbaa !102
-  %call45 = tail call i32 @PAPI_remove_events(i32 noundef %17, ptr noundef nonnull @EventCodes, i32 noundef 4) #11, !dbg !282
+  %add.lcssa = phi i32 [ %add, %for.body33 ], !dbg !260
+  %call39 = tail call i32 (ptr, ...) @printf(ptr noundef nonnull @.str.4, i32 noundef %add.lcssa), !dbg !263
+  %8 = load ptr, ptr @a, align 8, !dbg !264, !tbaa !113
+  tail call void @free(ptr noundef %8) #10, !dbg !265
+  %9 = load ptr, ptr @b, align 8, !dbg !266, !tbaa !113
+  tail call void @free(ptr noundef %9) #10, !dbg !267
+  %10 = load ptr, ptr @c, align 8, !dbg !268, !tbaa !113
+  tail call void @free(ptr noundef %10) #10, !dbg !269
+  %11 = load ptr, ptr @cond, align 8, !dbg !270, !tbaa !113
+  tail call void @free(ptr noundef %11) #10, !dbg !271
+  %12 = load i64, ptr @CounterValues, align 8, !dbg !272, !tbaa !273
+  %call40 = tail call i32 (ptr, ...) @printf(ptr noundef nonnull @.str.5, i64 noundef %12), !dbg !275
+  %13 = load i64, ptr getelementptr inbounds ([4 x i64], ptr @CounterValues, i64 0, i64 1), align 8, !dbg !276, !tbaa !273
+  %call41 = tail call i32 (ptr, ...) @printf(ptr noundef nonnull @.str.6, i64 noundef %13), !dbg !277
+  %14 = load i64, ptr getelementptr inbounds ([4 x i64], ptr @CounterValues, i64 0, i64 2), align 8, !dbg !278, !tbaa !273
+  %call42 = tail call i32 (ptr, ...) @printf(ptr noundef nonnull @.str.7, i64 noundef %14), !dbg !279
+  %15 = load i64, ptr getelementptr inbounds ([4 x i64], ptr @CounterValues, i64 0, i64 3), align 8, !dbg !280, !tbaa !273
+  %call43 = tail call i32 (ptr, ...) @printf(ptr noundef nonnull @.str.8, i64 noundef %15), !dbg !281
+  %16 = load double, ptr @ExecutionTime, align 8, !dbg !282, !tbaa !146
+  %call44 = tail call i32 (ptr, ...) @printf(ptr noundef nonnull @.str.9, double noundef %16), !dbg !283
+  %17 = load i32, ptr @EventSet, align 4, !dbg !284, !tbaa !102
+  %call45 = tail call i32 @PAPI_remove_events(i32 noundef %17, ptr noundef nonnull @EventCodes, i32 noundef 4) #10, !dbg !286
   call void @llvm.dbg.value(metadata i32 %call45, metadata !194, metadata !DIExpression()), !dbg !218
-  %cmp46.not = icmp eq i32 %call45, 0, !dbg !283
-  br i1 %cmp46.not, label %if.end50, label %if.then48, !dbg !284
+  %cmp46.not = icmp eq i32 %call45, 0, !dbg !287
+  br i1 %cmp46.not, label %if.end50, label %if.then48, !dbg !288
 
-for.body33:                                       ; preds = %for.body, %for.body33
-  %indvars.iv84 = phi i64 [ %indvars.iv.next85, %for.body33 ], [ 0, %for.body ]
-  %sum.081 = phi i32 [ %add, %for.body33 ], [ 0, %for.body ]
-  call void @llvm.dbg.value(metadata i64 %indvars.iv84, metadata !204, metadata !DIExpression()), !dbg !285
+for.body33:                                       ; preds = %for.body33.preheader, %for.body33
+  %indvars.iv84 = phi i64 [ %indvars.iv.next85, %for.body33 ], [ 0, %for.body33.preheader ]
+  %sum.081 = phi i32 [ %add, %for.body33 ], [ 0, %for.body33.preheader ]
+  call void @llvm.dbg.value(metadata i64 %indvars.iv84, metadata !204, metadata !DIExpression()), !dbg !289
   call void @llvm.dbg.value(metadata i32 %sum.081, metadata !203, metadata !DIExpression()), !dbg !218
-  %arrayidx35 = getelementptr inbounds i32, ptr %6, i64 %indvars.iv84, !dbg !286
-  %18 = load i32, ptr %arrayidx35, align 4, !dbg !286, !tbaa !102
-  %add = add nsw i32 %18, %sum.081, !dbg !289
+  %arrayidx35 = getelementptr inbounds i32, ptr %6, i64 %indvars.iv84, !dbg !290
+  %18 = load i32, ptr %arrayidx35, align 4, !dbg !290, !tbaa !102
+  %add = add nsw i32 %18, %sum.081, !dbg !260
   call void @llvm.dbg.value(metadata i32 %add, metadata !203, metadata !DIExpression()), !dbg !218
-  %indvars.iv.next85 = add nuw nsw i64 %indvars.iv84, 1, !dbg !290
-  call void @llvm.dbg.value(metadata i64 %indvars.iv.next85, metadata !204, metadata !DIExpression()), !dbg !285
-  %exitcond87.not = icmp eq i64 %indvars.iv.next85, 1000, !dbg !291
-  br i1 %exitcond87.not, label %for.cond.cleanup32, label %for.body33, !dbg !292, !llvm.loop !293
+  %indvars.iv.next85 = add nuw nsw i64 %indvars.iv84, 1, !dbg !291
+  call void @llvm.dbg.value(metadata i64 %indvars.iv.next85, metadata !204, metadata !DIExpression()), !dbg !289
+  %exitcond87.not = icmp eq i64 %indvars.iv.next85, 1000, !dbg !292
+  br i1 %exitcond87.not, label %for.cond.cleanup32, label %for.body33, !dbg !259, !llvm.loop !293
 
 if.then48:                                        ; preds = %for.cond.cleanup32
   %19 = load ptr, ptr @stderr, align 8, !dbg !295, !tbaa !113
-  %call49 = tail call i32 (ptr, ptr, ...) @fprintf(ptr noundef %19, ptr noundef nonnull @.str, i32 noundef %call45, ptr noundef nonnull @.str.1, i32 noundef 340) #12, !dbg !295
-  tail call void @exit(i32 noundef %call45) #13, !dbg !295
+  %call49 = tail call i32 (ptr, ptr, ...) @fprintf(ptr noundef %19, ptr noundef nonnull @.str, i32 noundef %call45, ptr noundef nonnull @.str.1, i32 noundef 340) #11, !dbg !295
+  tail call void @exit(i32 noundef %call45) #12, !dbg !295
   unreachable, !dbg !295
 
 if.end50:                                         ; preds = %for.cond.cleanup32
-  %call51 = tail call i32 @PAPI_destroy_eventset(ptr noundef nonnull @EventSet) #11, !dbg !297
+  %call51 = tail call i32 @PAPI_destroy_eventset(ptr noundef nonnull @EventSet) #10, !dbg !297
   call void @llvm.dbg.value(metadata i32 %call51, metadata !194, metadata !DIExpression()), !dbg !218
   %cmp52.not = icmp eq i32 %call51, 0, !dbg !299
   br i1 %cmp52.not, label %if.end56, label %if.then54, !dbg !300
 
 if.then54:                                        ; preds = %if.end50
   %20 = load ptr, ptr @stderr, align 8, !dbg !301, !tbaa !113
-  %call55 = tail call i32 (ptr, ptr, ...) @fprintf(ptr noundef %20, ptr noundef nonnull @.str, i32 noundef %call51, ptr noundef nonnull @.str.1, i32 noundef 343) #12, !dbg !301
-  tail call void @exit(i32 noundef %call51) #13, !dbg !301
+  %call55 = tail call i32 (ptr, ptr, ...) @fprintf(ptr noundef %20, ptr noundef nonnull @.str, i32 noundef %call51, ptr noundef nonnull @.str.1, i32 noundef 343) #11, !dbg !301
+  tail call void @exit(i32 noundef %call51) #12, !dbg !301
   unreachable, !dbg !301
 
 if.end56:                                         ; preds = %if.end50
-  tail call void @PAPI_shutdown() #11, !dbg !303
-  call void @llvm.lifetime.end.p0(i64 128, ptr nonnull %errstring) #11, !dbg !304
+  tail call void @PAPI_shutdown() #10, !dbg !303
+  call void @llvm.lifetime.end.p0(i64 128, ptr nonnull %errstring) #10, !dbg !304
   ret i32 0, !dbg !305
 }
 
@@ -363,26 +370,25 @@ declare !dbg !325 i32 @PAPI_destroy_eventset(ptr noundef) local_unnamed_addr #4
 declare !dbg !326 void @PAPI_shutdown() local_unnamed_addr #4
 
 ; Function Attrs: nocallback nofree nosync nounwind readnone speculatable willreturn
-declare void @llvm.dbg.value(metadata, metadata, metadata) #9
+declare void @llvm.dbg.value(metadata, metadata, metadata) #2
 
 ; Function Attrs: nofree nounwind
-declare noundef i32 @puts(ptr nocapture noundef readonly) local_unnamed_addr #10
+declare noundef i32 @puts(ptr nocapture noundef readonly) local_unnamed_addr #9
 
 attributes #0 = { noinline nounwind uwtable "frame-pointer"="non-leaf" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="generic" "target-features"="+neon,+v8a" }
-attributes #1 = { argmemonly mustprogress nocallback nofree nosync nounwind willreturn }
-attributes #2 = { mustprogress nocallback nofree nosync nounwind readnone speculatable willreturn }
+attributes #1 = { argmemonly nocallback nofree nosync nounwind willreturn }
+attributes #2 = { nocallback nofree nosync nounwind readnone speculatable willreturn }
 attributes #3 = { nounwind "frame-pointer"="non-leaf" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="generic" "target-features"="+neon,+v8a" }
 attributes #4 = { "frame-pointer"="non-leaf" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="generic" "target-features"="+neon,+v8a" }
 attributes #5 = { nofree nounwind "frame-pointer"="non-leaf" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="generic" "target-features"="+neon,+v8a" }
 attributes #6 = { noreturn nounwind "frame-pointer"="non-leaf" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="generic" "target-features"="+neon,+v8a" }
 attributes #7 = { inaccessiblememonly mustprogress nofree nounwind willreturn allocsize(0) "frame-pointer"="non-leaf" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="generic" "target-features"="+neon,+v8a" }
 attributes #8 = { inaccessiblemem_or_argmemonly mustprogress nounwind willreturn "frame-pointer"="non-leaf" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="generic" "target-features"="+neon,+v8a" }
-attributes #9 = { nocallback nofree nosync nounwind readnone speculatable willreturn }
-attributes #10 = { nofree nounwind }
-attributes #11 = { nounwind }
-attributes #12 = { cold }
-attributes #13 = { noreturn nounwind }
-attributes #14 = { nounwind allocsize(0) }
+attributes #9 = { nofree nounwind }
+attributes #10 = { nounwind }
+attributes #11 = { cold }
+attributes #12 = { noreturn nounwind }
+attributes #13 = { nounwind allocsize(0) }
 
 !llvm.dbg.cu = !{!2}
 !llvm.module.flags = !{!31, !32, !33, !34, !35, !36, !37, !38, !39, !40, !41}
@@ -647,44 +653,44 @@ attributes #14 = { nounwind allocsize(0) }
 !256 = !DILocation(line: 309, column: 23, scope: !245)
 !257 = distinct !{!257, !242, !258, !139, !140}
 !258 = !DILocation(line: 314, column: 5, scope: !202)
-!259 = !DILocation(line: 327, column: 5, scope: !190)
-!260 = !DILocation(line: 329, column: 10, scope: !190)
-!261 = !DILocation(line: 329, column: 5, scope: !190)
-!262 = !DILocation(line: 330, column: 10, scope: !190)
-!263 = !DILocation(line: 330, column: 5, scope: !190)
-!264 = !DILocation(line: 331, column: 10, scope: !190)
-!265 = !DILocation(line: 331, column: 5, scope: !190)
-!266 = !DILocation(line: 332, column: 10, scope: !190)
-!267 = !DILocation(line: 332, column: 5, scope: !190)
-!268 = !DILocation(line: 334, column: 53, scope: !190)
-!269 = !{!270, !270, i64 0}
-!270 = !{!"long long", !64, i64 0}
-!271 = !DILocation(line: 334, column: 5, scope: !190)
-!272 = !DILocation(line: 335, column: 36, scope: !190)
-!273 = !DILocation(line: 335, column: 5, scope: !190)
-!274 = !DILocation(line: 336, column: 50, scope: !190)
-!275 = !DILocation(line: 336, column: 5, scope: !190)
-!276 = !DILocation(line: 337, column: 49, scope: !190)
-!277 = !DILocation(line: 337, column: 5, scope: !190)
-!278 = !DILocation(line: 338, column: 40, scope: !190)
-!279 = !DILocation(line: 338, column: 5, scope: !190)
-!280 = !DILocation(line: 340, column: 38, scope: !281)
-!281 = distinct !DILexicalBlock(scope: !190, file: !3, line: 340, column: 9)
-!282 = !DILocation(line: 340, column: 19, scope: !281)
-!283 = !DILocation(line: 340, column: 72, scope: !281)
-!284 = !DILocation(line: 340, column: 9, scope: !190)
-!285 = !DILocation(line: 0, scope: !205)
-!286 = !DILocation(line: 324, column: 16, scope: !287)
-!287 = distinct !DILexicalBlock(scope: !288, file: !3, line: 323, column: 33)
-!288 = distinct !DILexicalBlock(scope: !205, file: !3, line: 323, column: 5)
-!289 = !DILocation(line: 324, column: 13, scope: !287)
-!290 = !DILocation(line: 323, column: 28, scope: !288)
-!291 = !DILocation(line: 323, column: 23, scope: !288)
-!292 = !DILocation(line: 323, column: 5, scope: !205)
-!293 = distinct !{!293, !292, !294, !139, !140}
+!259 = !DILocation(line: 323, column: 5, scope: !205)
+!260 = !DILocation(line: 324, column: 13, scope: !261)
+!261 = distinct !DILexicalBlock(scope: !262, file: !3, line: 323, column: 33)
+!262 = distinct !DILexicalBlock(scope: !205, file: !3, line: 323, column: 5)
+!263 = !DILocation(line: 327, column: 5, scope: !190)
+!264 = !DILocation(line: 329, column: 10, scope: !190)
+!265 = !DILocation(line: 329, column: 5, scope: !190)
+!266 = !DILocation(line: 330, column: 10, scope: !190)
+!267 = !DILocation(line: 330, column: 5, scope: !190)
+!268 = !DILocation(line: 331, column: 10, scope: !190)
+!269 = !DILocation(line: 331, column: 5, scope: !190)
+!270 = !DILocation(line: 332, column: 10, scope: !190)
+!271 = !DILocation(line: 332, column: 5, scope: !190)
+!272 = !DILocation(line: 334, column: 53, scope: !190)
+!273 = !{!274, !274, i64 0}
+!274 = !{!"long long", !64, i64 0}
+!275 = !DILocation(line: 334, column: 5, scope: !190)
+!276 = !DILocation(line: 335, column: 36, scope: !190)
+!277 = !DILocation(line: 335, column: 5, scope: !190)
+!278 = !DILocation(line: 336, column: 50, scope: !190)
+!279 = !DILocation(line: 336, column: 5, scope: !190)
+!280 = !DILocation(line: 337, column: 49, scope: !190)
+!281 = !DILocation(line: 337, column: 5, scope: !190)
+!282 = !DILocation(line: 338, column: 40, scope: !190)
+!283 = !DILocation(line: 338, column: 5, scope: !190)
+!284 = !DILocation(line: 340, column: 38, scope: !285)
+!285 = distinct !DILexicalBlock(scope: !190, file: !3, line: 340, column: 9)
+!286 = !DILocation(line: 340, column: 19, scope: !285)
+!287 = !DILocation(line: 340, column: 72, scope: !285)
+!288 = !DILocation(line: 340, column: 9, scope: !190)
+!289 = !DILocation(line: 0, scope: !205)
+!290 = !DILocation(line: 324, column: 16, scope: !261)
+!291 = !DILocation(line: 323, column: 28, scope: !262)
+!292 = !DILocation(line: 323, column: 23, scope: !262)
+!293 = distinct !{!293, !259, !294, !139, !140}
 !294 = !DILocation(line: 325, column: 5, scope: !205)
 !295 = !DILocation(line: 340, column: 84, scope: !296)
-!296 = distinct !DILexicalBlock(scope: !281, file: !3, line: 340, column: 84)
+!296 = distinct !DILexicalBlock(scope: !285, file: !3, line: 340, column: 84)
 !297 = !DILocation(line: 343, column: 19, scope: !298)
 !298 = distinct !DILexicalBlock(scope: !190, file: !3, line: 343, column: 9)
 !299 = !DILocation(line: 343, column: 53, scope: !298)

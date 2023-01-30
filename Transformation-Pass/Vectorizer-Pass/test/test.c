@@ -26,37 +26,9 @@ long long int CounterValues[NUMEVENTS] = {0};
 int EventCodes[NUMEVENTS] = {PAPI_TOT_INS, PAPI_TOT_CYC, PAPI_L1_DCM, PAPI_BR_MSP};
 double ExecutionTime = 0.0;
 
-
-void simple_if(int *__restrict__ a, int *__restrict__ b, int *__restrict__ c,
-               bool *__restrict__ cond, int n) {
-
-    int status;
-
-    double t = getTimeMiliSeconds();
-    /* Start counting */
-    if ((status = PAPI_start(EventSet)) != PAPI_OK) ERROR_RETURN(status);
-
-    for (int j = 0; j < 10; ++j) {
-        for (int i = 0; i < n; ++i) {
-            if (cond[i]) {
-                a[i] = (2 * a[i] - 2 * c[i]) + (b[i] - 2 * a[i]);
-                a[i] += 2 * i + i * b[i];
-                b[i] = 2 - 2 * b[i] + (2 * a[i] - 2 * c[i]);
-                b[i] -= 3 * i + i * c[i];
-                c[i] = 2 * b[i] + 2 * a[i] - 3 * (2 * c[i] - 2 * b[i] + i * i);
-                c[i] -= 2 * i;
-            }
-        }
-    }
-
-    /* Stop counting, this reads from the counter as well as stop it. */
-    if ((status = PAPI_stop(EventSet, CounterValues)) != PAPI_OK) ERROR_RETURN(status);
-
-    ExecutionTime = getTimeMiliSeconds() - t;
-}
-
-//void simple_if_else(int *__restrict__ a, int *__restrict__ b, int *__restrict__ c,
-//                    bool *__restrict__ cond, int n) {
+//
+//void simple_if(int *__restrict__ a, int *__restrict__ b, int *__restrict__ c,
+//               bool *__restrict__ cond, int n) {
 //
 //    int status;
 //
@@ -64,21 +36,49 @@ void simple_if(int *__restrict__ a, int *__restrict__ b, int *__restrict__ c,
 //    /* Start counting */
 //    if ((status = PAPI_start(EventSet)) != PAPI_OK) ERROR_RETURN(status);
 //
-////    for (int j = 0; j < 10; ++j) {
-//    for (int i = 0; i < n; ++i) {
-//        if (cond[i]) {
-//            c[i] = a[i] + b[i];
-//        } else {
-//            a[i] = a[i] - b[i];
+//    for (int j = 0; j < 10; ++j) {
+//        for (int i = 0; i < n; ++i) {
+//            if (cond[i]) {
+//                a[i] = (2 * a[i] - 2 * c[i]) + (b[i] - 2 * a[i]);
+//                a[i] += 2 * i + i * b[i];
+//                b[i] = 2 - 2 * b[i] + (2 * a[i] - 2 * c[i]);
+//                b[i] -= 3 * i + i * c[i];
+//                c[i] = 2 * b[i] + 2 * a[i] - 3 * (2 * c[i] - 2 * b[i] + i * i);
+//                c[i] -= 2 * i;
+//            }
 //        }
 //    }
-////    }
 //
 //    /* Stop counting, this reads from the counter as well as stop it. */
 //    if ((status = PAPI_stop(EventSet, CounterValues)) != PAPI_OK) ERROR_RETURN(status);
 //
 //    ExecutionTime = getTimeMiliSeconds() - t;
 //}
+
+void simple_if_else(int *__restrict__ a, int *__restrict__ b, int *__restrict__ c,
+                    bool *__restrict__ cond, int n) {
+
+    int status;
+
+    double t = getTimeMiliSeconds();
+    /* Start counting */
+    if ((status = PAPI_start(EventSet)) != PAPI_OK) ERROR_RETURN(status);
+
+//    for (int j = 0; j < 10; ++j) {
+    for (int i = 0; i < n; ++i) {
+        if (cond[i]) {
+            c[i] = a[i] + b[i];
+        } else {
+            a[i] = a[i] - b[i];
+        }
+    }
+//    }
+
+    /* Stop counting, this reads from the counter as well as stop it. */
+    if ((status = PAPI_stop(EventSet, CounterValues)) != PAPI_OK) ERROR_RETURN(status);
+
+    ExecutionTime = getTimeMiliSeconds() - t;
+}
 
 
 //void nested_if_case_1(int *__restrict__ a, int *__restrict__ b, int *__restrict__ c,
