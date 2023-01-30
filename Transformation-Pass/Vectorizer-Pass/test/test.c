@@ -27,8 +27,36 @@ int EventCodes[NUMEVENTS] = {PAPI_TOT_INS, PAPI_TOT_CYC, PAPI_L1_DCM, PAPI_BR_MS
 double ExecutionTime = 0.0;
 
 
-//void simple_if(int *__restrict__ a, int *__restrict__ b, int *__restrict__ c,
-//               bool *__restrict__ cond, int n) {
+void simple_if(int *__restrict__ a, int *__restrict__ b, int *__restrict__ c,
+               bool *__restrict__ cond, int n) {
+
+    int status;
+
+    double t = getTimeMiliSeconds();
+    /* Start counting */
+    if ((status = PAPI_start(EventSet)) != PAPI_OK) ERROR_RETURN(status);
+
+    for (int j = 0; j < 10; ++j) {
+        for (int i = 0; i < n; ++i) {
+            if (cond[i]) {
+                a[i] = (2 * a[i] - 2 * c[i]) + (b[i] - 2 * a[i]);
+                a[i] += 2 * i + i * b[i];
+                b[i] = 2 - 2 * b[i] + (2 * a[i] - 2 * c[i]);
+                b[i] -= 3 * i + i * c[i];
+                c[i] = 2 * b[i] + 2 * a[i] - 3 * (2 * c[i] - 2 * b[i] + i * i);
+                c[i] -= 2 * i;
+            }
+        }
+    }
+
+    /* Stop counting, this reads from the counter as well as stop it. */
+    if ((status = PAPI_stop(EventSet, CounterValues)) != PAPI_OK) ERROR_RETURN(status);
+
+    ExecutionTime = getTimeMiliSeconds() - t;
+}
+
+//void simple_if_else(int *__restrict__ a, int *__restrict__ b, int *__restrict__ c,
+//                    bool *__restrict__ cond, int n) {
 //
 //    int status;
 //
@@ -36,49 +64,21 @@ double ExecutionTime = 0.0;
 //    /* Start counting */
 //    if ((status = PAPI_start(EventSet)) != PAPI_OK) ERROR_RETURN(status);
 //
-//    for (int j = 0; j < 10; ++j) {
-//        for (int i = 0; i < n; ++i) {
-//            if (cond[i]) {
-//                a[i] = (2 * a[i] - 2 * c[i]) + (b[i] - 2 * a[i]);
-//                a[i] += 2 * i + i * b[i];
-//                b[i] = 2 - 2 * b[i] + (2 * a[i] - 2 * c[i]);
-//                b[i] -= 3 * i + i * c[i];
-//                c[i] = 2 * b[i] + 2 * a[i] - 3 * (2 * c[i] - 2 * b[i] + i * i);
-//                c[i] -= 2 * i;
-//            }
+////    for (int j = 0; j < 10; ++j) {
+//    for (int i = 0; i < n; ++i) {
+//        if (cond[i]) {
+//            c[i] = a[i] + b[i];
+//        } else {
+//            a[i] = a[i] - b[i];
 //        }
 //    }
+////    }
 //
 //    /* Stop counting, this reads from the counter as well as stop it. */
 //    if ((status = PAPI_stop(EventSet, CounterValues)) != PAPI_OK) ERROR_RETURN(status);
 //
 //    ExecutionTime = getTimeMiliSeconds() - t;
 //}
-
-
-struct InnerStruct {
-    int A;
-    int array[100];
-    int B;
-};
-
-struct OuterStruct {
-    int C;
-    struct InnerStruct innerStruct;
-};
-
-void test_struct(struct OuterStruct outerStruct, int *__restrict__ a,
-                 bool *__restrict__ cond, int n) {
-    for (int j = 0; j < 10; ++j) {
-        for (int i = 0; i < n; ++i) {
-            if (cond[i]) {
-//                outerStruct.innerStruct.array[22] = 34;
-                a[i] = outerStruct.innerStruct.array[6];
-            }
-        }
-    }
-}
-
 
 
 //void nested_if_case_1(int *__restrict__ a, int *__restrict__ b, int *__restrict__ c,
@@ -195,32 +195,9 @@ void test_struct(struct OuterStruct outerStruct, int *__restrict__ a,
 //    ExecutionTime = getTimeMiliSeconds() - t;
 //}
 //
-//
-//void simple_if_else(int *__restrict__ a, int *__restrict__ b, int *__restrict__ c,
-//                    bool *__restrict__ cond, int n) {
-//
-//    int status;
-//
-//    double t = getTimeMiliSeconds();
-//    /* Start counting */
-//    if ((status = PAPI_start(EventSet)) != PAPI_OK) ERROR_RETURN(status);
-//
-////    for (int j = 0; j < 10; ++j) {
-//    for (int i = 0; i < n; ++i) {
-//            if (cond[i]) {
-//                c[i] = a[i] + b[i];
-//            } else {
-//                a[i] = a[i] - b[i];
-//            }
-//    }
-////    }
-//
-//    /* Stop counting, this reads from the counter as well as stop it. */
-//    if ((status = PAPI_stop(EventSet, CounterValues)) != PAPI_OK) ERROR_RETURN(status);
-//
-//    ExecutionTime = getTimeMiliSeconds() - t;
-//}
-//
+
+
+
 //void multiple_if_else_case_1(int *__restrict__ a, int *__restrict__ b, int *__restrict__ c,
 //                    bool *__restrict__ cond, int n) {
 //
@@ -229,7 +206,7 @@ void test_struct(struct OuterStruct outerStruct, int *__restrict__ a,
 //    double t = getTimeMiliSeconds();
 //    /* Start counting */
 //    if ((status = PAPI_start(EventSet)) != PAPI_OK) ERROR_RETURN(status);
-//
+
 ////    for (int j = 0; j < 10; ++j) {
 //    for (int i = 0; i < n; ++i) {
 //        if (cond[i]) {
@@ -318,7 +295,7 @@ int main() {
     /* Add the array of events PAPI_TOT_INS and PAPI_TOT_CYC to the eventset*/
     if ((status = PAPI_add_events(EventSet, EventCodes, NUMEVENTS)) != PAPI_OK) ERROR_RETURN(status);
 
-    int n = 100;
+    int n = 1000;
 
     a = checked_malloc_int_array(n);
     b = checked_malloc_int_array(n);
@@ -336,14 +313,10 @@ int main() {
         cond[i] = (i % 3 == 0);
     }
 
-    struct InnerStruct innerStruct = {1, {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,}, 23};
-    struct OuterStruct outerStruct = {3, innerStruct};
-
-    test_struct(outerStruct, c, cond, n);
 
 //    simple_if(a, b, c, cond, n);
-//    nested_if_case_1(a, b, c, cond, n);
-//    nested_if_case_2(a, b, c, cond, n);
+//    simple_if_else(a, b, c, cond, n);
+
 
     int sum = 0;
 

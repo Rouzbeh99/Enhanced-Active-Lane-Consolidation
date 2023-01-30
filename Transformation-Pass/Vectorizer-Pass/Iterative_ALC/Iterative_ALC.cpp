@@ -16,10 +16,12 @@ void Iterative_ALC::doTransformation_itr_singleIf_simple() {
     auto *exitBlock = L->getExitBlock();
     ConstZeroVectorOfTripCountTy = llvm::ConstantInt::get(TripCountTy, 0, true);
 
-    targetedBlock = findTargetedBlock();
+    thenBlock = findThenBlock(header, latch);
+
+
     sharedInstructions =
             findHeaderAndPreheaderInstructionsRequiredInThenBlock(header, preheader,
-                                                                  targetedBlock);
+                                                                  thenBlock);
 
     BasicBlock *preheaderForRemainingBlock =
             createPreheaderForRemainingIterations();
@@ -45,9 +47,9 @@ void Iterative_ALC::doTransformation_itr_singleIf_simple() {
 
     fillLaneGatherBlock_itr(laneGatherBlock, uniformBlock, joinBlock);
     std::vector<Value *> *uniformBlockOutputs =
-            fillUniformBlock_itr(uniformBlock, joinBlock, targetedBlock,
+            fillUniformBlock_itr(uniformBlock, joinBlock, thenBlock,
                                  header, MergedIndices, VectorLoopIndex);
-    fillLinearizedBlock_itr(linearizedBlock, newLatch, targetedBlock,
+    fillLinearizedBlock_itr(linearizedBlock, newLatch, thenBlock,
                             IndexVectorOfSecondVector,
                             PredicatesOfSecondVector);
     std::vector<Value *> *joinBlockOutputs =
@@ -63,6 +65,7 @@ void Iterative_ALC::doTransformation_itr_singleIf_simple() {
 
     refinePreHeaderForRemaining(preheaderForRemainingBlock, middleBlock,
                                 (*latchOutputs)[0]);
+    
 
     DT->applyUpdates(DTUpdates);
     DTUpdates.clear();
@@ -78,9 +81,9 @@ void Iterative_ALC::doTransformation_itr_singleIf_full_permutation() {
     auto *exitBlock = L->getExitBlock();
     ConstZeroVectorOfTripCountTy = llvm::ConstantInt::get(TripCountTy, 0, true);
 
-    targetedBlock = findTargetedBlock();
+    thenBlock = findThenBlock(header, latch);
     sharedInstructions =
-            findHeaderAndPreheaderInstructionsRequiredInThenBlock(header, preheader, targetedBlock);
+            findHeaderAndPreheaderInstructionsRequiredInThenBlock(header, preheader, thenBlock);
 
     BasicBlock *preheaderForRemainingBlock =
             createPreheaderForRemainingIterations();
@@ -99,7 +102,7 @@ void Iterative_ALC::doTransformation_itr_singleIf_full_permutation() {
 
     fillALCHeader_full_permutation(alcHeader, laneGatherBlock, preALCBlock, preALCBlockValues, header);
     fillLaneGather_full_permutation(laneGatherBlock, uniformBlock, newLatch);
-    fillUniformBlock_full_permutation(uniformBlock, newLatch, targetedBlock, header, MergedIndices);
+    fillUniformBlock_full_permutation(uniformBlock, newLatch, thenBlock, header, MergedIndices);
     std::vector<Value *> *latchOutputs = fillNewLatchBlock_full_permutation(newLatch, alcHeader, middleBlock,
                                                                             laneGatherBlock, uniformBlock,
                                                                             (*preALCBlockValues)[3]);
@@ -115,18 +118,27 @@ void Iterative_ALC::doTransformation_itr_singleIf_full_permutation() {
 
 
 void Iterative_ALC::doTransformation_itr_if_then_else() {
+    auto *header = L->getHeader();
+    auto &context = header->getContext();
+    ScalarIV = L->getCanonicalInductionVariable();
+    assert(isa<PHINode>(ScalarIV) && "Induction variable must be a PHINode!");
+    auto *preheader = L->getLoopPreheader();
+    auto *latch = L->getLoopLatch();
+    auto *exitBlock = L->getExitBlock();
+    ConstZeroVectorOfTripCountTy = llvm::ConstantInt::get(TripCountTy, 0, true);
+
+    thenBlock = findThenBlock(header, latch);
+    elseBlock = findElseBlock(header);
+
+    thenBlock->print(outs());
+    elseBlock->print(outs());
+
 
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-
-// TODO: problem in algorithm, in the case where the total number of active
-// lanes is not enough to fill a vector, the result vector is not correct
 void Iterative_ALC::insertPermutationLogic(BasicBlock *insertAt, Value *&permutedZ0,
                                            Value *&permutedPredicates) {
-    // TODO: add code to compute predicates for uniform vector
 
     IRBuilder<> IRB(insertAt);
     auto *constZero = ConstantInt::get(ActiveLanesInFirstVector->getType(), 0);
@@ -143,16 +155,31 @@ void Iterative_ALC::insertPermutationLogic(BasicBlock *insertAt, Value *&permute
             IRB, constZero, ActiveLanesInBothVectors);
 }
 
-BasicBlock *Iterative_ALC::findTargetedBlock() {
-    // TODO: make a complete analysis
-
-    for (auto succ: successors(L->getHeader())) {
-        if (succ->getSingleSuccessor() == L->getLoopLatch()) {
-            return succ;
-        }
+BasicBlock *Iterative_ALC::findThenBlock(BasicBlock *header, BasicBlock *latch) {
+    auto *headerBr = dyn_cast<BranchInst>(header->getTerminator());
+    assert(headerBr && "header terminator is not conditional branch!!");
+    if (!headerBr->isConditional()) {
+        assert(headerBr && "header terminator is not conditional branch!!");
     }
 
-    return nullptr;
+    auto *thenBB = dyn_cast<BasicBlock>(headerBr->getOperand(1));
+    if (thenBB == latch) {
+        thenBB = dyn_cast<BasicBlock>(headerBr->getOperand(2));
+    }
+
+    return thenBB;
+
+
+}
+
+BasicBlock *Iterative_ALC::findElseBlock(BasicBlock *header) {
+    auto *headerBr = dyn_cast<BranchInst>(header->getTerminator());
+    assert(headerBr && "header terminator is not conditional branch!!");
+    if (!headerBr->isConditional()) {
+        assert(headerBr && "header terminator is not conditional branch!!");
+    }
+
+    return dyn_cast<BasicBlock>(headerBr->getOperand(2));
 }
 
 BasicBlock *Iterative_ALC::createEmptyBlock(const std::string &name,
@@ -283,7 +310,7 @@ void Iterative_ALC::fillMiddleBlock_itr(BasicBlock *middleBlock,
 
     // since we're using uniform vec as indices, addresses should start from zero
     std::vector<Instruction *> *clonedInstructions =
-            cloneInstructions(targetedBlock, middleBlock, constZero);
+            cloneInstructions(thenBlock, middleBlock, constZero);
 
     // when permuted, all indices in gather/scatter will be computed with respect
     // to indicesVec so index var should be 0
@@ -665,15 +692,15 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
     // following lines
     std::stack<Instruction *> toBeRemoved;
 
-    llvm::outs() << "--------------------------------------\n";
-    llvm::outs() << "In block " << block->getName() << "\n";
+//    llvm::outs() << "--------------------------------------\n";
+//    llvm::outs() << "In block " << block->getName() << "\n";
 
 
     // TODO: Complete the list
     for (auto instr: *instructions) {
 
-        instr->print(outs());
-        llvm::outs() << "\n";
+//        instr->print(outs());
+//        llvm::outs() << "\n";
 
         if (hoistedInstructions.count(instr)) {
             vMap[instr] = hoistedInstructions[instr];
@@ -1170,7 +1197,7 @@ bool Iterative_ALC::usesInductionVar(Value *value, Value *inductionVar) {
 
 void Iterative_ALC::addBranchHint(BranchInst *branchInst) {
 
-    Function &F = *targetedBlock->getParent();
+    Function &F = *thenBlock->getParent();
     LLVMContext &C = F.getContext();
     LLVMContext &context = branchInst->getContext();
     llvm::IntegerType *Int32Ty = llvm::Type::getInt32Ty(context);
@@ -1417,7 +1444,7 @@ void Iterative_ALC::fillHoistedInstructionsWithLoadsFromConstantMemoryAddress(Ba
     builder.SetInsertPoint(preALC->getTerminator());
 
 
-    for (auto &instr: targetedBlock->instructionsWithoutDebug()) {
+    for (auto &instr: thenBlock->instructionsWithoutDebug()) {
         if (auto loadInstr = dyn_cast<LoadInst>(&instr)) {
             Value *ptr = loadInstr->getPointerOperand();
             if (auto GEP = dyn_cast<GEPOperator>(ptr)) {
@@ -1474,6 +1501,8 @@ Iterative_ALC::Iterative_ALC(Loop *l, int vectorizationFactor,
             new IntrinsicCallGenerator(this->vectorizationFactor, module);
 
 }
+
+
 
 
 

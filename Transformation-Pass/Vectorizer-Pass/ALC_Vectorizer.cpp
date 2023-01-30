@@ -87,12 +87,31 @@ namespace {
         auto *alc_itr = new Iterative_ALC(L, factor, AR, tripCount);
 
 
-        if (analysisResult->isLegal1() && analysisResult->isProfitable1() &&
-            analysisResult->getDivergenceType() == ALCAnalysisResult::SINGLE_IF) {
-            llvm::outs() << "Applying iterative ALC \n";
-            alc_itr->doTransformation_itr_singleIf_simple();
-            printLoop(L);
+        if (!analysisResult->isLegal1() || !analysisResult->isProfitable1()) {
+            return PreservedAnalyses::all();
         }
+
+
+        llvm::outs() << "Applying iterative ALC \n";
+
+
+        switch (analysisResult->getDivergenceType()) {
+            case ALCAnalysisResult::SINGLE_IF :
+                alc_itr->doTransformation_itr_singleIf_simple();
+                break;
+            case ALCAnalysisResult::IF_THEN_ELSE:
+                alc_itr->doTransformation_itr_if_then_else();
+                break;
+
+            case ALCAnalysisResult::MULTI_PATH:
+
+                break;
+        }
+
+        alc_itr->doTransformation_itr_singleIf_simple();
+
+
+        printLoop(L);
 
 
         delete alc_analysis;

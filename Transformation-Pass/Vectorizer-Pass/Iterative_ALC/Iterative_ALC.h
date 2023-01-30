@@ -58,7 +58,8 @@ private:
     Value *allTrue;
     Constant *ConstZeroVectorOfTripCountTy;
     PHINode *ScalarIV;
-    BasicBlock *targetedBlock;
+    BasicBlock *thenBlock;
+    BasicBlock *elseBlock;
     std::vector<Instruction *> *sharedInstructions;
     std::map<Instruction *, Instruction *> hoistedInstructions;
 
@@ -74,7 +75,10 @@ public:
     void doTransformation_itr_if_then_else();
 
 private:
-    BasicBlock *findTargetedBlock();
+    BasicBlock *findThenBlock(BasicBlock* header, BasicBlock* latch);
+
+private:
+    BasicBlock *findElseBlock(BasicBlock* header);
 
 private:
     void insertPermutationLogic(BasicBlock *insertAt, Value *&permutedZ0,
@@ -174,7 +178,6 @@ private:
 private:
     void addBranchHint(BranchInst *branchInst);
 
-    //////////////////////////////////////////////////////////////////////////////////////////////////
 private:
     void fillALCHeader_full_permutation(BasicBlock *alcHeader, BasicBlock *laneGatherBlock,
                                         BasicBlock *preALCBlock,
