@@ -75,10 +75,10 @@ public:
     void doTransformation_itr_if_then_else();
 
 private:
-    BasicBlock *findThenBlock(BasicBlock* header, BasicBlock* latch);
+    BasicBlock *findThenBlock(BasicBlock *header, BasicBlock *latch);
 
 private:
-    BasicBlock *findElseBlock(BasicBlock* header);
+    BasicBlock *findElseBlock(BasicBlock *header);
 
 private:
     void insertPermutationLogic(BasicBlock *insertAt, Value *&permutedZ0,
@@ -172,8 +172,7 @@ private:
 
 private:
     std::vector<Instruction *> *
-    findHeaderAndPreheaderInstructionsRequiredInThenBlock(BasicBlock *header, BasicBlock *preheader,
-                                                          BasicBlock *thenBlock);
+    findHeaderAndPreheaderInstructionsRequiredForALC(BasicBlock *header, BasicBlock *preheader);
 
 private:
     void addBranchHint(BranchInst *branchInst);
@@ -197,9 +196,47 @@ private:
                                       BasicBlock *toBeVectorizedBlock,
                                       BasicBlock *header, Value *indices);
 
+private:
+
     bool findIfAccessingSameMemAddress(GEPOperator *GEP);
 
     void fillHoistedInstructionsWithLoadsFromConstantMemoryAddress(BasicBlock *preALC);
+
+
+private:
+
+    void fillALCHeader_if_then_else(BasicBlock *alcHeader, BasicBlock *laneGatherBlock,
+                                    BasicBlock *preALCBlock,
+                                    std::vector<Value *> *initialValues, BasicBlock *header);
+
+    void
+    fillLaneGather_if_then_else(BasicBlock *laneGather, BasicBlock *uniformThenBlock, BasicBlock *uniformElseBlock);
+
+    std::vector<Value *> *fillNewLatchBlock_if_then_else(
+            BasicBlock *newLatch, BasicBlock *alcHeader, BasicBlock *joinBlock, BasicBlock *uniformThen,
+            BasicBlock *uniformElseBlock, Value *totalVecIterations);
+
+    void
+    fillUniformThenBlock(BasicBlock *uniformThenBlock, BasicBlock *latch,
+                         BasicBlock *toBeVectorizedBlock,
+                         BasicBlock *header, Value *indices);
+
+    void
+    fillUniformElseBlock(BasicBlock *uniformElseBlock, BasicBlock *latch,
+                         BasicBlock *toBeVectorizedBlock,
+                         BasicBlock *header, Value *indices);
+
+    void fillMiddleBlock_if_then_else(BasicBlock *middleBlock,
+                                      BasicBlock *preheaderForRemaining,
+                                      BasicBlock *exitBlock, Value *remResult);
+
+    void fillLinearizedThen(BasicBlock *linearizedThen, BasicBlock *middleBlock);
+
+    void fillLinearizedElse(BasicBlock *linearizedElse, BasicBlock *middleBlock);
+
+    void fillJoinBlock_if_then_else(BasicBlock *linearizedThen, BasicBlock *linearizedElse, BasicBlock *JoinBlock,
+                                    BasicBlock *middleBlock,
+                                    Value *latchVector);
 
 };
 

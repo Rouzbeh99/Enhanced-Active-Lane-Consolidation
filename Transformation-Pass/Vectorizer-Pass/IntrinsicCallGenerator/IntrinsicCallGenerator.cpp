@@ -33,6 +33,24 @@ Value *IntrinsicCallGenerator::createWhileltInstruction(IRBuilder<> &IRB,
                              {VecTy, IndexType}, {LHSOp, RHSOp});
 }
 
+Value *IntrinsicCallGenerator::createWhileleInstruction(IRBuilder<> &IRB,
+                                                        Value *LHSOp,
+                                                        Value *RHSOp) {
+    auto *VecTy = VectorType::get(IRB.getInt1Ty(), VF, /*Scalable*/ true);
+    auto *IndexType = static_cast<VectorType*>(LHSOp->getType())->getScalarType();
+    return IRB.CreateIntrinsic(Intrinsic::aarch64_sve_whilele,
+                               {VecTy, IndexType}, {LHSOp, RHSOp});
+}
+
+Value *IntrinsicCallGenerator::createWhileloInstruction(IRBuilder<> &IRB,
+                                                        Value *LHSOp,
+                                                        Value *RHSOp) {
+    auto *VecTy = VectorType::get(IRB.getInt1Ty(), VF, /*Scalable*/ true);
+    auto *IndexType = static_cast<VectorType*>(LHSOp->getType())->getScalarType();
+    return IRB.CreateIntrinsic(Intrinsic::aarch64_sve_whilelo,
+                               {VecTy, IndexType}, {LHSOp, RHSOp});
+}
+
 Value *
 IntrinsicCallGenerator::createSpliceInstruction(IRBuilder<> &IRB,
                                                 Value *firstOp, Value *secondOp,

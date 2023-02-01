@@ -67,9 +67,9 @@ void simple_if_else(int *__restrict__ a, int *__restrict__ b, int *__restrict__ 
 //    for (int j = 0; j < 10; ++j) {
     for (int i = 0; i < n; ++i) {
         if (cond[i]) {
-            c[i] = a[i] + b[i];
+            c[i] = a[i] + 56;
         } else {
-            a[i] = a[i] - b[i];
+            c[i] -= 4;
         }
     }
 //    }
@@ -295,7 +295,7 @@ int main() {
     /* Add the array of events PAPI_TOT_INS and PAPI_TOT_CYC to the eventset*/
     if ((status = PAPI_add_events(EventSet, EventCodes, NUMEVENTS)) != PAPI_OK) ERROR_RETURN(status);
 
-    int n = 1000;
+    int n = 90;
 
     a = checked_malloc_int_array(n);
     b = checked_malloc_int_array(n);
@@ -306,16 +306,16 @@ int main() {
 
     srand(time(NULL));
 
-    for (int i = 0; i < n; ++i) {
+    for (int i = 1; i < n; ++i) {
         a[i] = i;
         b[i] = 2;
         c[i] = 0;
-        cond[i] = (i % 3 == 0);
+        cond[i] = (i % 10 == 0);
     }
 
 
 //    simple_if(a, b, c, cond, n);
-//    simple_if_else(a, b, c, cond, n);
+    simple_if_else(a, b, c, cond, n);
 
 
     int sum = 0;
@@ -324,7 +324,7 @@ int main() {
         sum += c[i];
     }
 
-    printf("%d \n", sum);
+    printf("checksum:  %d \n", sum);
 
     free(a);
     free(b);
