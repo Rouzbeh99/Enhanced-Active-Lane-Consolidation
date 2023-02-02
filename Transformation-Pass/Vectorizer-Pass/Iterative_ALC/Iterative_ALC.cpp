@@ -1424,6 +1424,10 @@ Iterative_ALC::insertPermutationLogic_full_permutation(BasicBlock *insertAt, Val
     permutedZ1 = intrinsicCallGenerator->createSelInstruction(IRB, z4, z2, p2);
 
 
+    // in the case where there are not enough active lanes to fill merge vec, the false elements should come from INITIAL elements z5 (compact z1 by not preds)
+    permutedZ0 =  intrinsicCallGenerator->createSpliceInstruction(IRB, permutedZ0, z5, permutedP0);
+
+
     Value *p6 = IRB.CreateNot(p2);      // mask based on first vector false elements
     Value *x3 = intrinsicCallGenerator->createCntpInstruction(IRB, p3, p3);
     Value *truncResult = IRB.CreateSExt(ActualVectorLength, x3->getType());

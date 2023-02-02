@@ -65,11 +65,21 @@ void simple_if_else(int *__restrict__ a, int *__restrict__ b, int *__restrict__ 
     if ((status = PAPI_start(EventSet)) != PAPI_OK) ERROR_RETURN(status);
 
 //    for (int j = 0; j < 10; ++j) {
+//#pragma clang loop vectorize(enable)
     for (int i = 0; i < n; ++i) {
         if (cond[i]) {
-            c[i] = a[i] + 56;
+            a[i] = (2 * a[i] - 2 * c[i]) + (b[i] - 2 * a[i]);
+            a[i] += 2 * i + i * b[i];
+            b[i] = 2 - 2 * b[i] + (2 * a[i] - 2 * c[i]);
+            b[i] -= 3 * i + i * c[i];
+            c[i] = 2 * b[i] + 2 * a[i] - 3 * (2 * c[i] - 2 * b[i] + i * i);
         } else {
-            c[i] -= 4;
+            a[i] *= 2;
+            c[i] = a[i];
+            b[i] = 3 * a[i] - c[i];
+            b[i] -= 2 * c[i] + 7;
+            a[i] -= 4 + b[i] * 2;
+            c[i] += 5 * a[i] + 2 * a[i] + 2;
         }
     }
 //    }
@@ -295,7 +305,7 @@ int main() {
     /* Add the array of events PAPI_TOT_INS and PAPI_TOT_CYC to the eventset*/
     if ((status = PAPI_add_events(EventSet, EventCodes, NUMEVENTS)) != PAPI_OK) ERROR_RETURN(status);
 
-    int n = 90;
+    int n = 5000000;
 
     a = checked_malloc_int_array(n);
     b = checked_malloc_int_array(n);
@@ -307,7 +317,7 @@ int main() {
     srand(time(NULL));
 
     for (int i = 1; i < n; ++i) {
-        a[i] = i;
+        a[i] = 1;
         b[i] = 2;
         c[i] = 0;
         cond[i] = (i % 10 == 0);
@@ -325,6 +335,7 @@ int main() {
     }
 
     printf("checksum:  %d \n", sum);
+    printf("\n");
 
     free(a);
     free(b);
