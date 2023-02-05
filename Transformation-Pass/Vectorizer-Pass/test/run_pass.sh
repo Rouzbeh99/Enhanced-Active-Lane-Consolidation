@@ -25,16 +25,13 @@ cd ../test
 #$LLVM_BUILD_DIR/bin/clang -g -O3  -fno-inline -fno-vectorize -fno-slp-vectorize -fno-unroll-loops -fpass-plugin=$PASS_DIR/build/ALC_Vectorizer.so  -S -emit-llvm $1 -o tmp.ll
 #$LLVM_BUILD_DIR/bin/clang -g -O3 -mllvm -debug-only=loop-accesses  -fpass-plugin=$PASS_DIR/build/ALC_Vectorizer.so  -S -emit-llvm $1 -o tmp.ll
 
-
-$LLVM_BUILD_DIR/bin/clang -g -O3 -target aarch64-unknown-linux-gnu -DSVE_INTRINSICS -fno-inline -fno-vectorize -fno-slp-vectorize -fno-unroll-loops -S -emit-llvm -I $GEM5_PATH/include -I ${PAPI_DIR}/include -L ${PAPI_DIR}/lib $1 -o compiled_with_O3.ll
-$LLVM_BUILD_DIR/bin/clang -g -O0 -target aarch64-unknown-linux-gnu -DSVE_INTRINSICS -fpass-plugin=$PASS_DIR/build/ALC_Vectorizer.so -S -emit-llvm -I $GEM5_PATH/include -I ${PAPI_DIR}/include -L ${PAPI_DIR}/lib  compiled_with_O3.ll -o $2.ll
+#
+$LLVM_BUILD_DIR/bin/clang -g -O3 -target aarch64-unknown-linux-gnu -DSVE_INTRINSICS -fno-inline -fno-vectorize -fno-slp-vectorize -fno-unroll-loops -S -emit-llvm -I $GEM5_PATH/include -I ${PAPI_DIR}/include -L ${PAPI_DIR}/lib $1 -o scalar_code.ll
+$LLVM_BUILD_DIR/bin/clang -g -O0 -target aarch64-unknown-linux-gnu -DSVE_INTRINSICS -fpass-plugin=$PASS_DIR/build/ALC_Vectorizer.so -S -emit-llvm -I $GEM5_PATH/include -I ${PAPI_DIR}/include -L ${PAPI_DIR}/lib  scalar_code.ll -o $2.ll
 $LLVM_BUILD_DIR/bin/clang -g -O3 -target aarch64-unknown-linux-gnu -DSVE_INTRINSICS -fno-inline -fno-vectorize -fno-slp-vectorize -fno-unroll-loops -S -emit-llvm $2.ll -o $2_O3.ll
 $LLVM_BUILD_DIR/bin/llc -O3 -mtriple=aarch64-linux-gnu -mattr=sve -filetype=obj $2_O3.ll -o $2.o
-$LLVM_BUILD_DIR/bin/llc -O3 -mtriple=aarch64-linux-gnu -mattr=sve -filetype=obj compiled_with_O3.ll -o compiled_with_O3.o
+$LLVM_BUILD_DIR/bin/llc -O3 -mtriple=aarch64-linux-gnu -mattr=sve -filetype=obj scalar_code.ll -o scalar_code.o
 
-
-#$LLVM_BUILD_DIR/bin/clang -g -O3 -target aarch64-unknown-linux-gnu -DSVE_INTRINSICS -Rpass-analysis=loop-vectorize -Rpass=loop-vectorize -Rpass-missed=loop-vectorize -S -emit-llvm -I $GEM5_PATH/include -I ${PAPI_DIR}/include -L ${PAPI_DIR}/lib $1 -o vectorized.ll
-#$LLVM_BUILD_DIR/bin/llc -O3 -mtriple=aarch64-linux-gnu -mattr=sve -filetype=obj vectorized.ll -o vectorized.o
 
 
 #$LLVM_BUILD_DIR/bin/llc -O3  -mtriple=aarch64-linux-gnu -mattr=sve -mcpu=cortex-a710 -filetype=asm $2_O3.ll -o $2_O3.s
@@ -51,6 +48,6 @@ $LLVM_BUILD_DIR/bin/llc -O3 -mtriple=aarch64-linux-gnu -mattr=sve -filetype=obj 
 # rm *.dot
 
 
-#$LLVM_BUILD_DIR/bin/opt -S -load-pass-plugin ../build/ALC_Vectorizer.so -passes="alc-vectorizer" compiled_with_O3.ll -o $2.ll
+#$LLVM_BUILD_DIR/bin/opt -S -load-pass-plugin ../build/ALC_Vectorizer.so -passes="alc-vectorizer" scalar_code.ll -o $2.ll
 #$LLVM_BUILD_DIR/bin/clang -target aarch64-none-linux-gnu --gcc-toolchain=$GCC_TOOLCHAIN --sysroot=$GCC_TOOLCHAIN/aarch64-none-linux-gnu/libc  -march=armv8.2-a+sve alc_applied_O3.o -o alc_applied.x
-#$LLVM_BUILD_DIR/bin/clang -target aarch64-none-linux-gnu --gcc-toolchain=$GCC_TOOLCHAIN --sysroot=$GCC_TOOLCHAIN/aarch64-none-linux-gnu/libc  -march=armv8.2-a+sve compiled_with_O3.o -o compiled_with_O3.x
+#$LLVM_BUILD_DIR/bin/clang -target aarch64-none-linux-gnu --gcc-toolchain=$GCC_TOOLCHAIN --sysroot=$GCC_TOOLCHAIN/aarch64-none-linux-gnu/libc  -march=armv8.2-a+sve scalar_code.o -o scalar_code.x

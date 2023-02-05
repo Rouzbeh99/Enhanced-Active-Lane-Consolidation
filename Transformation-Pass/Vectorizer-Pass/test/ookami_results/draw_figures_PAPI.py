@@ -18,7 +18,7 @@ generated_CSVs = []
 
 colors = ["steelblue", "orange", "forestgreen", "firebrick"]
 
-baseline = "compiled_with_O3"
+baseline = "scalar_code"
 
 for filename in all_files:
     df = pd.read_csv(filename, index_col=None, header=0)

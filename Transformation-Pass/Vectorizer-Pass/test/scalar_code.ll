@@ -1,4 +1,4 @@
-; ModuleID = 'alc_itr.ll'
+; ModuleID = 'test.c'
 source_filename = "test.c"
 target datalayout = "e-m:e-i8:8:32-i16:16:32-i64:64-i128:128-n32:64-S128"
 target triple = "aarch64-unknown-linux-gnu"
@@ -29,9 +29,9 @@ target triple = "aarch64-unknown-linux-gnu"
 define dso_local double @getTimeMiliSeconds() local_unnamed_addr #0 !dbg !43 {
 entry:
   %ts = alloca %struct.timespec, align 8
-  call void @llvm.lifetime.start.p0(i64 16, ptr nonnull %ts) #13, !dbg !57
+  call void @llvm.lifetime.start.p0(i64 16, ptr nonnull %ts) #11, !dbg !57
   call void @llvm.dbg.declare(metadata ptr %ts, metadata !47, metadata !DIExpression()), !dbg !58
-  %call = call i32 @clock_gettime(i32 noundef 2, ptr noundef nonnull %ts) #13, !dbg !59
+  %call = call i32 @clock_gettime(i32 noundef 2, ptr noundef nonnull %ts) #11, !dbg !59
   %0 = load i64, ptr %ts, align 8, !dbg !60, !tbaa !61
   %conv = sitofp i64 %0 to double, !dbg !66
   %tv_nsec = getelementptr inbounds %struct.timespec, ptr %ts, i64 0, i32 1, !dbg !67
@@ -39,7 +39,7 @@ entry:
   %conv1 = sitofp i64 %1 to double, !dbg !69
   %mul2 = fmul double %conv1, 0x3EB0C6F7A0B5ED8D, !dbg !70
   %2 = call double @llvm.fmuladd.f64(double %conv, double 1.000000e+03, double %mul2), !dbg !71
-  call void @llvm.lifetime.end.p0(i64 16, ptr nonnull %ts) #13, !dbg !72
+  call void @llvm.lifetime.end.p0(i64 16, ptr nonnull %ts) #11, !dbg !72
   ret double %2, !dbg !73
 }
 
@@ -69,7 +69,7 @@ entry:
   %call = tail call double @getTimeMiliSeconds(), !dbg !99
   call void @llvm.dbg.value(metadata double %call, metadata !95, metadata !DIExpression()), !dbg !98
   %0 = load i32, ptr @EventSet, align 4, !dbg !100, !tbaa !102
-  %call1 = tail call i32 @PAPI_start(i32 noundef %0) #13, !dbg !104
+  %call1 = tail call i32 @PAPI_start(i32 noundef %0) #11, !dbg !104
   call void @llvm.dbg.value(metadata i32 %call1, metadata !94, metadata !DIExpression()), !dbg !98
   %cmp.not = icmp eq i32 %call1, 0, !dbg !105
   br i1 %cmp.not, label %for.cond.preheader, label %if.then, !dbg !106
@@ -81,267 +81,83 @@ for.cond.preheader:                               ; preds = %entry
 
 for.body.preheader:                               ; preds = %for.cond.preheader
   %wide.trip.count = zext i32 %n to i64, !dbg !108
-  %1 = tail call i32 @llvm.vscale.i32(), !dbg !110
-  %2 = shl i32 %1, 2, !dbg !110
-  %3 = shl i32 %1, 3, !dbg !110
-  %.not = icmp ugt i32 %3, %n, !dbg !110
-  br i1 %.not, label %for.body.preheader38, label %pre.alc, !dbg !110
+  br label %for.body, !dbg !110
 
 if.then:                                          ; preds = %entry
-  %4 = load ptr, ptr @stderr, align 8, !dbg !111, !tbaa !113
-  %call2 = tail call i32 (ptr, ptr, ...) @fprintf(ptr noundef %4, ptr noundef nonnull @.str, i32 noundef %call1, ptr noundef nonnull @.str.1, i32 noundef 65) #14, !dbg !111
-  tail call void @exit(i32 noundef %call1) #15, !dbg !111
+  %1 = load ptr, ptr @stderr, align 8, !dbg !111, !tbaa !113
+  %call2 = tail call i32 (ptr, ptr, ...) @fprintf(ptr noundef %1, ptr noundef nonnull @.str, i32 noundef %call1, ptr noundef nonnull @.str.1, i32 noundef 65) #12, !dbg !111
+  tail call void @exit(i32 noundef %call1) #13, !dbg !111
   unreachable, !dbg !111
 
 for.cond.cleanup:                                 ; preds = %for.inc, %for.cond.preheader
-  %5 = load i32, ptr @EventSet, align 4, !dbg !115, !tbaa !102
-  %call79 = tail call i32 @PAPI_stop(i32 noundef %5, ptr noundef nonnull @CounterValues) #13, !dbg !117
+  %2 = load i32, ptr @EventSet, align 4, !dbg !115, !tbaa !102
+  %call79 = tail call i32 @PAPI_stop(i32 noundef %2, ptr noundef nonnull @CounterValues) #11, !dbg !117
   call void @llvm.dbg.value(metadata i32 %call79, metadata !94, metadata !DIExpression()), !dbg !98
   %cmp80.not = icmp eq i32 %call79, 0, !dbg !118
   br i1 %cmp80.not, label %if.end83, label %if.then81, !dbg !119
 
-for.body:                                         ; preds = %for.body.preheader38, %for.inc
-  %indvars.iv = phi i64 [ %indvars.iv.next, %for.inc ], [ %indvars.iv.ph, %for.body.preheader38 ]
+for.body:                                         ; preds = %for.body.preheader, %for.inc
+  %indvars.iv = phi i64 [ 0, %for.body.preheader ], [ %indvars.iv.next, %for.inc ]
   call void @llvm.dbg.value(metadata i64 %indvars.iv, metadata !96, metadata !DIExpression()), !dbg !107
   %arrayidx = getelementptr inbounds i8, ptr %cond, i64 %indvars.iv, !dbg !120
-  %6 = load i8, ptr %arrayidx, align 1, !dbg !120, !tbaa !123, !range !125
-  %tobool.not = icmp eq i8 %6, 0, !dbg !120
+  %3 = load i8, ptr %arrayidx, align 1, !dbg !120, !tbaa !123, !range !125
+  %tobool.not = icmp eq i8 %3, 0, !dbg !120
   %arrayidx70 = getelementptr inbounds i32, ptr %a, i64 %indvars.iv, !dbg !126
   br i1 %tobool.not, label %if.else, label %if.then4, !dbg !127
 
 if.then4:                                         ; preds = %for.body
   %arrayidx8 = getelementptr inbounds i32, ptr %c, i64 %indvars.iv, !dbg !128
-  %7 = load i32, ptr %arrayidx8, align 4, !dbg !128, !tbaa !102
+  %4 = load i32, ptr %arrayidx8, align 4, !dbg !128, !tbaa !102
   %arrayidx11 = getelementptr inbounds i32, ptr %b, i64 %indvars.iv, !dbg !130
-  %8 = load i32, ptr %arrayidx11, align 4, !dbg !130, !tbaa !102
-  %mul21136 = add i32 %8, 2, !dbg !131
-  %9 = trunc i64 %indvars.iv to i32, !dbg !131
-  %add22 = mul i32 %mul21136, %9, !dbg !131
-  %.neg = mul i32 %7, -2
-  %add = add i32 %.neg, %8, !dbg !132
-  %add25 = add i32 %add, %add22, !dbg !133
+  %5 = load i32, ptr %arrayidx11, align 4, !dbg !130, !tbaa !102
+  %mul21136 = add i32 %5, 2, !dbg !131
+  %6 = trunc i64 %indvars.iv to i32, !dbg !131
+  %add22 = mul i32 %mul21136, %6, !dbg !131
+  %.neg = mul i32 %4, -2
+  %add = add i32 %add22, %5, !dbg !132
+  %add25 = add i32 %add, %.neg, !dbg !133
   store i32 %add25, ptr %arrayidx70, align 4, !dbg !133, !tbaa !102
-  %mul43137.neg = sub i32 -3, %7, !dbg !134
-  %add44.neg144 = mul i32 %mul43137.neg, %9, !dbg !134
-  %10 = add i32 %8, %7
-  %reass.add139 = sub i32 %add25, %10
+  %mul43137.neg = sub i32 -3, %4, !dbg !134
+  %add44.neg144 = mul i32 %mul43137.neg, %6, !dbg !134
+  %7 = add i32 %4, %5
+  %reass.add139 = sub i32 %add25, %7
   %reass.mul140 = shl i32 %reass.add139, 1
   %add37 = add i32 %add44.neg144, 2, !dbg !135
   %sub47 = add i32 %add37, %reass.mul140, !dbg !136
   store i32 %sub47, ptr %arrayidx11, align 4, !dbg !136, !tbaa !102
-  %11 = add nsw i32 %sub47, %add25, !dbg !137
-  %add54 = shl nsw i32 %11, 1, !dbg !137
-  %12 = sub nsw i32 %7, %sub47, !dbg !138
-  %sub61 = shl nsw i32 %12, 1, !dbg !138
-  %mul62 = mul nsw i32 %9, %9, !dbg !139
+  %8 = add nsw i32 %sub47, %add25, !dbg !137
+  %add54 = shl nsw i32 %8, 1, !dbg !137
+  %9 = sub nsw i32 %4, %sub47, !dbg !138
+  %sub61 = shl nsw i32 %9, 1, !dbg !138
+  %mul62 = mul nsw i32 %6, %6, !dbg !139
   %add63 = add nsw i32 %sub61, %mul62, !dbg !140
   %mul64.neg = mul i32 %add63, -3, !dbg !141
-  %sub65 = add i32 %add54, %7, !dbg !142
+  %sub65 = add i32 %add54, %4, !dbg !142
   %add68 = add i32 %sub65, %mul64.neg, !dbg !143
   store i32 %add68, ptr %arrayidx8, align 4, !dbg !143, !tbaa !102
   br label %for.inc, !dbg !144
 
 if.else:                                          ; preds = %for.body
-  %13 = load i32, ptr %arrayidx70, align 4, !dbg !145, !tbaa !102
-  %mul71 = mul nsw i32 %13, 5, !dbg !147
+  %10 = load i32, ptr %arrayidx70, align 4, !dbg !145, !tbaa !102
+  %mul71 = mul nsw i32 %10, 5, !dbg !147
   %arrayidx73 = getelementptr inbounds i32, ptr %b, i64 %indvars.iv, !dbg !148
-  %14 = load i32, ptr %arrayidx73, align 4, !dbg !148, !tbaa !102
-  %mul74 = shl nsw i32 %14, 1, !dbg !149
+  %11 = load i32, ptr %arrayidx73, align 4, !dbg !148, !tbaa !102
+  %mul74 = shl nsw i32 %11, 1, !dbg !149
   %add75 = add nsw i32 %mul74, %mul71, !dbg !150
   %arrayidx77 = getelementptr inbounds i32, ptr %c, i64 %indvars.iv, !dbg !151
   store i32 %add75, ptr %arrayidx77, align 4, !dbg !152, !tbaa !102
   br label %for.inc
 
-pre.alc:                                          ; preds = %for.body.preheader
-  %15 = tail call <vscale x 4 x i1> @llvm.aarch64.sve.ptrue.nxv4i1(i32 31)
-  %16 = tail call <vscale x 4 x i32> @llvm.aarch64.sve.index.nxv4i32(i32 0, i32 1)
-  %17 = urem i32 %n, %2
-  %18 = add i32 %3, %17
-  %total.iterations.to.be.vectorized = sub i32 %n, %18
-  %19 = load <vscale x 4 x i8>, ptr %cond, align 4
-  %20 = icmp eq <vscale x 4 x i8> %19, zeroinitializer
-  %21 = sext i32 %2 to i64
-  br label %alc.header
-
-alc.header:                                       ; preds = %new.latch, %pre.alc
-  %vector.loop.index = phi i32 [ %2, %pre.alc ], [ %83, %new.latch ]
-  %uniform.vector = phi <vscale x 4 x i32> [ %16, %pre.alc ], [ %81, %new.latch ]
-  %uniform.vector.predicates = phi <vscale x 4 x i1> [ %20, %pre.alc ], [ %82, %new.latch ]
-  %22 = tail call <vscale x 4 x i32> @llvm.aarch64.sve.index.nxv4i32(i32 %vector.loop.index, i32 1)
-  %23 = sext i32 %vector.loop.index to i64, !dbg !120
-  %24 = getelementptr inbounds i8, ptr %cond, i64 %23, !dbg !120
-  %25 = load <vscale x 4 x i8>, ptr %24, align 4
-  %26 = icmp eq <vscale x 4 x i8> %25, zeroinitializer
-  %27 = tail call i64 @llvm.aarch64.sve.cntp.nxv4i1(<vscale x 4 x i1> %uniform.vector.predicates, <vscale x 4 x i1> %uniform.vector.predicates)
-  %28 = tail call i64 @llvm.aarch64.sve.cntp.nxv4i1(<vscale x 4 x i1> %26, <vscale x 4 x i1> %26)
-  %29 = trunc i64 %27 to i32
-  %30 = trunc i64 %28 to i32
-  %31 = add i32 %30, %29
-  %32 = tail call <vscale x 4 x i32> @llvm.aarch64.sve.compact.nxv4i32(<vscale x 4 x i1> %uniform.vector.predicates, <vscale x 4 x i32> %uniform.vector)
-  %33 = tail call <vscale x 4 x i32> @llvm.aarch64.sve.compact.nxv4i32(<vscale x 4 x i1> %26, <vscale x 4 x i32> %22)
-  %34 = xor <vscale x 4 x i1> %uniform.vector.predicates, shufflevector (<vscale x 4 x i1> insertelement (<vscale x 4 x i1> poison, i1 true, i32 0), <vscale x 4 x i1> poison, <vscale x 4 x i32> zeroinitializer)
-  %35 = xor <vscale x 4 x i1> %26, shufflevector (<vscale x 4 x i1> insertelement (<vscale x 4 x i1> poison, i1 true, i32 0), <vscale x 4 x i1> poison, <vscale x 4 x i32> zeroinitializer)
-  %36 = tail call <vscale x 4 x i32> @llvm.aarch64.sve.compact.nxv4i32(<vscale x 4 x i1> %34, <vscale x 4 x i32> %uniform.vector)
-  %37 = tail call <vscale x 4 x i32> @llvm.aarch64.sve.compact.nxv4i32(<vscale x 4 x i1> %35, <vscale x 4 x i32> %22)
-  %38 = tail call <vscale x 4 x i1> @llvm.aarch64.sve.whilelt.nxv4i1.i32(i32 0, i32 %29)
-  %39 = tail call <vscale x 4 x i32> @llvm.aarch64.sve.splice.nxv4i32(<vscale x 4 x i1> %38, <vscale x 4 x i32> %32, <vscale x 4 x i32> %33)
-  %40 = tail call <vscale x 4 x i1> @llvm.aarch64.sve.whilelt.nxv4i1.i32(i32 0, i32 %31)
-  %41 = tail call <vscale x 4 x i1> @llvm.aarch64.sve.whilelt.nxv4i1.i64(i64 0, i64 %28)
-  %42 = tail call <vscale x 4 x i32> @llvm.aarch64.sve.splice.nxv4i32(<vscale x 4 x i1> %41, <vscale x 4 x i32> %33, <vscale x 4 x i32> %37)
-  %43 = tail call i64 @llvm.aarch64.sve.cntp.nxv4i1(<vscale x 4 x i1> %34, <vscale x 4 x i1> %34)
-  %44 = tail call <vscale x 4 x i1> @llvm.aarch64.sve.whilelt.nxv4i1.i64(i64 0, i64 %43)
-  %45 = select <vscale x 4 x i1> %44, <vscale x 4 x i32> %36, <vscale x 4 x i32> %42
-  %46 = tail call <vscale x 4 x i32> @llvm.aarch64.sve.splice.nxv4i32(<vscale x 4 x i1> %40, <vscale x 4 x i32> %39, <vscale x 4 x i32> %37)
-  %47 = xor <vscale x 4 x i1> %44, shufflevector (<vscale x 4 x i1> insertelement (<vscale x 4 x i1> poison, i1 true, i32 0), <vscale x 4 x i1> poison, <vscale x 4 x i32> zeroinitializer)
-  %48 = tail call i64 @llvm.aarch64.sve.cntp.nxv4i1(<vscale x 4 x i1> %35, <vscale x 4 x i1> %35)
-  %49 = sub i64 %21, %48
-  %50 = tail call <vscale x 4 x i1> @llvm.aarch64.sve.whilelt.nxv4i1.i64(i64 0, i64 %49)
-  %51 = and <vscale x 4 x i1> %50, %47
-  %52 = icmp ugt i32 %31, %2
-  br i1 %52, label %uniform.then, label %uniform.else
-
-uniform.then:                                     ; preds = %alc.header
-  %53 = tail call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.gather.sxtw.index.nxv4i32(<vscale x 4 x i1> %15, ptr %a, <vscale x 4 x i32> %46)
-  %54 = mul <vscale x 4 x i32> %53, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 5, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %55 = tail call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.gather.sxtw.index.nxv4i32(<vscale x 4 x i1> %15, ptr %b, <vscale x 4 x i32> %46)
-  %56 = shl <vscale x 4 x i32> %55, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %57 = add <vscale x 4 x i32> %56, %54
-  tail call void @llvm.aarch64.sve.st1.scatter.sxtw.index.nxv4i32(<vscale x 4 x i32> %57, <vscale x 4 x i1> %15, ptr %c, <vscale x 4 x i32> %46)
-  br label %new.latch
-
-uniform.else:                                     ; preds = %alc.header
-  %58 = tail call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.gather.sxtw.index.nxv4i32(<vscale x 4 x i1> %15, ptr %c, <vscale x 4 x i32> %45)
-  %59 = tail call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.gather.sxtw.index.nxv4i32(<vscale x 4 x i1> %15, ptr %b, <vscale x 4 x i32> %45)
-  %60 = add <vscale x 4 x i32> %59, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 2, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %61 = mul <vscale x 4 x i32> %60, %45
-  %62 = mul <vscale x 4 x i32> %58, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 -2, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %63 = add <vscale x 4 x i32> %62, %59
-  %64 = add <vscale x 4 x i32> %63, %61
-  tail call void @llvm.aarch64.sve.st1.scatter.sxtw.index.nxv4i32(<vscale x 4 x i32> %64, <vscale x 4 x i1> %15, ptr %a, <vscale x 4 x i32> %45)
-  %65 = sub <vscale x 4 x i32> shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 -3, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer), %58
-  %66 = mul <vscale x 4 x i32> %65, %45
-  %67 = add <vscale x 4 x i32> %59, %58
-  %68 = sub <vscale x 4 x i32> %64, %67
-  %69 = shl <vscale x 4 x i32> %68, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %70 = add <vscale x 4 x i32> %66, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 2, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %71 = add <vscale x 4 x i32> %70, %69
-  tail call void @llvm.aarch64.sve.st1.scatter.sxtw.index.nxv4i32(<vscale x 4 x i32> %71, <vscale x 4 x i1> %15, ptr %b, <vscale x 4 x i32> %45)
-  %72 = add <vscale x 4 x i32> %71, %64
-  %73 = shl <vscale x 4 x i32> %72, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %74 = sub <vscale x 4 x i32> %58, %71
-  %75 = shl <vscale x 4 x i32> %74, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %76 = mul <vscale x 4 x i32> %45, %45
-  %77 = add <vscale x 4 x i32> %75, %76
-  %78 = mul <vscale x 4 x i32> %77, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 -3, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %79 = add <vscale x 4 x i32> %73, %58
-  %80 = add <vscale x 4 x i32> %79, %78
-  tail call void @llvm.aarch64.sve.st1.scatter.sxtw.index.nxv4i32(<vscale x 4 x i32> %80, <vscale x 4 x i1> %15, ptr %c, <vscale x 4 x i32> %45)
-  br label %new.latch
-
-new.latch:                                        ; preds = %uniform.else, %uniform.then
-  %81 = phi <vscale x 4 x i32> [ %45, %uniform.then ], [ %46, %uniform.else ]
-  %82 = phi <vscale x 4 x i1> [ %51, %uniform.then ], [ %40, %uniform.else ]
-  %83 = add i32 %vector.loop.index, %2
-  %.not2 = icmp ult i32 %83, %total.iterations.to.be.vectorized
-  br i1 %.not2, label %alc.header, label %joinBlock
-
-linearized.then:                                  ; preds = %joinBlock
-  %84 = tail call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.gather.sxtw.index.nxv4i32(<vscale x 4 x i1> %40, ptr %a, <vscale x 4 x i32> %46)
-  %85 = mul <vscale x 4 x i32> %84, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 5, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %86 = tail call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.gather.sxtw.index.nxv4i32(<vscale x 4 x i1> %40, ptr %b, <vscale x 4 x i32> %46)
-  %87 = shl <vscale x 4 x i32> %86, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %88 = add <vscale x 4 x i32> %87, %85
-  tail call void @llvm.aarch64.sve.st1.scatter.sxtw.index.nxv4i32(<vscale x 4 x i32> %88, <vscale x 4 x i1> %40, ptr %c, <vscale x 4 x i32> %46)
-  %89 = xor <vscale x 4 x i1> %40, shufflevector (<vscale x 4 x i1> insertelement (<vscale x 4 x i1> poison, i1 true, i32 0), <vscale x 4 x i1> poison, <vscale x 4 x i32> zeroinitializer)
-  %90 = tail call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.gather.sxtw.index.nxv4i32(<vscale x 4 x i1> %89, ptr %c, <vscale x 4 x i32> %46)
-  %91 = tail call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.gather.sxtw.index.nxv4i32(<vscale x 4 x i1> %89, ptr %b, <vscale x 4 x i32> %46)
-  %92 = add <vscale x 4 x i32> %91, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 2, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %93 = mul <vscale x 4 x i32> %92, %46
-  %94 = mul <vscale x 4 x i32> %90, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 -2, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %95 = add <vscale x 4 x i32> %94, %91
-  %96 = add <vscale x 4 x i32> %95, %93
-  tail call void @llvm.aarch64.sve.st1.scatter.sxtw.index.nxv4i32(<vscale x 4 x i32> %96, <vscale x 4 x i1> %89, ptr %a, <vscale x 4 x i32> %46)
-  %97 = sub <vscale x 4 x i32> shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 -3, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer), %90
-  %98 = mul <vscale x 4 x i32> %97, %46
-  %99 = add <vscale x 4 x i32> %91, %90
-  %100 = sub <vscale x 4 x i32> %96, %99
-  %101 = shl <vscale x 4 x i32> %100, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %102 = add <vscale x 4 x i32> %98, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 2, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %103 = add <vscale x 4 x i32> %102, %101
-  tail call void @llvm.aarch64.sve.st1.scatter.sxtw.index.nxv4i32(<vscale x 4 x i32> %103, <vscale x 4 x i1> %89, ptr %b, <vscale x 4 x i32> %46)
-  %104 = add <vscale x 4 x i32> %103, %96
-  %105 = shl <vscale x 4 x i32> %104, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %106 = sub <vscale x 4 x i32> %90, %103
-  %107 = shl <vscale x 4 x i32> %106, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %108 = mul <vscale x 4 x i32> %46, %46
-  %109 = add <vscale x 4 x i32> %107, %108
-  %110 = mul <vscale x 4 x i32> %109, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 -3, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %111 = add <vscale x 4 x i32> %105, %90
-  %112 = add <vscale x 4 x i32> %111, %110
-  tail call void @llvm.aarch64.sve.st1.scatter.sxtw.index.nxv4i32(<vscale x 4 x i32> %112, <vscale x 4 x i1> %89, ptr %c, <vscale x 4 x i32> %46)
-  br label %middel.block
-
-linearized.else:                                  ; preds = %joinBlock
-  %113 = xor <vscale x 4 x i1> %51, shufflevector (<vscale x 4 x i1> insertelement (<vscale x 4 x i1> poison, i1 true, i32 0), <vscale x 4 x i1> poison, <vscale x 4 x i32> zeroinitializer)
-  %114 = tail call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.gather.sxtw.index.nxv4i32(<vscale x 4 x i1> %113, ptr %c, <vscale x 4 x i32> %45)
-  %115 = tail call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.gather.sxtw.index.nxv4i32(<vscale x 4 x i1> %113, ptr %b, <vscale x 4 x i32> %45)
-  %116 = add <vscale x 4 x i32> %115, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 2, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %117 = mul <vscale x 4 x i32> %116, %45
-  %118 = mul <vscale x 4 x i32> %114, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 -2, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %119 = add <vscale x 4 x i32> %118, %115
-  %120 = add <vscale x 4 x i32> %119, %117
-  tail call void @llvm.aarch64.sve.st1.scatter.sxtw.index.nxv4i32(<vscale x 4 x i32> %120, <vscale x 4 x i1> %113, ptr %a, <vscale x 4 x i32> %45)
-  %121 = sub <vscale x 4 x i32> shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 -3, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer), %114
-  %122 = mul <vscale x 4 x i32> %121, %45
-  %123 = add <vscale x 4 x i32> %115, %114
-  %124 = sub <vscale x 4 x i32> %120, %123
-  %125 = shl <vscale x 4 x i32> %124, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %126 = add <vscale x 4 x i32> %122, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 2, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %127 = add <vscale x 4 x i32> %126, %125
-  tail call void @llvm.aarch64.sve.st1.scatter.sxtw.index.nxv4i32(<vscale x 4 x i32> %127, <vscale x 4 x i1> %113, ptr %b, <vscale x 4 x i32> %45)
-  %128 = add <vscale x 4 x i32> %127, %120
-  %129 = shl <vscale x 4 x i32> %128, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %130 = sub <vscale x 4 x i32> %114, %127
-  %131 = shl <vscale x 4 x i32> %130, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %132 = mul <vscale x 4 x i32> %45, %45
-  %133 = add <vscale x 4 x i32> %131, %132
-  %134 = mul <vscale x 4 x i32> %133, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 -3, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %135 = add <vscale x 4 x i32> %129, %114
-  %136 = add <vscale x 4 x i32> %135, %134
-  tail call void @llvm.aarch64.sve.st1.scatter.sxtw.index.nxv4i32(<vscale x 4 x i32> %136, <vscale x 4 x i1> %113, ptr %c, <vscale x 4 x i32> %45)
-  %137 = tail call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.gather.sxtw.index.nxv4i32(<vscale x 4 x i1> %51, ptr %a, <vscale x 4 x i32> %45)
-  %138 = mul <vscale x 4 x i32> %137, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 5, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %139 = tail call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.gather.sxtw.index.nxv4i32(<vscale x 4 x i1> %51, ptr %b, <vscale x 4 x i32> %45)
-  %140 = shl <vscale x 4 x i32> %139, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %141 = add <vscale x 4 x i32> %140, %138
-  tail call void @llvm.aarch64.sve.st1.scatter.sxtw.index.nxv4i32(<vscale x 4 x i32> %141, <vscale x 4 x i1> %51, ptr %c, <vscale x 4 x i32> %45)
-  br label %middel.block
-
-joinBlock:                                        ; preds = %new.latch
-  %142 = icmp eq <vscale x 4 x i32> %81, %46
-  %143 = tail call i64 @llvm.aarch64.sve.cntp.nxv4i1(<vscale x 4 x i1> %142, <vscale x 4 x i1> %142)
-  %144 = trunc i64 %143 to i32
-  %145 = icmp eq i32 %2, %144
-  br i1 %145, label %linearized.then, label %linearized.else
-
-middel.block:                                     ; preds = %linearized.else, %linearized.then
-  %146 = zext i32 %83 to i64
-  br label %for.body.preheader38
-
-for.body.preheader38:                             ; preds = %middel.block, %for.body.preheader
-  %indvars.iv.ph = phi i64 [ %146, %middel.block ], [ 0, %for.body.preheader ]
-  br label %for.body, !dbg !110
-
-for.inc:                                          ; preds = %if.else, %if.then4
+for.inc:                                          ; preds = %if.then4, %if.else
   %indvars.iv.next = add nuw nsw i64 %indvars.iv, 1, !dbg !153
   call void @llvm.dbg.value(metadata i64 %indvars.iv.next, metadata !96, metadata !DIExpression()), !dbg !107
   %exitcond.not = icmp eq i64 %indvars.iv.next, %wide.trip.count, !dbg !108
   br i1 %exitcond.not, label %for.cond.cleanup, label %for.body, !dbg !110, !llvm.loop !154
 
 if.then81:                                        ; preds = %for.cond.cleanup
-  %147 = load ptr, ptr @stderr, align 8, !dbg !158, !tbaa !113
-  %call82 = tail call i32 (ptr, ptr, ...) @fprintf(ptr noundef %147, ptr noundef nonnull @.str, i32 noundef %call79, ptr noundef nonnull @.str.1, i32 noundef 102) #14, !dbg !158
-  tail call void @exit(i32 noundef %call79) #15, !dbg !158
+  %12 = load ptr, ptr @stderr, align 8, !dbg !158, !tbaa !113
+  %call82 = tail call i32 (ptr, ptr, ...) @fprintf(ptr noundef %12, ptr noundef nonnull @.str, i32 noundef %call79, ptr noundef nonnull @.str.1, i32 noundef 102) #12, !dbg !158
+  tail call void @exit(i32 noundef %call79) #13, !dbg !158
   unreachable, !dbg !158
 
 if.end83:                                         ; preds = %for.cond.cleanup
@@ -367,14 +183,14 @@ entry:
   call void @llvm.dbg.value(metadata i32 %n, metadata !178, metadata !DIExpression()), !dbg !180
   %conv = sext i32 %n to i64, !dbg !181
   %mul = shl nsw i64 %conv, 2, !dbg !182
-  %call = tail call noalias ptr @malloc(i64 noundef %mul) #16, !dbg !183
+  %call = tail call noalias ptr @malloc(i64 noundef %mul) #14, !dbg !183
   call void @llvm.dbg.value(metadata ptr %call, metadata !179, metadata !DIExpression()), !dbg !180
   %cmp = icmp eq ptr %call, null, !dbg !184
   br i1 %cmp, label %if.then, label %if.end, !dbg !186
 
 if.then:                                          ; preds = %entry
   %puts = tail call i32 @puts(ptr nonnull @str.11), !dbg !187
-  tail call void @exit(i32 noundef 1) #15, !dbg !189
+  tail call void @exit(i32 noundef 1) #13, !dbg !189
   unreachable, !dbg !189
 
 if.end:                                           ; preds = %entry
@@ -392,14 +208,14 @@ define dso_local noalias ptr @checked_malloc_bool_array(i32 noundef %n) local_un
 entry:
   call void @llvm.dbg.value(metadata i32 %n, metadata !195, metadata !DIExpression()), !dbg !197
   %conv = sext i32 %n to i64, !dbg !198
-  %call = tail call noalias ptr @malloc(i64 noundef %conv) #16, !dbg !199
+  %call = tail call noalias ptr @malloc(i64 noundef %conv) #14, !dbg !199
   call void @llvm.dbg.value(metadata ptr %call, metadata !196, metadata !DIExpression()), !dbg !197
   %cmp = icmp eq ptr %call, null, !dbg !200
   br i1 %cmp, label %if.then, label %if.end, !dbg !202
 
 if.then:                                          ; preds = %entry
   %puts = tail call i32 @puts(ptr nonnull @str.11), !dbg !203
-  tail call void @exit(i32 noundef 1) #15, !dbg !205
+  tail call void @exit(i32 noundef 1) #13, !dbg !205
   unreachable, !dbg !205
 
 if.end:                                           ; preds = %entry
@@ -410,41 +226,41 @@ if.end:                                           ; preds = %entry
 define dso_local i32 @main() local_unnamed_addr #0 !dbg !207 {
 entry:
   %errstring = alloca [128 x i8], align 1
-  call void @llvm.lifetime.start.p0(i64 128, ptr nonnull %errstring) #13, !dbg !223
+  call void @llvm.lifetime.start.p0(i64 128, ptr nonnull %errstring) #11, !dbg !223
   call void @llvm.dbg.declare(metadata ptr %errstring, metadata !212, metadata !DIExpression()), !dbg !224
-  %call = tail call i32 @PAPI_library_init(i32 noundef 117440512) #13, !dbg !225
+  %call = tail call i32 @PAPI_library_init(i32 noundef 117440512) #11, !dbg !225
   %cmp.not = icmp eq i32 %call, 117440512, !dbg !227
   br i1 %cmp.not, label %if.end, label %if.then, !dbg !228
 
 if.then:                                          ; preds = %entry
   %0 = load ptr, ptr @stderr, align 8, !dbg !229, !tbaa !113
-  %call1 = call i32 (ptr, ptr, ...) @fprintf(ptr noundef %0, ptr noundef nonnull @.str.3, ptr noundef nonnull %errstring) #14, !dbg !231
-  call void @exit(i32 noundef 1) #15, !dbg !232
+  %call1 = call i32 (ptr, ptr, ...) @fprintf(ptr noundef %0, ptr noundef nonnull @.str.3, ptr noundef nonnull %errstring) #12, !dbg !231
+  call void @exit(i32 noundef 1) #13, !dbg !232
   unreachable, !dbg !232
 
 if.end:                                           ; preds = %entry
-  %call2 = tail call i32 @PAPI_create_eventset(ptr noundef nonnull @EventSet) #13, !dbg !233
+  %call2 = tail call i32 @PAPI_create_eventset(ptr noundef nonnull @EventSet) #11, !dbg !233
   call void @llvm.dbg.value(metadata i32 %call2, metadata !211, metadata !DIExpression()), !dbg !235
   %cmp3.not = icmp eq i32 %call2, 0, !dbg !236
   br i1 %cmp3.not, label %if.end6, label %if.then4, !dbg !237
 
 if.then4:                                         ; preds = %if.end
   %1 = load ptr, ptr @stderr, align 8, !dbg !238, !tbaa !113
-  %call5 = tail call i32 (ptr, ptr, ...) @fprintf(ptr noundef %1, ptr noundef nonnull @.str, i32 noundef %call2, ptr noundef nonnull @.str.1, i32 noundef 317) #14, !dbg !238
-  tail call void @exit(i32 noundef %call2) #15, !dbg !238
+  %call5 = tail call i32 (ptr, ptr, ...) @fprintf(ptr noundef %1, ptr noundef nonnull @.str, i32 noundef %call2, ptr noundef nonnull @.str.1, i32 noundef 317) #12, !dbg !238
+  tail call void @exit(i32 noundef %call2) #13, !dbg !238
   unreachable, !dbg !238
 
 if.end6:                                          ; preds = %if.end
   %2 = load i32, ptr @EventSet, align 4, !dbg !240, !tbaa !102
-  %call7 = tail call i32 @PAPI_add_events(i32 noundef %2, ptr noundef nonnull @EventCodes, i32 noundef 4) #13, !dbg !242
+  %call7 = tail call i32 @PAPI_add_events(i32 noundef %2, ptr noundef nonnull @EventCodes, i32 noundef 4) #11, !dbg !242
   call void @llvm.dbg.value(metadata i32 %call7, metadata !211, metadata !DIExpression()), !dbg !235
   %cmp8.not = icmp eq i32 %call7, 0, !dbg !243
   br i1 %cmp8.not, label %if.end11, label %if.then9, !dbg !244
 
 if.then9:                                         ; preds = %if.end6
   %3 = load ptr, ptr @stderr, align 8, !dbg !245, !tbaa !113
-  %call10 = tail call i32 (ptr, ptr, ...) @fprintf(ptr noundef %3, ptr noundef nonnull @.str, i32 noundef %call7, ptr noundef nonnull @.str.1, i32 noundef 320) #14, !dbg !245
-  tail call void @exit(i32 noundef %call7) #15, !dbg !245
+  %call10 = tail call i32 (ptr, ptr, ...) @fprintf(ptr noundef %3, ptr noundef nonnull @.str, i32 noundef %call7, ptr noundef nonnull @.str.1, i32 noundef 320) #12, !dbg !245
+  tail call void @exit(i32 noundef %call7) #13, !dbg !245
   unreachable, !dbg !245
 
 if.end11:                                         ; preds = %if.end6
@@ -458,9 +274,9 @@ if.end11:                                         ; preds = %if.end6
   %call15 = tail call ptr @checked_malloc_bool_array(i32 noundef 5000000), !dbg !253
   store ptr %call15, ptr @cond, align 8, !dbg !254, !tbaa !113
   store i8 0, ptr %call15, align 1, !dbg !255, !tbaa !123
-  %call16 = tail call i64 @time(ptr noundef null) #13, !dbg !256
+  %call16 = tail call i64 @time(ptr noundef null) #11, !dbg !256
   %conv = trunc i64 %call16 to i32, !dbg !256
-  tail call void @srand(i32 noundef %conv) #13, !dbg !257
+  tail call void @srand(i32 noundef %conv) #11, !dbg !257
   call void @llvm.dbg.value(metadata i32 1, metadata !218, metadata !DIExpression()), !dbg !258
   br label %for.body, !dbg !259
 
@@ -476,7 +292,7 @@ for.cond.cleanup:                                 ; preds = %for.body
   call void @llvm.dbg.value(metadata i32 0, metadata !220, metadata !DIExpression()), !dbg !235
   br label %for.body34, !dbg !265
 
-for.body:                                         ; preds = %for.body, %if.end11
+for.body:                                         ; preds = %if.end11, %for.body
   %indvars.iv = phi i64 [ 1, %if.end11 ], [ %indvars.iv.next, %for.body ]
   call void @llvm.dbg.value(metadata i64 %indvars.iv, metadata !218, metadata !DIExpression()), !dbg !258
   %8 = load ptr, ptr @a, align 8, !dbg !266, !tbaa !113
@@ -488,7 +304,7 @@ for.body:                                         ; preds = %for.body, %if.end11
   %10 = load ptr, ptr @c, align 8, !dbg !272, !tbaa !113
   %arrayidx23 = getelementptr inbounds i32, ptr %10, i64 %indvars.iv, !dbg !272
   store i32 0, ptr %arrayidx23, align 4, !dbg !273, !tbaa !102
-  %call24 = tail call i32 @rand() #13, !dbg !274
+  %call24 = tail call i32 @rand() #11, !dbg !274
   %11 = and i32 %call24, 7, !dbg !275
   %cmp25 = icmp eq i32 %11, 0, !dbg !275
   %12 = load ptr, ptr @cond, align 8, !dbg !276, !tbaa !113
@@ -504,13 +320,13 @@ for.cond.cleanup33:                               ; preds = %for.body34
   %call40 = tail call i32 (ptr, ...) @printf(ptr noundef nonnull @.str.4, i32 noundef %add), !dbg !282
   %putchar = tail call i32 @putchar(i32 10), !dbg !283
   %13 = load ptr, ptr @a, align 8, !dbg !284, !tbaa !113
-  tail call void @free(ptr noundef %13) #13, !dbg !285
+  tail call void @free(ptr noundef %13) #11, !dbg !285
   %14 = load ptr, ptr @b, align 8, !dbg !286, !tbaa !113
-  tail call void @free(ptr noundef %14) #13, !dbg !287
+  tail call void @free(ptr noundef %14) #11, !dbg !287
   %15 = load ptr, ptr @c, align 8, !dbg !288, !tbaa !113
-  tail call void @free(ptr noundef %15) #13, !dbg !289
+  tail call void @free(ptr noundef %15) #11, !dbg !289
   %16 = load ptr, ptr @cond, align 8, !dbg !290, !tbaa !113
-  tail call void @free(ptr noundef %16) #13, !dbg !291
+  tail call void @free(ptr noundef %16) #11, !dbg !291
   %17 = load i64, ptr @CounterValues, align 8, !dbg !292, !tbaa !293
   %call42 = tail call i32 (ptr, ...) @printf(ptr noundef nonnull @.str.6, i64 noundef %17), !dbg !295
   %18 = load i64, ptr getelementptr inbounds ([4 x i64], ptr @CounterValues, i64 0, i64 1), align 8, !dbg !296, !tbaa !293
@@ -522,12 +338,12 @@ for.cond.cleanup33:                               ; preds = %for.body34
   %21 = load double, ptr @ExecutionTime, align 8, !dbg !302, !tbaa !163
   %call46 = tail call i32 (ptr, ...) @printf(ptr noundef nonnull @.str.10, double noundef %21), !dbg !303
   %22 = load i32, ptr @EventSet, align 4, !dbg !304, !tbaa !102
-  %call47 = tail call i32 @PAPI_remove_events(i32 noundef %22, ptr noundef nonnull @EventCodes, i32 noundef 4) #13, !dbg !306
+  %call47 = tail call i32 @PAPI_remove_events(i32 noundef %22, ptr noundef nonnull @EventCodes, i32 noundef 4) #11, !dbg !306
   call void @llvm.dbg.value(metadata i32 %call47, metadata !211, metadata !DIExpression()), !dbg !235
   %cmp48.not = icmp eq i32 %call47, 0, !dbg !307
   br i1 %cmp48.not, label %if.end52, label %if.then50, !dbg !308
 
-for.body34:                                       ; preds = %for.body34, %for.cond.cleanup
+for.body34:                                       ; preds = %for.cond.cleanup, %for.body34
   %indvars.iv84 = phi i64 [ 0, %for.cond.cleanup ], [ %indvars.iv.next85, %for.body34 ]
   %sum.081 = phi i32 [ 0, %for.cond.cleanup ], [ %add, %for.body34 ]
   call void @llvm.dbg.value(metadata i64 %indvars.iv84, metadata !221, metadata !DIExpression()), !dbg !264
@@ -543,25 +359,25 @@ for.body34:                                       ; preds = %for.body34, %for.co
 
 if.then50:                                        ; preds = %for.cond.cleanup33
   %24 = load ptr, ptr @stderr, align 8, !dbg !317, !tbaa !113
-  %call51 = tail call i32 (ptr, ptr, ...) @fprintf(ptr noundef %24, ptr noundef nonnull @.str, i32 noundef %call47, ptr noundef nonnull @.str.1, i32 noundef 365) #14, !dbg !317
-  tail call void @exit(i32 noundef %call47) #15, !dbg !317
+  %call51 = tail call i32 (ptr, ptr, ...) @fprintf(ptr noundef %24, ptr noundef nonnull @.str, i32 noundef %call47, ptr noundef nonnull @.str.1, i32 noundef 365) #12, !dbg !317
+  tail call void @exit(i32 noundef %call47) #13, !dbg !317
   unreachable, !dbg !317
 
 if.end52:                                         ; preds = %for.cond.cleanup33
-  %call53 = tail call i32 @PAPI_destroy_eventset(ptr noundef nonnull @EventSet) #13, !dbg !319
+  %call53 = tail call i32 @PAPI_destroy_eventset(ptr noundef nonnull @EventSet) #11, !dbg !319
   call void @llvm.dbg.value(metadata i32 %call53, metadata !211, metadata !DIExpression()), !dbg !235
   %cmp54.not = icmp eq i32 %call53, 0, !dbg !321
   br i1 %cmp54.not, label %if.end58, label %if.then56, !dbg !322
 
 if.then56:                                        ; preds = %if.end52
   %25 = load ptr, ptr @stderr, align 8, !dbg !323, !tbaa !113
-  %call57 = tail call i32 (ptr, ptr, ...) @fprintf(ptr noundef %25, ptr noundef nonnull @.str, i32 noundef %call53, ptr noundef nonnull @.str.1, i32 noundef 368) #14, !dbg !323
-  tail call void @exit(i32 noundef %call53) #15, !dbg !323
+  %call57 = tail call i32 (ptr, ptr, ...) @fprintf(ptr noundef %25, ptr noundef nonnull @.str, i32 noundef %call53, ptr noundef nonnull @.str.1, i32 noundef 368) #12, !dbg !323
+  tail call void @exit(i32 noundef %call53) #13, !dbg !323
   unreachable, !dbg !323
 
 if.end58:                                         ; preds = %if.end52
-  tail call void @PAPI_shutdown() #13, !dbg !325
-  call void @llvm.lifetime.end.p0(i64 128, ptr nonnull %errstring) #13, !dbg !326
+  tail call void @PAPI_shutdown() #11, !dbg !325
+  call void @llvm.lifetime.end.p0(i64 128, ptr nonnull %errstring) #11, !dbg !326
   ret i32 0, !dbg !327
 }
 
@@ -589,44 +405,14 @@ declare !dbg !348 i32 @PAPI_destroy_eventset(ptr noundef) local_unnamed_addr #4
 
 declare !dbg !349 void @PAPI_shutdown() local_unnamed_addr #4
 
-; Function Attrs: mustprogress nocallback nofree nosync nounwind readnone speculatable willreturn
-declare void @llvm.dbg.value(metadata, metadata, metadata) #2
+; Function Attrs: nocallback nofree nosync nounwind readnone speculatable willreturn
+declare void @llvm.dbg.value(metadata, metadata, metadata) #9
 
 ; Function Attrs: nofree nounwind
-declare noundef i32 @puts(ptr nocapture noundef readonly) local_unnamed_addr #9
+declare noundef i32 @puts(ptr nocapture noundef readonly) local_unnamed_addr #10
 
 ; Function Attrs: nofree nounwind
-declare noundef i32 @putchar(i32 noundef) local_unnamed_addr #9
-
-; Function Attrs: mustprogress nocallback nofree nosync nounwind readnone willreturn
-declare i32 @llvm.vscale.i32() #10
-
-; Function Attrs: mustprogress nocallback nofree nosync nounwind readnone willreturn
-declare <vscale x 4 x i1> @llvm.aarch64.sve.ptrue.nxv4i1(i32 immarg) #10
-
-; Function Attrs: mustprogress nocallback nofree nosync nounwind readnone willreturn
-declare <vscale x 4 x i32> @llvm.aarch64.sve.index.nxv4i32(i32, i32) #10
-
-; Function Attrs: mustprogress nocallback nofree nosync nounwind readnone willreturn
-declare i64 @llvm.aarch64.sve.cntp.nxv4i1(<vscale x 4 x i1>, <vscale x 4 x i1>) #10
-
-; Function Attrs: mustprogress nocallback nofree nosync nounwind readnone willreturn
-declare <vscale x 4 x i32> @llvm.aarch64.sve.compact.nxv4i32(<vscale x 4 x i1>, <vscale x 4 x i32>) #10
-
-; Function Attrs: mustprogress nocallback nofree nosync nounwind readnone willreturn
-declare <vscale x 4 x i1> @llvm.aarch64.sve.whilelt.nxv4i1.i32(i32, i32) #10
-
-; Function Attrs: mustprogress nocallback nofree nosync nounwind readnone willreturn
-declare <vscale x 4 x i32> @llvm.aarch64.sve.splice.nxv4i32(<vscale x 4 x i1>, <vscale x 4 x i32>, <vscale x 4 x i32>) #10
-
-; Function Attrs: mustprogress nocallback nofree nosync nounwind readnone willreturn
-declare <vscale x 4 x i1> @llvm.aarch64.sve.whilelt.nxv4i1.i64(i64, i64) #10
-
-; Function Attrs: argmemonly mustprogress nocallback nofree nosync nounwind readonly willreturn
-declare <vscale x 4 x i32> @llvm.aarch64.sve.ld1.gather.sxtw.index.nxv4i32(<vscale x 4 x i1>, ptr, <vscale x 4 x i32>) #11
-
-; Function Attrs: argmemonly mustprogress nocallback nofree nosync nounwind willreturn writeonly
-declare void @llvm.aarch64.sve.st1.scatter.sxtw.index.nxv4i32(<vscale x 4 x i32>, <vscale x 4 x i1>, ptr, <vscale x 4 x i32>) #12
+declare noundef i32 @putchar(i32 noundef) local_unnamed_addr #10
 
 attributes #0 = { noinline nounwind uwtable "frame-pointer"="non-leaf" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="generic" "target-features"="+neon,+v8a" }
 attributes #1 = { argmemonly mustprogress nocallback nofree nosync nounwind willreturn }
@@ -637,14 +423,12 @@ attributes #5 = { nofree nounwind "frame-pointer"="non-leaf" "no-trapping-math"=
 attributes #6 = { noreturn nounwind "frame-pointer"="non-leaf" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="generic" "target-features"="+neon,+v8a" }
 attributes #7 = { inaccessiblememonly mustprogress nofree nounwind willreturn allocsize(0) "frame-pointer"="non-leaf" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="generic" "target-features"="+neon,+v8a" }
 attributes #8 = { inaccessiblemem_or_argmemonly mustprogress nounwind willreturn "frame-pointer"="non-leaf" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="generic" "target-features"="+neon,+v8a" }
-attributes #9 = { nofree nounwind }
-attributes #10 = { mustprogress nocallback nofree nosync nounwind readnone willreturn }
-attributes #11 = { argmemonly mustprogress nocallback nofree nosync nounwind readonly willreturn }
-attributes #12 = { argmemonly mustprogress nocallback nofree nosync nounwind willreturn writeonly }
-attributes #13 = { nounwind }
-attributes #14 = { cold }
-attributes #15 = { noreturn nounwind }
-attributes #16 = { nounwind allocsize(0) }
+attributes #9 = { nocallback nofree nosync nounwind readnone speculatable willreturn }
+attributes #10 = { nofree nounwind }
+attributes #11 = { nounwind }
+attributes #12 = { cold }
+attributes #13 = { noreturn nounwind }
+attributes #14 = { nounwind allocsize(0) }
 
 !llvm.dbg.cu = !{!2}
 !llvm.module.flags = !{!31, !32, !33, !34, !35, !36, !37, !38, !39, !40, !41}
