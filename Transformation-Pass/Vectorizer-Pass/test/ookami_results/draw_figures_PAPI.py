@@ -41,7 +41,7 @@ for i in range(sqrt):
         # conf_low = df["confidence_low"].values.tolist()
         # conf_high = df["confidence_high"].values.tolist()
         # confidence = [x / 2 for x in list(map(add, conf_low, conf_high))]
-        std_deviation = df["standard deviation"].values.tolist()
+        std_deviation = df["standard_deviation"].values.tolist()
         df.drop(df.columns[[1, 2, 3]], axis=1, inplace=True)
         tag = metric
         if "branch" in tag or "cache" in tag:

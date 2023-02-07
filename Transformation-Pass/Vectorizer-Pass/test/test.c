@@ -88,11 +88,11 @@ void simple_if_else(int *__restrict__ a, int *__restrict__ b, int *__restrict__ 
             b[i] -= 3 * i + i * c[i];
             c[i] += 2 * b[i] + 2 * a[i] - 3 * (2 * c[i] - 2 * b[i] + i * i);
         } else {
-//            a[i] *= 2 + b[i] - 3 * c[i];
-//            c[i] = a[i] * b[i] - 1 + c[i];
-//            b[i] = 3 * a[i] - 2 * c[i];
-//            b[i] -= 2 * c[i] + 7 + a[i] ;
-//            a[i] -= 4 + b[i] * 2;
+            a[i] *= 2 + b[i] - 3 * c[i];
+            c[i] = a[i] * b[i] - 1 + c[i];
+            b[i] = 3 * a[i] - 2 * c[i];
+            b[i] -= 2 * c[i] + 7 + a[i] ;
+            a[i] -= 4 + b[i] * 2;
             c[i] = 5 * a[i] + 2 * b[i];
         }
     }
