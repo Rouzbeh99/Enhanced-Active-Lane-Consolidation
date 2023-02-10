@@ -1,0 +1,4 @@
+inputs,cycles,standard_deviation,confidence_low,confidence_high
+if_converted,14239043,112281,14217036,14261050
+data_permute,57794463,111118,57772684,57816242
+gather,219695926,140776,219668334,219723517
