@@ -26,14 +26,14 @@ void Iterative_ALC::doTransformation_itr_singleIf_simple() {
             createPreheaderForRemainingIterations();
 
     // create blocks
-    BasicBlock *preALCBlock = createEmptyBlock("pre.alc", latch);
-    BasicBlock *middleBlock = createEmptyBlock("middel.block", latch);
-    BasicBlock *alcHeader = createEmptyBlock("alc.header", middleBlock);
-    BasicBlock *laneGatherBlock = createEmptyBlock("lane.gather", middleBlock);
-    BasicBlock *linearizedBlock = createEmptyBlock("linearized", middleBlock);
-    BasicBlock *uniformBlock = createEmptyBlock("uniform.block", middleBlock);
-    BasicBlock *newLatch = createEmptyBlock("new.latch", middleBlock);
-    BasicBlock *joinBlock = createEmptyBlock("join.block", middleBlock);
+    preALCBlock = createEmptyBlock("pre.alc", latch);
+    middleBlock = createEmptyBlock("middel.block", latch);
+    alcHeader = createEmptyBlock("alc.header", middleBlock);
+    laneGatherBlock = createEmptyBlock("lane.gather", middleBlock);
+    linearizedBlock = createEmptyBlock("linearized", middleBlock);
+    uniformThenBlock = createEmptyBlock("uniform.block", middleBlock);
+    newLatch = createEmptyBlock("new.latch", middleBlock);
+    joinBlock = createEmptyBlock("join.block", middleBlock);
 
     refinePreheader(preALCBlock, preheaderForRemainingBlock);
 
@@ -44,15 +44,15 @@ void Iterative_ALC::doTransformation_itr_singleIf_simple() {
             alcHeader, laneGatherBlock, linearizedBlock, preALCBlock,
             preALCBlockValues, header);
 
-    fillLaneGatherBlock_itr(laneGatherBlock, uniformBlock, joinBlock);
+    fillLaneGatherBlock_itr(laneGatherBlock, uniformThenBlock, joinBlock);
     std::vector<Value *> *uniformBlockOutputs =
-            fillUniformBlock_itr(uniformBlock, joinBlock, thenBlock,
+            fillUniformBlock_itr(uniformThenBlock, joinBlock, thenBlock,
                                  header, MergedIndices, VectorLoopIndex);
     fillLinearizedBlock_itr(linearizedBlock, newLatch, thenBlock,
                             IndexVectorOfSecondVector,
                             PredicatesOfSecondVector);
     std::vector<Value *> *joinBlockOutputs =
-            fillJoinBlock(joinBlock, newLatch, uniformBlock, laneGatherBlock,
+            fillJoinBlock(joinBlock, newLatch, uniformThenBlock, laneGatherBlock,
                           VectorLoopIndex, uniformBlockOutputs);
     std::vector<Value *> *latchOutputs = fillNewLatchBlock_itr(
             newLatch, alcHeader, middleBlock, joinBlock, linearizedBlock,
@@ -88,12 +88,12 @@ void Iterative_ALC::doTransformation_itr_singleIf_full_permutation() {
             createPreheaderForRemainingIterations();
 
     // create blocks
-    BasicBlock *preALCBlock = createEmptyBlock("pre.alc", latch);
-    BasicBlock *middleBlock = createEmptyBlock("middel.block", latch);
-    BasicBlock *alcHeader = createEmptyBlock("alc.header", middleBlock);
-    BasicBlock *laneGatherBlock = createEmptyBlock("lane.gather", middleBlock);
-    BasicBlock *uniformBlock = createEmptyBlock("uniform.block", middleBlock);
-    BasicBlock *newLatch = createEmptyBlock("new.latch", middleBlock);
+    preALCBlock = createEmptyBlock("pre.alc", latch);
+    middleBlock = createEmptyBlock("middel.block", latch);
+    alcHeader = createEmptyBlock("alc.header", middleBlock);
+    laneGatherBlock = createEmptyBlock("lane.gather", middleBlock);
+    uniformThenBlock = createEmptyBlock("uniform.block", middleBlock);
+    newLatch = createEmptyBlock("new.latch", middleBlock);
 
 
     refinePreheader(preALCBlock, preheaderForRemainingBlock);
@@ -101,16 +101,15 @@ void Iterative_ALC::doTransformation_itr_singleIf_full_permutation() {
             fillPreALCBlock_itr(preALCBlock, preheader, alcHeader);
 
     fillALCHeader_full_permutation(alcHeader, laneGatherBlock, preALCBlock, preALCBlockValues, header);
-    fillLaneGather_full_permutation(laneGatherBlock, uniformBlock, newLatch);
-    fillUniformBlock_full_permutation(uniformBlock, newLatch, thenBlock, header, MergedIndices);
+    fillLaneGather_full_permutation(laneGatherBlock, uniformThenBlock, newLatch);
+    fillUniformBlock_full_permutation(uniformThenBlock, newLatch, thenBlock, header, MergedIndices);
     std::vector<Value *> *latchOutputs = fillNewLatchBlock_full_permutation(newLatch, alcHeader, middleBlock,
-                                                                            laneGatherBlock, uniformBlock,
+                                                                            laneGatherBlock, uniformThenBlock,
                                                                             (*preALCBlockValues)[3]);
 
     fillMiddleBlock_itr(middleBlock, preheaderForRemainingBlock, exitBlock,
                         (*preALCBlockValues)[2], (*latchOutputs)[1],
                         (*latchOutputs)[2]);
-
 
     refinePreHeaderForRemaining(preheaderForRemainingBlock, middleBlock,
                                 (*latchOutputs)[0]);
@@ -136,23 +135,22 @@ void Iterative_ALC::doTransformation_itr_if_then_else() {
             createPreheaderForRemainingIterations();
 
     // create blocks
-    BasicBlock *preALCBlock = createEmptyBlock("pre.alc", latch);
-    BasicBlock *middleBlock = createEmptyBlock("middel.block", latch);
-    BasicBlock *alcHeader = createEmptyBlock("alc.header", middleBlock);
-    BasicBlock *laneGatherBlock = createEmptyBlock("lane.gather", middleBlock);
-    BasicBlock *uniformThenBlock = createEmptyBlock("uniform.then", middleBlock);
-    BasicBlock *uniformElseBlock = createEmptyBlock("uniform.else", middleBlock);
-    BasicBlock *newLatch = createEmptyBlock("new.latch", middleBlock);
-
-    BasicBlock *linearizedThen = createEmptyBlock("linearized.then", middleBlock);
-    BasicBlock *linearizedElse = createEmptyBlock("linearized.else", middleBlock);
-    BasicBlock *joinBlock = createEmptyBlock("joinBlock", middleBlock);
+    preALCBlock = createEmptyBlock("pre.alc", latch);
+    middleBlock = createEmptyBlock("middel.block", latch);
+    alcHeader = createEmptyBlock("alc.header", middleBlock);
+    laneGatherBlock = createEmptyBlock("lane.gather", middleBlock);
+    uniformThenBlock = createEmptyBlock("uniform.then", middleBlock);
+    uniformElseBlock = createEmptyBlock("uniform.else", middleBlock);
+    newLatch = createEmptyBlock("new.latch", middleBlock);
+    linearizedThen = createEmptyBlock("linearized.then", middleBlock);
+    linearizedElse = createEmptyBlock("linearized.else", middleBlock);
+    joinBlock = createEmptyBlock("joinBlock", middleBlock);
 
     refinePreheader(preALCBlock, preheaderForRemainingBlock);
     std::vector<Value *> *preALCBlockValues =
             fillPreALCBlock_itr(preALCBlock, preheader, alcHeader);
     fillALCHeader_if_then_else(alcHeader, laneGatherBlock, preALCBlock, preALCBlockValues, header);
-    fillLaneGather_if_then_else(laneGatherBlock, uniformThenBlock, uniformElseBlock);
+    fillLaneGather_if_then_else(laneGatherBlock, uniformThenBlock, uniformElseBlock, false);
     fillUniformThenBlock(uniformThenBlock, newLatch, thenBlock, header, MergedIndices);
     fillUniformElseBlock(uniformElseBlock, newLatch, elseBlock, header, RemainingIndices);
     std::vector<Value *> *latchOutputs = fillNewLatchBlock_if_then_else(newLatch, alcHeader, joinBlock,
@@ -171,6 +169,75 @@ void Iterative_ALC::doTransformation_itr_if_then_else() {
 
 
 }
+
+void Iterative_ALC::doTransformation_itr_if_then_else_data_Permutation() {
+    auto *header = L->getHeader();
+    auto &context = header->getContext();
+    ScalarIV = L->getCanonicalInductionVariable();
+    assert(isa<PHINode>(ScalarIV) && "Induction variable must be a PHINode!");
+    auto *preheader = L->getLoopPreheader();
+    auto *latch = L->getLoopLatch();
+    auto *exitBlock = L->getExitBlock();
+    ConstZeroVectorOfTripCountTy = llvm::ConstantInt::get(TripCountTy, 0, true);
+
+    thenBlock = findThenBlock(header, latch);
+    elseBlock = findElseBlock(header);
+
+
+    sharedInstructions =
+            findHeaderAndPreheaderInstructionsRequiredForALC(header, preheader);
+    findLoadInstructionPtrs();
+    dataPermutation = true;
+
+
+    BasicBlock *preheaderForRemainingBlock =
+            createPreheaderForRemainingIterations();
+
+    // create blocks
+    preALCBlock = createEmptyBlock("pre.alc", latch);
+    middleBlock = createEmptyBlock("middel.block", latch);
+    alcHeader = createEmptyBlock("alc.header", middleBlock);
+    laneGatherBlock = createEmptyBlock("lane.gather", middleBlock);
+    uniformThenBlock = createEmptyBlock("uniform.then", middleBlock);
+    uniformElseBlock = createEmptyBlock("uniform.else", middleBlock);
+    newLatch = createEmptyBlock("new.latch", middleBlock);
+    linearizedThen = createEmptyBlock("linearized.then", middleBlock);
+    linearizedElse = createEmptyBlock("linearized.else", middleBlock);
+    joinBlock = createEmptyBlock("joinBlock", middleBlock);
+
+    refinePreheader(preALCBlock, preheaderForRemainingBlock);
+    std::vector<Value *> *preALCBlockValues =
+            fillPreALCBlock_itr(preALCBlock, preheader, alcHeader);
+    fillALCHeader_if_then_else(alcHeader, laneGatherBlock, preALCBlock, preALCBlockValues, header);
+
+    std::map<Value *, Instruction *> instructionsInPreAlcMap = loadInstructionsInPreALC(preALCBlock);
+    loadInstructionsInHeader(alcHeader);
+    addLoadInstructionPhisInHeader(alcHeader, preALCBlock, instructionsInPreAlcMap);
+
+    fillLaneGather_if_then_else(laneGatherBlock, uniformThenBlock, uniformElseBlock, true);
+
+    std::vector<Value *> *latchOutputs = fillNewLatchBlock_if_then_else(newLatch, alcHeader, joinBlock,
+                                                                        uniformThenBlock, uniformElseBlock,
+                                                                        (*preALCBlockValues)[3]);
+    addLoadPhisToLatch(newLatch, alcHeader, uniformThenBlock, uniformElseBlock);
+    fillJoinBlock_if_then_else(linearizedThen, linearizedElse, joinBlock, middleBlock, (*latchOutputs)[1]);
+
+    fillUniformThenBlock(uniformThenBlock, newLatch, thenBlock, alcHeader, MergedIndices);
+    fillUniformElseBlock(uniformElseBlock, newLatch, elseBlock, alcHeader, RemainingIndices);
+
+
+    fillLinearizedThen(linearizedThen, middleBlock);
+    fillLinearizedElse(linearizedElse, middleBlock);
+    fillMiddleBlock_if_then_else(middleBlock, preheaderForRemainingBlock, exitBlock,
+                                 (*preALCBlockValues)[2]);
+    refinePreHeaderForRemaining(preheaderForRemainingBlock, middleBlock,
+                                (*latchOutputs)[0]);
+
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 void Iterative_ALC::insertPermutationLogic(BasicBlock *insertAt, Value *&permutedZ0,
@@ -809,6 +876,32 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
                 continue;
             }
 
+            if(dataPermutation) {
+                if (block == uniformThenBlock) { // we are vectorizing uniform then block
+                    Value *basePtr = getBasePointer(dyn_cast<LoadInst>(instr));
+                    Value *&mergeLoad = MergePtrToLoadInstrMap[basePtr];
+                    if (mergeLoad) {
+                        outputMap->insert({instr, mergeLoad});
+                        vMap[instr] = mergeLoad;
+                        toBeRemoved.push(instr);
+                    }else{
+                        assert(0 && "permuted load instruction not found!");
+                    }
+                    continue;
+                } else if (block == uniformElseBlock) {
+                    Value *basePtr = getBasePointer(dyn_cast<LoadInst>(instr));
+                    Value *&remainingLoad = RemainingPtrToLoadInstrMap[basePtr];
+                    if (remainingLoad) {
+                        outputMap->insert({instr, remainingLoad});
+                        vMap[instr] = remainingLoad;
+                        toBeRemoved.push(instr);
+                    }else{
+                        assert(0 && "permuted load instruction not found!");
+                    }
+                    continue;
+                }
+            }
+
             assert(isa<GEPOperator>(ptr) &&
                    "Expected LoadInst PointerOperand to be GetElementPtr!");
 
@@ -893,7 +986,8 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
                     firstOp =
                             createVectorOfValues(ConstantValue, IRB, "first.operand");
                 } else {
-                    instr->getOperand(0)->print(outs());
+                    instr->print(outs());
+                    llvm::outs() << "   ------ >  ";
                     assert(0 && "first operand neither already vectorized nor Constant!");
                 }
             }
@@ -1037,6 +1131,7 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
 
     }
 
+
     while (!toBeRemoved.empty()) {
         toBeRemoved.top()->eraseFromParent();
         toBeRemoved.pop();
@@ -1103,6 +1198,54 @@ std::vector<Instruction *> *Iterative_ALC::cloneInstructions(BasicBlock *From,
         Instruction *clonedInstr = instr.clone();
         clonedInstr->insertBefore(to->getTerminator());
         vMap[&instr] = clonedInstr;
+        clonedInstructions->push_back(clonedInstr);
+
+        for (auto &cloned_instr: *clonedInstructions) {
+            llvm::RemapInstruction(cloned_instr, vMap,
+                                   RF_NoModuleLevelChanges | RF_IgnoreMissingLocals);
+        }
+    }
+
+    // replace induction vars with inductionVarInitialValue
+    for (auto clonedInstr: *clonedInstructions) {
+
+        if (usesInductionVar(clonedInstr, ScalarIV)) {
+            for (int j = 0; j < clonedInstr->getNumOperands(); ++j) {
+                if (clonedInstr->getOperand(j) == ScalarIV) {
+                    clonedInstr->setOperand(j, VectorIndex);
+                }
+            }
+        }
+    }
+
+    return clonedInstructions;
+}
+
+std::vector<Instruction *> *
+Iterative_ALC::cloneInstructions(std::vector<Instruction *> &toBeCloned, BasicBlock *to, Value *VectorIndex) {
+    // TODO: assumption : there are no more than one phi node that is the
+    // induction var (since decision block is header)
+
+    llvm::ValueToValueMapTy vMap;
+    // first copy instruction into vectorizing Block, then vectorize them
+    auto *clonedInstructions = new std::vector<Instruction *>;
+
+
+    for (auto instr: toBeCloned) {
+
+        if (isa<PHINode>(instr)) {
+            continue;
+        }
+
+        if (hoistedInstructions.count(instr)) {
+            vMap[instr] = instr;
+            clonedInstructions->push_back(instr);
+            continue;
+        }
+
+        Instruction *clonedInstr = instr->clone();
+        clonedInstr->insertBefore(to->getTerminator());
+        vMap[instr] = clonedInstr;
         clonedInstructions->push_back(clonedInstr);
 
         for (auto &cloned_instr: *clonedInstructions) {
@@ -1368,8 +1511,7 @@ void Iterative_ALC::fillALCHeader_full_permutation(BasicBlock *alcHeader, BasicB
 void
 Iterative_ALC::fillLaneGather_full_permutation(BasicBlock *laneGather, BasicBlock *uniformBlock, BasicBlock *latch) {
 
-    insertPermutationLogic_full_permutation(laneGather, MergedIndices, RemainingIndices, MergedPredicates,
-                                            RemainingPredicates);
+    insertPermutationLogic_full_permutation(laneGather);
     IRBuilder<> builder(laneGather);
 
     ActiveElementsInPermutedVector =
@@ -1389,8 +1531,7 @@ Iterative_ALC::fillLaneGather_full_permutation(BasicBlock *laneGather, BasicBloc
 
 
 void
-Iterative_ALC::insertPermutationLogic_full_permutation(BasicBlock *insertAt, Value *&permutedZ0, Value *&permutedZ1,
-                                                       Value *&permutedP0, Value *&permutedP1) {
+Iterative_ALC::insertPermutationLogic_full_permutation(BasicBlock *insertAt) {
 
     IRBuilder<> IRB(insertAt);
     auto *constZero = ConstantInt::get(ActiveLanesInFirstVector->getType(), 0);
@@ -1408,11 +1549,11 @@ Iterative_ALC::insertPermutationLogic_full_permutation(BasicBlock *insertAt, Val
 
     auto *p4 = intrinsicCallGenerator->createWhileltInstruction(
             IRB, constZero, ActiveLanesInFirstVector);
-    permutedZ0 = intrinsicCallGenerator->createSpliceInstruction(IRB, z2, z3, p4);
+    MergedIndices = intrinsicCallGenerator->createSpliceInstruction(IRB, z2, z3, p4);
     // in the case where there are not enough active lanes to fill merge vec, the false elements should come from INITIAL elements z5 (compact z1 by not preds)
-    permutedP0 = intrinsicCallGenerator->createWhileltInstruction(
+    MergedPredicates = intrinsicCallGenerator->createWhileltInstruction(
             IRB, constZero, ActiveLanesInBothVectors);
-    permutedZ0 =  intrinsicCallGenerator->createSpliceInstruction(IRB, permutedZ0, z5, permutedP0);
+    MergedIndices = intrinsicCallGenerator->createSpliceInstruction(IRB, MergedIndices, z5, MergedPredicates);
 
 
     auto *constZero64 = ConstantInt::get(IRB.getInt64Ty(), 0);
@@ -1423,9 +1564,7 @@ Iterative_ALC::insertPermutationLogic_full_permutation(BasicBlock *insertAt, Val
     z2 = intrinsicCallGenerator->createSpliceInstruction(IRB, z3, z5, p5); // contains active ... inactive
     Value *x2 = intrinsicCallGenerator->createCntpInstruction(IRB, p2, p2);
     p2 = intrinsicCallGenerator->createWhileltInstruction(IRB, constZero64, x2);
-    permutedZ1 = intrinsicCallGenerator->createSelInstruction(IRB, z4, z2, p2);
-
-
+    RemainingIndices = intrinsicCallGenerator->createSelInstruction(IRB, z4, z2, p2);
 
 
     Value *p6 = IRB.CreateNot(p2);      // mask based on first vector false elements
@@ -1434,7 +1573,7 @@ Iterative_ALC::insertPermutationLogic_full_permutation(BasicBlock *insertAt, Val
     Value *subResult = IRB.CreateSub(truncResult, x3);
     Value *p7 = intrinsicCallGenerator->createWhileltInstruction(IRB, constZero64,
                                                                  subResult);  // mask based on second vector false elements
-    permutedP1 = IRB.CreateAnd(p6, p7);
+    RemainingPredicates = IRB.CreateAnd(p6, p7);
 
 }
 
@@ -1550,7 +1689,7 @@ Iterative_ALC::fillALCHeader_if_then_else(BasicBlock *alcHeader, BasicBlock *lan
 }
 
 void Iterative_ALC::fillLaneGather_if_then_else(BasicBlock *laneGather, BasicBlock *uniformThenBlock,
-                                                BasicBlock *uniformElseBlock) {
+                                                BasicBlock *uniformElseBlock, bool hasDataPermutation) {
 
     IRBuilder<> builder(laneGather);
 
@@ -1571,8 +1710,11 @@ void Iterative_ALC::fillLaneGather_if_then_else(BasicBlock *laneGather, BasicBlo
     ActiveLanesInBothVectors =
             builder.CreateAdd(ActiveLanesInFirstVector, ActiveLanesInSecondVector);
 
-    insertPermutationLogic_full_permutation(laneGather, MergedIndices, RemainingIndices, MergedPredicates,
-                                            RemainingPredicates);
+    if (hasDataPermutation) {
+        insertPermutationLogic_data_permutation(laneGather);
+    } else {
+        insertPermutationLogic_full_permutation(laneGather);
+    }
 
     ActiveElementsInPermutedVector =
             intrinsicCallGenerator->createCntpInstruction(builder, MergedPredicates,
@@ -1647,6 +1789,7 @@ Iterative_ALC::fillUniformThenBlock(BasicBlock *uniformThenBlock, BasicBlock *la
 
     std::vector<Instruction *> *clonedInstructions = cloneInstructions(
             toBeVectorizedBlock, uniformThenBlock, ConstZeroVectorOfTripCountTy);
+
 
 
     // TODO: handle cases where instruction uses 0 instead of induction var
@@ -1760,6 +1903,195 @@ void Iterative_ALC::fillJoinBlock_if_then_else(BasicBlock *linearizedThen, Basic
 
 }
 
+
+void Iterative_ALC::loadInstructionsInHeader(BasicBlock *alcHeader) {
+    IRBuilder<> builder(alcHeader->getContext());
+    builder.SetInsertPoint(alcHeader->getTerminator());
+
+    for (auto pair: loadInstructionPtrsToType) {
+        Value *GEP = builder.CreateGEP(pair.second, pair.first, VectorLoopIndex);
+        auto *vecType = VectorType::get(pair.second, vectorizationFactor, true);
+        LoadInst *vectorLoad = builder.CreateLoad(vecType, GEP, "remaining_" + pair.first->getName());
+        RemainingPtrToLoadInstrMap.insert({pair.first, vectorLoad});
+    }
+
+}
+
+std::map<Value *, Instruction *> Iterative_ALC::loadInstructionsInPreALC(BasicBlock *preALC) {
+    IRBuilder<> builder(preALC->getContext());
+    builder.SetInsertPoint(preALC->getTerminator());
+
+    std::map<Value *, Instruction *> initialLoadsMap;
+
+    Constant *constZero = ConstantInt::get(VectorLoopIndex->getType(), 0, false);
+
+    for (auto pair: loadInstructionPtrsToType) {
+        Value *GEP = builder.CreateGEP(pair.second, pair.first, constZero);
+        auto *vecType = VectorType::get(pair.second, vectorizationFactor, true);
+        LoadInst *vectorLoad = builder.CreateLoad(vecType, GEP, "initial_" + pair.first->getName());
+        initialLoadsMap.insert({pair.first, vectorLoad});
+    }
+    return initialLoadsMap;
+}
+
+void Iterative_ALC::addLoadInstructionPhisInHeader(BasicBlock *header, BasicBlock *preALC,
+                                                   std::map<Value *, Instruction *> &instructionsInPreAlcMap) {
+    Instruction *insertionPoint;
+    for (auto &instr: header->instructionsWithoutDebug()) {
+        if (isa<PHINode>(instr)) {
+            continue;
+        }
+        insertionPoint = &instr;
+        break;
+    }
+    IRBuilder<> builder(header->getContext());
+    builder.SetInsertPoint(insertionPoint);
+
+    for (auto ptr: ptrsToPermute) {
+        Instruction *&loadInstr = instructionsInPreAlcMap[ptr];
+        PHINode *phi = builder.CreatePHI(loadInstr->getType(), 2,
+                                         "uniform_" + ptr->getName());
+        phi->addIncoming(loadInstr, preALC);
+        MergePtrToLoadInstrMap.insert({ptr, phi});
+        headerLoadPhis.insert({ptr, phi});
+    }
+}
+
+void
+Iterative_ALC::insertPermutationLogic_data_permutation(BasicBlock *insertAt) {
+
+
+    IRBuilder<> IRB(insertAt);
+    auto *constZero = ConstantInt::get(ActiveLanesInFirstVector->getType(), 0);
+    // gather active lanes
+    auto *z2 = intrinsicCallGenerator->createCompactInstruction(
+            IRB, IndexVectorOfFirstVector, PredicatesOfFirstVector);
+    auto *z3 = intrinsicCallGenerator->createCompactInstruction(
+            IRB, IndexVectorOfSecondVector, PredicatesOfSecondVector);
+
+
+    ///compacting data vectors 
+    std::map<Value *, Value *> compacted_Merge;
+    std::map<Value *, Value *> compacted_Rem;
+    for (auto ptr: ptrsToPermute) {
+        Value *cmpct1 = intrinsicCallGenerator->createCompactInstruction(
+                IRB, MergePtrToLoadInstrMap[ptr], PredicatesOfFirstVector);
+        compacted_Merge.insert({ptr, cmpct1});
+
+        Value *cmpct2 = intrinsicCallGenerator->createCompactInstruction(
+                IRB, RemainingPtrToLoadInstrMap[ptr], PredicatesOfSecondVector);
+        compacted_Rem.insert({ptr, cmpct2});
+    }
+
+    Value *p2 = IRB.CreateNot(PredicatesOfFirstVector);
+    Value *p3 = IRB.CreateNot(PredicatesOfSecondVector);
+    Value *z4 = intrinsicCallGenerator->createCompactInstruction(IRB, IndexVectorOfFirstVector, p2);
+    Value *z5 = intrinsicCallGenerator->createCompactInstruction(IRB, IndexVectorOfSecondVector, p3);
+
+    ///compacting data vectors by negated predicates
+    std::map<Value *, Value *> compacted_negated_Merge;
+    std::map<Value *, Value *> compacted_negated_Rem;
+    for (auto ptr: ptrsToPermute) {
+        Value *cmpct1 = intrinsicCallGenerator->createCompactInstruction(IRB, MergePtrToLoadInstrMap[ptr], p2);
+        compacted_negated_Merge.insert({ptr, cmpct1});
+
+        Value *cmpct2 = intrinsicCallGenerator->createCompactInstruction(IRB, RemainingPtrToLoadInstrMap[ptr], p3);
+        compacted_negated_Rem.insert({ptr, cmpct2});
+    }
+
+
+    auto *p4 = intrinsicCallGenerator->createWhileltInstruction(
+            IRB, constZero, ActiveLanesInFirstVector);
+    MergedIndices = intrinsicCallGenerator->createSpliceInstruction(IRB, z2, z3, p4);
+    ///create merge vectors for data vectors
+    std::map<Value *, Value *> mergeMap;
+    for (auto ptr: ptrsToPermute) {
+        Value *merge = intrinsicCallGenerator->createSpliceInstruction(IRB, compacted_Merge[ptr], compacted_Rem[ptr],
+                                                                       p4);
+        mergeMap.insert({ptr, merge});
+        MergePtrToLoadInstrMap[ptr] =merge;
+    }
+
+
+    // in the case where there are not enough active lanes to fill merge vec, the false elements should come from INITIAL elements z5 (compact z1 by not preds)
+    MergedPredicates = intrinsicCallGenerator->createWhileltInstruction(
+            IRB, constZero, ActiveLanesInBothVectors);
+    MergedIndices = intrinsicCallGenerator->createSpliceInstruction(IRB, MergedIndices, z5, MergedPredicates);
+
+    //create splice for data vectors
+    for (auto ptr: ptrsToPermute) {
+        Value *merge = intrinsicCallGenerator->createSpliceInstruction(IRB, mergeMap[ptr], compacted_negated_Rem[ptr],
+                                                                       MergedPredicates);
+        MergePtrToLoadInstrMap[ptr] = merge;
+    }
+
+
+    auto *constZero64 = ConstantInt::get(IRB.getInt64Ty(), 0);
+
+    Value *x1 = intrinsicCallGenerator->createCntpInstruction(IRB, PredicatesOfSecondVector,
+                                                              PredicatesOfSecondVector);
+    Value *p5 = intrinsicCallGenerator->createWhileltInstruction(IRB, constZero64, x1);
+
+    z2 = intrinsicCallGenerator->createSpliceInstruction(IRB, z3, z5, p5); // contains active ... inactive
+
+    // create splice for data vectors
+    std::map<Value *, Value *> spliceMap;
+    for (auto ptr: ptrsToPermute) {
+        Value *splice = intrinsicCallGenerator->createSpliceInstruction(IRB, compacted_Rem[ptr],
+                                                                        compacted_negated_Rem[ptr],
+                                                                        p5); // contains active ... inactive
+        spliceMap.insert({ptr, splice});
+    }
+
+    Value *x2 = intrinsicCallGenerator->createCntpInstruction(IRB, p2, p2);
+    p2 = intrinsicCallGenerator->createWhileltInstruction(IRB, constZero64, x2);
+    RemainingIndices = intrinsicCallGenerator->createSelInstruction(IRB, z4, z2, p2);
+
+    // create Remaining data vector
+    for (auto ptr: ptrsToPermute) {
+        Value *sel = intrinsicCallGenerator->createSelInstruction(IRB, compacted_negated_Merge[ptr], spliceMap[ptr],
+                                                                  p2);
+        RemainingPtrToLoadInstrMap[ptr] = sel;
+    }
+
+
+    Value *p6 = IRB.CreateNot(p2);      // mask based on first vector false elements
+    Value *x3 = intrinsicCallGenerator->createCntpInstruction(IRB, p3, p3);
+    Value *truncResult = IRB.CreateSExt(ActualVectorLength, x3->getType());
+    Value *subResult = IRB.CreateSub(truncResult, x3);
+    Value *p7 = intrinsicCallGenerator->createWhileltInstruction(IRB, constZero64,
+                                                                 subResult);  // mask based on second vector false elements
+    RemainingPredicates = IRB.CreateAnd(p6, p7);
+
+}
+
+void Iterative_ALC::addLoadPhisToLatch(BasicBlock *newLatch, BasicBlock *alcHeader, BasicBlock *uniformThen,
+                                       BasicBlock *uniformElse) {
+
+    Instruction *insertionPoint;
+    for (auto &instr: newLatch->instructionsWithoutDebug()) {
+        if (isa<PHINode>(instr)) {
+            continue;
+        }
+        insertionPoint = &instr;
+        break;
+    }
+    IRBuilder<> builder(newLatch->getContext());
+    builder.SetInsertPoint(insertionPoint);
+
+
+    for (auto ptr: ptrsToPermute) {
+        Value *&remainingLoadVec = RemainingPtrToLoadInstrMap[ptr];
+        PHINode *phi = builder.CreatePHI(remainingLoadVec->getType(), 2,
+                                         "");
+        phi->addIncoming(MergePtrToLoadInstrMap[ptr], uniformElse);
+        phi->addIncoming(remainingLoadVec, uniformThen);
+
+        headerLoadPhis[ptr]->addIncoming(phi, newLatch);
+    }
+
+}
+
 Value *Iterative_ALC::createVectorOfValues(Value *value, IRBuilder<> &builder,
                                            std::string name) {
 
@@ -1807,6 +2139,53 @@ void Iterative_ALC::fillHoistedInstructionsWithLoadsFromConstantMemoryAddress(Ba
     }
 }
 
+Value *Iterative_ALC::getBasePointer(LoadInst *inst) {
+    Value *ptr = inst->getPointerOperand();
+    if (auto GEP = dyn_cast<GEPOperator>(ptr)) {
+        ptr = GEP->getPointerOperand();
+    }
+
+    return ptr;
+}
+
+// TODO: we assume all load instructions in then and else block use index var as offset for address
+void Iterative_ALC::findLoadInstructionPtrs() {
+
+    for (auto &instr: thenBlock->instructionsWithoutDebug()) {
+        if (auto loadInstr = dyn_cast<LoadInst>(&instr)) {
+            Value *ptr = getBasePointer(loadInstr);
+            assert(!ptr->getType()->isStructTy() && " can't handle structs!!! ");
+            if (!loadInstructionPtrsToType.count(ptr)) {
+                ptrsToPermute.push_back(ptr);
+                loadInstructionPtrsToType.insert({ptr, instr.getType()});
+            }
+
+        }
+    }
+    for (auto &instr: elseBlock->instructionsWithoutDebug()) {
+        if (auto loadInstr = dyn_cast<LoadInst>(&instr)) {
+            Value *ptr = getBasePointer(loadInstr);
+            assert(!ptr->getType()->isStructTy() && " can't handle structs!!! ");
+            if (!loadInstructionPtrsToType.count(ptr)) {
+                ptrsToPermute.push_back(ptr);
+                loadInstructionPtrsToType.insert({ptr, instr.getType()});
+            }
+        }
+    }
+
+    for(auto instr: *sharedInstructions){
+        if (auto loadInstr = dyn_cast<LoadInst>(instr)) {
+            Value *ptr = getBasePointer(loadInstr);
+            assert(!ptr->getType()->isStructTy() && " can't handle structs!!! ");
+            if (!loadInstructionPtrsToType.count(ptr)) {
+                ptrsToPermute.push_back(ptr);
+                loadInstructionPtrsToType.insert({ptr, instr->getType()});
+            }
+
+        }
+    }
+}
+
 bool Iterative_ALC::findIfAccessingSameMemAddress(GEPOperator *GEP) {
     bool isConstantMemoryLocation = true;
     for (int i = 1; i < GEP->getNumOperands(); ++i) {
@@ -1828,7 +2207,6 @@ Iterative_ALC::Iterative_ALC(Loop *l, int vectorizationFactor,
                              LoopStandardAnalysisResults &ar, Value *tripCount)
         : L(l), vectorizationFactor(vectorizationFactor), AR(ar), tripCount(tripCount) {
     LI = &AR.LI;
-    SE = &AR.SE;
     DT = &AR.DT;
     module = L->getHeader()->getModule();
 
@@ -1841,6 +2219,10 @@ Iterative_ALC::Iterative_ALC(Loop *l, int vectorizationFactor,
             new IntrinsicCallGenerator(this->vectorizationFactor, module);
 
 }
+
+
+
+
 
 
 

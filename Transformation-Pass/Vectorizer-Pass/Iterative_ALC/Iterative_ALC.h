@@ -39,7 +39,18 @@ private:
 
 private:
     Type *TripCountTy;
-    ScalarEvolution *SE;
+    BasicBlock *preALCBlock;
+    BasicBlock *middleBlock;
+    BasicBlock *alcHeader;
+    BasicBlock *laneGatherBlock;
+    BasicBlock *uniformThenBlock;
+    BasicBlock *uniformElseBlock;
+    BasicBlock *newLatch;
+    BasicBlock *linearizedThen;
+    BasicBlock *linearizedElse;
+    BasicBlock *joinBlock;
+    BasicBlock *linearizedBlock;
+
     PHINode *VectorLoopIndex;
     Value *VscaleFactor;
     Value *ActualVectorLength;
@@ -62,6 +73,12 @@ private:
     BasicBlock *elseBlock;
     std::vector<Instruction *> *sharedInstructions;
     std::map<Instruction *, Instruction *> hoistedInstructions;
+    bool dataPermutation;
+    std::vector<Value *> ptrsToPermute;
+    std::map<Value *, Type *> loadInstructionPtrsToType;
+    std::map<Value*, PHINode*> headerLoadPhis;
+    std::map<Value*, Value*> MergePtrToLoadInstrMap;
+    std::map<Value *, Value *> RemainingPtrToLoadInstrMap;
 
 public:
     Iterative_ALC(Loop *l, int vectorizationFactor,
@@ -73,6 +90,8 @@ public:
     void doTransformation_itr_singleIf_full_permutation();
 
     void doTransformation_itr_if_then_else();
+
+    void doTransformation_itr_if_then_else_data_Permutation();
 
 private:
     BasicBlock *findThenBlock(BasicBlock *header, BasicBlock *latch);
@@ -160,6 +179,9 @@ private:
     std::vector<Instruction *> *
     cloneInstructions(BasicBlock *From, BasicBlock *to, Value *VectorIndex);
 
+    std::vector<Instruction *> *
+    cloneInstructions(std::vector<Instruction *> &toBeCloned, BasicBlock *to, Value *VectorIndex);
+
 private:
     bool usesInductionVar(Value *value, Value *inductionVar);
 
@@ -184,8 +206,7 @@ private:
 
     void fillLaneGather_full_permutation(BasicBlock *laneGather, BasicBlock *uniformBlock, BasicBlock *latch);
 
-    void insertPermutationLogic_full_permutation(BasicBlock *insertAt, Value *&permutedZ0, Value *&permutedZ1,
-                                                 Value *&permutedP0, Value *&permutedP1);
+    void insertPermutationLogic_full_permutation(BasicBlock *insertAt);
 
     std::vector<Value *> *fillNewLatchBlock_full_permutation(
             BasicBlock *newLatch, BasicBlock *alcHeader, BasicBlock *middleBlock, BasicBlock *laneGather,
@@ -210,7 +231,7 @@ private:
                                     std::vector<Value *> *initialValues, BasicBlock *header);
 
     void
-    fillLaneGather_if_then_else(BasicBlock *laneGather, BasicBlock *uniformThenBlock, BasicBlock *uniformElseBlock);
+    fillLaneGather_if_then_else(BasicBlock *laneGather, BasicBlock *uniformThenBlock, BasicBlock *uniformElseBlock, bool hasDataPermutation);
 
     std::vector<Value *> *fillNewLatchBlock_if_then_else(
             BasicBlock *newLatch, BasicBlock *alcHeader, BasicBlock *joinBlock, BasicBlock *uniformThen,
@@ -237,6 +258,22 @@ private:
     void fillJoinBlock_if_then_else(BasicBlock *linearizedThen, BasicBlock *linearizedElse, BasicBlock *JoinBlock,
                                     BasicBlock *middleBlock,
                                     Value *latchVector);
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    void findLoadInstructionPtrs();
+
+    Value *getBasePointer(LoadInst *inst);
+
+    std::map<Value *, Instruction *> loadInstructionsInPreALC(BasicBlock *preALC);
+
+    void loadInstructionsInHeader(BasicBlock *alcHeader);
+
+    void addLoadInstructionPhisInHeader(BasicBlock *header, BasicBlock *preALC,
+                                        std::map<Value *, Instruction *> &instructionsInPreAlcMap);
+
+    void insertPermutationLogic_data_permutation(BasicBlock *insertAt );
+
+    void addLoadPhisToLatch(BasicBlock* newLatch, BasicBlock* alcHeader, BasicBlock* uniformThen, BasicBlock* uniformElse);
 
 };
 

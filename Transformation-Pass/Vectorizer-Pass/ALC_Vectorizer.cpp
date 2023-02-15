@@ -100,7 +100,8 @@ namespace {
                 alc_itr->doTransformation_itr_singleIf_simple();
                 break;
             case ALCAnalysisResult::IF_THEN_ELSE:
-                alc_itr->doTransformation_itr_if_then_else();
+//                alc_itr->doTransformation_itr_if_then_else();
+                alc_itr->doTransformation_itr_if_then_else_data_Permutation();
                 break;
 
             case ALCAnalysisResult::MULTI_PATH:

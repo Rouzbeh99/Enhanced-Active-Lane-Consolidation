@@ -223,6 +223,56 @@ propose different versions of ALC each specialized for that category.
 
 Having the analysis phase and different versions of ALC, we combine them together to offer a solid recipe for ALC tranformation that can now automatically be applied on every input code and expect improvements.
 
+
+\section{ALC Strategies}
+
+In this section we explain how we do the transformation for each case. We start by Wytte algorithm, show the potential cases where it would not result in good performance. Then we analyze what is happening in detail to fine the solution and propose our modified version which works well.
+
+\subsection{If-Then-Else Case}
+It's worth to first talk about the hypothesis behind ALC performance improvement. When we linearize and then vectorize the code with control flow divergence, what happens is that in each iteration of the loop we are adding two sources of overhead:
+\begin{enumerate}
+    \item The overhead of predicated instructions
+    \item redundant computations which their results will be discarded later 
+\end{enumerate}
+
+The first one is quite clear. Proccessor can execute normal instructions faster than predicated ones since it need to keep track of the predicates to decide whether it should commit the changes or not.
+
+To better understand the second problem let's consider our motivation example on figure ?? and assume the if condistion is going to be true on every other iteration. So in total, half iteration will execute then block and the other half will execute else block.
+now lets move to the figure ?? where lineariation and vectorization have been applied to the code. Let's focus on the first iteration of the vectorized loop.
+
+
+\begin{figure}[t!]
+    \centering
+    \includegraphics[width=0.95\textwidth]{img/masked_operations.png}
+    \caption{Masked Opertions}
+    \label{fig:masked_multiplication}
+\end{figure}
+
+After vectors \emph{a\_v, b\_v, c\_v} are loaded in lines 3-5, the mask vector is formed which we know in this example, will be true for \emph{first} and \emph{third} element and will be false for \emph{second} and \emph{forth} element. figure ?? illustrates what will happen at lines 7 to 11 of the code. White elemets are the ones coressponding to true mask and gray ones coresspond to false mask.
+For each Opertion, the vector unit of the processor will do the operation for all lanes \emph{regardless} of mask values. After doing so, it will discard result for false elements and only keep the true ones and then store them to the memory. Vector instruction could have significant more latency [cite?] compared to scalar instructions and as you can see, we are wasting half our computation power while paying the overhead of vector instructions in each iteration.
+
+The idea behind ALC is to utilize vector instructions by postponing any masked operation to the point where, we have a uniform vector. This way not only we don't waste any computation power but we also eliminate maksed operation which are more expensive that regular ones as discussed before.
+
+%%%%%% permutation overhead, requiring more instructions to make ALC sense
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 \section{Analysis Phase}
 
 The analysis has three major roles:
@@ -232,7 +282,7 @@ The analysis has three major roles:
     \item Based on the information it gathers, is it benefitial to do the tranformation or not.
 \end{enumerate}
 
-As Wytte explained in his work, in order to be alowed to apply ALC which means that we need to make sure that the generated will be correct and the result of the execution will be exactly the same as the result for exectuing scalar code, we must make sure that the loop has no function calls, no loop carried dependecy and there exists at least two paths inside the loop. The first responsiblity of the analysis is to check these restrictions.
+As Wytte explained in his work, in order to be alowed to apply ALC which means that we need to make sure that the generated code will be correct and the result of the execution will be exactly the same as the result for exectuing scalar code, we must make sure that the loop has no function calls, no loop carried dependecy and there exists at least two paths inside the loop. The first responsiblity of the analysis is to check these restrictions.
 
 Providing a general recipe to do the tranformations for any input code requires gathering infromation about exact structure of control flow, so that we can classify any sort of divergence in a pre-defined category. To attain this goal we first define three categories of divergence
 which will cover all possible shapes of control flow. Having them classifed, we can then propose techniques and algorithms for applying ALC in each case. The three categories are followings:
@@ -245,8 +295,7 @@ which will cover all possible shapes of control flow. Having them classifed, we 
 
 There are different experimental factor that lead us to these three categories which include the level of difficulty to apply the pass and expected improvement for each case. The recipe to apply the transfromation on each case is explaned in next chapters.
 
-Finally, After making sure that we are allowed to apply ALC and finding the right categoriy for the loop, we need to make the dicision of whether it's benefitial to do the tranformation or not. This is one the most challenging parts since the improvement that comes from the ALC depends on the runtime aspects of the code which can not be detected at compile time. One of these aspects is the probability for 
-each path to be taken. Let's go back to our motivating example [].Suppose we know at runtime, then block is executed most of iterations. // TODO: is there any difference ??  
+Finally, After making sure that we are allowed to apply ALC and finding the right categoriy for the loop, we need to make the dicision of whether it's benefitial to do the tranformation or not. This is one the most challenging parts since the improvement that comes from the ALC depends on several different factors which some of them could be detected only at run time. In Section ?? we will explain these factors and requirements and how our cost model answers them in detail.   
 
 
 \end{document}
