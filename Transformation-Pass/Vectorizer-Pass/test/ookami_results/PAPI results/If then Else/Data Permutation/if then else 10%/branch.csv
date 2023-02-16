@@ -1,0 +1,6 @@
+inputs,branch,standard_deviation,confidence_low,confidence_high
+armclang,29,2,28,29
+scalar_code,504129,604,504010,504247
+alc_permute_10,31899,63,31886,31911
+gcc,1441799,1777,1441450,1442147
+alc_itr_10,32034,57,32023,32045

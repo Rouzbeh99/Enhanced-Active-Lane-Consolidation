@@ -9,16 +9,19 @@ for file in *.x; do
 	filename="${filename%.*}"
 	files+=($filename)
 done
+
+rm results/*
  
 
-repeat=10
+repeat=100
+NODE=$((RANDOM % 3 + 1)) 
 
 for i in $(seq 1 $repeat); do
 	files=( $(shuf -e "${files[@]}") )
 	for file in "${files[@]}"; do
 		 filename=$(basename -- "$file")
 		 filename="${filename%.*}"
-		./${filename}.x &> ./results/${filename}-report-${i}.txt
+		 numactl -N $NODE -m $NODE -s./${filename}.x &> ./results/${filename}-report-${i}.txt
 	done
 	
 done
