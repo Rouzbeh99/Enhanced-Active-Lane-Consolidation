@@ -322,7 +322,7 @@ int main() {
         a[i] = 2;
         b[i] = -1;
         c[i] = 0;
-        cond[i] = rand() % 2 == 0;
+        cond[i] = rand() % 10 != 0;
     }
 
 
