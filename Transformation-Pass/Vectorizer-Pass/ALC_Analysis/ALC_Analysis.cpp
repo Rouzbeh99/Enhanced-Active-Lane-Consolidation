@@ -8,7 +8,7 @@ ALCAnalysisResult *ALC_Analysis::doAnalysis() {
     bool hasFunctionCall = containsFunctionCall();
     bool vectorizable = isVectorizable();
     bool outputDependency = containsOutputDependency();
-    bool singleIfCase = isSingleIfCase();
+    bool canGetIV = true;
 
 
     const ArrayRef<BasicBlock *> &allBlocks = L->getBlocks();
@@ -32,9 +32,11 @@ ALCAnalysisResult *ALC_Analysis::doAnalysis() {
         llvm::outs() << "Loop doesn't contain output dependency" << '\n';
     }
 
-    if (singleIfCase) {
-        llvm::outs() << "Single if case \n";
+    if (!L->getCanonicalInductionVariable()) {
+        llvm::outs() << "Can't determine induction variable" << "\n";
+        canGetIV = false;
     }
+
 
 
 
@@ -73,7 +75,7 @@ ALCAnalysisResult *ALC_Analysis::doAnalysis() {
                      << "\n";
     }
 
-    bool isLegal = vectorizable && !hasFunctionCall && !outputDependency && numberOfPaths > 1;
+    bool isLegal = vectorizable && !hasFunctionCall && !outputDependency && numberOfPaths > 1 && canGetIV ;
     bool isProfitable = false;
     if (numberOfPaths == 2) {
         isProfitable = true;
@@ -82,7 +84,7 @@ ALCAnalysisResult *ALC_Analysis::doAnalysis() {
                                                                : ALCAnalysisResult::DIVERGENCE_TYPE::IF_THEN_ELSE;
 
 
-    if (!hasFunctionCall && !outputDependency && vectorizable && (numberOfPaths > 1)) {
+    if (isLegal) {
         llvm::outs() << "ALC can be applied \n";
     } else {
         llvm::outs() << "ALC can NOT be applied \n";

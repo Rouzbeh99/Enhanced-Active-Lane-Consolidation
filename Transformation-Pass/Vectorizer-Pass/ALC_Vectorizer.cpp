@@ -67,12 +67,12 @@ namespace {
         auto *alc_analysis = new ALC_Analysis(L, AM, AR);
         ALCAnalysisResult *analysisResult = alc_analysis->doAnalysis();
 
-        int factor = 4;
-
-        if (!L->getCanonicalInductionVariable()) {
-            llvm::outs() << "Can't determine induction variable" << "\n";
+        if (!analysisResult->isLegal1() || !analysisResult->isProfitable1()) {
             return PreservedAnalyses::all();
         }
+
+
+        int factor = 4;
 
         Value *tripCount = findLoopTripCount(L, factor);
 
@@ -85,12 +85,6 @@ namespace {
         auto *sve_vectorizer = new SVE_Vectorizer(L, factor, AR);
         auto *simple_alc = new Simple_ALC(L, factor, AR, tripCount);
         auto *alc_itr = new Iterative_ALC(L, factor, AR, tripCount);
-
-
-        if (!analysisResult->isLegal1() || !analysisResult->isProfitable1()) {
-            return PreservedAnalyses::all();
-        }
-
 
         llvm::outs() << "Applying iterative ALC \n";
 
