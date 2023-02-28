@@ -55,6 +55,17 @@ double ExecutionTime = 0.0;
 //    ExecutionTime = getTimeMiliSeconds() - t;
 //}
 
+
+const int n = 10000;
+
+struct St {
+    int array1[n];
+    int array2[n];
+};
+
+struct St s;
+int arr2D[3][n];
+
 void simple_if_else(int *__restrict__ a, int *__restrict__ b, int *__restrict__ c,
                     bool *__restrict__ cond, int n) {
 
@@ -80,9 +91,10 @@ void simple_if_else(int *__restrict__ a, int *__restrict__ b, int *__restrict__ 
             b[i] = 3 * a[i] - 2 * c[i];
             b[i] -= 2 * c[i] + 7 + a[i] ;
             a[i] -= 4 + b[i] * 2;
-            c[i] = 5 * a[i] + 2 * b[i];
+            c[i] += 5 * a[i] + 2 * b[i];
 
         }
+
     }
 //    }
 
@@ -307,7 +319,6 @@ int main() {
     /* Add the array of events PAPI_TOT_INS and PAPI_TOT_CYC to the eventset*/
     if ((status = PAPI_add_events(EventSet, EventCodes, NUMEVENTS)) != PAPI_OK) ERROR_RETURN(status);
 
-    int n = 5000000;
 
     a = checked_malloc_int_array(n);
     b = checked_malloc_int_array(n);
@@ -318,11 +329,16 @@ int main() {
 
     srand(time(NULL));
 
+
     for (int i = 1; i < n; ++i) {
         a[i] = 2;
         b[i] = -1;
         c[i] = 0;
-        cond[i] = rand() % 10 != 0;
+        s.array1[i] = 1;
+        s.array2[i] = 2;
+        arr2D[0][i] = -5;
+        arr2D[1][i] = -7;
+        cond[i] = (i % 2) == 0;
     }
 
 

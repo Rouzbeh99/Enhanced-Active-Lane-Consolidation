@@ -4,6 +4,7 @@
 #include "../IntrinsicCallGenerator/IntrinsicCallGenerator.h"
 #include "map"
 #include "stack"
+#include <unordered_map>
 #include "llvm/Analysis/LoopInfo.h"
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/IRBuilder.h"
@@ -72,13 +73,12 @@ private:
     BasicBlock *thenBlock;
     BasicBlock *elseBlock;
     std::vector<Instruction *> *sharedInstructions;
+    std::vector<LoadInst *> loadInstructionsToPermute;
     std::map<Instruction *, Instruction *> hoistedInstructions;
     bool dataPermutation;
-    std::vector<Value *> ptrsToPermute;
-    std::map<Value *, Type *> loadInstructionPtrsToType;
-    std::map<Value*, PHINode*> headerLoadPhis;
-    std::map<Value*, Value*> MergePtrToLoadInstrMap;
-    std::map<Value *, Value *> RemainingPtrToLoadInstrMap;
+    std::map<Instruction *, PHINode *> headerLoadPhis;
+    std::map<Value *, Value *> MergeLoadInstrMap;
+    std::map<Value *, Value *> RemainingLoadInstrMap;
 
 public:
     Iterative_ALC(Loop *l, int vectorizationFactor,
@@ -176,18 +176,17 @@ private:
                          Value *inductionVarInitialValue);
 
 private:
-    std::vector<Instruction *> *
-    cloneInstructions(BasicBlock *From, BasicBlock *to, Value *VectorIndex);
+    std::map<Instruction*, Instruction*> *
+    cloneInstructions(BasicBlock *From, BasicBlock *to, Value *VectorIndex, bool useSharedInstructions, std::vector<Instruction*>* instructionsOrder);
 
-    std::vector<Instruction *> *
-    cloneInstructions(std::vector<Instruction *> &toBeCloned, BasicBlock *to, Value *VectorIndex);
 
 private:
     bool usesInductionVar(Value *value, Value *inductionVar);
 
 private:
     std::map<const Value *, const Value *> *vectorizeInstructions(
-            std::vector<Instruction *> *instructions, BasicBlock *block,
+            const std::map<Instruction *, Instruction *>* originalToClonedInstMap, std::vector<Instruction *>* instructionsOrder,
+            BasicBlock *block,
             Value *indices, Value *VectorIndex, Value *predicates, bool isPermuted,
             bool isPredicated);
 
@@ -231,7 +230,8 @@ private:
                                     std::vector<Value *> *initialValues, BasicBlock *header);
 
     void
-    fillLaneGather_if_then_else(BasicBlock *laneGather, BasicBlock *uniformThenBlock, BasicBlock *uniformElseBlock, bool hasDataPermutation);
+    fillLaneGather_if_then_else(BasicBlock *laneGather, BasicBlock *uniformThenBlock, BasicBlock *uniformElseBlock,
+                                bool hasDataPermutation);
 
     std::vector<Value *> *fillNewLatchBlock_if_then_else(
             BasicBlock *newLatch, BasicBlock *alcHeader, BasicBlock *joinBlock, BasicBlock *uniformThen,
@@ -260,20 +260,20 @@ private:
                                     Value *latchVector);
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    void findLoadInstructionPtrs();
+    void findLoadInstructions();
 
-    Value *getBasePointer(LoadInst *inst);
 
-    std::map<Value *, Instruction *> loadInstructionsInPreALC(BasicBlock *preALC);
+    std::map<Instruction *, Instruction *> loadInstructionsInPreALC(BasicBlock *preALC);
 
     void loadInstructionsInHeader(BasicBlock *alcHeader);
 
     void addLoadInstructionPhisInHeader(BasicBlock *header, BasicBlock *preALC,
-                                        std::map<Value *, Instruction *> &instructionsInPreAlcMap);
+                                        std::map<Instruction *, Instruction *> &instructionsInPreAlcMap);
 
-    void insertPermutationLogic_data_permutation(BasicBlock *insertAt );
+    void insertPermutationLogic_data_permutation(BasicBlock *insertAt);
 
-    void addLoadPhisToLatch(BasicBlock* newLatch, BasicBlock* alcHeader, BasicBlock* uniformThen, BasicBlock* uniformElse);
+    void
+    addLoadPhisToLatch(BasicBlock *newLatch, BasicBlock *alcHeader, BasicBlock *uniformThen, BasicBlock *uniformElse);
 
 };
 
