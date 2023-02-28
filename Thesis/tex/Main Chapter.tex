@@ -229,7 +229,7 @@ Having the analysis phase and different versions of ALC, we combine them togethe
 In this section we explain how we do the transformation for each case. We start by Wytte algorithm, show the potential cases where it would not result in good performance. Then we analyze what is happening in detail to fine the solution and propose our modified version which works well.
 
 \subsection{If-Then-Else Case}
-It's worth to first talk about the hypothesis behind ALC performance improvement. When we linearize and then vectorize the code with control flow divergence, what happens is that in each iteration of the loop we are adding two sources of overhead:
+It's worth first talking about the hypothesis behind ALC performance improvement. When we linearize and then vectorize the code with control flow divergence, what happens is that in each iteration of the loop we are adding two sources of overhead:
 \begin{enumerate}
     \item The overhead of predicated instructions
     \item redundant computations which their results will be discarded later 
@@ -237,7 +237,7 @@ It's worth to first talk about the hypothesis behind ALC performance improvement
 
 The first one is quite clear. Proccessor can execute normal instructions faster than predicated ones since it need to keep track of the predicates to decide whether it should commit the changes or not.
 
-To better understand the second problem let's consider our motivation example on figure ?? and assume the if condistion is going to be true on every other iteration. So in total, half iteration will execute then block and the other half will execute else block.
+To better understand the second problem let's consider our motivating example on figure ?? and assume the if condistion is going to be true on every other iteration. So in total, half iteration will execute then block and the other half will execute else block.
 now lets move to the figure ?? where lineariation and vectorization have been applied to the code. Let's focus on the first iteration of the vectorized loop.
 
 
@@ -248,20 +248,22 @@ now lets move to the figure ?? where lineariation and vectorization have been ap
     \label{fig:masked_multiplication}
 \end{figure}
 
-After vectors \emph{a\_v, b\_v, c\_v} are loaded in lines 3-5, the mask vector is formed which we know in this example, will be true for \emph{first} and \emph{third} element and will be false for \emph{second} and \emph{forth} element. figure ?? illustrates what will happen at lines 7 to 11 of the code. White elemets are the ones coressponding to true mask and gray ones coresspond to false mask.
+After vectors \emph{a\_v, b\_v, c\_v} are loaded in lines 3-5, the mask vector is formed which we know in this example, will be true for \emph{first} and \emph{third} elements and will be false for \emph{second} and \emph{forth} elements. figure ?? illustrates what will happen at lines 7 to 11 of the code. White elemets are the ones coressponding to true mask and gray ones coresspond to false mask.
 For each Opertion, the vector unit of the processor will do the operation for all lanes \emph{regardless} of mask values. After doing so, it will discard result for false elements and only keep the true ones and then store them to the memory. Vector instruction could have significant more latency [cite?] compared to scalar instructions and as you can see, we are wasting half our computation power while paying the overhead of vector instructions in each iteration.
 
-The idea behind ALC is to utilize vector instructions by postponing any masked operation to the point where, we have a uniform vector. This way not only we don't waste any computation power but we also eliminate maksed operation which are more expensive that regular ones as discussed before.
+In the this example we supposed that the confdtion is true every other iteration but when we have if and else blocks, any sort of distribution of the true and false conditions would have the same impact. Figure ?? shows different possible scenarios which might happen in each iteration of the if-converted code at runtime. It assumes that numbers of instructions in both if and else blocks are the same. The green elements correspond to active elements of the vector exectuing then block 
+instructions and blue ones are those corresponding to active elements of the vector exectuing else block. The gray ones show inactive lanes. As you can see, regardless of how predicates look like, we always endup wasting half vector elements in total as long as then and else block are approximately of the same size. 
+
+\begin{figure}[t!]
+    \centering
+    \includegraphics[width=0.95\textwidth]{img/condition_distribution.png}
+    \caption{different scenarios for predicate distribution}
+    \label{fig:predicate_distribution}
+\end{figure}
+
+The idea behind ALC is to utilize vector instructions by postponing any masked operation to the point where, we have a uniform vector filled with all active lanes. This way not only we don't waste any computation power but we also eliminate maksed operation which are more expensive that regular ones as discussed before.
 
 %%%%%% permutation overhead, requiring more instructions to make ALC sense
-
-
-
-
-
-
-
-
 
 
 
