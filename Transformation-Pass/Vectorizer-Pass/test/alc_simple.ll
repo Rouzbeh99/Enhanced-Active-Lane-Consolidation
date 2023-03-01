@@ -151,7 +151,7 @@ if.then4:                                         ; preds = %for.body
   br label %for.inc, !dbg !162
 
 Preheader.for.remaining.iterations:               ; preds = %middel.block, %for.body.preheader
-  %16 = phi i64 [ 0, %for.body.preheader ], [ %165, %middel.block ]
+  %16 = phi i64 [ 0, %for.body.preheader ], [ %153, %middel.block ]
   br label %for.body
 
 pre.alc:                                          ; preds = %for.body.preheader
@@ -161,203 +161,181 @@ pre.alc:                                          ; preds = %for.body.preheader
   %20 = mul i32 %2, 2
   %21 = add i32 %20, %19
   %total.iterations.to.be.vectorized = sub i32 %n, %21
-  %22 = getelementptr inbounds i32, ptr %c, i64 0, !dbg !146
-  %initial_load = load <vscale x 4 x i32>, ptr %22, align 16
-  %23 = getelementptr inbounds i32, ptr %b, i64 0, !dbg !147
-  %initial_load1 = load <vscale x 4 x i32>, ptr %23, align 16
-  %24 = getelementptr inbounds i8, ptr %cond, i32 0, !dbg !137
-  %25 = call <vscale x 4 x i32> @llvm.aarch64.sve.index.nxv4i32(i32 0, i32 1)
-  %26 = insertelement <vscale x 4 x i32> undef, i32 %n, i64 0
-  %vector.arg = shufflevector <vscale x 4 x i32> %26, <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer
-  %27 = load <vscale x 4 x i8>, ptr %24, align 4
-  %28 = icmp eq <vscale x 4 x i8> %27, zeroinitializer
-  %29 = xor <vscale x 4 x i1> %28, shufflevector (<vscale x 4 x i1> insertelement (<vscale x 4 x i1> poison, i1 true, i32 0), <vscale x 4 x i1> poison, <vscale x 4 x i32> zeroinitializer)
-  %30 = call i64 @llvm.aarch64.sve.cntp.nxv4i1(<vscale x 4 x i1> %29, <vscale x 4 x i1> %29)
-  %31 = trunc i64 %30 to i32
+  %22 = getelementptr inbounds i8, ptr %cond, i32 0, !dbg !137
+  %23 = call <vscale x 4 x i32> @llvm.aarch64.sve.index.nxv4i32(i32 0, i32 1)
+  %24 = insertelement <vscale x 4 x i32> undef, i32 %n, i64 0
+  %vector.arg = shufflevector <vscale x 4 x i32> %24, <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer
+  %25 = load <vscale x 4 x i8>, ptr %22, align 4
+  %26 = icmp eq <vscale x 4 x i8> %25, zeroinitializer
+  %27 = xor <vscale x 4 x i1> %26, shufflevector (<vscale x 4 x i1> insertelement (<vscale x 4 x i1> poison, i1 true, i32 0), <vscale x 4 x i1> poison, <vscale x 4 x i32> zeroinitializer)
+  %28 = call i64 @llvm.aarch64.sve.cntp.nxv4i1(<vscale x 4 x i1> %27, <vscale x 4 x i1> %27)
+  %29 = trunc i64 %28 to i32
   br label %alc.header
 
 alc.header:                                       ; preds = %new.latch, %pre.alc
-  %vector.loop.index = phi i32 [ %2, %pre.alc ], [ %131, %new.latch ]
-  %uniform.vector = phi <vscale x 4 x i32> [ %18, %pre.alc ], [ %126, %new.latch ]
-  %uniform.vector.predicates = phi <vscale x 4 x i1> [ %29, %pre.alc ], [ %127, %new.latch ]
-  %uniform.vec.actives = phi i32 [ %31, %pre.alc ], [ %128, %new.latch ]
-  %uniformLoad = phi <vscale x 4 x i32> [ %initial_load, %pre.alc ], [ %129, %new.latch ]
-  %uniformLoad4 = phi <vscale x 4 x i32> [ %initial_load1, %pre.alc ], [ %130, %new.latch ]
+  %vector.loop.index = phi i32 [ %2, %pre.alc ], [ %119, %new.latch ]
+  %uniform.vector = phi <vscale x 4 x i32> [ %18, %pre.alc ], [ %116, %new.latch ]
+  %uniform.vector.predicates = phi <vscale x 4 x i1> [ %27, %pre.alc ], [ %117, %new.latch ]
+  %uniform.vec.actives = phi i32 [ %29, %pre.alc ], [ %118, %new.latch ]
+  %30 = call <vscale x 4 x i32> @llvm.aarch64.sve.index.nxv4i32(i32 %vector.loop.index, i32 1)
+  %31 = getelementptr inbounds i8, ptr %cond, i32 %vector.loop.index, !dbg !137
   %32 = call <vscale x 4 x i32> @llvm.aarch64.sve.index.nxv4i32(i32 %vector.loop.index, i32 1)
-  %33 = getelementptr inbounds i8, ptr %cond, i32 %vector.loop.index, !dbg !137
-  %34 = call <vscale x 4 x i32> @llvm.aarch64.sve.index.nxv4i32(i32 %vector.loop.index, i32 1)
-  %35 = insertelement <vscale x 4 x i32> undef, i32 %n, i64 0
-  %vector.arg2 = shufflevector <vscale x 4 x i32> %35, <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer
-  %36 = load <vscale x 4 x i8>, ptr %33, align 4
-  %37 = icmp eq <vscale x 4 x i8> %36, zeroinitializer
-  %38 = xor <vscale x 4 x i1> %37, shufflevector (<vscale x 4 x i1> insertelement (<vscale x 4 x i1> poison, i1 true, i32 0), <vscale x 4 x i1> poison, <vscale x 4 x i32> zeroinitializer)
-  %39 = call i64 @llvm.aarch64.sve.cntp.nxv4i1(<vscale x 4 x i1> %38, <vscale x 4 x i1> %38)
-  %40 = trunc i64 %39 to i32
-  %41 = add i32 %uniform.vec.actives, %40
-  %condition = icmp ule i32 %41, %2
-  %42 = getelementptr inbounds i32, ptr %c, i32 %vector.loop.index, !dbg !146
-  %remaining_load = load <vscale x 4 x i32>, ptr %42, align 16
-  %43 = getelementptr inbounds i32, ptr %b, i32 %vector.loop.index, !dbg !147
-  %remaining_load3 = load <vscale x 4 x i32>, ptr %43, align 16
+  %33 = insertelement <vscale x 4 x i32> undef, i32 %n, i64 0
+  %vector.arg1 = shufflevector <vscale x 4 x i32> %33, <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer
+  %34 = load <vscale x 4 x i8>, ptr %31, align 4
+  %35 = icmp eq <vscale x 4 x i8> %34, zeroinitializer
+  %36 = xor <vscale x 4 x i1> %35, shufflevector (<vscale x 4 x i1> insertelement (<vscale x 4 x i1> poison, i1 true, i32 0), <vscale x 4 x i1> poison, <vscale x 4 x i32> zeroinitializer)
+  %37 = call i64 @llvm.aarch64.sve.cntp.nxv4i1(<vscale x 4 x i1> %36, <vscale x 4 x i1> %36)
+  %38 = trunc i64 %37 to i32
+  %39 = add i32 %uniform.vec.actives, %38
+  %condition = icmp ule i32 %39, %2
   br i1 %condition, label %lane.gather, label %linearized
 
 lane.gather:                                      ; preds = %alc.header
-  %44 = call <vscale x 4 x i32> @llvm.aarch64.sve.compact.nxv4i32(<vscale x 4 x i1> %uniform.vector.predicates, <vscale x 4 x i32> %uniform.vector)
-  %45 = call <vscale x 4 x i32> @llvm.aarch64.sve.compact.nxv4i32(<vscale x 4 x i1> %38, <vscale x 4 x i32> %32)
-  %46 = call <vscale x 4 x i32> @llvm.aarch64.sve.compact.nxv4i32(<vscale x 4 x i1> %uniform.vector.predicates, <vscale x 4 x i32> %uniformLoad)
-  %47 = call <vscale x 4 x i32> @llvm.aarch64.sve.compact.nxv4i32(<vscale x 4 x i1> %38, <vscale x 4 x i32> %remaining_load)
-  %48 = call <vscale x 4 x i32> @llvm.aarch64.sve.compact.nxv4i32(<vscale x 4 x i1> %uniform.vector.predicates, <vscale x 4 x i32> %uniformLoad4)
-  %49 = call <vscale x 4 x i32> @llvm.aarch64.sve.compact.nxv4i32(<vscale x 4 x i1> %38, <vscale x 4 x i32> %remaining_load3)
-  %50 = call <vscale x 4 x i1> @llvm.aarch64.sve.whilelt.nxv4i1.i32(i32 0, i32 %uniform.vec.actives)
-  %51 = call <vscale x 4 x i32> @llvm.aarch64.sve.splice.nxv4i32(<vscale x 4 x i1> %50, <vscale x 4 x i32> %44, <vscale x 4 x i32> %45)
-  %52 = call <vscale x 4 x i32> @llvm.aarch64.sve.splice.nxv4i32(<vscale x 4 x i1> %50, <vscale x 4 x i32> %46, <vscale x 4 x i32> %47)
-  %53 = call <vscale x 4 x i32> @llvm.aarch64.sve.splice.nxv4i32(<vscale x 4 x i1> %50, <vscale x 4 x i32> %48, <vscale x 4 x i32> %49)
-  %54 = call <vscale x 4 x i1> @llvm.aarch64.sve.whilelt.nxv4i1.i32(i32 0, i32 %41)
-  %55 = call i64 @llvm.aarch64.sve.cntp.nxv4i1(<vscale x 4 x i1> %54, <vscale x 4 x i1> %54)
-  %56 = trunc i64 %55 to i32
-  %57 = icmp ult i32 %41, %2
-  br i1 %57, label %join.block, label %uniform.block
+  %40 = call <vscale x 4 x i32> @llvm.aarch64.sve.compact.nxv4i32(<vscale x 4 x i1> %uniform.vector.predicates, <vscale x 4 x i32> %uniform.vector)
+  %41 = call <vscale x 4 x i32> @llvm.aarch64.sve.compact.nxv4i32(<vscale x 4 x i1> %36, <vscale x 4 x i32> %30)
+  %42 = call <vscale x 4 x i1> @llvm.aarch64.sve.whilelt.nxv4i1.i32(i32 0, i32 %uniform.vec.actives)
+  %43 = call <vscale x 4 x i32> @llvm.aarch64.sve.splice.nxv4i32(<vscale x 4 x i1> %42, <vscale x 4 x i32> %40, <vscale x 4 x i32> %41)
+  %44 = call <vscale x 4 x i1> @llvm.aarch64.sve.whilelt.nxv4i1.i32(i32 0, i32 %39)
+  %45 = call i64 @llvm.aarch64.sve.cntp.nxv4i1(<vscale x 4 x i1> %44, <vscale x 4 x i1> %44)
+  %46 = trunc i64 %45 to i32
+  %47 = icmp ult i32 %39, %2
+  br i1 %47, label %join.block, label %uniform.block
 
 linearized:                                       ; preds = %alc.header
-  %58 = getelementptr inbounds i32, ptr %a, i32 %vector.loop.index, !dbg !144
-  %59 = getelementptr inbounds i32, ptr %c, i32 %vector.loop.index, !dbg !146
-  %60 = getelementptr inbounds i32, ptr %b, i32 %vector.loop.index, !dbg !147
-  %61 = call <vscale x 4 x i32> @llvm.aarch64.sve.index.nxv4i32(i32 %vector.loop.index, i32 1)
-  %62 = insertelement <vscale x 4 x i32> undef, i32 %n, i64 0
-  %vector.arg8 = shufflevector <vscale x 4 x i32> %62, <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer
-  %63 = call <vscale x 4 x i32> @llvm.masked.load.nxv4i32.p0(ptr %59, i32 16, <vscale x 4 x i1> %38, <vscale x 4 x i32> undef)
-  %64 = call <vscale x 4 x i32> @llvm.masked.load.nxv4i32.p0(ptr %60, i32 16, <vscale x 4 x i1> %38, <vscale x 4 x i32> undef)
-  %65 = mul <vscale x 4 x i32> %64, %61
-  %66 = mul <vscale x 4 x i32> %63, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 -2, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %67 = shl <vscale x 4 x i32> %61, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %68 = add <vscale x 4 x i32> %64, %67
-  %69 = add <vscale x 4 x i32> %68, %65
-  %70 = add <vscale x 4 x i32> %69, %66
-  call void @llvm.masked.store.nxv4i32.p0(<vscale x 4 x i32> %70, ptr %58, i32 16, <vscale x 4 x i1> %38)
-  %71 = sub <vscale x 4 x i32> shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 -3, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer), %63
-  %72 = mul <vscale x 4 x i32> %71, %61
-  %73 = add <vscale x 4 x i32> %63, %64
-  %74 = sub <vscale x 4 x i32> %70, %73
+  %48 = getelementptr inbounds i32, ptr %a, i32 %vector.loop.index, !dbg !144
+  %49 = getelementptr inbounds i32, ptr %c, i32 %vector.loop.index, !dbg !146
+  %50 = getelementptr inbounds i32, ptr %b, i32 %vector.loop.index, !dbg !147
+  %51 = call <vscale x 4 x i32> @llvm.aarch64.sve.index.nxv4i32(i32 %vector.loop.index, i32 1)
+  %52 = insertelement <vscale x 4 x i32> undef, i32 %n, i64 0
+  %vector.arg4 = shufflevector <vscale x 4 x i32> %52, <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer
+  %53 = call <vscale x 4 x i32> @llvm.masked.load.nxv4i32.p0(ptr %49, i32 16, <vscale x 4 x i1> %36, <vscale x 4 x i32> undef)
+  %54 = call <vscale x 4 x i32> @llvm.masked.load.nxv4i32.p0(ptr %50, i32 16, <vscale x 4 x i1> %36, <vscale x 4 x i32> undef)
+  %55 = mul <vscale x 4 x i32> %54, %51
+  %56 = mul <vscale x 4 x i32> %53, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 -2, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %57 = shl <vscale x 4 x i32> %51, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %58 = add <vscale x 4 x i32> %54, %57
+  %59 = add <vscale x 4 x i32> %58, %55
+  %60 = add <vscale x 4 x i32> %59, %56
+  call void @llvm.masked.store.nxv4i32.p0(<vscale x 4 x i32> %60, ptr %48, i32 16, <vscale x 4 x i1> %36)
+  %61 = sub <vscale x 4 x i32> shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 -3, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer), %53
+  %62 = mul <vscale x 4 x i32> %61, %51
+  %63 = add <vscale x 4 x i32> %53, %54
+  %64 = sub <vscale x 4 x i32> %60, %63
+  %65 = shl <vscale x 4 x i32> %64, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %66 = add <vscale x 4 x i32> %62, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 2, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %67 = add <vscale x 4 x i32> %66, %65
+  call void @llvm.masked.store.nxv4i32.p0(<vscale x 4 x i32> %67, ptr %50, i32 16, <vscale x 4 x i1> %36)
+  %68 = add <vscale x 4 x i32> %67, %60
+  %69 = sub <vscale x 4 x i32> %53, %67
+  %70 = shl <vscale x 4 x i32> %69, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %71 = mul <vscale x 4 x i32> %51, %51
+  %72 = add <vscale x 4 x i32> %70, %71
+  %73 = mul <vscale x 4 x i32> %72, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 -3, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %74 = sub <vscale x 4 x i32> %68, %51
   %75 = shl <vscale x 4 x i32> %74, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %76 = add <vscale x 4 x i32> %72, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 2, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %77 = add <vscale x 4 x i32> %76, %75
-  call void @llvm.masked.store.nxv4i32.p0(<vscale x 4 x i32> %77, ptr %60, i32 16, <vscale x 4 x i1> %38)
-  %78 = add <vscale x 4 x i32> %77, %70
-  %79 = sub <vscale x 4 x i32> %63, %77
-  %80 = shl <vscale x 4 x i32> %79, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %81 = mul <vscale x 4 x i32> %61, %61
-  %82 = add <vscale x 4 x i32> %80, %81
-  %83 = mul <vscale x 4 x i32> %82, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 -3, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %84 = sub <vscale x 4 x i32> %78, %61
-  %85 = shl <vscale x 4 x i32> %84, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %86 = add <vscale x 4 x i32> %85, %83
-  call void @llvm.masked.store.nxv4i32.p0(<vscale x 4 x i32> %86, ptr %59, i32 16, <vscale x 4 x i1> %38)
+  %76 = add <vscale x 4 x i32> %75, %73
+  call void @llvm.masked.store.nxv4i32.p0(<vscale x 4 x i32> %76, ptr %49, i32 16, <vscale x 4 x i1> %36)
   br label %new.latch
 
 uniform.block:                                    ; preds = %lane.gather
-  %87 = getelementptr inbounds i32, ptr %a, i32 0, !dbg !144
-  %88 = getelementptr inbounds i32, ptr %c, i32 0, !dbg !146
-  %89 = getelementptr inbounds i32, ptr %b, i32 0, !dbg !147
-  %90 = insertelement <vscale x 4 x i32> undef, i32 %n, i64 0
-  %vector.arg5 = shufflevector <vscale x 4 x i32> %90, <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer
-  %91 = mul <vscale x 4 x i32> %53, %51
-  %92 = mul <vscale x 4 x i32> %52, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 -2, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %93 = shl <vscale x 4 x i32> %51, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %94 = add <vscale x 4 x i32> %53, %93
-  %95 = add <vscale x 4 x i32> %94, %91
-  %96 = add <vscale x 4 x i32> %95, %92
-  call void @llvm.aarch64.sve.st1.scatter.sxtw.index.nxv4i32(<vscale x 4 x i32> %96, <vscale x 4 x i1> %17, ptr %87, <vscale x 4 x i32> %51)
-  %97 = sub <vscale x 4 x i32> shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 -3, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer), %52
-  %98 = mul <vscale x 4 x i32> %97, %51
-  %99 = add <vscale x 4 x i32> %52, %53
-  %100 = sub <vscale x 4 x i32> %96, %99
-  %101 = shl <vscale x 4 x i32> %100, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %102 = add <vscale x 4 x i32> %98, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 2, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %103 = add <vscale x 4 x i32> %102, %101
-  call void @llvm.aarch64.sve.st1.scatter.sxtw.index.nxv4i32(<vscale x 4 x i32> %103, <vscale x 4 x i1> %17, ptr %89, <vscale x 4 x i32> %51)
-  %104 = add <vscale x 4 x i32> %103, %96
-  %105 = sub <vscale x 4 x i32> %52, %103
-  %106 = shl <vscale x 4 x i32> %105, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %107 = mul <vscale x 4 x i32> %51, %51
-  %108 = add <vscale x 4 x i32> %106, %107
-  %109 = mul <vscale x 4 x i32> %108, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 -3, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %110 = sub <vscale x 4 x i32> %104, %51
-  %111 = shl <vscale x 4 x i32> %110, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %112 = add <vscale x 4 x i32> %111, %109
-  call void @llvm.aarch64.sve.st1.scatter.sxtw.index.nxv4i32(<vscale x 4 x i32> %112, <vscale x 4 x i1> %17, ptr %88, <vscale x 4 x i32> %51)
-  %113 = add i32 %vector.loop.index, %2
-  %114 = call <vscale x 4 x i32> @llvm.aarch64.sve.index.nxv4i32(i32 %113, i32 1)
-  %115 = getelementptr inbounds i8, ptr %cond, i32 %113, !dbg !137
-  %116 = call <vscale x 4 x i32> @llvm.aarch64.sve.index.nxv4i32(i32 %113, i32 1)
-  %117 = insertelement <vscale x 4 x i32> undef, i32 %n, i64 0
-  %vector.arg6 = shufflevector <vscale x 4 x i32> %117, <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer
-  %118 = load <vscale x 4 x i8>, ptr %115, align 4
-  %119 = icmp eq <vscale x 4 x i8> %118, zeroinitializer
-  %120 = xor <vscale x 4 x i1> %119, shufflevector (<vscale x 4 x i1> insertelement (<vscale x 4 x i1> poison, i1 true, i32 0), <vscale x 4 x i1> poison, <vscale x 4 x i32> zeroinitializer)
-  %121 = call i64 @llvm.aarch64.sve.cntp.nxv4i1(<vscale x 4 x i1> %120, <vscale x 4 x i1> %120)
-  %122 = trunc i64 %121 to i32
-  %123 = getelementptr inbounds i32, ptr %c, i32 %113, !dbg !146
-  %new_loaded = load <vscale x 4 x i32>, ptr %123, align 16
-  %124 = getelementptr inbounds i32, ptr %b, i32 %113, !dbg !147
-  %new_loaded7 = load <vscale x 4 x i32>, ptr %124, align 16
+  %77 = getelementptr inbounds i32, ptr %a, i32 0, !dbg !144
+  %78 = getelementptr inbounds i32, ptr %c, i32 0, !dbg !146
+  %79 = getelementptr inbounds i32, ptr %b, i32 0, !dbg !147
+  %80 = insertelement <vscale x 4 x i32> undef, i32 %n, i64 0
+  %vector.arg2 = shufflevector <vscale x 4 x i32> %80, <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer
+  %81 = call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.gather.sxtw.index.nxv4i32(<vscale x 4 x i1> %17, ptr %78, <vscale x 4 x i32> %43)
+  %82 = call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.gather.sxtw.index.nxv4i32(<vscale x 4 x i1> %17, ptr %79, <vscale x 4 x i32> %43)
+  %83 = mul <vscale x 4 x i32> %82, %43
+  %84 = mul <vscale x 4 x i32> %81, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 -2, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %85 = shl <vscale x 4 x i32> %43, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %86 = add <vscale x 4 x i32> %82, %85
+  %87 = add <vscale x 4 x i32> %86, %83
+  %88 = add <vscale x 4 x i32> %87, %84
+  call void @llvm.aarch64.sve.st1.scatter.sxtw.index.nxv4i32(<vscale x 4 x i32> %88, <vscale x 4 x i1> %17, ptr %77, <vscale x 4 x i32> %43)
+  %89 = sub <vscale x 4 x i32> shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 -3, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer), %81
+  %90 = mul <vscale x 4 x i32> %89, %43
+  %91 = add <vscale x 4 x i32> %81, %82
+  %92 = sub <vscale x 4 x i32> %88, %91
+  %93 = shl <vscale x 4 x i32> %92, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %94 = add <vscale x 4 x i32> %90, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 2, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %95 = add <vscale x 4 x i32> %94, %93
+  call void @llvm.aarch64.sve.st1.scatter.sxtw.index.nxv4i32(<vscale x 4 x i32> %95, <vscale x 4 x i1> %17, ptr %79, <vscale x 4 x i32> %43)
+  %96 = add <vscale x 4 x i32> %95, %88
+  %97 = sub <vscale x 4 x i32> %81, %95
+  %98 = shl <vscale x 4 x i32> %97, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %99 = mul <vscale x 4 x i32> %43, %43
+  %100 = add <vscale x 4 x i32> %98, %99
+  %101 = mul <vscale x 4 x i32> %100, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 -3, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %102 = sub <vscale x 4 x i32> %96, %43
+  %103 = shl <vscale x 4 x i32> %102, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %104 = add <vscale x 4 x i32> %103, %101
+  call void @llvm.aarch64.sve.st1.scatter.sxtw.index.nxv4i32(<vscale x 4 x i32> %104, <vscale x 4 x i1> %17, ptr %78, <vscale x 4 x i32> %43)
+  %105 = add i32 %vector.loop.index, %2
+  %106 = call <vscale x 4 x i32> @llvm.aarch64.sve.index.nxv4i32(i32 %105, i32 1)
+  %107 = getelementptr inbounds i8, ptr %cond, i32 %105, !dbg !137
+  %108 = call <vscale x 4 x i32> @llvm.aarch64.sve.index.nxv4i32(i32 %105, i32 1)
+  %109 = insertelement <vscale x 4 x i32> undef, i32 %n, i64 0
+  %vector.arg3 = shufflevector <vscale x 4 x i32> %109, <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer
+  %110 = load <vscale x 4 x i8>, ptr %107, align 4
+  %111 = icmp eq <vscale x 4 x i8> %110, zeroinitializer
+  %112 = xor <vscale x 4 x i1> %111, shufflevector (<vscale x 4 x i1> insertelement (<vscale x 4 x i1> poison, i1 true, i32 0), <vscale x 4 x i1> poison, <vscale x 4 x i32> zeroinitializer)
+  %113 = call i64 @llvm.aarch64.sve.cntp.nxv4i1(<vscale x 4 x i1> %112, <vscale x 4 x i1> %112)
+  %114 = trunc i64 %113 to i32
   br label %join.block
 
 new.latch:                                        ; preds = %join.block, %linearized
-  %125 = phi i32 [ %133, %join.block ], [ %vector.loop.index, %linearized ]
-  %126 = phi <vscale x 4 x i32> [ %134, %join.block ], [ %uniform.vector, %linearized ]
-  %127 = phi <vscale x 4 x i1> [ %135, %join.block ], [ %uniform.vector.predicates, %linearized ]
-  %128 = phi i32 [ %136, %join.block ], [ %uniform.vec.actives, %linearized ]
-  %129 = phi <vscale x 4 x i32> [ %loadPhi, %join.block ], [ %uniformLoad, %linearized ]
-  %130 = phi <vscale x 4 x i32> [ %loadPhi9, %join.block ], [ %uniformLoad4, %linearized ]
-  %131 = add i32 %125, %2
-  %132 = icmp uge i32 %131, %total.iterations.to.be.vectorized
-  br i1 %132, label %middel.block, label %alc.header
+  %115 = phi i32 [ %121, %join.block ], [ %vector.loop.index, %linearized ]
+  %116 = phi <vscale x 4 x i32> [ %122, %join.block ], [ %uniform.vector, %linearized ]
+  %117 = phi <vscale x 4 x i1> [ %123, %join.block ], [ %uniform.vector.predicates, %linearized ]
+  %118 = phi i32 [ %124, %join.block ], [ %uniform.vec.actives, %linearized ]
+  %119 = add i32 %115, %2
+  %120 = icmp uge i32 %119, %total.iterations.to.be.vectorized
+  br i1 %120, label %middel.block, label %alc.header
 
 join.block:                                       ; preds = %uniform.block, %lane.gather
-  %133 = phi i32 [ %vector.loop.index, %lane.gather ], [ %113, %uniform.block ]
-  %134 = phi <vscale x 4 x i32> [ %51, %lane.gather ], [ %114, %uniform.block ]
-  %135 = phi <vscale x 4 x i1> [ %54, %lane.gather ], [ %120, %uniform.block ]
-  %136 = phi i32 [ %56, %lane.gather ], [ %122, %uniform.block ]
-  %loadPhi = phi <vscale x 4 x i32> [ %52, %lane.gather ], [ %new_loaded, %uniform.block ]
-  %loadPhi9 = phi <vscale x 4 x i32> [ %53, %lane.gather ], [ %new_loaded7, %uniform.block ]
+  %121 = phi i32 [ %vector.loop.index, %lane.gather ], [ %105, %uniform.block ]
+  %122 = phi <vscale x 4 x i32> [ %43, %lane.gather ], [ %106, %uniform.block ]
+  %123 = phi <vscale x 4 x i1> [ %44, %lane.gather ], [ %112, %uniform.block ]
+  %124 = phi i32 [ %46, %lane.gather ], [ %114, %uniform.block ]
   br label %new.latch
 
 middel.block:                                     ; preds = %new.latch
-  %condition10 = icmp eq i32 %21, 0
-  %137 = getelementptr inbounds i32, ptr %a, i32 0, !dbg !144
-  %138 = getelementptr inbounds i32, ptr %c, i32 0, !dbg !146
-  %139 = getelementptr inbounds i32, ptr %b, i32 0, !dbg !147
-  %140 = insertelement <vscale x 4 x i32> undef, i32 %n, i64 0
-  %vector.arg11 = shufflevector <vscale x 4 x i32> %140, <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer
-  %141 = call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.gather.sxtw.index.nxv4i32(<vscale x 4 x i1> %127, ptr %138, <vscale x 4 x i32> %126)
-  %142 = call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.gather.sxtw.index.nxv4i32(<vscale x 4 x i1> %127, ptr %139, <vscale x 4 x i32> %126)
-  %143 = mul <vscale x 4 x i32> %142, %126
-  %144 = mul <vscale x 4 x i32> %141, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 -2, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %145 = shl <vscale x 4 x i32> %126, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %146 = add <vscale x 4 x i32> %142, %145
-  %147 = add <vscale x 4 x i32> %146, %143
-  %148 = add <vscale x 4 x i32> %147, %144
-  call void @llvm.aarch64.sve.st1.scatter.sxtw.index.nxv4i32(<vscale x 4 x i32> %148, <vscale x 4 x i1> %127, ptr %137, <vscale x 4 x i32> %126)
-  %149 = sub <vscale x 4 x i32> shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 -3, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer), %141
-  %150 = mul <vscale x 4 x i32> %149, %126
-  %151 = add <vscale x 4 x i32> %141, %142
-  %152 = sub <vscale x 4 x i32> %148, %151
-  %153 = shl <vscale x 4 x i32> %152, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %154 = add <vscale x 4 x i32> %150, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 2, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %155 = add <vscale x 4 x i32> %154, %153
-  call void @llvm.aarch64.sve.st1.scatter.sxtw.index.nxv4i32(<vscale x 4 x i32> %155, <vscale x 4 x i1> %127, ptr %139, <vscale x 4 x i32> %126)
-  %156 = add <vscale x 4 x i32> %155, %148
-  %157 = sub <vscale x 4 x i32> %141, %155
-  %158 = shl <vscale x 4 x i32> %157, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %159 = mul <vscale x 4 x i32> %126, %126
-  %160 = add <vscale x 4 x i32> %158, %159
-  %161 = mul <vscale x 4 x i32> %160, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 -3, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %162 = sub <vscale x 4 x i32> %156, %126
-  %163 = shl <vscale x 4 x i32> %162, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
-  %164 = add <vscale x 4 x i32> %163, %161
-  call void @llvm.aarch64.sve.st1.scatter.sxtw.index.nxv4i32(<vscale x 4 x i32> %164, <vscale x 4 x i1> %127, ptr %138, <vscale x 4 x i32> %126)
-  %165 = zext i32 %131 to i64
-  br i1 %condition10, label %for.cond.cleanup.loopexit, label %Preheader.for.remaining.iterations
+  %condition5 = icmp eq i32 %21, 0
+  %125 = getelementptr inbounds i32, ptr %a, i32 0, !dbg !144
+  %126 = getelementptr inbounds i32, ptr %c, i32 0, !dbg !146
+  %127 = getelementptr inbounds i32, ptr %b, i32 0, !dbg !147
+  %128 = insertelement <vscale x 4 x i32> undef, i32 %n, i64 0
+  %vector.arg6 = shufflevector <vscale x 4 x i32> %128, <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer
+  %129 = call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.gather.sxtw.index.nxv4i32(<vscale x 4 x i1> %117, ptr %126, <vscale x 4 x i32> %116)
+  %130 = call <vscale x 4 x i32> @llvm.aarch64.sve.ld1.gather.sxtw.index.nxv4i32(<vscale x 4 x i1> %117, ptr %127, <vscale x 4 x i32> %116)
+  %131 = mul <vscale x 4 x i32> %130, %116
+  %132 = mul <vscale x 4 x i32> %129, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 -2, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %133 = shl <vscale x 4 x i32> %116, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %134 = add <vscale x 4 x i32> %130, %133
+  %135 = add <vscale x 4 x i32> %134, %131
+  %136 = add <vscale x 4 x i32> %135, %132
+  call void @llvm.aarch64.sve.st1.scatter.sxtw.index.nxv4i32(<vscale x 4 x i32> %136, <vscale x 4 x i1> %117, ptr %125, <vscale x 4 x i32> %116)
+  %137 = sub <vscale x 4 x i32> shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 -3, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer), %129
+  %138 = mul <vscale x 4 x i32> %137, %116
+  %139 = add <vscale x 4 x i32> %129, %130
+  %140 = sub <vscale x 4 x i32> %136, %139
+  %141 = shl <vscale x 4 x i32> %140, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %142 = add <vscale x 4 x i32> %138, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 2, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %143 = add <vscale x 4 x i32> %142, %141
+  call void @llvm.aarch64.sve.st1.scatter.sxtw.index.nxv4i32(<vscale x 4 x i32> %143, <vscale x 4 x i1> %117, ptr %127, <vscale x 4 x i32> %116)
+  %144 = add <vscale x 4 x i32> %143, %136
+  %145 = sub <vscale x 4 x i32> %129, %143
+  %146 = shl <vscale x 4 x i32> %145, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %147 = mul <vscale x 4 x i32> %116, %116
+  %148 = add <vscale x 4 x i32> %146, %147
+  %149 = mul <vscale x 4 x i32> %148, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 -3, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %150 = sub <vscale x 4 x i32> %144, %116
+  %151 = shl <vscale x 4 x i32> %150, shufflevector (<vscale x 4 x i32> insertelement (<vscale x 4 x i32> undef, i32 1, i64 0), <vscale x 4 x i32> undef, <vscale x 4 x i32> zeroinitializer)
+  %152 = add <vscale x 4 x i32> %151, %149
+  call void @llvm.aarch64.sve.st1.scatter.sxtw.index.nxv4i32(<vscale x 4 x i32> %152, <vscale x 4 x i1> %117, ptr %126, <vscale x 4 x i32> %116)
+  %153 = zext i32 %119 to i64
+  br i1 %condition5, label %for.cond.cleanup.loopexit, label %Preheader.for.remaining.iterations
 
 for.inc:                                          ; preds = %if.then4, %for.body
   %indvars.iv.next = add nuw nsw i64 %indvars.iv, 1, !dbg !163
@@ -366,8 +344,8 @@ for.inc:                                          ; preds = %if.then4, %for.body
   br i1 %exitcond.not, label %for.cond.cleanup.loopexit, label %for.body, !dbg !127, !llvm.loop !164
 
 if.then75:                                        ; preds = %for.cond.cleanup
-  %166 = load ptr, ptr @stderr, align 8, !dbg !168, !tbaa !130
-  %call76 = tail call i32 (ptr, ptr, ...) @fprintf(ptr noundef %166, ptr noundef nonnull @.str, i32 noundef %call73, ptr noundef nonnull @.str.1, i32 noundef 63) #14, !dbg !168
+  %154 = load ptr, ptr @stderr, align 8, !dbg !168, !tbaa !130
+  %call76 = tail call i32 (ptr, ptr, ...) @fprintf(ptr noundef %154, ptr noundef nonnull @.str, i32 noundef %call73, ptr noundef nonnull @.str.1, i32 noundef 63) #14, !dbg !168
   tail call void @exit(i32 noundef %call73) #15, !dbg !168
   unreachable, !dbg !168
 
@@ -488,128 +466,134 @@ if.end11:                                         ; preds = %if.end6
   %conv = trunc i64 %call16 to i32, !dbg !265
   tail call void @srand(i32 noundef %conv) #13, !dbg !266
   call void @llvm.dbg.value(metadata i32 1, metadata !227, metadata !DIExpression()), !dbg !267
-  %4 = load ptr, ptr @a, align 8, !tbaa !130
-  %5 = load ptr, ptr @b, align 8, !tbaa !130
-  %6 = load ptr, ptr @c, align 8, !tbaa !130
-  %7 = load ptr, ptr @cond, align 8, !tbaa !130
-  call void @llvm.dbg.value(metadata i32 1, metadata !227, metadata !DIExpression()), !dbg !267
   br label %for.body, !dbg !268
 
 for.cond.cleanup:                                 ; preds = %for.body
-  tail call void @simple_if(ptr noundef nonnull %4, ptr noundef nonnull %5, ptr noundef nonnull %6, ptr noundef nonnull %7, i32 noundef 5000000), !dbg !269
+  %.lcssa = phi ptr [ %11, %for.body ], !dbg !269
+  %4 = load ptr, ptr @a, align 8, !dbg !272, !tbaa !130
+  %5 = load ptr, ptr @b, align 8, !dbg !273, !tbaa !130
+  %6 = load ptr, ptr @c, align 8, !dbg !274, !tbaa !130
+  tail call void @simple_if(ptr noundef %4, ptr noundef %5, ptr noundef %6, ptr noundef nonnull %.lcssa, i32 noundef 5000000), !dbg !275
   call void @llvm.dbg.value(metadata i32 0, metadata !229, metadata !DIExpression()), !dbg !244
-  call void @llvm.dbg.value(metadata i32 0, metadata !230, metadata !DIExpression()), !dbg !270
-  %8 = load ptr, ptr @c, align 8, !tbaa !130
-  call void @llvm.dbg.value(metadata i32 0, metadata !230, metadata !DIExpression()), !dbg !270
+  call void @llvm.dbg.value(metadata i32 0, metadata !230, metadata !DIExpression()), !dbg !276
+  %7 = load ptr, ptr @c, align 8, !tbaa !130
+  call void @llvm.dbg.value(metadata i32 0, metadata !230, metadata !DIExpression()), !dbg !276
   call void @llvm.dbg.value(metadata i32 0, metadata !229, metadata !DIExpression()), !dbg !244
-  br label %for.body33, !dbg !271
+  br label %for.body34, !dbg !277
 
 for.body:                                         ; preds = %for.body, %if.end11
   %indvars.iv = phi i64 [ 1, %if.end11 ], [ %indvars.iv.next, %for.body ]
   call void @llvm.dbg.value(metadata i64 %indvars.iv, metadata !227, metadata !DIExpression()), !dbg !267
-  %arrayidx19 = getelementptr inbounds i32, ptr %4, i64 %indvars.iv, !dbg !272
-  store i32 1, ptr %arrayidx19, align 4, !dbg !275, !tbaa !119
-  %arrayidx21 = getelementptr inbounds i32, ptr %5, i64 %indvars.iv, !dbg !276
-  store i32 -1, ptr %arrayidx21, align 4, !dbg !277, !tbaa !119
-  %arrayidx23 = getelementptr inbounds i32, ptr %6, i64 %indvars.iv, !dbg !278
-  store i32 0, ptr %arrayidx23, align 4, !dbg !279, !tbaa !119
-  %9 = trunc i64 %indvars.iv to i32, !dbg !280
-  %rem = urem i32 %9, 3, !dbg !280
-  %cmp24 = icmp ne i32 %rem, 0, !dbg !281
-  %arrayidx27 = getelementptr inbounds i8, ptr %7, i64 %indvars.iv, !dbg !282
-  %frombool = zext i1 %cmp24 to i8, !dbg !283
-  store i8 %frombool, ptr %arrayidx27, align 1, !dbg !283, !tbaa !140
-  %indvars.iv.next = add nuw nsw i64 %indvars.iv, 1, !dbg !284
+  %8 = load ptr, ptr @a, align 8, !dbg !278, !tbaa !130
+  %arrayidx19 = getelementptr inbounds i32, ptr %8, i64 %indvars.iv, !dbg !278
+  store i32 1, ptr %arrayidx19, align 4, !dbg !279, !tbaa !119
+  %9 = load ptr, ptr @b, align 8, !dbg !280, !tbaa !130
+  %arrayidx21 = getelementptr inbounds i32, ptr %9, i64 %indvars.iv, !dbg !280
+  store i32 -1, ptr %arrayidx21, align 4, !dbg !281, !tbaa !119
+  %10 = load ptr, ptr @c, align 8, !dbg !282, !tbaa !130
+  %arrayidx23 = getelementptr inbounds i32, ptr %10, i64 %indvars.iv, !dbg !282
+  store i32 0, ptr %arrayidx23, align 4, !dbg !283, !tbaa !119
+  %call24 = tail call i32 @rand() #13, !dbg !284
+  %rem = srem i32 %call24, 5, !dbg !285
+  %cmp25 = icmp eq i32 %rem, 0, !dbg !286
+  %11 = load ptr, ptr @cond, align 8, !dbg !269, !tbaa !130
+  %arrayidx28 = getelementptr inbounds i8, ptr %11, i64 %indvars.iv, !dbg !269
+  %frombool = zext i1 %cmp25 to i8, !dbg !287
+  store i8 %frombool, ptr %arrayidx28, align 1, !dbg !287, !tbaa !140
+  %indvars.iv.next = add nuw nsw i64 %indvars.iv, 1, !dbg !288
   call void @llvm.dbg.value(metadata i64 %indvars.iv.next, metadata !227, metadata !DIExpression()), !dbg !267
-  %exitcond.not = icmp eq i64 %indvars.iv.next, 5000000, !dbg !285
-  br i1 %exitcond.not, label %for.cond.cleanup, label %for.body, !dbg !268, !llvm.loop !286
+  %exitcond.not = icmp eq i64 %indvars.iv.next, 5000000, !dbg !289
+  br i1 %exitcond.not, label %for.cond.cleanup, label %for.body, !dbg !268, !llvm.loop !290
 
-for.cond.cleanup32:                               ; preds = %for.body33
-  %add.lcssa = phi i32 [ %add, %for.body33 ], !dbg !288
-  %call39 = tail call i32 (ptr, ...) @printf(ptr noundef nonnull @.str.4, i32 noundef %add.lcssa), !dbg !291
-  %putchar = tail call i32 @putchar(i32 10), !dbg !292
-  %10 = load ptr, ptr @a, align 8, !dbg !293, !tbaa !130
-  tail call void @free(ptr noundef %10) #13, !dbg !294
-  %11 = load ptr, ptr @b, align 8, !dbg !295, !tbaa !130
-  tail call void @free(ptr noundef %11) #13, !dbg !296
-  %12 = load ptr, ptr @c, align 8, !dbg !297, !tbaa !130
+for.cond.cleanup33:                               ; preds = %for.body34
+  %add.lcssa = phi i32 [ %add, %for.body34 ], !dbg !292
+  %call40 = tail call i32 (ptr, ...) @printf(ptr noundef nonnull @.str.4, i32 noundef %add.lcssa), !dbg !295
+  %putchar = tail call i32 @putchar(i32 10), !dbg !296
+  %12 = load ptr, ptr @a, align 8, !dbg !297, !tbaa !130
   tail call void @free(ptr noundef %12) #13, !dbg !298
-  %13 = load ptr, ptr @cond, align 8, !dbg !299, !tbaa !130
+  %13 = load ptr, ptr @b, align 8, !dbg !299, !tbaa !130
   tail call void @free(ptr noundef %13) #13, !dbg !300
-  %14 = load i64, ptr @CounterValues, align 8, !dbg !301, !tbaa !302
-  %call41 = tail call i32 (ptr, ...) @printf(ptr noundef nonnull @.str.6, i64 noundef %14), !dbg !304
-  %15 = load i64, ptr getelementptr inbounds ([4 x i64], ptr @CounterValues, i64 0, i64 1), align 8, !dbg !305, !tbaa !302
-  %call42 = tail call i32 (ptr, ...) @printf(ptr noundef nonnull @.str.7, i64 noundef %15), !dbg !306
-  %16 = load i64, ptr getelementptr inbounds ([4 x i64], ptr @CounterValues, i64 0, i64 2), align 8, !dbg !307, !tbaa !302
-  %call43 = tail call i32 (ptr, ...) @printf(ptr noundef nonnull @.str.8, i64 noundef %16), !dbg !308
-  %17 = load i64, ptr getelementptr inbounds ([4 x i64], ptr @CounterValues, i64 0, i64 3), align 8, !dbg !309, !tbaa !302
-  %call44 = tail call i32 (ptr, ...) @printf(ptr noundef nonnull @.str.9, i64 noundef %17), !dbg !310
-  %18 = load double, ptr @ExecutionTime, align 8, !dbg !311, !tbaa !173
-  %call45 = tail call i32 (ptr, ...) @printf(ptr noundef nonnull @.str.10, double noundef %18), !dbg !312
-  %19 = load i32, ptr @EventSet, align 4, !dbg !313, !tbaa !119
-  %call46 = tail call i32 @PAPI_remove_events(i32 noundef %19, ptr noundef nonnull @EventCodes, i32 noundef 4) #13, !dbg !315
-  call void @llvm.dbg.value(metadata i32 %call46, metadata !221, metadata !DIExpression()), !dbg !244
-  %cmp47.not = icmp eq i32 %call46, 0, !dbg !316
-  br i1 %cmp47.not, label %if.end51, label %if.then49, !dbg !317
+  %14 = load ptr, ptr @c, align 8, !dbg !301, !tbaa !130
+  tail call void @free(ptr noundef %14) #13, !dbg !302
+  %15 = load ptr, ptr @cond, align 8, !dbg !303, !tbaa !130
+  tail call void @free(ptr noundef %15) #13, !dbg !304
+  %16 = load i64, ptr @CounterValues, align 8, !dbg !305, !tbaa !306
+  %call42 = tail call i32 (ptr, ...) @printf(ptr noundef nonnull @.str.6, i64 noundef %16), !dbg !308
+  %17 = load i64, ptr getelementptr inbounds ([4 x i64], ptr @CounterValues, i64 0, i64 1), align 8, !dbg !309, !tbaa !306
+  %call43 = tail call i32 (ptr, ...) @printf(ptr noundef nonnull @.str.7, i64 noundef %17), !dbg !310
+  %18 = load i64, ptr getelementptr inbounds ([4 x i64], ptr @CounterValues, i64 0, i64 2), align 8, !dbg !311, !tbaa !306
+  %call44 = tail call i32 (ptr, ...) @printf(ptr noundef nonnull @.str.8, i64 noundef %18), !dbg !312
+  %19 = load i64, ptr getelementptr inbounds ([4 x i64], ptr @CounterValues, i64 0, i64 3), align 8, !dbg !313, !tbaa !306
+  %call45 = tail call i32 (ptr, ...) @printf(ptr noundef nonnull @.str.9, i64 noundef %19), !dbg !314
+  %20 = load double, ptr @ExecutionTime, align 8, !dbg !315, !tbaa !173
+  %call46 = tail call i32 (ptr, ...) @printf(ptr noundef nonnull @.str.10, double noundef %20), !dbg !316
+  %21 = load i32, ptr @EventSet, align 4, !dbg !317, !tbaa !119
+  %call47 = tail call i32 @PAPI_remove_events(i32 noundef %21, ptr noundef nonnull @EventCodes, i32 noundef 4) #13, !dbg !319
+  call void @llvm.dbg.value(metadata i32 %call47, metadata !221, metadata !DIExpression()), !dbg !244
+  %cmp48.not = icmp eq i32 %call47, 0, !dbg !320
+  br i1 %cmp48.not, label %if.end52, label %if.then50, !dbg !321
 
-for.body33:                                       ; preds = %for.body33, %for.cond.cleanup
-  %indvars.iv78 = phi i64 [ 0, %for.cond.cleanup ], [ %indvars.iv.next79, %for.body33 ]
-  %sum.075 = phi i32 [ 0, %for.cond.cleanup ], [ %add, %for.body33 ]
-  call void @llvm.dbg.value(metadata i64 %indvars.iv78, metadata !230, metadata !DIExpression()), !dbg !270
+for.body34:                                       ; preds = %for.body34, %for.cond.cleanup
+  %indvars.iv78 = phi i64 [ 0, %for.cond.cleanup ], [ %indvars.iv.next79, %for.body34 ]
+  %sum.075 = phi i32 [ 0, %for.cond.cleanup ], [ %add, %for.body34 ]
+  call void @llvm.dbg.value(metadata i64 %indvars.iv78, metadata !230, metadata !DIExpression()), !dbg !276
   call void @llvm.dbg.value(metadata i32 %sum.075, metadata !229, metadata !DIExpression()), !dbg !244
-  %arrayidx35 = getelementptr inbounds i32, ptr %8, i64 %indvars.iv78, !dbg !318
-  %20 = load i32, ptr %arrayidx35, align 4, !dbg !318, !tbaa !119
-  %add = add nsw i32 %20, %sum.075, !dbg !288
+  %arrayidx36 = getelementptr inbounds i32, ptr %7, i64 %indvars.iv78, !dbg !322
+  %22 = load i32, ptr %arrayidx36, align 4, !dbg !322, !tbaa !119
+  %add = add nsw i32 %22, %sum.075, !dbg !292
   call void @llvm.dbg.value(metadata i32 %add, metadata !229, metadata !DIExpression()), !dbg !244
-  %indvars.iv.next79 = add nuw nsw i64 %indvars.iv78, 1, !dbg !319
-  call void @llvm.dbg.value(metadata i64 %indvars.iv.next79, metadata !230, metadata !DIExpression()), !dbg !270
-  %exitcond81.not = icmp eq i64 %indvars.iv.next79, 5000000, !dbg !320
-  br i1 %exitcond81.not, label %for.cond.cleanup32, label %for.body33, !dbg !271, !llvm.loop !321
+  %indvars.iv.next79 = add nuw nsw i64 %indvars.iv78, 1, !dbg !323
+  call void @llvm.dbg.value(metadata i64 %indvars.iv.next79, metadata !230, metadata !DIExpression()), !dbg !276
+  %exitcond81.not = icmp eq i64 %indvars.iv.next79, 5000000, !dbg !324
+  br i1 %exitcond81.not, label %for.cond.cleanup33, label %for.body34, !dbg !277, !llvm.loop !325
 
-if.then49:                                        ; preds = %for.cond.cleanup32
-  %21 = load ptr, ptr @stderr, align 8, !dbg !323, !tbaa !130
-  %call50 = tail call i32 (ptr, ptr, ...) @fprintf(ptr noundef %21, ptr noundef nonnull @.str, i32 noundef %call46, ptr noundef nonnull @.str.1, i32 noundef 370) #14, !dbg !323
-  tail call void @exit(i32 noundef %call46) #15, !dbg !323
-  unreachable, !dbg !323
+if.then50:                                        ; preds = %for.cond.cleanup33
+  %23 = load ptr, ptr @stderr, align 8, !dbg !327, !tbaa !130
+  %call51 = tail call i32 (ptr, ptr, ...) @fprintf(ptr noundef %23, ptr noundef nonnull @.str, i32 noundef %call47, ptr noundef nonnull @.str.1, i32 noundef 370) #14, !dbg !327
+  tail call void @exit(i32 noundef %call47) #15, !dbg !327
+  unreachable, !dbg !327
 
-if.end51:                                         ; preds = %for.cond.cleanup32
-  %call52 = tail call i32 @PAPI_destroy_eventset(ptr noundef nonnull @EventSet) #13, !dbg !325
-  call void @llvm.dbg.value(metadata i32 %call52, metadata !221, metadata !DIExpression()), !dbg !244
-  %cmp53.not = icmp eq i32 %call52, 0, !dbg !327
-  br i1 %cmp53.not, label %if.end57, label %if.then55, !dbg !328
+if.end52:                                         ; preds = %for.cond.cleanup33
+  %call53 = tail call i32 @PAPI_destroy_eventset(ptr noundef nonnull @EventSet) #13, !dbg !329
+  call void @llvm.dbg.value(metadata i32 %call53, metadata !221, metadata !DIExpression()), !dbg !244
+  %cmp54.not = icmp eq i32 %call53, 0, !dbg !331
+  br i1 %cmp54.not, label %if.end58, label %if.then56, !dbg !332
 
-if.then55:                                        ; preds = %if.end51
-  %22 = load ptr, ptr @stderr, align 8, !dbg !329, !tbaa !130
-  %call56 = tail call i32 (ptr, ptr, ...) @fprintf(ptr noundef %22, ptr noundef nonnull @.str, i32 noundef %call52, ptr noundef nonnull @.str.1, i32 noundef 373) #14, !dbg !329
-  tail call void @exit(i32 noundef %call52) #15, !dbg !329
-  unreachable, !dbg !329
+if.then56:                                        ; preds = %if.end52
+  %24 = load ptr, ptr @stderr, align 8, !dbg !333, !tbaa !130
+  %call57 = tail call i32 (ptr, ptr, ...) @fprintf(ptr noundef %24, ptr noundef nonnull @.str, i32 noundef %call53, ptr noundef nonnull @.str.1, i32 noundef 373) #14, !dbg !333
+  tail call void @exit(i32 noundef %call53) #15, !dbg !333
+  unreachable, !dbg !333
 
-if.end57:                                         ; preds = %if.end51
-  tail call void @PAPI_shutdown() #13, !dbg !331
-  call void @llvm.lifetime.end.p0(i64 128, ptr nonnull %errstring) #13, !dbg !332
-  ret i32 0, !dbg !333
+if.end58:                                         ; preds = %if.end52
+  tail call void @PAPI_shutdown() #13, !dbg !335
+  call void @llvm.lifetime.end.p0(i64 128, ptr nonnull %errstring) #13, !dbg !336
+  ret i32 0, !dbg !337
 }
 
-declare !dbg !334 i32 @PAPI_library_init(i32 noundef) local_unnamed_addr #4
+declare !dbg !338 i32 @PAPI_library_init(i32 noundef) local_unnamed_addr #4
 
-declare !dbg !335 i32 @PAPI_create_eventset(ptr noundef) local_unnamed_addr #4
+declare !dbg !339 i32 @PAPI_create_eventset(ptr noundef) local_unnamed_addr #4
 
-declare !dbg !338 i32 @PAPI_add_events(i32 noundef, ptr noundef, i32 noundef) local_unnamed_addr #4
-
-; Function Attrs: nounwind
-declare !dbg !341 void @srand(i32 noundef) local_unnamed_addr #3
+declare !dbg !342 i32 @PAPI_add_events(i32 noundef, ptr noundef, i32 noundef) local_unnamed_addr #4
 
 ; Function Attrs: nounwind
-declare !dbg !346 i64 @time(ptr noundef) local_unnamed_addr #3
+declare !dbg !345 void @srand(i32 noundef) local_unnamed_addr #3
+
+; Function Attrs: nounwind
+declare !dbg !350 i64 @time(ptr noundef) local_unnamed_addr #3
+
+; Function Attrs: nounwind
+declare !dbg !356 i32 @rand() local_unnamed_addr #3
 
 ; Function Attrs: inaccessiblemem_or_argmemonly mustprogress nounwind willreturn
 declare void @free(ptr nocapture noundef) local_unnamed_addr #8
 
-declare !dbg !352 i32 @PAPI_remove_events(i32 noundef, ptr noundef, i32 noundef) local_unnamed_addr #4
+declare !dbg !357 i32 @PAPI_remove_events(i32 noundef, ptr noundef, i32 noundef) local_unnamed_addr #4
 
-declare !dbg !353 i32 @PAPI_destroy_eventset(ptr noundef) local_unnamed_addr #4
+declare !dbg !358 i32 @PAPI_destroy_eventset(ptr noundef) local_unnamed_addr #4
 
-declare !dbg !354 void @PAPI_shutdown() local_unnamed_addr #4
+declare !dbg !359 void @PAPI_shutdown() local_unnamed_addr #4
 
 ; Function Attrs: nocallback nofree nosync nounwind readnone speculatable willreturn
 declare void @llvm.dbg.value(metadata, metadata, metadata) #2
@@ -641,17 +625,17 @@ declare <vscale x 4 x i1> @llvm.aarch64.sve.whilelt.nxv4i1.i32(i32, i32) #10
 ; Function Attrs: nocallback nofree nosync nounwind readnone willreturn
 declare <vscale x 4 x i32> @llvm.aarch64.sve.splice.nxv4i32(<vscale x 4 x i1>, <vscale x 4 x i32>, <vscale x 4 x i32>) #10
 
-; Function Attrs: argmemonly nocallback nofree nosync nounwind willreturn writeonly
-declare void @llvm.aarch64.sve.st1.scatter.sxtw.index.nxv4i32(<vscale x 4 x i32>, <vscale x 4 x i1>, ptr, <vscale x 4 x i32>) #11
-
 ; Function Attrs: argmemonly nocallback nofree nosync nounwind readonly willreturn
-declare <vscale x 4 x i32> @llvm.masked.load.nxv4i32.p0(ptr, i32 immarg, <vscale x 4 x i1>, <vscale x 4 x i32>) #12
+declare <vscale x 4 x i32> @llvm.aarch64.sve.ld1.gather.sxtw.index.nxv4i32(<vscale x 4 x i1>, ptr, <vscale x 4 x i32>) #11
 
 ; Function Attrs: argmemonly nocallback nofree nosync nounwind willreturn writeonly
-declare void @llvm.masked.store.nxv4i32.p0(<vscale x 4 x i32>, ptr, i32 immarg, <vscale x 4 x i1>) #11
+declare void @llvm.aarch64.sve.st1.scatter.sxtw.index.nxv4i32(<vscale x 4 x i32>, <vscale x 4 x i1>, ptr, <vscale x 4 x i32>) #12
 
 ; Function Attrs: argmemonly nocallback nofree nosync nounwind readonly willreturn
-declare <vscale x 4 x i32> @llvm.aarch64.sve.ld1.gather.sxtw.index.nxv4i32(<vscale x 4 x i1>, ptr, <vscale x 4 x i32>) #12
+declare <vscale x 4 x i32> @llvm.masked.load.nxv4i32.p0(ptr, i32 immarg, <vscale x 4 x i1>, <vscale x 4 x i32>) #11
+
+; Function Attrs: argmemonly nocallback nofree nosync nounwind willreturn writeonly
+declare void @llvm.masked.store.nxv4i32.p0(<vscale x 4 x i32>, ptr, i32 immarg, <vscale x 4 x i1>) #12
 
 attributes #0 = { noinline nounwind uwtable "frame-pointer"="non-leaf" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="generic" "target-features"="+neon,+v8a" }
 attributes #1 = { argmemonly nocallback nofree nosync nounwind willreturn }
@@ -664,8 +648,8 @@ attributes #7 = { inaccessiblememonly mustprogress nofree nounwind willreturn al
 attributes #8 = { inaccessiblemem_or_argmemonly mustprogress nounwind willreturn "frame-pointer"="non-leaf" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="generic" "target-features"="+neon,+v8a" }
 attributes #9 = { nofree nounwind }
 attributes #10 = { nocallback nofree nosync nounwind readnone willreturn }
-attributes #11 = { argmemonly nocallback nofree nosync nounwind willreturn writeonly }
-attributes #12 = { argmemonly nocallback nofree nosync nounwind readonly willreturn }
+attributes #11 = { argmemonly nocallback nofree nosync nounwind readonly willreturn }
+attributes #12 = { argmemonly nocallback nofree nosync nounwind willreturn writeonly }
 attributes #13 = { nounwind }
 attributes #14 = { cold }
 attributes #15 = { noreturn nounwind }
@@ -678,7 +662,7 @@ attributes #16 = { nounwind allocsize(0) }
 !0 = !DIGlobalVariableExpression(var: !1, expr: !DIExpression())
 !1 = distinct !DIGlobalVariable(name: "EventSet", scope: !2, file: !3, line: 22, type: !6, isLocal: false, isDefinition: true)
 !2 = distinct !DICompileUnit(language: DW_LANG_C99, file: !3, producer: "clang version 15.0.0 (https://www.github.com/llvm/llvm-project.git 61baf2ffa7071944c00a0642fdb9ff77d9cff0da)", isOptimized: true, runtimeVersion: 0, emissionKind: FullDebug, retainedTypes: !4, globals: !10, splitDebugInlining: false, nameTableKind: None)
-!3 = !DIFile(filename: "test.c", directory: "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation-Pass/Vectorizer-Pass/test", checksumkind: CSK_MD5, checksum: "69a6a0fc5e2ca2e1dd1c37c5b956e87a")
+!3 = !DIFile(filename: "test.c", directory: "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Transformation-Pass/Vectorizer-Pass/test", checksumkind: CSK_MD5, checksum: "fe2328a01b98b0329038bdf60290427b")
 !4 = !{!5, !7, !8}
 !5 = !DIDerivedType(tag: DW_TAG_pointer_type, baseType: !6, size: 64)
 !6 = !DIBasicType(name: "int", size: 32, encoding: DW_ATE_signed)
@@ -944,91 +928,96 @@ attributes #16 = { nounwind allocsize(0) }
 !266 = !DILocation(line: 330, column: 5, scope: !217)
 !267 = !DILocation(line: 0, scope: !228)
 !268 = !DILocation(line: 333, column: 5, scope: !228)
-!269 = !DILocation(line: 345, column: 5, scope: !217)
-!270 = !DILocation(line: 0, scope: !231)
-!271 = !DILocation(line: 351, column: 5, scope: !231)
-!272 = !DILocation(line: 334, column: 9, scope: !273)
-!273 = distinct !DILexicalBlock(scope: !274, file: !3, line: 333, column: 33)
-!274 = distinct !DILexicalBlock(scope: !228, file: !3, line: 333, column: 5)
-!275 = !DILocation(line: 334, column: 14, scope: !273)
-!276 = !DILocation(line: 335, column: 9, scope: !273)
-!277 = !DILocation(line: 335, column: 14, scope: !273)
-!278 = !DILocation(line: 336, column: 9, scope: !273)
-!279 = !DILocation(line: 336, column: 14, scope: !273)
-!280 = !DILocation(line: 341, column: 22, scope: !273)
-!281 = !DILocation(line: 341, column: 27, scope: !273)
-!282 = !DILocation(line: 341, column: 9, scope: !273)
-!283 = !DILocation(line: 341, column: 17, scope: !273)
-!284 = !DILocation(line: 333, column: 28, scope: !274)
-!285 = !DILocation(line: 333, column: 23, scope: !274)
-!286 = distinct !{!286, !268, !287, !166, !167}
-!287 = !DILocation(line: 342, column: 5, scope: !228)
-!288 = !DILocation(line: 352, column: 13, scope: !289)
-!289 = distinct !DILexicalBlock(scope: !290, file: !3, line: 351, column: 33)
-!290 = distinct !DILexicalBlock(scope: !231, file: !3, line: 351, column: 5)
-!291 = !DILocation(line: 356, column: 5, scope: !217)
-!292 = !DILocation(line: 357, column: 5, scope: !217)
-!293 = !DILocation(line: 359, column: 10, scope: !217)
-!294 = !DILocation(line: 359, column: 5, scope: !217)
-!295 = !DILocation(line: 360, column: 10, scope: !217)
-!296 = !DILocation(line: 360, column: 5, scope: !217)
-!297 = !DILocation(line: 361, column: 10, scope: !217)
-!298 = !DILocation(line: 361, column: 5, scope: !217)
-!299 = !DILocation(line: 362, column: 10, scope: !217)
-!300 = !DILocation(line: 362, column: 5, scope: !217)
-!301 = !DILocation(line: 364, column: 53, scope: !217)
-!302 = !{!303, !303, i64 0}
-!303 = !{!"long long", !81, i64 0}
-!304 = !DILocation(line: 364, column: 5, scope: !217)
-!305 = !DILocation(line: 365, column: 36, scope: !217)
-!306 = !DILocation(line: 365, column: 5, scope: !217)
-!307 = !DILocation(line: 366, column: 50, scope: !217)
-!308 = !DILocation(line: 366, column: 5, scope: !217)
-!309 = !DILocation(line: 367, column: 49, scope: !217)
-!310 = !DILocation(line: 367, column: 5, scope: !217)
-!311 = !DILocation(line: 368, column: 40, scope: !217)
-!312 = !DILocation(line: 368, column: 5, scope: !217)
-!313 = !DILocation(line: 370, column: 38, scope: !314)
-!314 = distinct !DILexicalBlock(scope: !217, file: !3, line: 370, column: 9)
-!315 = !DILocation(line: 370, column: 19, scope: !314)
-!316 = !DILocation(line: 370, column: 72, scope: !314)
-!317 = !DILocation(line: 370, column: 9, scope: !217)
-!318 = !DILocation(line: 352, column: 16, scope: !289)
-!319 = !DILocation(line: 351, column: 28, scope: !290)
-!320 = !DILocation(line: 351, column: 23, scope: !290)
-!321 = distinct !{!321, !271, !322, !166, !167}
-!322 = !DILocation(line: 353, column: 5, scope: !231)
-!323 = !DILocation(line: 370, column: 84, scope: !324)
-!324 = distinct !DILexicalBlock(scope: !314, file: !3, line: 370, column: 84)
-!325 = !DILocation(line: 373, column: 19, scope: !326)
-!326 = distinct !DILexicalBlock(scope: !217, file: !3, line: 373, column: 9)
-!327 = !DILocation(line: 373, column: 53, scope: !326)
-!328 = !DILocation(line: 373, column: 9, scope: !217)
-!329 = !DILocation(line: 373, column: 65, scope: !330)
-!330 = distinct !DILexicalBlock(scope: !326, file: !3, line: 373, column: 65)
-!331 = !DILocation(line: 376, column: 5, scope: !217)
-!332 = !DILocation(line: 379, column: 1, scope: !217)
-!333 = !DILocation(line: 378, column: 5, scope: !217)
-!334 = !DISubprogram(name: "PAPI_library_init", scope: !177, file: !177, line: 1172, type: !178, flags: DIFlagPrototyped, spFlags: DISPFlagOptimized, retainedNodes: !99)
-!335 = !DISubprogram(name: "PAPI_create_eventset", scope: !177, file: !177, line: 1147, type: !336, flags: DIFlagPrototyped, spFlags: DISPFlagOptimized, retainedNodes: !99)
-!336 = !DISubroutineType(types: !337)
-!337 = !{!6, !5}
-!338 = !DISubprogram(name: "PAPI_add_events", scope: !177, file: !177, line: 1143, type: !339, flags: DIFlagPrototyped, spFlags: DISPFlagOptimized, retainedNodes: !99)
-!339 = !DISubroutineType(types: !340)
-!340 = !{!6, !6, !5, !6}
-!341 = !DISubprogram(name: "srand", scope: !342, file: !342, line: 455, type: !343, flags: DIFlagPrototyped, spFlags: DISPFlagOptimized, retainedNodes: !99)
-!342 = !DIFile(filename: "/usr/include/stdlib.h", directory: "", checksumkind: CSK_MD5, checksum: "f0db66726d35051e5af2525f5b33bd81")
+!269 = !DILocation(line: 341, column: 9, scope: !270)
+!270 = distinct !DILexicalBlock(scope: !271, file: !3, line: 333, column: 33)
+!271 = distinct !DILexicalBlock(scope: !228, file: !3, line: 333, column: 5)
+!272 = !DILocation(line: 345, column: 15, scope: !217)
+!273 = !DILocation(line: 345, column: 18, scope: !217)
+!274 = !DILocation(line: 345, column: 21, scope: !217)
+!275 = !DILocation(line: 345, column: 5, scope: !217)
+!276 = !DILocation(line: 0, scope: !231)
+!277 = !DILocation(line: 351, column: 5, scope: !231)
+!278 = !DILocation(line: 334, column: 9, scope: !270)
+!279 = !DILocation(line: 334, column: 14, scope: !270)
+!280 = !DILocation(line: 335, column: 9, scope: !270)
+!281 = !DILocation(line: 335, column: 14, scope: !270)
+!282 = !DILocation(line: 336, column: 9, scope: !270)
+!283 = !DILocation(line: 336, column: 14, scope: !270)
+!284 = !DILocation(line: 341, column: 20, scope: !270)
+!285 = !DILocation(line: 341, column: 27, scope: !270)
+!286 = !DILocation(line: 341, column: 32, scope: !270)
+!287 = !DILocation(line: 341, column: 17, scope: !270)
+!288 = !DILocation(line: 333, column: 28, scope: !271)
+!289 = !DILocation(line: 333, column: 23, scope: !271)
+!290 = distinct !{!290, !268, !291, !166, !167}
+!291 = !DILocation(line: 342, column: 5, scope: !228)
+!292 = !DILocation(line: 352, column: 13, scope: !293)
+!293 = distinct !DILexicalBlock(scope: !294, file: !3, line: 351, column: 33)
+!294 = distinct !DILexicalBlock(scope: !231, file: !3, line: 351, column: 5)
+!295 = !DILocation(line: 356, column: 5, scope: !217)
+!296 = !DILocation(line: 357, column: 5, scope: !217)
+!297 = !DILocation(line: 359, column: 10, scope: !217)
+!298 = !DILocation(line: 359, column: 5, scope: !217)
+!299 = !DILocation(line: 360, column: 10, scope: !217)
+!300 = !DILocation(line: 360, column: 5, scope: !217)
+!301 = !DILocation(line: 361, column: 10, scope: !217)
+!302 = !DILocation(line: 361, column: 5, scope: !217)
+!303 = !DILocation(line: 362, column: 10, scope: !217)
+!304 = !DILocation(line: 362, column: 5, scope: !217)
+!305 = !DILocation(line: 364, column: 53, scope: !217)
+!306 = !{!307, !307, i64 0}
+!307 = !{!"long long", !81, i64 0}
+!308 = !DILocation(line: 364, column: 5, scope: !217)
+!309 = !DILocation(line: 365, column: 36, scope: !217)
+!310 = !DILocation(line: 365, column: 5, scope: !217)
+!311 = !DILocation(line: 366, column: 50, scope: !217)
+!312 = !DILocation(line: 366, column: 5, scope: !217)
+!313 = !DILocation(line: 367, column: 49, scope: !217)
+!314 = !DILocation(line: 367, column: 5, scope: !217)
+!315 = !DILocation(line: 368, column: 40, scope: !217)
+!316 = !DILocation(line: 368, column: 5, scope: !217)
+!317 = !DILocation(line: 370, column: 38, scope: !318)
+!318 = distinct !DILexicalBlock(scope: !217, file: !3, line: 370, column: 9)
+!319 = !DILocation(line: 370, column: 19, scope: !318)
+!320 = !DILocation(line: 370, column: 72, scope: !318)
+!321 = !DILocation(line: 370, column: 9, scope: !217)
+!322 = !DILocation(line: 352, column: 16, scope: !293)
+!323 = !DILocation(line: 351, column: 28, scope: !294)
+!324 = !DILocation(line: 351, column: 23, scope: !294)
+!325 = distinct !{!325, !277, !326, !166, !167}
+!326 = !DILocation(line: 353, column: 5, scope: !231)
+!327 = !DILocation(line: 370, column: 84, scope: !328)
+!328 = distinct !DILexicalBlock(scope: !318, file: !3, line: 370, column: 84)
+!329 = !DILocation(line: 373, column: 19, scope: !330)
+!330 = distinct !DILexicalBlock(scope: !217, file: !3, line: 373, column: 9)
+!331 = !DILocation(line: 373, column: 53, scope: !330)
+!332 = !DILocation(line: 373, column: 9, scope: !217)
+!333 = !DILocation(line: 373, column: 65, scope: !334)
+!334 = distinct !DILexicalBlock(scope: !330, file: !3, line: 373, column: 65)
+!335 = !DILocation(line: 376, column: 5, scope: !217)
+!336 = !DILocation(line: 379, column: 1, scope: !217)
+!337 = !DILocation(line: 378, column: 5, scope: !217)
+!338 = !DISubprogram(name: "PAPI_library_init", scope: !177, file: !177, line: 1172, type: !178, flags: DIFlagPrototyped, spFlags: DISPFlagOptimized, retainedNodes: !99)
+!339 = !DISubprogram(name: "PAPI_create_eventset", scope: !177, file: !177, line: 1147, type: !340, flags: DIFlagPrototyped, spFlags: DISPFlagOptimized, retainedNodes: !99)
+!340 = !DISubroutineType(types: !341)
+!341 = !{!6, !5}
+!342 = !DISubprogram(name: "PAPI_add_events", scope: !177, file: !177, line: 1143, type: !343, flags: DIFlagPrototyped, spFlags: DISPFlagOptimized, retainedNodes: !99)
 !343 = !DISubroutineType(types: !344)
-!344 = !{null, !345}
-!345 = !DIBasicType(name: "unsigned int", size: 32, encoding: DW_ATE_unsigned)
-!346 = !DISubprogram(name: "time", scope: !92, file: !92, line: 75, type: !347, flags: DIFlagPrototyped, spFlags: DISPFlagOptimized, retainedNodes: !99)
+!344 = !{!6, !6, !5, !6}
+!345 = !DISubprogram(name: "srand", scope: !346, file: !346, line: 455, type: !347, flags: DIFlagPrototyped, spFlags: DISPFlagOptimized, retainedNodes: !99)
+!346 = !DIFile(filename: "/usr/include/stdlib.h", directory: "", checksumkind: CSK_MD5, checksum: "f0db66726d35051e5af2525f5b33bd81")
 !347 = !DISubroutineType(types: !348)
-!348 = !{!349, !351}
-!349 = !DIDerivedType(tag: DW_TAG_typedef, name: "time_t", file: !350, line: 7, baseType: !69)
-!350 = !DIFile(filename: "/usr/include/bits/types/time_t.h", directory: "", checksumkind: CSK_MD5, checksum: "49b4e16ef1215de5afdbb283400ab90c")
-!351 = !DIDerivedType(tag: DW_TAG_pointer_type, baseType: !349, size: 64)
-!352 = !DISubprogram(name: "PAPI_remove_events", scope: !177, file: !177, line: 1192, type: !339, flags: DIFlagPrototyped, spFlags: DISPFlagOptimized, retainedNodes: !99)
-!353 = !DISubprogram(name: "PAPI_destroy_eventset", scope: !177, file: !177, line: 1149, type: !336, flags: DIFlagPrototyped, spFlags: DISPFlagOptimized, retainedNodes: !99)
-!354 = !DISubprogram(name: "PAPI_shutdown", scope: !177, file: !177, line: 1202, type: !355, flags: DIFlagPrototyped, spFlags: DISPFlagOptimized, retainedNodes: !99)
-!355 = !DISubroutineType(types: !356)
-!356 = !{null}
+!348 = !{null, !349}
+!349 = !DIBasicType(name: "unsigned int", size: 32, encoding: DW_ATE_unsigned)
+!350 = !DISubprogram(name: "time", scope: !92, file: !92, line: 75, type: !351, flags: DIFlagPrototyped, spFlags: DISPFlagOptimized, retainedNodes: !99)
+!351 = !DISubroutineType(types: !352)
+!352 = !{!353, !355}
+!353 = !DIDerivedType(tag: DW_TAG_typedef, name: "time_t", file: !354, line: 7, baseType: !69)
+!354 = !DIFile(filename: "/usr/include/bits/types/time_t.h", directory: "", checksumkind: CSK_MD5, checksum: "49b4e16ef1215de5afdbb283400ab90c")
+!355 = !DIDerivedType(tag: DW_TAG_pointer_type, baseType: !353, size: 64)
+!356 = !DISubprogram(name: "rand", scope: !346, file: !346, line: 453, type: !218, flags: DIFlagPrototyped, spFlags: DISPFlagOptimized, retainedNodes: !99)
+!357 = !DISubprogram(name: "PAPI_remove_events", scope: !177, file: !177, line: 1192, type: !343, flags: DIFlagPrototyped, spFlags: DISPFlagOptimized, retainedNodes: !99)
+!358 = !DISubprogram(name: "PAPI_destroy_eventset", scope: !177, file: !177, line: 1149, type: !340, flags: DIFlagPrototyped, spFlags: DISPFlagOptimized, retainedNodes: !99)
+!359 = !DISubprogram(name: "PAPI_shutdown", scope: !177, file: !177, line: 1202, type: !360, flags: DIFlagPrototyped, spFlags: DISPFlagOptimized, retainedNodes: !99)
+!360 = !DISubroutineType(types: !361)
+!361 = !{null}
