@@ -76,9 +76,12 @@ private:
     std::vector<LoadInst *> loadInstructionsToPermute;
     std::map<Instruction *, Instruction *> hoistedInstructions;
     bool dataPermutation;
+    bool negatedCondition;
     std::map<Instruction *, PHINode *> headerLoadPhis;
     std::map<Value *, Value *> MergeLoadInstrMap;
     std::map<Value *, Value *> RemainingLoadInstrMap;
+
+    std::map<Instruction*,Instruction*> joinBlockLoadPhis;
 
 public:
     Iterative_ALC(Loop *l, int vectorizationFactor,
@@ -86,6 +89,8 @@ public:
 
 public:
     void doTransformation_itr_singleIf_simple();
+
+    void doTransformation_itr_singleIf_data_Permutation();
 
     void doTransformation_itr_singleIf_full_permutation();
 
@@ -100,8 +105,9 @@ private:
     BasicBlock *findElseBlock(BasicBlock *header);
 
 private:
-    void insertPermutationLogic(BasicBlock *insertAt, Value *&permutedZ0,
-                                Value *&permutedPredicates);
+    void insertPermutationLogic(BasicBlock *insertAt);
+
+    void insertPermutationLogic_singleIf_data_Permutation(BasicBlock *insertAt);
 
 private:
     BasicBlock *createEmptyBlock(const std::string &name,
@@ -188,7 +194,7 @@ private:
             const std::map<Instruction *, Instruction *>* originalToClonedInstMap, std::vector<Instruction *>* instructionsOrder,
             BasicBlock *block,
             Value *indices, Value *VectorIndex, Value *predicates, bool isPermuted,
-            bool isPredicated);
+            bool isPredicated, bool predicateFormation);
 
 
 private:
@@ -273,8 +279,10 @@ private:
     void insertPermutationLogic_data_permutation(BasicBlock *insertAt);
 
     void
-    addLoadPhisToLatch(BasicBlock *newLatch, BasicBlock *alcHeader, BasicBlock *uniformThen, BasicBlock *uniformElse);
+    addLoadPhisToLatch_if_then_else_data_Permutation(BasicBlock *newLatch, BasicBlock *alcHeader, BasicBlock *uniformThen, BasicBlock *uniformElse);
 
+    void
+    addLoadPhisToLatch_singleIf_data_Permutation(BasicBlock *newLatch, BasicBlock *alcHeader, BasicBlock *uniformThen, BasicBlock *LinearizedBlock);
 };
 
 #endif // SVE_PERMUTE_SVE_PERMUTE_H
