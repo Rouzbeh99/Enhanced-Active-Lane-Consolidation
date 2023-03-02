@@ -68,6 +68,7 @@ private:
     Value *RemainingPredicates;
     Value *ActiveElementsInPermutedVector;
     Value *allTrue;
+
     Constant *ConstZeroVectorOfTripCountTy;
     PHINode *ScalarIV;
     BasicBlock *thenBlock;
@@ -81,7 +82,7 @@ private:
     std::map<Value *, Value *> MergeLoadInstrMap;
     std::map<Value *, Value *> RemainingLoadInstrMap;
 
-    std::map<Instruction*,Instruction*> joinBlockLoadPhis;
+    std::map<Instruction *, Instruction *> joinBlockLoadPhis;
 
 public:
     Iterative_ALC(Loop *l, int vectorizationFactor,
@@ -117,64 +118,44 @@ private:
     BasicBlock *createPreheaderForRemainingIterations();
 
 private:
-    void refinePreheader(BasicBlock *preVecBlock,
-                         BasicBlock *preHeaderForRemaining);
+    void refinePreheader(BasicBlock *preHeaderForRemaining);
 
 private:
-    std::vector<Value *> *fillPreALCBlock_itr(BasicBlock *preALCBlock,
-                                              BasicBlock *preheader,
-                                              BasicBlock *alcHeader);
+    std::vector<Value *> *fillPreALCBlock_itr(BasicBlock *preheader);
 
 private:
     Value *createVectorOfValues(Value *value, IRBuilder<> &builder,
-                                std::string name);
+                                const std::string& name);
 
 private:
-    void fillMiddleBlock_itr(BasicBlock *middleBlock,
-                             BasicBlock *preheaderForRemaining,
+    void fillMiddleBlock_itr(BasicBlock *preheaderForRemaining,
                              BasicBlock *exitBlock, Value *remResult,
                              Value *uniformVec,
                              Value *uniformVecPredicates);
 
 private:
-    void fillALCHeaderBlock_itr(
-            BasicBlock *alcHeader, BasicBlock *laneGatherBlock,
-            BasicBlock *linearized, BasicBlock *preALC,
-            std::vector<Value *> *initialValues, BasicBlock *header);
+    void fillALCHeaderBlock_itr(std::vector<Value *> *initialValues, BasicBlock *header);
 
 private:
-    void fillLaneGatherBlock_itr(BasicBlock *laneGather,
-                                 BasicBlock *alcApplied,
-                                 BasicBlock *joinBlock);
+    void fillLaneGatherBlock_itr();
 
 private:
     std::vector<Value *> *
-    fillUniformBlock_itr(BasicBlock *uniformBlock, BasicBlock *joinBlock,
-                         BasicBlock *toBeVectorizedBlock,
-                         BasicBlock *header, Value *indices,
-                         Value *indexPhi);
+    fillUniformBlock_itr(BasicBlock *header);
 
 private:
-    void fillLinearizedBlock_itr(BasicBlock *linearized,
-                                 BasicBlock *newLatch,
-                                 BasicBlock *toBeVectorizedBlock,
-                                 Value *indexVec, Value *predicates);
+    void fillLinearizedBlock_itr(Value *indexVec, Value *predicates);
 
 private:
     std::vector<Value *> *
-    fillJoinBlock(BasicBlock *joinBlock, BasicBlock *newLatch,
-                  BasicBlock *uniformBlock, BasicBlock *laneGather,
-                  Value *headerIndex, std::vector<Value *> *uniformBlockOutputs);
+    fillJoinBlock(std::vector<Value *> *uniformBlockOutputs);
 
 private:
-    std::vector<Value *> *fillNewLatchBlock_itr(
-            BasicBlock *newLatch, BasicBlock *alcHeader, BasicBlock *middleBlock,
-            BasicBlock *joinBlock, BasicBlock *linearizedBlock,
-            std::vector<Value *> *joinBlockOutputs, Value *totalVecIterations);
+    std::vector<Value *> *fillNewLatchBlock_itr(std::vector<Value *> *joinBlockOutputs, Value *totalVecIterations);
 
 private:
     void refinePreHeaderForRemaining(BasicBlock *preHeaderForRemaining,
-                                     BasicBlock *middleBlock, Value *value);
+                                     Value *value);
 
 private:
     Value *formPredicate(BasicBlock *decisionBlock,
@@ -182,8 +163,9 @@ private:
                          Value *inductionVarInitialValue);
 
 private:
-    std::map<Instruction*, Instruction*> *
-    cloneInstructions(BasicBlock *From, BasicBlock *to, Value *VectorIndex, bool useSharedInstructions, std::vector<Instruction*>* instructionsOrder);
+    std::map<Instruction *, Instruction *> *
+    cloneInstructions(BasicBlock *From, BasicBlock *to, Value *VectorIndex, bool useSharedInstructions,
+                      std::vector<Instruction *> *instructionsOrder);
 
 
 private:
@@ -191,7 +173,8 @@ private:
 
 private:
     std::map<const Value *, const Value *> *vectorizeInstructions(
-            const std::map<Instruction *, Instruction *>* originalToClonedInstMap, std::vector<Instruction *>* instructionsOrder,
+            const std::map<Instruction *, Instruction *> *originalToClonedInstMap,
+            std::vector<Instruction *> *instructionsOrder,
             BasicBlock *block,
             Value *indices, Value *VectorIndex, Value *predicates, bool isPermuted,
             bool isPredicated, bool predicateFormation);
@@ -205,84 +188,66 @@ private:
     void addBranchHint(BranchInst *branchInst);
 
 private:
-    void fillALCHeader_full_permutation(BasicBlock *alcHeader, BasicBlock *laneGatherBlock,
-                                        BasicBlock *preALCBlock,
-                                        std::vector<Value *> *initialValues, BasicBlock *header);
+    void fillALCHeader_full_permutation(std::vector<Value *> *initialValues, BasicBlock *header);
 
-    void fillLaneGather_full_permutation(BasicBlock *laneGather, BasicBlock *uniformBlock, BasicBlock *latch);
+    void fillLaneGather_full_permutation();
 
     void insertPermutationLogic_full_permutation(BasicBlock *insertAt);
 
-    std::vector<Value *> *fillNewLatchBlock_full_permutation(
-            BasicBlock *newLatch, BasicBlock *alcHeader, BasicBlock *middleBlock, BasicBlock *laneGather,
-            BasicBlock *uniformBlock, Value *totalVecIterations);
+    std::vector<Value *> *fillNewLatchBlock_full_permutation(Value *totalVecIterations);
 
     void
-    fillUniformBlock_full_permutation(BasicBlock *uniformBlock, BasicBlock *latch,
-                                      BasicBlock *toBeVectorizedBlock,
-                                      BasicBlock *header, Value *indices);
+    fillUniformBlock_full_permutation(BasicBlock *header);
 
 private:
 
     bool findIfAccessingSameMemAddress(GEPOperator *GEP);
 
-    void fillHoistedInstructionsWithLoadsFromConstantMemoryAddress(BasicBlock *preALC);
+    void fillHoistedInstructionsWithLoadsFromConstantMemoryAddress();
 
 
 private:
 
-    void fillALCHeader_if_then_else(BasicBlock *alcHeader, BasicBlock *laneGatherBlock,
-                                    BasicBlock *preALCBlock,
-                                    std::vector<Value *> *initialValues, BasicBlock *header);
+    void fillALCHeader_if_then_else(std::vector<Value *> *initialValues, BasicBlock *header);
 
     void
-    fillLaneGather_if_then_else(BasicBlock *laneGather, BasicBlock *uniformThenBlock, BasicBlock *uniformElseBlock,
-                                bool hasDataPermutation);
+    fillLaneGather_if_then_else(bool hasDataPermutation);
 
-    std::vector<Value *> *fillNewLatchBlock_if_then_else(
-            BasicBlock *newLatch, BasicBlock *alcHeader, BasicBlock *joinBlock, BasicBlock *uniformThen,
-            BasicBlock *uniformElseBlock, Value *totalVecIterations);
+    std::vector<Value *> *fillNewLatchBlock_if_then_else(Value *totalVecIterations);
 
     void
-    fillUniformThenBlock(BasicBlock *uniformThenBlock, BasicBlock *latch,
-                         BasicBlock *toBeVectorizedBlock,
-                         BasicBlock *header, Value *indices);
+    fillUniformThenBlock();
 
     void
-    fillUniformElseBlock(BasicBlock *uniformElseBlock, BasicBlock *latch,
-                         BasicBlock *toBeVectorizedBlock,
-                         BasicBlock *header, Value *indices);
+    fillUniformElseBlock();
 
-    void fillMiddleBlock_if_then_else(BasicBlock *middleBlock,
-                                      BasicBlock *preheaderForRemaining,
+    void fillMiddleBlock_if_then_else(BasicBlock *preheaderForRemaining,
                                       BasicBlock *exitBlock, Value *remResult);
 
-    void fillLinearizedThen(BasicBlock *linearizedThen, BasicBlock *middleBlock);
+    void fillLinearizedThen();
 
-    void fillLinearizedElse(BasicBlock *linearizedElse, BasicBlock *middleBlock);
+    void fillLinearizedElse();
 
-    void fillJoinBlock_if_then_else(BasicBlock *linearizedThen, BasicBlock *linearizedElse, BasicBlock *JoinBlock,
-                                    BasicBlock *middleBlock,
-                                    Value *latchVector);
+    void fillJoinBlock_if_then_else(Value *latchVector);
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     void findLoadInstructions();
 
 
-    std::map<Instruction *, Instruction *> loadInstructionsInPreALC(BasicBlock *preALC);
+    std::map<Instruction *, Instruction *> loadInstructionsInPreALC();
 
-    void loadInstructionsInHeader(BasicBlock *alcHeader);
+    void loadInstructionsInHeader();
 
-    void addLoadInstructionPhisInHeader(BasicBlock *header, BasicBlock *preALC,
+    void addLoadInstructionPhisInHeader(BasicBlock *header,
                                         std::map<Instruction *, Instruction *> &instructionsInPreAlcMap);
 
     void insertPermutationLogic_data_permutation(BasicBlock *insertAt);
 
     void
-    addLoadPhisToLatch_if_then_else_data_Permutation(BasicBlock *newLatch, BasicBlock *alcHeader, BasicBlock *uniformThen, BasicBlock *uniformElse);
+    addLoadPhisToLatch_if_then_else_data_Permutation();
 
     void
-    addLoadPhisToLatch_singleIf_data_Permutation(BasicBlock *newLatch, BasicBlock *alcHeader, BasicBlock *uniformThen, BasicBlock *LinearizedBlock);
+    addLoadPhisToLatch_singleIf_data_Permutation();
 };
 
 #endif // SVE_PERMUTE_SVE_PERMUTE_H
