@@ -338,7 +338,7 @@ int main() {
 //        s.array2[i] = 2;
 //        arr2D[0][i] = -5;
 //        arr2D[1][i] = -7;
-        cond[i] = (rand() % 5) == 0;
+        cond[i] = (rand() % 50) == 0;
     }
 
 

@@ -1,0 +1,5 @@
+inputs,cycles,standard_deviation,confidence_low,confidence_high
+alc_simple,13662101,87238,13645002,13679199
+armclang,9703317,12485,9700870,9705764
+alc_data_permute,9700441,48062,9691021,9709861
+scalar_code,35242942,165448,35210515,35275369

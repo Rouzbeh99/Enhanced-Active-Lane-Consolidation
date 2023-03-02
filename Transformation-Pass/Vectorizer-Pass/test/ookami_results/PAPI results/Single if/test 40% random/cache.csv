@@ -1,5 +1,0 @@
-inputs,cache,standard deviation,confidence_low,confidence_high
-alc_simple,2545813,575,2545699,2545926
-vectorized,2543661,350,2543592,2543730
-alc_itr,2572079,1079,2571867,2572292
-compiled_with_O3,2583301,892,2583125,2583477
