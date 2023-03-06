@@ -1,0 +1,3 @@
+inputs,memory_stall,standard_deviation,confidence_low,confidence_high
+alc,317682,7275,316256,319108
+scalar_code,11838610,101894,11818640,11858581

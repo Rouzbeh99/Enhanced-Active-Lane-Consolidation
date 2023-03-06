@@ -20,10 +20,10 @@ double getTimeMiliSeconds() {
 
 /* Must be initialized to PAPI_NULL before calling PAPI_create_event */
 int EventSet = PAPI_NULL;
-#define NUMEVENTS 4
+#define NUMEVENTS 8
 long long int CounterValues[NUMEVENTS] = {0};
 /* Event code names/availability can be queried with papi_avail command */
-int EventCodes[NUMEVENTS] = {PAPI_TOT_INS, PAPI_TOT_CYC, PAPI_L1_DCM, PAPI_BR_MSP};
+int EventCodes[NUMEVENTS] = {PAPI_TOT_INS, PAPI_TOT_CYC, PAPI_L1_DCM, PAPI_BR_MSP, PAPI_MEM_SCY, PAPI_RES_STL, PAPI_FPU_IDL, PAPI_STL_CCY};
 double ExecutionTime = 0.0;
 
 
@@ -362,9 +362,13 @@ int main() {
     free(cond);
 
     printf("\nTotal instructions executed: %lld\n", CounterValues[0]);
-    printf("Total cycles: %lld\n", CounterValues[1]);
+    printf("Total program_cycles: %lld\n", CounterValues[1]);
     printf("Total L1 data cache misses: %lld\n", CounterValues[2]);
     printf("Total branch mispredicted: %lld\n", CounterValues[3]);
+    printf("Total cycles for memory_stall ops: %lld\n", CounterValues[4]);
+    printf("Total cycles for any resource_stall: %lld\n", CounterValues[5]);
+    printf("Total FPU idle cycles: %lld\n", CounterValues[6]);
+    printf("Total Cycles with no_instructions executed: %lld\n", CounterValues[7]);
     printf("Execution time: %lf ms\n", ExecutionTime);
 
     if ((status = PAPI_remove_events(EventSet, EventCodes, NUMEVENTS)) != PAPI_OK) ERROR_RETURN(status);
