@@ -46,7 +46,7 @@ for i in range(row):
         df.drop(df.columns[[1, 2, 3]], axis=1, inplace=True)
         tag = tag_dic[metric]
         df.plot.bar(yerr=std_deviation, ax=axes[i, j], rot=0, title=tag, color=colors[i * column + j])
-        # axes[i, j].xaxis.label.set_visible(False)
+        axes[i, j].xaxis.label.set_visible(False)
         axes[i, j].legend([metric])
         axes[i, j].axhline(y=baseline_value, xmin=-3, xmax=20, color='black', linestyle='dashed',
                            linewidth=1)
