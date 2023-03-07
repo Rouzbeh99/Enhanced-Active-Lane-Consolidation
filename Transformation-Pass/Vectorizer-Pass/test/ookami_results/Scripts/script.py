@@ -1,12 +1,13 @@
 import os
 import scipy.stats as st
 import numpy as np
+import math
 from math import sqrt
 import csv
 
 directory = 'results/'
 uniqueFiles = []
-metrics = ['instructions', 'program_cycles', 'cache', 'branch', 'memory_stall', 'resource_stall', 'FPU', 'no_instructions' ]
+metrics = ['instructions_executed', 'program_cycles', 'cache', 'branch', 'memory_stall', 'resource_stall', 'FPU', 'no_instructions' ]
 iterations = 100
 
 for filename in os.listdir(directory):

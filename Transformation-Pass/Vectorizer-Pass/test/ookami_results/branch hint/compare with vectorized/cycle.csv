@@ -1,6 +1,0 @@
-inputs,cycle,standard deviation,confidence_low,confidence_high
-alc_itr_header_hint,9119497,37261,9112157,9126837
-vectorized,10064235,15694,10061143,10067326
-alc_itr_no_hint,9203641,37233,9196307,9210976
-compiled_with_O3,25913903,22747,25909422,25918384
-alc_itr_both_hint,9026194,21762,9021908,9030481

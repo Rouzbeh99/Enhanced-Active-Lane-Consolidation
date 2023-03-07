@@ -23,7 +23,8 @@ int EventSet = PAPI_NULL;
 #define NUMEVENTS 8
 long long int CounterValues[NUMEVENTS] = {0};
 /* Event code names/availability can be queried with papi_avail command */
-int EventCodes[NUMEVENTS] = {PAPI_TOT_INS, PAPI_TOT_CYC, PAPI_L1_DCM, PAPI_BR_MSP, PAPI_MEM_SCY, PAPI_RES_STL, PAPI_FPU_IDL, PAPI_STL_CCY};
+int EventCodes[NUMEVENTS] = {PAPI_TOT_INS, PAPI_TOT_CYC, PAPI_L1_DCM, PAPI_BR_MSP, PAPI_MEM_SCY, PAPI_RES_STL,
+                             PAPI_FPU_IDL, PAPI_STL_CCY};
 double ExecutionTime = 0.0;
 
 
@@ -49,12 +50,12 @@ void simple_if(int *__restrict__ a, int *__restrict__ b, int *__restrict__ c,
 //    for (int j = 0; j < 10; ++j) {
     for (int i = 0; i < n; ++i) {
         if (cond[i]) {
-                a[i] = (2 * a[i] - 2 * c[i]) + (b[i] - 2 * a[i]);
-                a[i] += 2 * i + i * b[i];
-                b[i] = 2 - 2 * b[i] + (2 * a[i] - 2 * c[i]);
-                b[i] -= 3 * i + i * c[i];
-                c[i] = 2 * b[i] + 2 * a[i] - 3 * (2 * c[i] - 2 * b[i] + i * i);
-                c[i] -= 2 * i;
+            a[i] = (2 * a[i] - 2 * c[i]) + (b[i] - 2 * a[i]);
+            a[i] += 2 * i + i * b[i];
+            b[i] = 2 - 2 * b[i] + (2 * a[i] - 2 * c[i]);
+            b[i] -= 3 * i + i * c[i];
+            c[i] = 2 * b[i] + 2 * a[i] - 3 * (2 * c[i] - 2 * b[i] + i * i);
+            c[i] -= 2 * i;
         }
     }
 //    }
@@ -361,7 +362,7 @@ int main() {
     free(c);
     free(cond);
 
-    printf("\nTotal instructions executed: %lld\n", CounterValues[0]);
+    printf("\nTotal instructions_executed: %lld\n", CounterValues[0]);
     printf("Total program_cycles: %lld\n", CounterValues[1]);
     printf("Total L1 data cache misses: %lld\n", CounterValues[2]);
     printf("Total branch mispredicted: %lld\n", CounterValues[3]);

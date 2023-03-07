@@ -1,0 +1,5 @@
+Input,Mean,standard_deviation,confidence_low,confidence_high
+armclang,5813902,19074,5810164,5817641
+scalar_code,154181,4307,153336,155025
+alc_itr_all_false,2498606,3316,2497956,2499256
+alc_data_permute_false,2698452,40542,2690506,2706399

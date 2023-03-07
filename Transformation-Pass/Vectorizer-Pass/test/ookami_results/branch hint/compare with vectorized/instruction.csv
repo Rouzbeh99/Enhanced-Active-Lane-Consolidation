@@ -1,6 +1,0 @@
-inputs,instruction,standard deviation,confidence_low,confidence_high
-alc_itr_header_hint,6813257,0,6813257,6813257
-vectorized,10000726,0,10000726,10000726
-alc_itr_no_hint,6813257,0,6813257,6813257
-compiled_with_O3,59000725,0,59000725,59000725
-alc_itr_both_hint,6813257,0,6813257,6813257
