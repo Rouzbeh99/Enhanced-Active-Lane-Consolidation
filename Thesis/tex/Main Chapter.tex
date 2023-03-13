@@ -263,7 +263,25 @@ instructions and blue ones are those corresponding to active elements of the vec
 
 The idea behind ALC is to utilize vector instructions by postponing any masked operation to the point where, we have a uniform vector filled with all active lanes. This way not only we don't waste any computation power but we also eliminate maksed operation which are more expensive that regular ones as discussed before.
 
-%%%%%% permutation overhead, requiring more instructions to make ALC sense
+To accomplish this, we use vector permutation algorithm proposed by Wytte[cite]. The high level view of this operation is illustrated in fig(?). White color represents vector elements for which the coressponding predicate is true (we call them active lanes of the vector) and the gray ones show elements coressponding to false predicates (we call them inactive lanes).
+Given two predicated vector, the permutation logic fills the first vector with active lanes, and puts the other ones in the second vector. If there are enough active lanes in both vectors to fill the first vector, permutation will produce a uniform true vector and if not, then the total number of inactive lanes is more than the size of a vector and permutation will produce
+a uniform false vector. As a result, no matter how the input vector look like, after doing the permutation, we will have \emph{at least} one uniform vector.
+
+\begin{figure}[t!]
+    \centering
+    \includegraphics[width=0.90\textwidth]{img/permutation.png}
+    \caption{Permutation Logic}
+    \label{fig:permutation}
+\end{figure}
+
+Having the permutation algorithm, we implemented what wytte calls \emph{Iterative ALC} as a compiler pass. High level approach is illustrated in figure(?)
+
+\begin{figure}[t!]
+    \centering
+    \includegraphics[width=0.95\textwidth]{img/iterative_alc.png}
+    \caption{High Level approach for Iterative ALC}
+    \label{fig:iterative_alc}
+\end{figure}
 
 
 

@@ -104,6 +104,8 @@ namespace {
                 break;
         }
 
+//        sve_vectorizer->doVectorization();
+
 
         llvm::outs() << "-------------------------------------------------------------------------\n";
         printLoop(L);
