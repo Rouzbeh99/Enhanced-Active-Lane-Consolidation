@@ -274,7 +274,11 @@ a uniform false vector. As a result, no matter how the input vector look like, a
     \label{fig:permutation}
 \end{figure}
 
-Having the permutation algorithm, we implemented what wytte calls \emph{Iterative ALC} as a compiler pass. High level approach is illustrated in figure(?)
+Having the permutation algorithm, we implemented what wytte calls \emph{Iterative ALC} as a compiler pass. High level approach is illustrated in figure(?).
+
+In this version of ALC, vectors contain indices of the loop, so we also call it \emph{index permutation}. In each iteration, we have two vector of indices, one the indices of current loop iteration and the other one, indices of previous iterations that have not been executed yet. ALC starts by permuting these two vectors, forming a uniform vector. If it produces a uniform true vector, then it will execute 
+Then block for those elements. Otherwise, as discussed before, we have a uniform false vector and we execute the else block for those indices. No matter which block executed, the other vector (which could have any combination of true and false elements) is passed to the next iteration for permutation.
+
 
 \begin{figure}[t!]
     \centering
@@ -283,12 +287,31 @@ Having the permutation algorithm, we implemented what wytte calls \emph{Iterativ
     \label{fig:iterative_alc}
 \end{figure}
 
+You have probably noticed the trade-off in ALC. We add the overhead of index permutation but in return, we avoid predicate instructions and fully utilize proccessor computation power. The cost of permutation is independant from the size of the loop and instructions it has. The only factors that affects it is loop trip count (number of times loop is going to be executed) as it determines how many times the permutation should happen.
+So you can see that as number of instructions inside the loop increase, the overhead of permutation becomes smaller compared to the overhead of loop instructions and ALC makes more sense. As a result, there should be a threshold of(?) minimum number of instrcution in the loop to apply ALC. We will exaplain this in details in Analysis section.
+
+In order to compare the performance of ALC and vectorization applied by state-of-the-art compilers, we provided a simple test shown in fig(?). It consists of a single loop which contains an if-then-else statements. there are a large number of load/store and arithmetical instructions inside the e\emph{then} and \emph{else} blocks so that it overcomes the overhead of permutation. Figure (?) shows The speed up of each version over scalar code.
+For the scalar code, we compiled code with \emph{Clang} compiler disabling \emph{vectorization} and \emph{loop-unrolling}. As you can see, although ALC brings a speedup of around 2.9X, it is still slower than Armclang by almost 5/%.
 
 
 
+\begin{figure}[t!]
+    \centering
+    \includegraphics[width=0.95\textwidth]{img/test.png}
+    \caption{test code to comapre ALC and Armclang}
+    \label{fig:iterative_alc}
+\end{figure}
 
 
 
+\begin{figure}%
+    \centering
+    \subfloat[\centering Speedup over scalar code]{{\includegraphics[width=5cm]{img/alc_vs_armclang_test_cycle.png} }}%
+    \qquad
+    \subfloat[\centering Number of cycles stalled for memory operations]{{\includegraphics[width=5cm]{img/memory_stalls.png} }}%
+    \caption{Comparison between Armclang vectorization and ALC}%
+    \label{fig:example}%
+\end{figure}
 
 
 

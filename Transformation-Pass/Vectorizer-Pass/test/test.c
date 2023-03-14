@@ -37,38 +37,9 @@ struct St {
 
 struct St s;
 int arr2D[3][n];
-
-void simple_if(int *__restrict__ a, int *__restrict__ b, int *__restrict__ c,
-               bool *__restrict__ cond, int n) {
-
-    int status;
-
-    double t = getTimeMiliSeconds();
-    /* Start counting */
-    if ((status = PAPI_start(EventSet)) != PAPI_OK) ERROR_RETURN(status);
-
-//    for (int j = 0; j < 10; ++j) {
-    for (int i = 0; i < n; ++i) {
-        if (cond[i]) {
-            a[i] = (2 * a[i] - 2 * c[i]) + (b[i] - 2 * a[i]);
-            a[i] += 2 * i + i * b[i];
-            b[i] = 2 - 2 * b[i] + (2 * a[i] - 2 * c[i]);
-            b[i] -= 3 * i + i * c[i];
-            c[i] = 2 * b[i] + 2 * a[i] - 3 * (2 * c[i] - 2 * b[i] + i * i);
-            c[i] -= 2 * i;
-        }
-    }
-//    }
-
-    /* Stop counting, this reads from the counter as well as stop it. */
-    if ((status = PAPI_stop(EventSet, CounterValues)) != PAPI_OK) ERROR_RETURN(status);
-
-    ExecutionTime = getTimeMiliSeconds() - t;
-}
-
-
-//void simple_if_else(int *__restrict__ a, int *__restrict__ b, int *__restrict__ c,
-//                    bool *__restrict__ cond, int n) {
+//
+//void simple_if(int *__restrict__ a, int *__restrict__ b, int *__restrict__ c,
+//               bool *__restrict__ cond, int n) {
 //
 //    int status;
 //
@@ -77,25 +48,15 @@ void simple_if(int *__restrict__ a, int *__restrict__ b, int *__restrict__ c,
 //    if ((status = PAPI_start(EventSet)) != PAPI_OK) ERROR_RETURN(status);
 //
 ////    for (int j = 0; j < 10; ++j) {
-////#pragma clang loop vectorize(enable)
 //    for (int i = 0; i < n; ++i) {
-//
 //        if (cond[i]) {
 //            a[i] = (2 * a[i] - 2 * c[i]) + (b[i] - 2 * a[i]);
 //            a[i] += 2 * i + i * b[i];
 //            b[i] = 2 - 2 * b[i] + (2 * a[i] - 2 * c[i]);
 //            b[i] -= 3 * i + i * c[i];
-//            c[i] += 2 * b[i] + 2 * a[i] - 3 * (2 * c[i] - 2 * b[i] + i * i);
-//        } else {
-//            a[i] *= 2 + b[i] - 3 * c[i];
-//            c[i] = a[i] * b[i] - 1 + c[i];
-//            b[i] = 3 * a[i] - 2 * c[i];
-//            b[i] -= 2 * c[i] + 7 + a[i] ;
-//            a[i] -= 4 + b[i] * 2;
-//            c[i] += 5 * a[i] + 2 * b[i];
-//
+//            c[i] = 2 * b[i] + 2 * a[i] - 3 * (2 * c[i] - 2 * b[i] + i * i);
+//            c[i] -= 2 * i;
 //        }
-//
 //    }
 ////    }
 //
@@ -104,6 +65,47 @@ void simple_if(int *__restrict__ a, int *__restrict__ b, int *__restrict__ c,
 //
 //    ExecutionTime = getTimeMiliSeconds() - t;
 //}
+
+
+void simple_if_else(int *__restrict__ a, int *__restrict__ b, int *__restrict__ c,
+                    bool *__restrict__ cond, int n) {
+
+    int status;
+
+    double t = getTimeMiliSeconds();
+    /* Start counting */
+    if ((status = PAPI_start(EventSet)) != PAPI_OK) ERROR_RETURN(status);
+
+//    for (int j = 0; j < 10; ++j) {
+//#pragma clang loop vectorize(enable)
+
+
+    for (int i = 0; i < n; ++i) {
+        if (cond[i]) {
+            a[i] = (2 * a[i] - 2 * c[i]) + (b[i] - 2 * a[i]);
+            a[i] += 2 * i + i * b[i];
+            b[i] = 2 - 2 * b[i] + (2 * a[i] - 2 * c[i]);
+            b[i] -= 3 * i + i * c[i];
+            c[i] += 2 * b[i] + 2 * a[i] - 3 * (2 * c[i] - 2 * b[i] + i * i);
+        } else {
+            a[i] *= 2 + b[i] - 3 * c[i];
+            c[i] = a[i] * b[i] - 1 + c[i];
+            b[i] = 3 * a[i] - 2 * c[i];
+            b[i] -= 2 * c[i] + 7 + a[i] ;
+            a[i] -= 4 + b[i] * 2;
+            c[i] += 5 * a[i] + 2 * b[i];
+
+        }
+    }
+    
+    
+//    }
+
+    /* Stop counting, this reads from the counter as well as stop it. */
+    if ((status = PAPI_stop(EventSet, CounterValues)) != PAPI_OK) ERROR_RETURN(status);
+
+    ExecutionTime = getTimeMiliSeconds() - t;
+}
 
 
 //void nested_if_case_1(int *__restrict__ a, int *__restrict__ b, int *__restrict__ c,
@@ -339,12 +341,12 @@ int main() {
 //        s.array2[i] = 2;
 //        arr2D[0][i] = -5;
 //        arr2D[1][i] = -7;
-        cond[i] = (rand() % 50) == 0;
+        cond[i] = (rand() % 3) == 0;
     }
 
 
-    simple_if(a, b, c, cond, n);
-//    simple_if_else(a, b, c, cond, n);
+//    simple_if(a, b, c, cond, n);
+    simple_if_else(a, b, c, cond, n);
 
 
     int sum = 0;
