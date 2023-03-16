@@ -6,63 +6,40 @@
 #endif
 
 
-int VLength = 4; // vector length
+//int VLength = svcntw(); // vector length
 
-void ACLEVersion(bool *cond);
 
 void printVector(svint32_t z);
 
 void printPredicate(svbool_t p1);
 
-void permutation_c_sve_intrinsics(svint32_t z0, svint32_t z1, svint32_t *result0, svint32_t *result1,
-                                  svbool_t *resultPredicate, svbool_t p0,
-                                  svbool_t p1);
-
-
-void ACLEVersion(bool *cond) {
-
-    int i = 0;
-
-    svbool_t allActive = svptrue_b32();
-    svint32_t uniformVector = svindex_s32(i + 1, 1);
-    svint32_t remainingVector = svindex_s32(i + 5, 1);
-    svbool_t uniformVectorPredicate = svdupq_b32(cond[i], cond[i + 1], cond[i + 2], cond[i + 3]);
-    svbool_t remainingVectorPredicate = svdupq_b32(cond[i + 4], cond[i + 5], cond[i + 6], cond[i + 7]);
-
-    svint32_t idxM = svundef_s32();
-    svint32_t idxR = svundef_s32();
-    svbool_t cond_r = svptrue_b32();
-
-    // finding index vectors
-    permutation_c_sve_intrinsics(uniformVector, remainingVector, &idxM, &idxR, &cond_r, uniformVectorPredicate,
-                                 remainingVectorPredicate);
-
-    printf("----------------------\n");
-    printPredicate(cond_r);
-    printVector(idxR);
-
-}
+void permutation_c_sve_intrinsics(svint32_t z0, svint32_t z1, svbool_t p0,
+                                  svbool_t p1, svint32_t *result0, svint32_t *result1,
+                                  svbool_t *resultPredicate0, svbool_t *resultPredicate1);
 
 int main() {
-                                                                          //  1 2 3 4       5 6 7 8
-    bool cond[] = {1, 1, 0, 0, 1, 1, 1, 0};  //  1 1 0 0       1 1 1 0
-    ACLEVersion(cond);
 
-                                                                           //  1 2 3 4       5 6 7 8
-    bool cond1[] = {1, 0, 0, 0, 1, 1, 1, 0};  //  1 0 0 0       1 1 1 0
-    ACLEVersion(cond1);
+    svbool_t allActive = svptrue_b32();
 
-                                                                           //  1 2 3 4       5 6 7 8
-    bool cond2[] = {0, 0, 0, 0, 1, 0, 1, 0};  //  0 0 0 0       1 0 1 0
-    ACLEVersion(cond2);
+    svint32_t z0 = svindex_s32(1, 1);
+    svint32_t z1 = svindex_s32(svcntw(), 1);
+    svbool_t p0 = svdupq_b32(0, 0, 0, 0);
+    svbool_t p1 = svdupq_b32(1, 1, 1, 0); // repeats 1 1 1 0 for 4 times
 
-                                                                           //  1 2 3 4       5 6 7 8
-    bool cond3[] = {1, 1, 1, 1, 1, 1, 1, 0};  //  1 1 1 1       1 1 1 0
-    ACLEVersion(cond3);
+    svint32_t result0 = svundef_s32();
+    svint32_t result1 = svundef_s32();
+    svbool_t resultPredicate0 = svptrue_b32();
+    svbool_t resultPredicate1 = svptrue_b32();
 
-                                                                           //  1 2 3 4       5 6 7 8
-    bool cond4[] = {1, 1, 0, 1, 0, 0, 1, 0};  //  1 1 0 1       0 0 1 0
-    ACLEVersion(cond4);
+    // finding index vectors
+    permutation_c_sve_intrinsics(z0, z1, p0, p1, &result0, &result1, &resultPredicate0, &resultPredicate1);
+
+    printf("----------------------\n");
+    printPredicate(resultPredicate0);
+    printVector(result0);
+    printPredicate(resultPredicate1);
+    printVector(result1);
+
 
 }
 
@@ -72,12 +49,16 @@ int main() {
 void printVector(svint32_t z) {
 
     svbool_t allActive = svptrue_b32();
-    int32_t a[] = {-1, -1, -1, -1};
+    int32_t a[svcntw()];
+
+    for (int i = 0; i < svcntw(); ++i) {
+        a[i] = -1;
+    }
 
     //storing to memory
     svst1_s32(allActive, &a[0], z);
 
-    for (int i = 0; i < 4; ++i) {
+    for (int i = 0; i < svcntw(); ++i) {
         printf("%d ", a[i]);
     }
     printf("\n");
@@ -85,22 +66,29 @@ void printVector(svint32_t z) {
 
 void printPredicate(svbool_t p1) {
 
-    int32_t a[] = {1, 1, 1, 1, 1};
-    int32_t b[] = {0, 0, 0, 0, 0};
+    svbool_t allActive = svptrue_b32();
+    int32_t a[svcntw()];
+    int32_t b[svcntw()];
 
+    for (int i = 0; i < svcntw(); ++i) {
+        a[i] = 1;
+        b[i] = 0;
+    }
+
+    //storing to memory
     svint32_t z = svld1_s32(p1, &a[0]);
-    svst1_s32(p1, &b[0], z);
+    svst1_s32(allActive, &b[0], z);
 
-    for (int i = 0; i < 4; ++i) {
+    for (int i = 0; i < svcntw(); ++i) {
         printf("%d ", b[i]);
     }
     printf("\n");
 }
 
 
-void permutation_c_sve_intrinsics(svint32_t z0, svint32_t z1, svint32_t *result0, svint32_t *result1,
-                                  svbool_t *resultPredicate, svbool_t p0,
-                                  svbool_t p1) {
+void permutation_c_sve_intrinsics(svint32_t z0, svint32_t z1, svbool_t p0,
+                                  svbool_t p1, svint32_t *result0, svint32_t *result1,
+                                  svbool_t *resultPredicate0, svbool_t *resultPredicate1) {
 
     svbool_t allActive = svptrue_b32();
 
@@ -114,24 +102,26 @@ void permutation_c_sve_intrinsics(svint32_t z0, svint32_t z1, svint32_t *result0
     svint32_t z4 = svcompact_s32(p2, z0);
     svint32_t z5 = svcompact_s32(p3, z1);
 
-// gathering all active lanes to result1
-    uint32_t x0 = svcntp_b32(allActive, p0);
+// gathering all active lanes to result0
+    uint32_t x0 = svcntp_b32(p0, p0);
+    uint32_t x1 = svcntp_b32(p1, p1);
     svbool_t p4 = svwhilelt_b32_s32(0, x0);
+    *resultPredicate0 = svwhilelt_b32_s32(0, x0 + x1);
     *result0 = svsplice_s32(p4, z2, z3);
+    *result0 = svsplice_s32(*resultPredicate0, *result0, z5);
 
 //gather others to z1
-    uint32_t x1 = svcntp_b32(allActive, p1);
     svbool_t p5 = svwhilelt_b32_s32(0, x1);
     z2 = svsplice_s32(p5, z3, z5);  // contains active ... inactive of z1
-    uint32_t x2 = svcntp_b32(allActive, p2);    // number of false elements in z0
+    uint32_t x2 = svcntp_b32(p2, p2);    // number of false elements in z0
     p2 = svwhilelt_b32_s32(0, x2);
     *result1 = svsel_s32(p2, z4, z2);
 
 //find result predicate
     svbool_t p6 = svnot_z(allActive, p2);               // mask based on first vector false elements
-    uint32_t x3 = svcntp_b32(allActive, p3);            // number of false elements in z1
-    svbool_t p7 = svwhilelt_b32_s32(0, VLength - x3);  // mask based on second vector false elements
-    *resultPredicate = svand_b_z(allActive, p6, p7);
+    uint32_t x3 = svcntp_b32(p3, p3);            // number of false elements in z1
+    svbool_t p7 = svwhilelt_b32_s32(0, svcntw() - x3);  // mask based on second vector false elements
+    *resultPredicate1 = svand_b_z(allActive, p6, p7);
 
 
 }

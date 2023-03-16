@@ -1,7 +1,7 @@
 import subprocess
 import os
 
-specDir = 'spec'
+specDir = 'benchmarks'
 
 allPathCount = []
 result = []
@@ -10,6 +10,10 @@ result = []
 for dir in os.listdir(specDir):
     print("------------------------------------------------------------")
     print("Application : " + dir)
+    
+    if dir != 'Lonstar_eda':
+    	continue;
+    
     for filename in os.listdir(specDir + "/" + dir):
         print("File : " + filename)
         cmd = ['./run_pass.sh', specDir + "/" + dir + "/" + filename]
