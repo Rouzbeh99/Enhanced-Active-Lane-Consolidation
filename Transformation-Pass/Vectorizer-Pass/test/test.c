@@ -82,20 +82,33 @@ void simple_if_else(int *__restrict__ a, int *__restrict__ b, int *__restrict__ 
 
     for (int i = 0; i < n; ++i) {
         if (cond[i]) {
-            a[i] = (2 * a[i] - 2 * c[i]) + (b[i] - 2 * a[i]);
-            a[i] += 2 * i + i * b[i];
-            b[i] = 2 - 2 * b[i] + (2 * a[i] - 2 * c[i]);
-            b[i] -= 3 * i + i * c[i];
-            c[i] += 2 * b[i] + 2 * a[i] - 3 * (2 * c[i] - 2 * b[i] + i * i);
+            int exp1 =  2 * i + i * b[i] + (2 * a[i] - 2 * c[i]) + (b[i] - 2 * a[i]);
+            int exp2 = 3 * i + i * c[i]+2 - 2 * b[i] + (2 * a[i] - 2 * c[i]);
+            c[i] += 2 * exp2 + 2 * exp1 - 3 * (2 * c[i] - 2 * exp2 + i * i);
         } else {
-            a[i] *= 2 + b[i] - 3 * c[i];
-            c[i] = a[i] * b[i] - 1 + c[i];
-            b[i] = 3 * a[i] - 2 * c[i];
-            b[i] -= 2 * c[i] + 7 + a[i] ;
-            a[i] -= 4 + b[i] * 2;
-            c[i] += 5 * a[i] + 2 * b[i];
-
+            int exp1 = 4 + b[i] * 2 + 2 + b[i] - 3 * c[i];
+            int exp2 = 2 * c[i] + 7 + a[i] + 3 * a[i] - 2 * c[i] ;
+            c[i] += 5 * exp1 + 2 * exp2 + exp1 * exp2 - i*i + c[i];
         }
+
+
+//        if (cond[i]) {
+//            a[i] = (2 * a[i] - 2 * c[i]) + (b[i] - 2 * a[i]);
+//            a[i] += 2 * i + i * b[i];
+//            b[i] = 2 - 2 * b[i] + (2 * a[i] - 2 * c[i]);
+//            b[i] -= 3 * i + i * c[i];
+//            c[i] += 2 * b[i] + 2 * a[i] - 3 * (2 * c[i] - 2 * b[i] + i * i);
+//        } else {
+//            a[i] *= 2 + b[i] - 3 * c[i];
+//            c[i] = a[i] * b[i] - 1 + c[i];
+//            b[i] = 3 * a[i] - 2 * c[i];
+//            b[i] -= 2 * c[i] + 7 + a[i] ;
+//            a[i] -= 4 + b[i] * 2;
+//            c[i] += 5 * a[i] + 2 * b[i];
+//
+//        }
+
+
     }
     
     

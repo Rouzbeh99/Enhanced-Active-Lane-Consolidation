@@ -1,6 +1,0 @@
-inputs,cache,standard deviation,confidence_low,confidence_high
-armclang,255792,135,255765,255819
-scalar_code,256041,157,256010,256072
-alc_itr,256043,129,256018,256069
-gcc,255998,131,255972,256024
-cray,255972,137,255945,255999
