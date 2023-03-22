@@ -1,4 +1,5 @@
 Input,Mean,standard_deviation,confidence_low,confidence_high
-armclang,26,2,26,27
-ALC,52194,214,52152,52236
-scalar_code,1791403,1506,1791107,1791698
+alc_data_permute_33%,3047,45,3038,3056
+armclang,31,1,31,32
+scalar_code,250,37,243,258
+alc_itr_33%,1494,64,1482,1507

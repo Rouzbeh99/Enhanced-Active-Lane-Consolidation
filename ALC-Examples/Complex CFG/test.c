@@ -6,13 +6,12 @@
 int foo(int *a, int *b, int *c, bool *cond, int n) {
     for (int i = 0; i < n; ++i) {
         if (cond[i]) {
-            c[i] = a[i] + 4;
-            if (b[i] < a[i]) {
-                c[i] = b[i] * a[i];
-            } else {
-                b[i] = b[i] * c[i];
-                c[i] = b[i] - 5;
+            c[i] = a[i] + b[i];
+            if (a[i] >= b[i]) {
+                c[i] += b[i] * a[i];
             }
+        } else {
+            c[i] = b[i] - a[i];
         }
     }
 
@@ -41,19 +40,19 @@ bool *checked_malloc_bool_array(int n) {
 int main() {
 
 
-    int n = 1000;
+    int n = 112;
     int *a = checked_malloc_int_array(n);
     int *b = checked_malloc_int_array(n);
     int *c = checked_malloc_int_array(n);
     bool *cond = checked_malloc_bool_array(n);
 
-
     srand(time(NULL));
-    for (int i = 1; i < n; ++i) {
+    for (int i = 0; i < n; ++i) {
         a[i] = 1;
         b[i] = -1;
         c[i] = 0;
-        cond[i] = (rand() % 3) == 0;
+        cond[i] = (i % 4) == 0;
+//        cond[i] = 1;
     }
 
 
