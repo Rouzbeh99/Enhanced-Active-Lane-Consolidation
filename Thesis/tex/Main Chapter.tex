@@ -46,47 +46,18 @@
 
 \begin{document}
 
-\chapter{Main Chapter}
 
-SIMD intructions allow modern processor to apply the same Intruction on multiple data at the ame time. The performance improvement gained from these intructions is 
-so considerable(?) that made compiler specialists to explore different ways to exploite SIMD intructions. Auto-vectorization [cite] is a compiler tranformation that is proposed
-for this purpose. Implemented by almost all current compilers, auto-vectorization looks for possibility of using SIMD instructions (also called vector instructions) in the program and replaces
-scalar code (code that is made of simple instructions) with vector instructions wherever possible.
+\chapter{Backgrounds}
 
-Since most of the execution time of a program is spent on loops, vectorization is typically applied on loops. Famous Compilers have optimization passes (such as slp-vectorizer in clang ... [cite, more examples])
-that vectorize loops body. In spite of loop-vectorization there has been efforts to vectorize other structres such as functions [cite] as well however, the focus of research in this area is on loops.
-
-A huge amount of work has been done to improve codes using vectorization [cite] however, the transformation needs the code to meet certain requirements which if not met, would result in invalid code
-produced by the compilers. Furthuremore, replacing scalar code with vector is not always benefitial. In some situations(?) scalar code can provide better performance in comparison to vector code.
-In response to these two problems with vectorization, compilers come with an analysis pass to check both legality of the tranformation and it's profitability.
-
-One of the larget obstacles for vectorization has always been control flow divergence. Existence of branches (such as if-then-else statements or swithch case statements) causes the program to take different paths during execution time 
-based on some conditions inside the code that could change dynamically. This is called divergence in the control flow of the program. Having divergence in the code, vectorization can not be simply applied,
-as different iterations of the loop might take different paths and as a result disabling the compiler to replace instructions with SIMD ones. 
-
-To deal with divergence in the code, a tranformation called If-Conversion (also called Control Flow Linearization)  has been proposed. Modern Processors support "predicated instructions". in predicated instructions, every single instruction is 
-gaurded by a one bit predicate which could be either 1 or 0. The result of execution of the instruction will be committed only if that predicate bit is set to 1. Otherwise, the result will be discarded leaving no architectural(?) effect e.g: memory writes (?),... .
-Having "Predicated Vector instructions" in the processor, compilers will be able to vectorize codes with divergence by first Linearizing control flow and then replacing scalar instructions with vectorized ones.
-This is the most widely taken approach to vector such codes with divergence, But there are probelms with this approach.
+Modern processors utilize Single Instruction Multiple Data (SIMD) instructions to execute the same instruction on multiple data simultaneously. This technique provides significant performance improvements, leading compiler specialists to explore different ways to exploit SIMD instructions. One of the most popular approaches is auto-vectorization [cite], a compiler transformation that looks for opportunities to use SIMD instructions (also known as vector instructions) in a program and replaces scalar code (i.e., simple instructions) with vector instructions whenever possible. This transformation is implemented by almost all current compilers.
+Since most of the execution time of a program is spent on loops, vectorization is typically applied to loops. Well-known compilers have optimization passes, such as the slp-vectorizer in Clang [cite], that vectorize loops' bodies. Although there have been efforts to vectorize other structures, such as functions [cite], the primary focus of research in this area is on loops.
+A considerable amount of work has been done to improve code using vectorization [cite]. However, this transformation requires the code to meet certain requirements; otherwise, compilers may produce invalid code. Moreover, replacing scalar code with vector instructions is not always beneficial. In some cases, scalar code can provide better performance than vector code. To address these two issues, compilers include an analysis pass to check both the legality of the transformation and its profitability.
+One of the significant obstacles for vectorization is control flow divergence. When a program contains branches (e.g., if-then-else or switch-case statements), it can take different paths during runtime based on certain conditions within the code that may change dynamically. This is called divergence in the control flow of the program. With control flow divergence, vectorization cannot be applied easily, as different iterations of the loop may take different paths, disabling the compiler from replacing instructions with SIMD ones.
+To tackle control flow divergence, a transformation called If-Conversion (also known as Control Flow Linearization) has been proposed. Modern processors support "predicated instructions," in which each instruction is guarded by a one-bit predicate that can be either 1 or 0. The execution of the instruction will be committed only if the predicate bit is set to 1. Otherwise, the result will be discarded, leaving no architectural effects, such as memory writes, etc. With "Predicated Vector instructions" in the processor,
+compilers can vectorize codes with divergence by first linearizing control flow and then replacing scalar instructions with vectorized ones. 
+This is the most widely used approach to vectorize such codes with divergence. However, there are problems with this approach.
 
 To demonstrate possible shortcomings with this approach, let's follow a simple example: 
-
-% \begin{algorithm}
-%     \caption{Motivating Example}\label{euclid}
-%     \begin{algorithmic}[1]
-%     \For{$i \gets 0$ to $N$ by 1}
-%         \If{($i \bmod $2) == 1} 
-%             \State $C_{i} \gets $($A_{i} + B_{i}$) 
-%         \Else
-%             \State $B_{i} \gets $($A_{i} - C_{i}$) 
-%         \EndIf 
-%     \EndFor
-
-%     \end{algorithmic}
-
-% \end{algorithm}
-
-
 \begin{lstlisting}[language=C, caption={Motivating Example}]
     for(i = 0; i < n; i++){
         if(cond[i]){
@@ -97,8 +68,9 @@ To demonstrate possible shortcomings with this approach, let's follow a simple e
     }
 \end{lstlisting}
 
-There are two different paths inside the loop body which disable us to simply vectorize the code. As explaned before, we need to first linearize the control flow through if-conversion and then vectorized code. After doing so, resulting code 
-would look like this:(In this section we assume that vector length is 4.)
+This code contains an if-else statement inside the loop, causing control flow divergence. To vectorize this code, we first need to linearize the control flow by converting the if-else statement to a sequence of predicated instructions. After linearization, the resulting code would look like this (assuming a vector length of 4):
+
+
 
 \begin{lstlisting}[language=C]
     VLength= 4;
@@ -115,23 +87,15 @@ would look like this:(In this section we assume that vector length is 4.)
     }
 \end{lstlisting}
 
-When we apply if conversion, all branches are eliminated and instead, all instruction are gaurded with predicates. In line 6 we have computed the mask for instructions that belong to if block. Then instructions in lines 7 and 8 use this mask vectore. Since here we have a simple if then else statement,
-the predicate for else block instructions will simply be negated(?) predicates we had for if block. So in line 9 we used not instruction to form mask vector for then block and used it for instructions in lines 10 and 11.
+The process of applying if conversion involves eliminating all branches and instead guarding all instructions with predicates. In the case of a simple if-then-else statement (our example), the predicate for the else block instructions will be the negation of the predicates used for the if block instructions. To accomplish this, we compute the mask for instructions that belong to the if block in line 6, and then use this mask vector for the instructions in lines 7 and 8. In line 9, we use the "not" instruction to form a mask vector for the then block and use it for the instructions in lines 10 and 11.
 
-As you can see, by applying if conversion, we are always executing codes in both if and else blocks and because the conditions for these two blocks are mutually exclusive, no matter how many true and false elements exist in 
-the mask vector, we always end up wastng half of vector lanes due to predication.
+However, by applying if conversion, we are always executing code in both the if and else blocks, which means that we end up wasting half of vector lanes due to predication. This issue has been studied for a while, and recent works (cite) have proposed solutions to address it. The main idea behind most of these solutions is to detect uniform true and uniform false paths.
 
-This problem has been studied for a while and recent works [cite] has proposed solutions for that. The main idea behind most of these solutions is to detect \textbf{Uniform True} and \textbf{Uniform False} paths.
+A uniform path refers to the case where, for one vector iteration, all predicates are either true or false, which means that all iterations are going to execute one path (in our motivating example, either the then block or the else block). If such a uniform path is detected, we only need to introduce a path that corresponds to the block it's going to execute, where all instructions are vectorized but not predicated. This way, we can utilize the full vector capacity to execute code and avoid the excessive overhead introduced by predicated instructions.
 
-A uniform path refers to the case where for one vector iterations, all predicates are either true or false which means all iterations are going to execute one path (in our motivating example either then block or else block). If such a uniform is detected, All we need to 
-do is to introduce a path (coressponding to the block it's going to execute) that all instructions are vectorized but not predicated. Doing so we will: 1- utilize full vector capacity to execute code and 2- avoid excessive overhead introduced by predicated 
-instructions.
+However, the main challenge is how to detect uniform vectors. As we discussed earlier and saw in the example, predicated vectors are formed from branch conditions. The value for these conditions could be either static or dynamic. If the condition is static, the compiler can find its value at compile time and apply appropriate optimizations to produce the most performant code. However, in most cases, the condition can only be determined at runtime and could change on each iteration, making static approaches unable to detect uniformity.
 
-Having the idea of uniform paths, the main challenge is how to detect uniform vectors. As discussed above and we saw in the example[figure number], predicated vectors are formed from branch (in the example the if statement) conditions. The value for these conditions could be 
-either static or dynamic. In case of static, compiler could find its value at compile time and apply appropriate optimizations to produce the most performant(?) code however, in most cases the condition can only be determined at runtime and could change on each iteration and 
-a result static approaches are unable to detec uniformity. 
-
-Runtime checks are typical solutions to this problem. Compiler inserts some runtime checks to find if a vector is uniform in that execution time or not. Compiler also introduced some paths so that when a uniform vector is detected dynamically, the coressponding path will be executed.
+Runtime checks are typical solutions to this problem. The compiler inserts some runtime checks to find out if a vector is uniform in that execution time or not. The compiler also introduces some paths so that when a uniform vector is detected dynamically, the corresponding path will be executed.
 
 To demonstrate how this approach works, let's apply it on the code in figure [FIG number]:
 
@@ -161,11 +125,135 @@ To demonstrate how this approach works, let's apply it on the code in figure [FI
     }
 \end{lstlisting}
 
-Like before, we formed mask vector in line 6. Then we check to see if all elements in mask vector is true. If so, it means that we have detected a uniform vector coressponding to if blcok and we can execute if code without predication. But if the all elements of the mask are false, then we have detected 
-uniform vector coressponding to else block. So we can execute else code with no predicatation. Otherwise, it means that the vector is a combination of true and false elements which execute different paths in the code (some if block and some else). In this case we use predicated code in our linearized path as before.
+To avoid the performance overhead of predicated instructions, we need to detect if any uniform paths exist in the loop, where a uniform path is a sequence of instructions that always execute the same branch of the code based on a condition. To detect a uniform path, we first load the mask vector cond in line 6. We then check if all elements of the mask vector are true using the all\_true function in line 7. If this is the case, we have detected a uniform vector corresponding to the if block, and we can execute the if code without any predication. The if block consists of a multiplication of vectors b\_v and c\_v, and the result is stored in vector a\_v.
 
-Although uniform paths could possibily lead to performance improvement, there are two things to consider about them: First, they introduce overheads due to runtime checks they add to the code and second, if the input is in a way that uniform vectors are unlikely to occur, then unifrom paths
-won't be executed often, thus no improvement will be gained.
+If all elements of the mask vector are false, we have detected a uniform vector corresponding to the else block. We can execute the else code without any predication. The else block consists of an addition of vectors a\_v and c\_v, and the result is stored in vector b\_v.
+
+If some elements of the mask vector are true and others are false, it means that we have a combination of vectors that execute different paths in the code (some if block and some else). In this case, we use predicated code in our linearized path, as we did in the previous example.
+
+Although uniform paths could potentially lead to performance improvements, there are two things to consider about them. First, they introduce overheads due to the runtime checks added to the code. Second, if the input data is such that uniform vectors are unlikely to occur, uniform paths won't be executed often, and no performance improvement will be gained. Therefore, the performance gains from the uniform path approach depend on the characteristics of the input data and the frequency of uniform vectors.
+
+
+\chapter{Main Chapter}
+
+% SIMD intructions allow modern processor to apply the same Intruction on multiple data at the ame time. The performance improvement gained from these intructions is 
+% so considerable that made compiler specialists to explore different ways to exploite SIMD intructions. Auto-vectorization [cite] is a compiler tranformation that is proposed
+% for this purpose. Implemented by almost all current compilers, auto-vectorization looks for possibility of using SIMD instructions (also called vector instructions) in the program and replaces
+% scalar code (code that is made of simple instructions) with vector instructions wherever possible.
+
+% Since most of the execution time of a program is spent on loops, vectorization is typically applied on loops. Famous Compilers have optimization passes (such as slp-vectorizer in clang ... [cite, more examples])
+% that vectorize loops body. In spite of loop-vectorization there has been efforts to vectorize other structres such as functions [cite] as well however, the focus of research in this area is on loops.
+
+% A huge amount of work has been done to improve codes using vectorization [cite] however, the transformation needs the code to meet certain requirements which if not met, would result in invalid code
+% produced by the compilers. Furthuremore, replacing scalar code with vector is not always benefitial. In some situations(?) scalar code can provide better performance in comparison to vector code.
+% In response to these two problems with vectorization, compilers come with an analysis pass to check both legality of the tranformation and it's profitability.
+
+% One of the larget obstacles for vectorization has always been control flow divergence. Existence of branches (such as if-then-else statements or swithch case statements) causes the program to take different paths during execution time 
+% based on some conditions inside the code that could change dynamically. This is called divergence in the control flow of the program. Having divergence in the code, vectorization can not be simply applied,
+% as different iterations of the loop might take different paths and as a result disabling the compiler to replace instructions with SIMD ones. 
+
+% To deal with divergence in the code, a tranformation called If-Conversion (also called Control Flow Linearization)  has been proposed. Modern Processors support "predicated instructions". in predicated instructions, every single instruction is 
+% gaurded by a one bit predicate which could be either 1 or 0. The result of execution of the instruction will be committed only if that predicate bit is set to 1. Otherwise, the result will be discarded leaving no architectural(?) effect e.g: memory writes (?),... .
+% Having "Predicated Vector instructions" in the processor, compilers will be able to vectorize codes with divergence by first Linearizing control flow and then replacing scalar instructions with vectorized ones.
+% This is the most widely taken approach to vector such codes with divergence, But there are probelms with this approach.
+
+% To demonstrate possible shortcomings with this approach, let's follow a simple example: 
+
+% \begin{algorithm}
+%     \caption{Motivating Example}\label{euclid}
+%     \begin{algorithmic}[1]
+%     \For{$i \gets 0$ to $N$ by 1}
+%         \If{($i \bmod $2) == 1} 
+%             \State $C_{i} \gets $($A_{i} + B_{i}$) 
+%         \Else
+%             \State $B_{i} \gets $($A_{i} - C_{i}$) 
+%         \EndIf 
+%     \EndFor
+
+%     \end{algorithmic}
+
+% \end{algorithm}
+
+
+% \begin{lstlisting}[language=C, caption={Motivating Example}]
+%     for(i = 0; i < n; i++){
+%         if(cond[i]){
+%             a[i] = b[i] * c[i];
+%         }else{
+%             b[i] = a[i] + c[i];
+%         }
+%     }
+% \end{lstlisting}
+
+% There are two different paths inside the loop body which disable us to simply vectorize the code. As explaned before, we need to first linearize the control flow through if-conversion and then vectorized code. After doing so, resulting code 
+% would look like this:(In this section we assume that vector length is 4.)
+
+% \begin{lstlisting}[language=C]
+%     VLength= 4;
+%     for(i = 0; i < n; i+=VLength ){
+%         a_v = load_v(&a[i], VLength);
+%         b_v = load_v(&b[i], VLength);
+%         c_v = load_v(&c[i], VLength);
+%         mask_v = load_v(&cond[i], VLength);
+%         mult_v = masked_mul(b_v, c_v, mask_v);
+%         masked_store_v(&a[i], mult_v, VLength, mask_v);
+%         mask_not_v = not_v(mask_v);
+%         add_v = maked_add(a_v, b_v, mask_v)
+%         masked_store_v(&b[i],add_v, VLength, mask_not_v);
+%     }
+% \end{lstlisting}
+
+% When we apply if conversion, all branches are eliminated and instead, all instruction are gaurded with predicates. In line 6 we have computed the mask for instructions that belong to if block. Then instructions in lines 7 and 8 use this mask vectore. Since here we have a simple if then else statement,
+% the predicate for else block instructions will simply be negated(?) predicates we had for if block. So in line 9 we used not instruction to form mask vector for then block and used it for instructions in lines 10 and 11.
+
+% As you can see, by applying if conversion, we are always executing codes in both if and else blocks and because the conditions for these two blocks are mutually exclusive, no matter how many true and false elements exist in 
+% the mask vector, we always end up wastng half of vector lanes due to predication.
+
+% This problem has been studied for a while and recent works [cite] has proposed solutions for that. The main idea behind most of these solutions is to detect \textbf{Uniform True} and \textbf{Uniform False} paths.
+
+% A uniform path refers to the case where for one vector iterations, all predicates are either true or false which means all iterations are going to execute one path (in our motivating example either then block or else block). If such a uniform is detected, All we need to 
+% do is to introduce a path (coressponding to the block it's going to execute) that all instructions are vectorized but not predicated. Doing so we will: 1- utilize full vector capacity to execute code and 2- avoid excessive overhead introduced by predicated 
+% instructions.
+
+% Having the idea of uniform paths, the main challenge is how to detect uniform vectors. As discussed above and we saw in the example[figure number], predicated vectors are formed from branch (in the example the if statement) conditions. The value for these conditions could be 
+% either static or dynamic. In case of static, compiler could find its value at compile time and apply appropriate optimizations to produce the most performant(?) code however, in most cases the condition can only be determined at runtime and could change on each iteration and 
+% a result static approaches are unable to detec uniformity. 
+
+% Runtime checks are typical solutions to this problem. Compiler inserts some runtime checks to find if a vector is uniform in that execution time or not. Compiler also introduced some paths so that when a uniform vector is detected dynamically, the coressponding path will be executed.
+
+% To demonstrate how this approach works, let's apply it on the code in figure [FIG number]:
+
+% \begin{lstlisting}[language=C]
+%     VLength= 4;
+%     for(i = 0; i < n; i+=VLength ){
+%         a_v = load_v(&a[i], VLength);
+%         b_v = load_v(&b[i], VLength);
+%         c_v = load_v(&c[i], VLength);
+%         mask_v = load_v(&cond[i], VLength);
+%         if(all_true(mask_v)){
+%             /* uniform true path */
+%             mult_v = b_v * c_v;
+%             store(&a[i], mult_v, VLength);
+%         } else if (all_false(mask_v)){
+%             /* uniform false path */
+%             add_v = a_v + c_v;
+%             store(&b[i],add_v, VLength);
+%         }else{
+%             /* Linearized Path */
+%             mult_v = masked_mul(b_v, c_v, mask_v);
+%             masked_store_v(&a[i], mult_v, VLength, mask_v);
+%             mask_not_v = not_v(mask_v);
+%             add_v = maked_add(a_v, b_v, mask_v)
+%             masked_store_v(&b[i],add_v, VLength, mask_not_v);
+%         }
+%     }
+% \end{lstlisting}
+
+% Like before, we formed mask vector in line 6. Then we check to see if all elements in mask vector is true. If so, it means that we have detected a uniform vector coressponding to if blcok and we can execute if code without predication. But if the all elements of the mask are false, then we have detected 
+% uniform vector coressponding to else block. So we can execute else code with no predicatation. Otherwise, it means that the vector is a combination of true and false elements which execute different paths in the code (some if block and some else). In this case we use predicated code in our linearized path as before.
+
+% Although uniform paths could possibily lead to performance improvement, there are two things to consider about them: First, they introduce overheads due to runtime checks they add to the code and second, if the input is in a way that uniform vectors are unlikely to occur, then unifrom paths
+% won't be executed often, thus no improvement will be gained.
 
 Wytte[cite] suggested the idea of \emph{forming} uniform vectors reather than \emph{waiting} for one to occur. He proposed his transformation called Active-Lane-Consolidation (ALC) to dynamically form such uniform vectors. The main idea behind this transformation is to \emph{permute} loop indices
 so that eventually we have a uniform vector of indices which then executes the coressponding block without preication. 
