@@ -88,6 +88,7 @@ void permutation_c_sve_intrinsics(svint32_t z0, svint32_t z1, svbool_t p0,
 
 }
 
+
 int foo(int *a, int *b, int *c, bool *cond, int n) {
 
     svbool_t allActive = svptrue_b32();
@@ -103,6 +104,17 @@ int foo(int *a, int *b, int *c, bool *cond, int n) {
     svint32_t idxR = svundef_s32();
     svbool_t cond_M = svptrue_b32();
     svbool_t cond_R = svptrue_b32();
+
+    svint32_t inner_uniform_vec = svundef_s32();
+    svint32_t inner_rem_vec = svundef_s32();
+    svbool_t inner_uniform_pred = svpfalse_b();
+    svbool_t inner_rem_pred = svpfalse_b();
+
+    svint32_t inner_idxM = svundef_s32();
+    svint32_t inner_idxR = svundef_s32();
+    svbool_t inner_cond_M = svpfalse_b();
+    svbool_t inner_cond_R = svpfalse_b();
+
 
     bool ifBlockExecuted;
 
@@ -120,12 +132,31 @@ int foo(int *a, int *b, int *c, bool *cond, int n) {
             svint32_t addResult = svadd_s32_m(allActive, loaded_a, loaded_b);
             svst1_scatter_s32index_s32(allActive, c, idxM, addResult);
 
-            // form predicates for inner if statement and execute predicated code
-            svbool_t predicates = svcmpge_s32(allActive, loaded_a, loaded_b);
-            svint32_t multResult = svmul_s32_z(predicates, loaded_a, loaded_b);
-            svint32_t loaded_c = svld1_gather_s32index_s32(predicates, c, idxM);
-            svint32_t result = svadd_s32_m(predicates, multResult, loaded_c);
-            svst1_scatter_s32index_s32(predicates, c, idxM, result);
+            // do another Permutation for inner if
+            svbool_t inner_rem_pred = svcmpge_s32(allActive, loaded_a, loaded_b);
+            inner_rem_vec = idxM;
+
+            permutation_c_sve_intrinsics(inner_uniform_vec, inner_rem_vec, inner_uniform_pred,
+                                         inner_rem_pred, &inner_idxM, &inner_idxR, &inner_cond_M, &inner_cond_R);
+
+            if (svcntp_b32(allActive, inner_cond_M) == svcntw()) {    // if there is a uniform true vector for inner permutation
+
+
+                loaded_a = svld1_gather_s32index_s32(allActive, a, inner_idxM);
+                loaded_b = svld1_gather_s32index_s32(allActive, b, inner_idxM);
+
+                svint32_t multResult = svmul_s32_z(allActive, loaded_a, loaded_b);
+                svint32_t loaded_c = svld1_gather_s32index_s32(allActive, c, idxM);
+                svint32_t result = svadd_s32_m(allActive, multResult, loaded_c);
+                svst1_scatter_s32index_s32(allActive, c, idxM, result);
+
+                inner_uniform_vec = inner_idxR;
+                inner_uniform_pred = inner_cond_R;
+            } else {
+                inner_uniform_vec = inner_idxM;
+                inner_uniform_pred = inner_cond_M;
+            }
+
 
             // fill uniformVector with new instances
             uniformVector = svindex_s32(i, 1);
@@ -152,15 +183,8 @@ int foo(int *a, int *b, int *c, bool *cond, int n) {
     }
 
 
-
-
     // linearized path: execute corresponding code for everything that remains in index vectors
     if (ifBlockExecuted) {
-
-        printPredicate(uniformVectorPredicate);
-        printVector(uniformVector);
-        printPredicate(cond_R);
-        printVector(idxR);
 
         svint32_t loaded_a = svld1_gather_s32index_s32(uniformVectorPredicate, a, uniformVector);
         svint32_t loaded_b = svld1_gather_s32index_s32(uniformVectorPredicate, b, uniformVector);
@@ -204,10 +228,6 @@ int foo(int *a, int *b, int *c, bool *cond, int n) {
 
     } else {
 
-        printPredicate(cond_M);
-        printVector(idxM);
-        printPredicate(remainingVectorPredicate);
-        printVector(remainingVector);
 
         svint32_t loaded_a = svld1_gather_s32index_s32(cond_M, a, idxM);
         svint32_t loaded_b = svld1_gather_s32index_s32(cond_M, b, idxM);
@@ -249,6 +269,9 @@ int foo(int *a, int *b, int *c, bool *cond, int n) {
 
 
     }
+
+
+
 
 
 }
