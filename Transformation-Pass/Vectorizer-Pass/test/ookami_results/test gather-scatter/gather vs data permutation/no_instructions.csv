@@ -1,0 +1,4 @@
+Input,Mean,standard_deviation,confidence_low,confidence_high
+data_permutation,37704461,84859,37687829,37721093
+vectorized,9234928,157405,9204077,9265779
+gather_scatter,209670387,130244,209644860,209695915

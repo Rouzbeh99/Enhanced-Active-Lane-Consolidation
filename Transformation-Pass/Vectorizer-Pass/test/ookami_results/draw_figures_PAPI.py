@@ -23,7 +23,9 @@ tag_dic = {'instructions_executed': 'Number of instructions', 'program_cycles': 
            'memory_stall': 'Cycles Stalled for Memory ops', 'resource_stall': 'Cycles Stalled for  Resources',
            'FPU': 'Total FPU Idle Cycles', 'no_instructions': 'Cycles with No Instructions Executed'}
 
-baseline = "scalar_code"
+#baseline = "scalar_code"
+baseline = "vectorized"
+
 
 for filename in all_files:
     df = pd.read_csv(filename, index_col=None, header=0)

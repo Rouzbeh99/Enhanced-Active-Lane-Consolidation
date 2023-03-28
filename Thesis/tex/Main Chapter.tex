@@ -9,39 +9,43 @@
 \definecolor{codepurple}{rgb}{0.58,0,0.82}
 \definecolor{backcolour}{rgb}{0.95,0.95,0.92}
 
-\lstdefinestyle{mystyle}{
-    backgroundcolor=\color{backcolour},   
+
+\lstdefinestyle{code_snippet_style}{
+    backgroundcolor=\color{gray!10},
+    basicstyle=\footnotesize\ttfamily,
     commentstyle=\color{codegreen},
     keywordstyle=\color{magenta},
-    numberstyle=\tiny\color{codegray},
-    stringstyle=\color{codepurple},
-    basicstyle=\ttfamily\footnotesize,
-    breakatwhitespace=false,         
-    breaklines=true,                 
-    captionpos=b,                    
-    keepspaces=true,                 
-    numbers=left,                    
-    numbersep=5pt,                  
-    showspaces=false,                
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    numberstyle=\tiny\color{gray},
+    showspaces=false,
     showstringspaces=false,
-    showtabs=false,                  
+    showtabs=false,
     tabsize=2
 }
 
 
 \lstset{
-    style=mystyle,
+    style=code_snippet_style,
     columns=fullflexible,
     basicstyle=\ttfamily,
     frame=tlbr,
+    postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
     framerule=0pt,
-    xleftmargin=17pt,
-    framexleftmargin=17pt,
-    framexrightmargin=5pt,
+    framexleftmargin=3pt,
+    framexrightmargin=3pt,
     framexbottommargin=4pt,
     aboveskip=20pt,
-    belowskip=20pt
+    belowskip=20pt,
+    xleftmargin=0.01cm,
+    xrightmargin=0.01cm
 }
+
+
     
 
 \begin{document}
@@ -71,7 +75,6 @@ To demonstrate possible shortcomings with this approach, let's follow a simple e
 This code contains an if-else statement inside the loop, causing control flow divergence. To vectorize this code, we first need to linearize the control flow by converting the if-else statement to a sequence of predicated instructions. After linearization, the resulting code would look like this (assuming a vector length of 4):
 
 
-
 \begin{lstlisting}[language=C]
     VLength= 4;
     for(i = 0; i < n; i+=VLength ){
@@ -87,13 +90,24 @@ This code contains an if-else statement inside the loop, causing control flow di
     }
 \end{lstlisting}
 
-The process of applying if conversion involves eliminating all branches and instead guarding all instructions with predicates. In the case of a simple if-then-else statement (our example), the predicate for the else block instructions will be the negation of the predicates used for the if block instructions. To accomplish this, we compute the mask for instructions that belong to the if block in line 6, and then use this mask vector for the instructions in lines 7 and 8. In line 9, we use the "not" instruction to form a mask vector for the then block and use it for the instructions in lines 10 and 11.
+The process of applying if conversion involves eliminating all branches and instead guarding all instructions with predicates. For example, in the case of a simple if-then-else statement, the predicate for the else block instructions will be the negation of the predicates used for the if block instructions. This allows us to effectively compute the instructions for both blocks without the need for branching, enabling us to use vector instructions and produce more efficient code.
 
-However, by applying if conversion, we are always executing code in both the if and else blocks, which means that we end up wasting half of vector lanes due to predication. This issue has been studied for a while, and recent works (cite) have proposed solutions to address it. The main idea behind most of these solutions is to detect uniform true and uniform false paths.
+However, one downside of applying if conversion is that we may end up wasting half of vector lanes due to predication, as we are always executing code in both the if and else blocks. As shown in Figure [?], the green elements represent the vector lanes executing the then block, the blue ones represent the vector lanes executing the else block, and the gray elements show inactive lanes. Regardless of how predicates are distributed among the mask vector, we are always losing half of our computation power due to predication. This is particularly true when the number of instructions in both the then and else blocks are approximately the same, which is often the case.
+
+Moreover, the problem of wasted computation power due to predication is further intensified when we have unbalanced conditions, where we execute one of the two blocks more than the other. In such cases, the effect of predication is even more pronounced, as we end up losing more computation power due to the large number of inactive lanes.
+
+This issue has been studied for a while, and recent works (cite) have proposed solutions to address it. The main idea behind most of these solutions is to detect uniform true and uniform false paths.
 
 A uniform path refers to the case where, for one vector iteration, all predicates are either true or false, which means that all iterations are going to execute one path (in our motivating example, either the then block or the else block). If such a uniform path is detected, we only need to introduce a path that corresponds to the block it's going to execute, where all instructions are vectorized but not predicated. This way, we can utilize the full vector capacity to execute code and avoid the excessive overhead introduced by predicated instructions.
 
 However, the main challenge is how to detect uniform vectors. As we discussed earlier and saw in the example, predicated vectors are formed from branch conditions. The value for these conditions could be either static or dynamic. If the condition is static, the compiler can find its value at compile time and apply appropriate optimizations to produce the most performant code. However, in most cases, the condition can only be determined at runtime and could change on each iteration, making static approaches unable to detect uniformity.
+
+\begin{figure}[t!]
+    \centering
+    \includegraphics[width=0.95\textwidth]{img/condition_distribution.png}
+    \caption{Wasting vector lanes due to predication}
+    \label{fig:Permutation}
+\end{figure}
 
 Runtime checks are typical solutions to this problem. The compiler inserts some runtime checks to find out if a vector is uniform in that execution time or not. The compiler also introduces some paths so that when a uniform vector is detected dynamically, the corresponding path will be executed.
 
@@ -134,131 +148,25 @@ If some elements of the mask vector are true and others are false, it means that
 Although uniform paths could potentially lead to performance improvements, there are two things to consider about them. First, they introduce overheads due to the runtime checks added to the code. Second, if the input data is such that uniform vectors are unlikely to occur, uniform paths won't be executed often, and no performance improvement will be gained. Therefore, the performance gains from the uniform path approach depend on the characteristics of the input data and the frequency of uniform vectors.
 
 
-\chapter{Main Chapter}
 
-% SIMD intructions allow modern processor to apply the same Intruction on multiple data at the ame time. The performance improvement gained from these intructions is 
-% so considerable that made compiler specialists to explore different ways to exploite SIMD intructions. Auto-vectorization [cite] is a compiler tranformation that is proposed
-% for this purpose. Implemented by almost all current compilers, auto-vectorization looks for possibility of using SIMD instructions (also called vector instructions) in the program and replaces
-% scalar code (code that is made of simple instructions) with vector instructions wherever possible.
+Wytte[cite] has proposed an innovative approach to overcome the problem of waiting for uniform vectors to occur, by suggesting the formation of such vectors through the use of his transformation called Active-Lane-Consolidation (ALC). The ALC transformation dynamically forms uniform vectors by permuting loop indices, thereby enabling the execution of the corresponding block without predication. The main idea behind this transformation is to create a uniform vector of indices that can execute the corresponding block of code without requiring any conditional statements.
 
-% Since most of the execution time of a program is spent on loops, vectorization is typically applied on loops. Famous Compilers have optimization passes (such as slp-vectorizer in clang ... [cite, more examples])
-% that vectorize loops body. In spite of loop-vectorization there has been efforts to vectorize other structres such as functions [cite] as well however, the focus of research in this area is on loops.
+This approach offers a more efficient and streamlined way of executing code, as it eliminates the need for predication and branching, which can result in slower execution times. By forming uniform vectors rather than waiting for them to occur, the ALC transformation helps the program to run more efficiently.
 
-% A huge amount of work has been done to improve codes using vectorization [cite] however, the transformation needs the code to meet certain requirements which if not met, would result in invalid code
-% produced by the compilers. Furthuremore, replacing scalar code with vector is not always benefitial. In some situations(?) scalar code can provide better performance in comparison to vector code.
-% In response to these two problems with vectorization, compilers come with an analysis pass to check both legality of the tranformation and it's profitability.
+At the core of ALC is an algorithm named \emph{Permutation}, which aims to create a uniform vector with minimal overhead from two vectors and their corresponding predicates. The algorithm accomplishes this task by combining the input vectors in a specific manner. A high level view of the approach is shown in fig[?].
 
-% One of the larget obstacles for vectorization has always been control flow divergence. Existence of branches (such as if-then-else statements or swithch case statements) causes the program to take different paths during execution time 
-% based on some conditions inside the code that could change dynamically. This is called divergence in the control flow of the program. Having divergence in the code, vectorization can not be simply applied,
-% as different iterations of the loop might take different paths and as a result disabling the compiler to replace instructions with SIMD ones. 
-
-% To deal with divergence in the code, a tranformation called If-Conversion (also called Control Flow Linearization)  has been proposed. Modern Processors support "predicated instructions". in predicated instructions, every single instruction is 
-% gaurded by a one bit predicate which could be either 1 or 0. The result of execution of the instruction will be committed only if that predicate bit is set to 1. Otherwise, the result will be discarded leaving no architectural(?) effect e.g: memory writes (?),... .
-% Having "Predicated Vector instructions" in the processor, compilers will be able to vectorize codes with divergence by first Linearizing control flow and then replacing scalar instructions with vectorized ones.
-% This is the most widely taken approach to vector such codes with divergence, But there are probelms with this approach.
-
-% To demonstrate possible shortcomings with this approach, let's follow a simple example: 
-
-% \begin{algorithm}
-%     \caption{Motivating Example}\label{euclid}
-%     \begin{algorithmic}[1]
-%     \For{$i \gets 0$ to $N$ by 1}
-%         \If{($i \bmod $2) == 1} 
-%             \State $C_{i} \gets $($A_{i} + B_{i}$) 
-%         \Else
-%             \State $B_{i} \gets $($A_{i} - C_{i}$) 
-%         \EndIf 
-%     \EndFor
-
-%     \end{algorithmic}
-
-% \end{algorithm}
+As can be observed, each input vector comprises a combination of true and false lanes, indicating the active and inactive values respectively. Following the permutation process, the resulting vector on the left-hand side contains only true lanes, while the other vector includes both active and inactive lanes. In this scenario, the permutation produces a uniform true vector. Regardless of the number of active and inactive lanes in the input vectors, there will always be at least one uniform vector, either true or false. Consequently, permuting loop indices allows us to execute one of the then or else blocks without the need for predication.
 
 
-% \begin{lstlisting}[language=C, caption={Motivating Example}]
-%     for(i = 0; i < n; i++){
-%         if(cond[i]){
-%             a[i] = b[i] * c[i];
-%         }else{
-%             b[i] = a[i] + c[i];
-%         }
-%     }
-% \end{lstlisting}
+\begin{figure}[t!]
+    \centering
+    \includegraphics[width=0.95\textwidth]{img/permutation.png}
+    \caption{Permutation}
+    \label{fig:Permutation}
+\end{figure}will
 
-% There are two different paths inside the loop body which disable us to simply vectorize the code. As explaned before, we need to first linearize the control flow through if-conversion and then vectorized code. After doing so, resulting code 
-% would look like this:(In this section we assume that vector length is 4.)
+Being equipped by permutation, ALC can be implemented in our motivation code, as demonstrated in the following code snippet:
 
-% \begin{lstlisting}[language=C]
-%     VLength= 4;
-%     for(i = 0; i < n; i+=VLength ){
-%         a_v = load_v(&a[i], VLength);
-%         b_v = load_v(&b[i], VLength);
-%         c_v = load_v(&c[i], VLength);
-%         mask_v = load_v(&cond[i], VLength);
-%         mult_v = masked_mul(b_v, c_v, mask_v);
-%         masked_store_v(&a[i], mult_v, VLength, mask_v);
-%         mask_not_v = not_v(mask_v);
-%         add_v = maked_add(a_v, b_v, mask_v)
-%         masked_store_v(&b[i],add_v, VLength, mask_not_v);
-%     }
-% \end{lstlisting}
-
-% When we apply if conversion, all branches are eliminated and instead, all instruction are gaurded with predicates. In line 6 we have computed the mask for instructions that belong to if block. Then instructions in lines 7 and 8 use this mask vectore. Since here we have a simple if then else statement,
-% the predicate for else block instructions will simply be negated(?) predicates we had for if block. So in line 9 we used not instruction to form mask vector for then block and used it for instructions in lines 10 and 11.
-
-% As you can see, by applying if conversion, we are always executing codes in both if and else blocks and because the conditions for these two blocks are mutually exclusive, no matter how many true and false elements exist in 
-% the mask vector, we always end up wastng half of vector lanes due to predication.
-
-% This problem has been studied for a while and recent works [cite] has proposed solutions for that. The main idea behind most of these solutions is to detect \textbf{Uniform True} and \textbf{Uniform False} paths.
-
-% A uniform path refers to the case where for one vector iterations, all predicates are either true or false which means all iterations are going to execute one path (in our motivating example either then block or else block). If such a uniform is detected, All we need to 
-% do is to introduce a path (coressponding to the block it's going to execute) that all instructions are vectorized but not predicated. Doing so we will: 1- utilize full vector capacity to execute code and 2- avoid excessive overhead introduced by predicated 
-% instructions.
-
-% Having the idea of uniform paths, the main challenge is how to detect uniform vectors. As discussed above and we saw in the example[figure number], predicated vectors are formed from branch (in the example the if statement) conditions. The value for these conditions could be 
-% either static or dynamic. In case of static, compiler could find its value at compile time and apply appropriate optimizations to produce the most performant(?) code however, in most cases the condition can only be determined at runtime and could change on each iteration and 
-% a result static approaches are unable to detec uniformity. 
-
-% Runtime checks are typical solutions to this problem. Compiler inserts some runtime checks to find if a vector is uniform in that execution time or not. Compiler also introduced some paths so that when a uniform vector is detected dynamically, the coressponding path will be executed.
-
-% To demonstrate how this approach works, let's apply it on the code in figure [FIG number]:
-
-% \begin{lstlisting}[language=C]
-%     VLength= 4;
-%     for(i = 0; i < n; i+=VLength ){
-%         a_v = load_v(&a[i], VLength);
-%         b_v = load_v(&b[i], VLength);
-%         c_v = load_v(&c[i], VLength);
-%         mask_v = load_v(&cond[i], VLength);
-%         if(all_true(mask_v)){
-%             /* uniform true path */
-%             mult_v = b_v * c_v;
-%             store(&a[i], mult_v, VLength);
-%         } else if (all_false(mask_v)){
-%             /* uniform false path */
-%             add_v = a_v + c_v;
-%             store(&b[i],add_v, VLength);
-%         }else{
-%             /* Linearized Path */
-%             mult_v = masked_mul(b_v, c_v, mask_v);
-%             masked_store_v(&a[i], mult_v, VLength, mask_v);
-%             mask_not_v = not_v(mask_v);
-%             add_v = maked_add(a_v, b_v, mask_v)
-%             masked_store_v(&b[i],add_v, VLength, mask_not_v);
-%         }
-%     }
-% \end{lstlisting}
-
-% Like before, we formed mask vector in line 6. Then we check to see if all elements in mask vector is true. If so, it means that we have detected a uniform vector coressponding to if blcok and we can execute if code without predication. But if the all elements of the mask are false, then we have detected 
-% uniform vector coressponding to else block. So we can execute else code with no predicatation. Otherwise, it means that the vector is a combination of true and false elements which execute different paths in the code (some if block and some else). In this case we use predicated code in our linearized path as before.
-
-% Although uniform paths could possibily lead to performance improvement, there are two things to consider about them: First, they introduce overheads due to runtime checks they add to the code and second, if the input is in a way that uniform vectors are unlikely to occur, then unifrom paths
-% won't be executed often, thus no improvement will be gained.
-
-Wytte[cite] suggested the idea of \emph{forming} uniform vectors reather than \emph{waiting} for one to occur. He proposed his transformation called Active-Lane-Consolidation (ALC) to dynamically form such uniform vectors. The main idea behind this transformation is to \emph{permute} loop indices
-so that eventually we have a uniform vector of indices which then executes the coressponding block without preication. 
-
-To see how it works let's apply it to our motivating example in figure[?]:
 \begin{lstlisting}[language=C]
     VLength= 4;
     /*Initialization*/
@@ -287,120 +195,104 @@ To see how it works let's apply it to our motivating example in figure[?]:
     }
 \end{lstlisting}
 
-In lines 3 and 4, the uniform vector (uniform\_vec) and its mask vector (unifrom\_mask) have been Initialized with indices 0 to VLength and the coressponding masks respectively.
-Then in each iteration of the loop, next vector of indices and its masked vector have been formed. The magic happens in line 11 where we call the permute function. It will put all active elements in uniform\_vec, the other elements in remaining\_vec and coressponding mask bits to uniform\_mask and remaining\_mask.
-After doing so we check if all mask bits in uniform\_mask is true. If this happens, it means that we have formed a uniform vector coressponding to then block and we can execute it with no predication. Otherwise, we are sure that all mask bits in remaining\_vec is false thus, without checking this condition we can 
-execute else block with indices stored in remaining\_vec vector, again with no predication.
+We can see how ALC is applied to our motivation code, starting with the initialization of the uniform vector (uniform\_vec) and its corresponding mask vector (uniform\_mask) in lines 3-4. These vectors are initialized with indices 0 to VLength and their corresponding masks, respectively.
 
-As we can see, using ALC, we always have a uniform (either uniform true for uniform false) vector in each iteration and there is no need to use predicated instructions anymore. 
+In each iteration of the loop, the next vector of indices and its corresponding masked vector are formed (lines 6-7). The magic happens in line 11, where we call the permute function, which takes four input vectors: uniform\_vec, index\_vec, uniform\_mask, and mask\_vec. The function then arranges the active and inactive lanes of these vectors to form two output vectors: uniform\_vec (containing only active lanes) and remaining\_vec (containing inactive lanes and active lanes that were not included in the uniform\_vec). The function also generates two mask vectors, uniform\_mask and remaining\_mask, corresponding to the active and inactive lanes of the output vectors.
 
-The only part of code that can affect the performance negatively is Permute function. If Implemented naively, it could result in even worse performance that predicated code. This is why Wytte propsed his transformation only for ARM architecture with SVE support. SVE (Scalable Vector Extention)[cite] is a vector extention
-proposed by ARM that provides special vector instructions that makes it possible to Implement different vector algorithms efficeintly (elaborate more on sve). Using these instructions, Wytte proposed a fast algorithm for permutation [cite].
+After calling the permute function, we check if all the mask bits in uniform\_mask are true (line 12). If this is the case, it means that we have formed a uniform vector corresponding to the then block, and we can execute it without the need for predication (lines 13-17). Specifically, we gather load the values of b and c vectors at the indices specified by uniform\_vec, multiply them, and store the result in the a vector at the same indices. We then update the uniform\_vec and uniform\_mask to reflect the active lanes that were not included in the uniform vector.
 
-In this work we continue his work on ALC. He proposed the idea of ALC and showed that it could be benefitial by manualy applying it on some selected benchmarks however, he just ran his experiments on a simulator that could only count dynamically executed instructions. This is because at the time there very few machines 
-that supported SVE instructions. His results showed that applying ALC on the cases where he thought would be benefitial, could result in significant reduction in dynamically executed instructions compared to scalar code and also considerable reduction compared to vectorized code.
+If all the mask bits in uniform\_mask are not true, it means that we have formed a uniform vector, corresponding to the else block. In this case, we can execute the else block without predication, as we know that all the mask bits in remaining\_mask are false (lines 18-22). We gather load the values of a and c vectors at the indices specified by remaining\_vec, add them, and store the result in the b vector at the same indices.
 
-We argue that although such a result is promising, it's not enough to demonstrate that the optimization is actullay benefitial. Vector instructions by nature reduce the number of instructions executed as they operate on multiple data at the same time but they also introduce more overheads in terms of latency. 
+As we can see, by using ALC, we can always form a uniform vector (either uniform true or uniform false) in each iteration of the loop. This eliminates the need for predicated instructions and simplifies the code. Additionally, since the permute function generates uniform vectors, we can be confident that the code will execute correctly, without encountering any unexpected errors or behaviors.
 
-The other important aspect that could be severely imapcted by ALC transformation is cache misses. When a load/store happens to a memory address, proccessor also loads data from adjacent memory addresses to the cache since it's likely that it will be used by next operations, which is called locality. Having a memory access patteren in the code that 
-utilizes the memory locality is essential to provide performance however, ALC is so likely to change this access pattern by accessing different memory addresses through \emph{gather load} and \emph{scatter store} instructions. It is apparent that such behaviours their imapct on performance can not be easily detected through metrics such as executed instructions.
 
-In this work we propose a compiler pass that automatically applies ALC tranformation on a given code. Such an automatation requires a deep analysis of first legality of the tranformation and second costs and expected benefits of it. To answer this requirement, our pass comes with an intesive (?) analysis phase that is executed before any tranformation is done. Next, 
-we improve ALC algorithm by proposing different versions of it. Analyzing Wytte's results we found that the same approach for ALC is not able to provide benefits for every case however, small modifications to the algorithm and new versions of it could provide good performance improvements. So we tried to first deivide input codes structures to different categories and
-propose different versions of ALC each specialized for that category.
+Wytte proposed his transformation only for Arm SVE architecture. SVE (Scalable Vector Extension) is a vector extension proposed by ARM that is designed to address the limitations of existing vector unit extensions. One of the key features of SVE is that it supports very large vector lengths, up to 2048 bits. This allows for a higher degree of parallelism and makes it possible to process more data in a single instruction, which can result in significant performance gains.
 
-Having the analysis phase and different versions of ALC, we combine them together to offer a solid recipe for ALC tranformation that can now automatically be applied on every input code and expect improvements.
+Another powerful feature of SVE is its predication support. Unlike traditional vector extensions that have a single predicate register for the entire vector, SVE provides a vector of predicates for every vector of data. This allows for more fine-grained control over which elements of the vector are processed, enabling more efficient branching and reducing the need for predicated instructions.
+
+In addition to its advanced predication support, SVE also provides a rich set of vector manipulation instructions that are optimized to move data between vector efficeintly. These instructions can efficiently rearrange the elements of a vector according to a specified pattern, making it possible to implement algorithms such as permutation with high efficiency.
+
+
+\chapter{Main Chapter}
+
+
+In this study, we build on the pioneering work of Wytte on the ALC technique. He first introduced the ALC idea and manually applied it to a few selected benchmarks, showing its potential to reduce the number of dynamically executed instructions compared to scalar and vectorized code. However, he conducted the experiments on a simulator since at the time, few machines supported SVE instructions.
+
+While Wytte's results are promising, they do not provide sufficient evidence that ALC is actually beneficial. Vector instructions naturally reduce the number of executed instructions by processing multiple data at the same time, but they also introduce more overhead in terms of latency. Therefore, a careful evaluation of ALC is necessary to determine its effectiveness.
+
+Another crucial aspect that could be severely impacted by the ALC transformation is memory access. When a load or store occurs, the processor also loads data from adjacent memory addresses into the cache, assuming that they will be used in the subsequent operations. This process, called locality, is essential for achieving good performance. However, ALC may alter the memory access pattern by using gather load and scatter store instructions to access different memory addresses. This change in behavior is likely to affect performance, but it cannot be easily detected through metrics such as executed instructions.
+
+Thus, to assess the true impact of ALC, we need to consider different metrics including execution time and as well as the reduction in the number of executed instructions and the potential effects on memory access patterns. We conduct a thorough evaluation of ALC using a modern machine that supports SVE instructions and to compare its performance with that of scalar and vectorized code. Our evaluation provides insights into the effectiveness of ALC and help identify its potential limitations.
+
+
+
+
+\section{Gather/Scatter Instructions}
+
+This section delves into a comprehensive examination of gather load and scatter store instructions, which are commonly used in modern computer architectures. These instructions are designed to efficiently process data that is non-contiguous or has irregular memory access patterns, which can significantly impact the performance of memory-bound applications. By using gather load instructions, multiple memory locations can be accessed simultaneously and their contents combined into a single vector, reducing the number of memory accesses required. Conversely, scatter store instructions enable data to be written to non-contiguous memory locations simultaneously, which can further improve performance by reducing the number of memory write operations required.
+
+While gather load and scatter store instructions can improve the performance of memory-bound applications, they also come with significant overhead. These instructions require additional hardware support and software optimizations to effectively utilize the parallelism inherent in the data access patterns. Additionally, the use of gather load and scatter store instructions can result in increased latency and less memory bandwidth utilization, which can negatively impact overall system performance.
+
+\newpage
+
+\begin{lstlisting}[language=C, caption=Scalar Code]
+    for (int i = 0; i < n; i++) {
+        if (cond[i]) {
+            b[i] = a[i];
+        }
+    }
+    \end{lstlisting}
+    
+    \begin{lstlisting}[language=C,caption=Vectorized Code]
+        // predicate for all lanes true
+        const svbool_t allActive = svptrue_b32(); 
+        // get vector length
+        const int vl = svcntw(); 
+    
+        for (int i = 0; i < n; i += vl) {
+            const svbool_t p_mask = svld1(allActive, &cond[i]); 
+            const svint32_t a_vec = svld1_s32(p_mask, &a[i]);
+            svst1_s32(p_mask, &b[i], a_vec); 
+        }
+    \end{lstlisting}
+    
+    \begin{lstlisting}[language=C,caption= Code Using Gather/Scatter]
+        // predicate for all lanes true
+        const svbool_t allActive = svptrue_b32(); 
+        // get vector length
+        const int vl = svcntw(); 
+
+        for (int i = 0; i < n - vl; i += vl) {
+            indexVec = svindex_s32(i, 2);
+            loaded = svld1_gather_s32index_s32(allActive, a, indexVec);
+            svst1_scatter_s32index_s32(allActive, b, indexVec, loaded);
+    
+        }
+    \end{lstlisting}
+    
+
+\newpage
+
+In order to gain a deeper understanding of how gather load and scatter store instructions work, we conduct a test to compare their performance with that of vectorized code. The scalar code used in the test is shown in the figure[?], which involves iterating over the array and copying elements from the input array to the output array only if the corresponding element in the condition array was true. The condition array is designed so that every other element was true, creating a non-contiguous and irregular memory access pattern.
+
+To perform the test, we provid two versions of the code. The first is a vectorized version that utilizes masked instructions to perform loads and stores from consecutive memory addresses (figure[?]). The second version (figure[?]) utilizes gather load and scatter store instructions to load data from the addresses where we knew the corresponding condition is true. These addresses are computed at line 7 where we form a vecto of indices which corresponds to true elements.
+
+
 
 
 \section{ALC Strategies}
 
 In this section we explain how we do the transformation for each case. We start by Wytte algorithm, show the potential cases where it would not result in good performance. Then we analyze what is happening in detail to fine the solution and propose our modified version which works well.
 
-\subsection{If-Then-Else Case}
-It's worth first talking about the hypothesis behind ALC performance improvement. When we linearize and then vectorize the code with control flow divergence, what happens is that in each iteration of the loop we are adding two sources of overhead:
-\begin{enumerate}
-    \item The overhead of predicated instructions
-    \item redundant computations which their results will be discarded later 
-\end{enumerate}
 
-The first one is quite clear. Proccessor can execute normal instructions faster than predicated ones since it need to keep track of the predicates to decide whether it should commit the changes or not.
-
-To better understand the second problem let's consider our motivating example on figure ?? and assume the if condistion is going to be true on every other iteration. So in total, half iteration will execute then block and the other half will execute else block.
-now lets move to the figure ?? where lineariation and vectorization have been applied to the code. Let's focus on the first iteration of the vectorized loop.
-
-
-\begin{figure}[t!]
-    \centering
-    \includegraphics[width=0.95\textwidth]{img/masked_operations.png}
-    \caption{Masked Opertions}
-    \label{fig:masked_multiplication}
-\end{figure}
-
-After vectors \emph{a\_v, b\_v, c\_v} are loaded in lines 3-5, the mask vector is formed which we know in this example, will be true for \emph{first} and \emph{third} elements and will be false for \emph{second} and \emph{forth} elements. figure ?? illustrates what will happen at lines 7 to 11 of the code. White elemets are the ones coressponding to true mask and gray ones coresspond to false mask.
-For each Opertion, the vector unit of the processor will do the operation for all lanes \emph{regardless} of mask values. After doing so, it will discard result for false elements and only keep the true ones and then store them to the memory. Vector instruction could have significant more latency [cite?] compared to scalar instructions and as you can see, we are wasting half our computation power while paying the overhead of vector instructions in each iteration.
-
-In the this example we supposed that the confdtion is true every other iteration but when we have if and else blocks, any sort of distribution of the true and false conditions would have the same impact. Figure ?? shows different possible scenarios which might happen in each iteration of the if-converted code at runtime. It assumes that numbers of instructions in both if and else blocks are the same. The green elements correspond to active elements of the vector exectuing then block 
-instructions and blue ones are those corresponding to active elements of the vector exectuing else block. The gray ones show inactive lanes. As you can see, regardless of how predicates look like, we always endup wasting half vector elements in total as long as then and else block are approximately of the same size. 
-
-\begin{figure}[t!]
-    \centering
-    \includegraphics[width=0.95\textwidth]{img/condition_distribution.png}
-    \caption{different scenarios for predicate distribution}
-    \label{fig:predicate_distribution}
-\end{figure}
-
-The idea behind ALC is to utilize vector instructions by postponing any masked operation to the point where, we have a uniform vector filled with all active lanes. This way not only we don't waste any computation power but we also eliminate maksed operation which are more expensive that regular ones as discussed before.
-
-To accomplish this, we use vector permutation algorithm proposed by Wytte[cite]. The high level view of this operation is illustrated in fig(?). White color represents vector elements for which the coressponding predicate is true (we call them active lanes of the vector) and the gray ones show elements coressponding to false predicates (we call them inactive lanes).
-Given two predicated vector, the permutation logic fills the first vector with active lanes, and puts the other ones in the second vector. If there are enough active lanes in both vectors to fill the first vector, permutation will produce a uniform true vector and if not, then the total number of inactive lanes is more than the size of a vector and permutation will produce
-a uniform false vector. As a result, no matter how the input vector look like, after doing the permutation, we will have \emph{at least} one uniform vector.
-
-\begin{figure}[t!]
-    \centering
-    \includegraphics[width=0.90\textwidth]{img/permutation.png}
-    \caption{Permutation Logic}
-    \label{fig:permutation}
-\end{figure}
-
-Having the permutation algorithm, we implemented what wytte calls \emph{Iterative ALC} as a compiler pass. High level approach is illustrated in figure(?).
-
-In this version of ALC, vectors contain indices of the loop, so we also call it \emph{index permutation}. In each iteration, we have two vector of indices, one the indices of current loop iteration and the other one, indices of previous iterations that have not been executed yet. ALC starts by permuting these two vectors, forming a uniform vector. If it produces a uniform true vector, then it will execute 
-Then block for those elements. Otherwise, as discussed before, we have a uniform false vector and we execute the else block for those indices. No matter which block executed, the other vector (which could have any combination of true and false elements) is passed to the next iteration for permutation.
-
-
-\begin{figure}[t!]
-    \centering
-    \includegraphics[width=0.95\textwidth]{img/iterative_alc.png}
-    \caption{High Level approach for Iterative ALC}
-    \label{fig:iterative_alc}
-\end{figure}
-
-You have probably noticed the trade-off in ALC. We add the overhead of index permutation but in return, we avoid predicate instructions and fully utilize proccessor computation power. The cost of permutation is independant from the size of the loop and instructions it has. The only factors that affects it is loop trip count (number of times loop is going to be executed) as it determines how many times the permutation should happen.
-So you can see that as number of instructions inside the loop increase, the overhead of permutation becomes smaller compared to the overhead of loop instructions and ALC makes more sense. As a result, there should be a threshold of(?) minimum number of instrcution in the loop to apply ALC. We will exaplain this in details in Analysis section.
-
-In order to compare the performance of ALC and vectorization applied by state-of-the-art compilers, we provided a simple test shown in fig(?). It consists of a single loop which contains an if-then-else statements. there are a large number of load/store and arithmetical instructions inside the \emph{then} and \emph{else} blocks so that it overcomes the overhead of permutation. Figure (?) shows speed up of each version over scalar code.
-For the scalar code, we compiled code with \emph{Clang} compiler disabling \emph{vectorization} and \emph{loop-unrolling}. As you can see, although ALC brings a speedup of around 2.9X, it is still slower than Armclang by almost 5\%.
-Figure (?) shows number of dynamically executed instructions For both versions which is roughly the same. Although ALC saves instrrcutions by not execution both then and else block for every iteration, it adds permutation logic. This trade-off results in almost same number of dynamically executed instructions.  
-
-We measured overhead of permutation as it was adding a large number of instructions to the code however, it turned out that, permutation logic takes less than 5\% of the execution time. This is because it's only moving data between vector registers and we implemented it with SVE vector manipulation instructions that are extremely faster than regular vector instructions.
-
-
-\begin{figure}[t!]
-    \centering
-    \includegraphics[width=0.95\textwidth]{img/test.png}
-    \caption{test code to comapre ALC and Armclang}
-    \label{fig:iterative_alc}
-\end{figure}
-
-
-\begin{figure}%
-    \centering
-    \subfloat[\centering Speedup over scalar code]{{\includegraphics[width=6cm]{img/alc_vs_armclang_test_cycle.png} }}%
-    \qquad
-    \subfloat[\centering Number of instructions executed]{{\includegraphics[width=6cm]{img/alc_vs_armclang_test_instructions.png} }}%
-    \caption{Comparison between Armclang vectorization and ALC}%
-    \label{fig:example}%
-\end{figure}
+% \begin{figure}%
+%     \centering
+%     \subfloat[\centering Speedup over scalar code]{{\includegraphics[width=6cm]{img/alc_vs_armclang_test_cycle.png} }}%
+%     \qquad
+%     \subfloat[\centering Number of instructions executed]{{\includegraphics[width=6cm]{img/alc_vs_armclang_test_instructions.png} }}%
+%     \caption{Comparison between Armclang vectorization and ALC}%
+%     \label{fig:example}%
+% \end{figure}
 
 
 

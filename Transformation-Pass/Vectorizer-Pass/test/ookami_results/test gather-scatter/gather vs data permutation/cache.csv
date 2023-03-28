@@ -1,4 +1,4 @@
-inputs,cache,standard_deviation,confidence_low,confidence_high
-if_converted,1138979,1764,1138633,1139324
-data_permute,1008789,967,1008600,1008979
-gather,1010211,654,1010083,1010339
+Input,Mean,standard_deviation,confidence_low,confidence_high
+data_permutation,1007817,1180,1007585,1008048
+vectorized,1139015,1946,1138633,1139396
+gather_scatter,1011681,999,1011485,1011877

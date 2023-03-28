@@ -1,4 +1,4 @@
-inputs,branch,standard_deviation,confidence_low,confidence_high
-if_converted,43,2,43,44
-data_permute,220,25,215,225
-gather,66,5,65,67
+Input,Mean,standard_deviation,confidence_low,confidence_high
+data_permutation,244,16,240,247
+vectorized,38,3,37,38
+gather_scatter,63,6,61,64
