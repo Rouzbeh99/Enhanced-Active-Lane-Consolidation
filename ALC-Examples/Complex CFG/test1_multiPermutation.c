@@ -89,15 +89,14 @@ void permutation_c_sve_intrinsics(svint32_t z0, svint32_t z1, svbool_t p0,
 }
 
 
-int foo(int *a, int *b, int *c, bool *cond, int n) {
+int foo(int *a, int *b, int *c, int *cond, int n) {
 
     svbool_t allActive = svptrue_b32();
+
     svint32_t uniformVector = svindex_s32(0, 1);
     svint32_t remainingVector = svindex_s32(svcntw(), 1);
-
-    svbool_t uniformVectorPredicate = svdupq_b32(cond[0], cond[1], cond[2], cond[3]);
-    svbool_t remainingVectorPredicate = svdupq_b32(cond[svcntw()], cond[svcntw() + 1], cond[svcntw() + 2],
-                                                   cond[svcntw() + 3]);
+    svbool_t uniformVectorPredicate = svcmpeq_n_s32(allActive, svld1_s32(allActive, &cond[0]), 1);
+    svbool_t remainingVectorPredicate = svcmpeq_n_s32(allActive, svld1_s32(allActive, &cond[svcntw()]), 1);
 
 
     svint32_t idxM = svundef_s32();
@@ -160,7 +159,7 @@ int foo(int *a, int *b, int *c, bool *cond, int n) {
 
             // fill uniformVector with new instances
             uniformVector = svindex_s32(i, 1);
-            uniformVectorPredicate = svdupq_b32(cond[i], cond[i + 1], cond[i + 2], cond[i + 3]);
+            uniformVectorPredicate = svcmpeq_n_s32(allActive, svld1_s32(allActive, &cond[i]), 1);
             remainingVector = idxR;
             remainingVectorPredicate = cond_R;
             ifBlockExecuted = true;
@@ -175,7 +174,7 @@ int foo(int *a, int *b, int *c, bool *cond, int n) {
 
             // fill remainingVector with new instances
             remainingVector = svindex_s32(i, 1);
-            remainingVectorPredicate = svdupq_b32(cond[i], cond[i + 1], cond[i + 2], cond[i + 3]);
+            remainingVectorPredicate = svcmpeq_n_s32(allActive, svld1_s32(allActive, &cond[i]), 1);
             uniformVector = idxM;
             uniformVectorPredicate = cond_M;
             ifBlockExecuted = false;
@@ -303,14 +302,13 @@ int main() {
     int *a = checked_malloc_int_array(n);
     int *b = checked_malloc_int_array(n);
     int *c = checked_malloc_int_array(n);
-    bool *cond = checked_malloc_bool_array(n);
+    int *cond = checked_malloc_int_array(n);
 
     for (int i = 0; i < n; ++i) {
         a[i] = 1;
         b[i] = -1;
         c[i] = 0;
-        cond[i] = (i % 4) == 0;
-//        cond[i] = 1;
+        cond[i] = (i % 3) == 0;
     }
 
 

@@ -35,12 +35,13 @@
     basicstyle=\ttfamily,
     frame=tlbr,
     postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+    breaklines=false,
     framerule=0pt,
-    framexleftmargin=3pt,
-    framexrightmargin=3pt,
-    framexbottommargin=4pt,
-    aboveskip=20pt,
-    belowskip=20pt,
+    framexleftmargin=0pt,
+    framexrightmargin=0pt,
+    framexbottommargin=1pt,
+    aboveskip=10pt,
+    belowskip=10pt,
     xleftmargin=0.01cm,
     xrightmargin=0.01cm
 }
@@ -104,7 +105,7 @@ However, the main challenge is how to detect uniform vectors. As we discussed ea
 
 \begin{figure}[t!]
     \centering
-    \includegraphics[width=0.95\textwidth]{img/condition_distribution.png}
+    \includegraphics[width=1.1\textwidth, height=7.3cm]{img/condition_distribution.png}
     \caption{Wasting vector lanes due to predication}
     \label{fig:Permutation}
 \end{figure}
@@ -175,7 +176,12 @@ Being equipped by permutation, ALC can be implemented in our motivation code, as
     for(i = 0; i < n; i+=VLength ){
         index_vec = index(i, VLength);
         mask_vec = load_v(&cond[i], VLength);
-        uniform_vec, remaining_vec, uniform_mask, remaining_mask = Permute(uniform_vec, index_vec, uniform_mask, mask_vec);        
+        uniform_vec 
+        ,remaining_vec
+        ,uniform_mask
+        ,remaining_mask =
+        Permute(uniform_vec, index_vec, uniform_mask, mask_vec); 
+                
         if(all_true(uniform_mask)){
             /* execute if block without predication */
             b_v = gather_load_v(&b, uniform_vec);
@@ -246,11 +252,14 @@ While gather load and scatter store instructions can improve the performance of 
     \begin{lstlisting}[language=C,caption=Vectorized Code]
         // predicate for all lanes true
         const svbool_t allActive = svptrue_b32(); 
-        // get vector length
-        const int vl = svcntw(); 
-    
+        const int vl = svcntw(); // get vector length
         for (int i = 0; i < n; i += vl) {
-            const svbool_t p_mask = svld1(allActive, &cond[i]); 
+            const svint32_t condVec = svld1_s32(allActive
+                                                ,&cond[i]);
+            // form predicate vector
+            const svbool_t p_mask = svcmpeq_n_s32(allActive 
+                                                  ,condVec
+                                                  ,1); 
             const svint32_t a_vec = svld1_s32(p_mask, &a[i]);
             svst1_s32(p_mask, &b[i], a_vec); 
         }
@@ -259,13 +268,16 @@ While gather load and scatter store instructions can improve the performance of 
     \begin{lstlisting}[language=C,caption= Code Using Gather/Scatter]
         // predicate for all lanes true
         const svbool_t allActive = svptrue_b32(); 
-        // get vector length
-        const int vl = svcntw(); 
-
+        const int vl = svcntw();  // get vector length
         for (int i = 0; i < n - vl; i += vl) {
             indexVec = svindex_s32(i, 2);
-            loaded = svld1_gather_s32index_s32(allActive, a, indexVec);
-            svst1_scatter_s32index_s32(allActive, b, indexVec, loaded);
+            loaded = svld1_gather_s32index_s32(allActive
+                                               ,a
+                                               ,indexVec);
+            svst1_scatter_s32index_s32(allActive
+                                        ,b
+                                        ,indexVec
+                                        ,loaded);
     
         }
     \end{lstlisting}
@@ -275,7 +287,38 @@ While gather load and scatter store instructions can improve the performance of 
 
 In order to gain a deeper understanding of how gather load and scatter store instructions work, we conduct a test to compare their performance with that of vectorized code. The scalar code used in the test is shown in the figure[?], which involves iterating over the array and copying elements from the input array to the output array only if the corresponding element in the condition array was true. The condition array is designed so that every other element was true, creating a non-contiguous and irregular memory access pattern.
 
-To perform the test, we provid two versions of the code. The first is a vectorized version that utilizes masked instructions to perform loads and stores from consecutive memory addresses (figure[?]). The second version (figure[?]) utilizes gather load and scatter store instructions to load data from the addresses where we knew the corresponding condition is true. These addresses are computed at line 7 where we form a vecto of indices which corresponds to true elements.
+To perform the test, we provide two versions of the code. The first is a vectorized version that utilizes masked instructions to perform loads and stores from consecutive memory addresses (figure[?]). The second version (figure[?]) utilizes gather load and scatter store instructions to load data from the addresses where we knew the corresponding condition is true. These addresses are computed at line 7 where we form a vecto of indices which corresponds to true elements.
+
+
+
+\begin{figure}%
+    \centering
+    \subfloat[\centering Number of Program Cycles]{{\includegraphics[width=6cm, height=5cm]{img/gather_scatter_cycles.png} }}%
+    \qquad
+    \subfloat[\centering Number of instructions executed]{{\includegraphics[width=6cm, height=5cm]{img/gather_scatter_instructions.png} }}%
+    \caption{Comparison between Armclang vectorization and ALC}%
+    \label{fig:example}%
+\end{figure}
+
+The comparison of the two versions of the code, as shown in Figure [?], reveals that there is a difference of less than 15\% in the number of executed instructions. However, the version that utilizes gather load and scatter store operations exhibits significantly poor performance, slowing down the program by more than 15x. This performance degradation is far greater than what could be accounted for by the mere 15\% increase in the number of dynamically executed instructions. Thus, additional metrics are necessary to better understand the underlying causes of this performance loss.
+
+\begin{figure}[h]
+    \centering
+    \subfloat[Branch misses]{\includegraphics[width=0.5\textwidth]{img/gather_scatter_br_miss.png}}\hfill
+    \subfloat[Cache misses.]{\includegraphics[width=0.5\textwidth]{img/gather_scatter_cache_miss.png}}\\
+    \subfloat[Cycles stalled due to memory]{\includegraphics[width=0.5\textwidth]{img/gather_scatter_mem_stall.png}}\hfill
+    \subfloat[Cycles with no instructions executed]{\includegraphics[width=0.5\textwidth]{img/gather_scatter_no_instr.png}}
+    \caption{Comparing other metrics for vectorized code vs gather/scatter}
+    \label{fig:four-images}
+\end{figure}
+
+The results of the experiment are presented in Figure [?]. The branch misses for the gather/scatter version are higher compared to the vectorized code. However, the total number of branch misses is very small, indicating that it may not have a significant impact on the overall performance. On the other hand, the cache misses, as shown in Figure [], are particularly interesting. It is observed that the use of gather loads and scatter stores has reduced the total number of cache misses. This observation may seem counter-intuitive given that we are accessing none-consecutive memory addresses however, since the memory addresses accessed through these instructions are very close to each other (stride distance of 2 in this case), it is likely that all the data needed can fit in a one or two cache lines, resulting in fewer cache misses.
+
+The results presented in Figure [?] and [?] shed light on the significant performance degradation caused by the gather and scatter operations. The number of cycles that the processor has been stalled and has executed no instructions is increased by almost 10x due to the use of these instructions. This finding highlights the importance of caution when considering the use of gather and scatter operations in code optimization. While the reduction in cache misses may seem appealing, it is crucial to consider the potential impact on the overall performance of the code. Anypne deciding to use these gather and scatter instructions should carefully evaluate the trade-off between cache performance and the increased processor stall cycles caused by gather and scatter operations. Furthermore, it is recommended to perform thorough profiling and benchmarking of the code to ensure that the benefits outweigh the costs before implementing gather and scatter instructions in performance-critical sections of the code.
+
+
+
+
 
 
 
@@ -283,18 +326,6 @@ To perform the test, we provid two versions of the code. The first is a vectoriz
 \section{ALC Strategies}
 
 In this section we explain how we do the transformation for each case. We start by Wytte algorithm, show the potential cases where it would not result in good performance. Then we analyze what is happening in detail to fine the solution and propose our modified version which works well.
-
-
-% \begin{figure}%
-%     \centering
-%     \subfloat[\centering Speedup over scalar code]{{\includegraphics[width=6cm]{img/alc_vs_armclang_test_cycle.png} }}%
-%     \qquad
-%     \subfloat[\centering Number of instructions executed]{{\includegraphics[width=6cm]{img/alc_vs_armclang_test_instructions.png} }}%
-%     \caption{Comparison between Armclang vectorization and ALC}%
-%     \label{fig:example}%
-% \end{figure}
-
-
 
 
 \section{Analysis Phase}
