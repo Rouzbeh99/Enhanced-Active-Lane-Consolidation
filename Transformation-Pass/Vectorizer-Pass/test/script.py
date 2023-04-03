@@ -11,7 +11,7 @@ for dir in os.listdir(specDir):
     print("------------------------------------------------------------")
     print("Application : " + dir)
     
-    if dir != 'Lonstar_eda':
+    if dir != 'MiBench':
     	continue;
     
     for filename in os.listdir(specDir + "/" + dir):
@@ -28,8 +28,10 @@ for dir in os.listdir(specDir):
             singleIf = False
             line = 0
             paths = []
+            
+            
             for t in records:
-
+                print(t)
                 if "In Function" in t:
                     function = (t.split(":")[1]).strip()
                 if "Loop at line number" in t:
@@ -38,6 +40,7 @@ for dir in os.listdir(specDir):
                     singleIf = True
                 if "paths" in t:
                     pathCount = int(t.split(":")[1].strip())
+                
                 if "ALC" in t and not "NOT" in t:
                     canBeApplied = True
                 if "total instructions" in t:
@@ -80,7 +83,10 @@ print("************************SUMMARY***********************************")
 print("******************************************************************\n")
 summary = []
 
-for i in range(2, max(allPathCount) + 1):
+
+length = 0 if len(allPathCount ) == 0 else max(allPathCount) + 1
+
+for i in range(2, length):
     summary.append({i: 0})
 
 for t in allPathCount:
