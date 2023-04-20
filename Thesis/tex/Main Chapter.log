@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2023.1.21)  31 MAR 2023 15:59
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2023.1.21)  11 APR 2023 13:23
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -964,40 +964,40 @@ File: lstlang1.sty 2019/09/10 1.8c listings language file
 ) (/usr/share/texlive/texmf-dist/tex/latex/listings/lstmisc.sty
 File: lstmisc.sty 2019/09/10 1.8c (Carsten Heinz)
 )
-Package hyperref Info: bookmark level for unknown lstlisting defaults to 0 on input line 66.
+Package hyperref Info: bookmark level for unknown lstlisting defaults to 0 on input line 71.
  [3]
 
-LaTeX Warning: File `img/condition_distribution.png' not found on input line 108.
+LaTeX Warning: File `img/condition_distribution.png' not found on input line 113.
 
 
-/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Thesis/tex/Main Chapter.tex:108: Package pdftex.def Error: File `img/condition_distribution.png' not found: using draft setting.
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Thesis/tex/Main Chapter.tex:113: Package pdftex.def Error: File `img/condition_distribution.png' not found: using draft setting.
 
 See the pdftex.def package documentation for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.108 ...ht=7.3cm]{img/condition_distribution.png}
+l.113 ...ht=7.3cm]{img/condition_distribution.png}
                                                   
 Try typing  <return>  to proceed.
 If that doesn't work, type  X <return>  to quit.
 
 
-Overfull \hbox (39.87105pt too wide) in paragraph at lines 108--109
+Overfull \hbox (39.87105pt too wide) in paragraph at lines 113--114
  [][] 
  []
 
 [4] [5]
 
-LaTeX Warning: File `img/permutation.png' not found on input line 164.
+LaTeX Warning: File `img/permutation.png' not found on input line 169.
 
 
-/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Thesis/tex/Main Chapter.tex:164: Package pdftex.def Error: File `img/permutation.png' not found: using draft setting.
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Thesis/tex/Main Chapter.tex:169: Package pdftex.def Error: File `img/permutation.png' not found: using draft setting.
 
 See the pdftex.def package documentation for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.164 ...idth=0.95\textwidth]{img/permutation.png}
+l.169 ...idth=0.95\textwidth]{img/permutation.png}
                                                   
 Try typing  <return>  to proceed.
 If that doesn't work, type  X <return>  to quit.
@@ -1008,91 +1008,91 @@ Chapter 2.
 
 ] [11] [12]
 
-LaTeX Warning: File `img/gather_scatter_cycles.png' not found on input line 296.
+LaTeX Warning: File `img/gather_scatter_cycles.png' not found on input line 301.
 
 
-/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Thesis/tex/Main Chapter.tex:296: Package pdftex.def Error: File `img/gather_scatter_cycles.png' not found: using draft setting.
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Thesis/tex/Main Chapter.tex:301: Package pdftex.def Error: File `img/gather_scatter_cycles.png' not found: using draft setting.
 
 See the pdftex.def package documentation for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.296 ...ht=5cm]{img/gather_scatter_cycles.png} }}
+l.301 ...ht=5cm]{img/gather_scatter_cycles.png} }}
                                                   %
 Try typing  <return>  to proceed.
 If that doesn't work, type  X <return>  to quit.
 
 
-LaTeX Warning: File `img/gather_scatter_instructions.png' not found on input line 298.
+LaTeX Warning: File `img/gather_scatter_instructions.png' not found on input line 303.
 
 
-/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Thesis/tex/Main Chapter.tex:298: Package pdftex.def Error: File `img/gather_scatter_instructions.png' not found: using draft setting.
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Thesis/tex/Main Chapter.tex:303: Package pdftex.def Error: File `img/gather_scatter_instructions.png' not found: using draft setting.
 
 See the pdftex.def package documentation for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.298 ...]{img/gather_scatter_instructions.png} }}
+l.303 ...]{img/gather_scatter_instructions.png} }}
                                                   %
 Try typing  <return>  to proceed.
 If that doesn't work, type  X <return>  to quit.
 
 
-LaTeX Warning: File `img/gather_scatter_br_miss.png' not found on input line 307.
+LaTeX Warning: File `img/gather_scatter_br_miss.png' not found on input line 312.
 
 
-/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Thesis/tex/Main Chapter.tex:307: Package pdftex.def Error: File `img/gather_scatter_br_miss.png' not found: using draft setting.
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Thesis/tex/Main Chapter.tex:312: Package pdftex.def Error: File `img/gather_scatter_br_miss.png' not found: using draft setting.
 
 See the pdftex.def package documentation for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.307 ...xtwidth]{img/gather_scatter_br_miss.png}}
+l.312 ...xtwidth]{img/gather_scatter_br_miss.png}}
                                                   \hfill
 Try typing  <return>  to proceed.
 If that doesn't work, type  X <return>  to quit.
 
 
-LaTeX Warning: File `img/gather_scatter_cache_miss.png' not found on input line 308.
+LaTeX Warning: File `img/gather_scatter_cache_miss.png' not found on input line 313.
 
 
-/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Thesis/tex/Main Chapter.tex:308: Package pdftex.def Error: File `img/gather_scatter_cache_miss.png' not found: using draft setting.
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Thesis/tex/Main Chapter.tex:313: Package pdftex.def Error: File `img/gather_scatter_cache_miss.png' not found: using draft setting.
 
 See the pdftex.def package documentation for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.308 ...idth]{img/gather_scatter_cache_miss.png}}
+l.313 ...idth]{img/gather_scatter_cache_miss.png}}
                                                   \\
 Try typing  <return>  to proceed.
 If that doesn't work, type  X <return>  to quit.
 
 
-LaTeX Warning: File `img/gather_scatter_mem_stall.png' not found on input line 309.
+LaTeX Warning: File `img/gather_scatter_mem_stall.png' not found on input line 314.
 
 
-/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Thesis/tex/Main Chapter.tex:309: Package pdftex.def Error: File `img/gather_scatter_mem_stall.png' not found: using draft setting.
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Thesis/tex/Main Chapter.tex:314: Package pdftex.def Error: File `img/gather_scatter_mem_stall.png' not found: using draft setting.
 
 See the pdftex.def package documentation for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.309 ...width]{img/gather_scatter_mem_stall.png}}
+l.314 ...width]{img/gather_scatter_mem_stall.png}}
                                                   \hfill
 Try typing  <return>  to proceed.
 If that doesn't work, type  X <return>  to quit.
 
 
-LaTeX Warning: File `img/gather_scatter_no_instr.png' not found on input line 310.
+LaTeX Warning: File `img/gather_scatter_no_instr.png' not found on input line 315.
 
 
-/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Thesis/tex/Main Chapter.tex:310: Package pdftex.def Error: File `img/gather_scatter_no_instr.png' not found: using draft setting.
+/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Thesis/tex/Main Chapter.tex:315: Package pdftex.def Error: File `img/gather_scatter_no_instr.png' not found: using draft setting.
 
 See the pdftex.def package documentation for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.310 ...twidth]{img/gather_scatter_no_instr.png}}
+l.315 ...twidth]{img/gather_scatter_no_instr.png}}
                                                   
 Try typing  <return>  to proceed.
 If that doesn't work, type  X <return>  to quit.
@@ -1106,7 +1106,7 @@ Package glossaries Warning: No \printnoidxglossary or \printnoidxglossaries
  found. (Remove \makenoidxglossaries if you don't want any glossaries.)
 This document will not have a glossary.
 
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 356.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 361.
 [15]
 Missing character: There is no ù in font cmr12!
  [16
@@ -1117,10 +1117,10 @@ Missing character: There is no ù in font cmr12!
 
 Overfull \vbox (12.0pt too high) has occurred while \output is active []
 
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 356.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 361.
  (/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Thesis/tex/Main Chapter.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 356.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 356.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 361.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 361.
 
 
 Package rerunfilecheck Warning: File `"Main Chapter".out' has changed.
@@ -1154,7 +1154,7 @@ Here is how much of TeX's memory you used:
  1141 hyphenation exceptions out of 8191
  63i,8n,87p,1102b,1962s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb>
-Output written on "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Thesis/tex/Main Chapter.pdf" (16 pages, 109310 bytes).
+Output written on "/home/rouzbeh/Graduate/LLVM/Active-Lane-Conslidation/Thesis/tex/Main Chapter.pdf" (16 pages, 109347 bytes).
 PDF statistics:
  260 PDF objects out of 1000 (max. 8388607)
  233 compressed objects within 3 object streams

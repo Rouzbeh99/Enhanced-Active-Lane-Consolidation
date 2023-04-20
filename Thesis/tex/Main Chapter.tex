@@ -54,8 +54,13 @@
 
 \chapter{Backgrounds}
 
-Modern processors utilize Single Instruction Multiple Data (SIMD) instructions to execute the same instruction on multiple data simultaneously. This technique provides significant performance improvements, leading compiler specialists to explore different ways to exploit SIMD instructions. One of the most popular approaches is auto-vectorization [cite], a compiler transformation that looks for opportunities to use SIMD instructions (also known as vector instructions) in a program and replaces scalar code (i.e., simple instructions) with vector instructions whenever possible. This transformation is implemented by almost all current compilers.
-Since most of the execution time of a program is spent on loops, vectorization is typically applied to loops. Well-known compilers have optimization passes, such as the slp-vectorizer in Clang [cite], that vectorize loops' bodies. Although there have been efforts to vectorize other structures, such as functions [cite], the primary focus of research in this area is on loops.
+Single Instruction Multiple Data or SIMD instructions are used by processors to make computations faster as they execute the same operation on multiple data simultaneously. Using these instrcutions typically leads to a significant performance improvement as a result, compiler specialists try to explore different ways to utilize these instrcutions. Auto-vectorization [cite] is the most popular approach to use SIMD instrcutions in modern compilers. It's a compiler tranformation that tries to replace scalar code  (i.e., simple instructions) with SIMD instrcutions whenever it finds it both possible and beneficial. For this reason, these set of instrcutions are also called vector instrcutions.
+In majority of applications, most of the execution time is spent on loops as a result, although there are works thhat try to aply vectorization on different regions of code such as funtion [cite], it is typically applied on loops. To do this, modern compilers are equipped by optimization passes such as slp-vectorizer in Clang compiler [cite] to automatically do the tranformation.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Modern processors utilize Single Instruction Multiple Data (SIMD) instructions to execute the same instruction on multiple data simultaneously. This technique provides significant performance improvements, leading compiler specialists to explore different ways to exploit SIMD instructions. One of the most popular approaches is auto-vectorization [cite], a compiler transformation that looks for opportunities to use SIMD instructions (also known as vector instructions) in a program and replaces scalar code (i.e., simple instructions) with vector instructions whenever possible. This transformation is implemented by almost all current compilers.
+% Since most of the execution time of a program is spent on loops, vectorization is typically applied to loops. Well-known compilers have optimization passes, such as the slp-vectorizer in Clang [cite], that vectorize loops' bodies. Although there have been efforts to vectorize other structures, such as functions [cite], the primary focus of research in this area is on loops.
+
 A considerable amount of work has been done to improve code using vectorization [cite]. However, this transformation requires the code to meet certain requirements; otherwise, compilers may produce invalid code. Moreover, replacing scalar code with vector instructions is not always beneficial. In some cases, scalar code can provide better performance than vector code. To address these two issues, compilers include an analysis pass to check both the legality of the transformation and its profitability.
 One of the significant obstacles for vectorization is control flow divergence. When a program contains branches (e.g., if-then-else or switch-case statements), it can take different paths during runtime based on certain conditions within the code that may change dynamically. This is called divergence in the control flow of the program. With control flow divergence, vectorization cannot be applied easily, as different iterations of the loop may take different paths, disabling the compiler from replacing instructions with SIMD ones.
 To tackle control flow divergence, a transformation called If-Conversion (also known as Control Flow Linearization) has been proposed. Modern processors support "predicated instructions," in which each instruction is guarded by a one-bit predicate that can be either 1 or 0. The execution of the instruction will be committed only if the predicate bit is set to 1. Otherwise, the result will be discarded, leaving no architectural effects, such as memory writes, etc. With "Predicated Vector instructions" in the processor,
@@ -83,10 +88,10 @@ This code contains an if-else statement inside the loop, causing control flow di
         b_v = load_v(&b[i], VLength);
         c_v = load_v(&c[i], VLength);
         mask_v = load_v(&cond[i], VLength);
+        mask_not_v = not_v(mask_v);
         mult_v = masked_mul(b_v, c_v, mask_v);
         masked_store_v(&a[i], mult_v, VLength, mask_v);
-        mask_not_v = not_v(mask_v);
-        add_v = maked_add(a_v, b_v, mask_v)
+        add_v = maked_add(a_v, b_v, mask_v);
         masked_store_v(&b[i],add_v, VLength, mask_not_v);
     }
 \end{lstlisting}

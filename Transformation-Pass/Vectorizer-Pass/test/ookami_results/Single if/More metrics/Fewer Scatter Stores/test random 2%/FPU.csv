@@ -1,0 +1,5 @@
+Input,Mean,standard_deviation,confidence_low,confidence_high
+vectorized,4660397,980,4660205,4660589
+scalar_code,3,1,2,3
+alc_itr_2%,2269663,1866,2269298,2270029
+alc_data_permute_2%,1354421,7583,1352934,1355907

@@ -24,7 +24,7 @@ tag_dic = {'instructions_executed': 'Number of instructions', 'program_cycles': 
            'FPU': 'Total FPU Idle Cycles', 'no_instructions': 'Cycles with No Instructions Executed'}
 
 #baseline = "scalar_code"
-baseline = "vectorized"
+#baseline = "vectorized"
 
 
 for filename in all_files:
@@ -43,15 +43,15 @@ for i in range(row):
         metric = Path(os.path.basename(all_files[i * column + j])).stem
         df = generated_CSVs[i * column + j]
         df = df.set_index('Input')
-        baseline_value = df.loc[baseline]['Mean']
+        #baseline_value = df.loc[baseline]['Mean']
         std_deviation = df["standard_deviation"].values.tolist()
         df.drop(df.columns[[1, 2, 3]], axis=1, inplace=True)
         tag = tag_dic[metric]
         df.plot.bar(yerr=std_deviation, ax=axes[i, j], rot=0, title=tag, color=colors[i * column + j])
         axes[i, j].xaxis.label.set_visible(False)
         axes[i, j].legend([metric])
-        axes[i, j].axhline(y=baseline_value, xmin=-3, xmax=20, color='black', linestyle='dashed',
-                           linewidth=1)
+        #axes[i, j].axhline(y=baseline_value, xmin=-3, xmax=20, color='black', linestyle='dashed',
+         #                  linewidth=1)
 
 plt.plot()
 plt.savefig("Chart.png")
