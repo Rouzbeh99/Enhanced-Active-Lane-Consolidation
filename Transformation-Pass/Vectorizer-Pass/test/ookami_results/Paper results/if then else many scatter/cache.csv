@@ -1,0 +1,17 @@
+Input,Mean,standard_deviation,confidence_low,confidence_high
+if_then_else_many_scatter_vectorized_20%,255763,137,255736,255790
+if_then_else_many_scatter_20%_ALC_DataPermutation,256170,42,256162,256178
+if_then_else_many_scatter_20%_scalar,256160,150,256131,256190
+if_then_else_many_scatter_80%_ALC_DataPermutation,256174,39,256166,256182
+if_then_else_many_scatter_20%_ALC,256227,144,256198,256255
+if_then_else_many_scatter_vectorized_40%,255734,124,255709,255758
+if_then_else_many_scatter_2%_scalar,256167,140,256140,256195
+if_then_else_many_scatter_40%_ALC_DataPermutation,256189,45,256180,256197
+if_then_else_many_scatter_80%_scalar,256067,161,256035,256098
+if_then_else_many_scatter_40%_ALC,256141,130,256116,256167
+if_then_else_many_scatter_2%_ALC,256312,153,256282,256342
+if_then_else_many_scatter_vectorized_80%,255747,127,255722,255772
+if_then_else_many_scatter_vectorized_2%,255942,166,255910,255975
+if_then_else_many_scatter_2%_ALC_DataPermutation,256183,47,256173,256192
+if_then_else_many_scatter_80%_ALC,256093,109,256071,256114
+if_then_else_many_scatter_40%_scalar,256149,149,256120,256179

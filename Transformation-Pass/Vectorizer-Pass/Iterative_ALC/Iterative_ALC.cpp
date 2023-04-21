@@ -72,6 +72,8 @@ void Iterative_ALC::doTransformation_itr_singleIf_full_permutation() {
     ConstZeroVectorOfTripCountTy = llvm::ConstantInt::get(TripCountTy, 0, true);
 
     thenBlock = findThenBlock(header, latch);
+    elseBlock = nullptr;
+
     sharedInstructions =
             findHeaderAndPreheaderInstructionsRequiredForALC(header, preheader);
 
@@ -80,7 +82,7 @@ void Iterative_ALC::doTransformation_itr_singleIf_full_permutation() {
 
     // create blocks
     preALCBlock = createEmptyBlock("pre.alc", latch);
-    middleBlock = createEmptyBlock("middel.block", latch);
+    middleBlock = createEmptyBlock("middle.block", latch);
     alcHeader = createEmptyBlock("alc.header", middleBlock);
     laneGatherBlock = createEmptyBlock("lane.gather", middleBlock);
     uniformThenBlock = createEmptyBlock("uniform.block", middleBlock);
@@ -851,7 +853,7 @@ Value *Iterative_ALC::formPredicate(BasicBlock *decisionBlock,
                                   inductionVarInitialValue, nullptr, false, false, true);
     Value *predicates = const_cast<Value *>((*instructionsMap)[predicates_scalar]);
     if (negatedCondition) {
-        IRBuilder<> builder(joinBlock->getContext());
+        IRBuilder<> builder(predicateHolderBlock->getContext());
         builder.SetInsertPoint(predicateHolderBlock->getTerminator());
 
         predicates = builder.CreateNot(predicates);
@@ -1364,6 +1366,7 @@ std::vector<Instruction *> *
 Iterative_ALC::findHeaderAndPreheaderInstructionsRequiredForALC(BasicBlock *header, BasicBlock *preheader) {
 
 
+
     auto output = new std::vector<Instruction *>();
     for (auto &thenInstr: thenBlock->instructionsWithoutDebug()) {
 
@@ -1404,6 +1407,7 @@ Iterative_ALC::findHeaderAndPreheaderInstructionsRequiredForALC(BasicBlock *head
             }
         }
     }
+
 
     if (elseBlock) {
 
