@@ -31,7 +31,7 @@ cd ../test
  $LLVM_BUILD_DIR/bin/llc -O3 -mtriple=aarch64-linux-gnu -mattr=sve -filetype=obj $2_O3.ll -o $2_ALC.o
  $LLVM_BUILD_DIR/bin/llc -O3 -mtriple=aarch64-linux-gnu -mattr=sve -filetype=obj scalar_code.ll -o $2_scalar.o
 
-rm *.ll
+#rm *.ll
 
 # $LLVM_BUILD_DIR/bin/llc -O3  -mtriple=aarch64-linux-gnu -mattr=sve -mcpu=cortex-a710 -filetype=asm $2_O3.ll -o $2_O3.s
 
