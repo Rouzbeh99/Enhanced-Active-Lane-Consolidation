@@ -1,0 +1,23 @@
+\newif\ifComments
+\Commentstrue
+%\Commentsfalse
+
+\ifComments
+    \newcommand{\rouzbeh}[1] {{\slshape\color{purple}  ([Rouzbeh]:   {#1})}}
+    \newcommand{\nelson}[1]  {{\slshape\color{olive}   ([Nelson]: {#1})}}
+    \newcommand{\joao}[1]    {{\slshape\color{magenta} ([João]:   {#1})}}
+
+    \newcommand{\todo}[1]{(\textbf{TODO:} \textcolor{red}{{#1}})}
+    \newcommand{\del}[1]{{\textcolor{gray}{\sout{#1}}}}
+    \newcommand{\new}[1]{{\textcolor{blue}{{#1}}}}
+    \newcommand{\ed}[1] {{\textcolor{red}{{#1}}}}
+\else
+    \newcommand{\rouzbeh}[1]{}
+    \newcommand{\nelson}[1]{}
+    \newcommand{\joao}[1]{}
+    
+    \newcommand{\todo}[1]{}
+    \newcommand{\del}[1]{}
+    \newcommand{\new}[1]{{#1}}
+    \newcommand{\ed}[1]{{#1}}
+\fi

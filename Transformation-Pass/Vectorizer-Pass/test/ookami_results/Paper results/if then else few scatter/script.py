@@ -40,16 +40,16 @@ ax.yaxis.set_major_formatter(formatter)
 ax.get_legend().remove()
 
 # Set the minimum and maximum values for the y-axis
-ax.set_ylim([0, 100])
+ax.set_ylim([-70, 15])
 ax.yaxis.grid(True, linestyle='--', which='major', color='grey', alpha=0.3)
 
-# # Add actual numbers to bars that are smaller than -75%
-# for bar in ax.containers:
-#     for i, rect in enumerate(bar):
-#         height = rect.get_height()
-#         if height < -10:
-#             ax.text(rect.get_x() + rect.get_width() / 2.0, 0, f'{height:.1f}%', ha='center', verticalalignment='bottom',
-#                     fontsize=12)
+# Add actual numbers to bars that are smaller than -75%
+for bar in ax.containers:
+    for i, rect in enumerate(bar):
+        height = rect.get_height()
+        if height < -70:
+            ax.text(rect.get_x() + rect.get_width() / 2.0, 0, f'{height:.1f}%', ha='center', verticalalignment='bottom',
+                    fontsize=12)
 
 plt.tight_layout()
 

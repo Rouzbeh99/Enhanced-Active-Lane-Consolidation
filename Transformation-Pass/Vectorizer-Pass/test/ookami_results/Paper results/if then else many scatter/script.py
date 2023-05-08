@@ -23,7 +23,7 @@ colors = ['#7fcdbb', '#2c7fb8', '#4B0082']
 # Create the bar chart using matplotlib
 ax = df.plot(kind='bar', color=colors)
 ax.set_xlabel('Input Sparsity', fontsize=19, labelpad=15)
-ax.set_ylabel('Ration of Resource Stalls', fontsize=19, labelpad=15)
+ax.set_ylabel('Ratio of Resource Stalls', fontsize=19, labelpad=15)
 ax.tick_params(axis='both', which='major', labelsize=16)
 
 
@@ -37,8 +37,8 @@ ax.tick_params(axis='both', which='major', labelsize=16)
 #
 # # Set the y-axis tick labels to use the FuncFormatter object
 # ax.yaxis.set_major_formatter(formatter)
-# ax.get_legend().remove()
 
+ax.get_legend().remove()
 # Set the minimum and maximum values for the y-axis
 ax.set_ylim([0, 2])
 ax.yaxis.grid(True, linestyle='--', which='major', color='grey', alpha=0.3)

@@ -30,7 +30,7 @@
 \usepackage{multirow} % For multirow/multicolumn cells in a table. See https://en.wikibooks.org/wiki/LaTeX/Tables#Columns_spanning_multiple_rows
 \usepackage{graphicx}
 %\usepackage{subcaption} % A package that can be used to create sub-figures
-\usepackage{enumitem} % for more control over enumerate
+% \usepackage{enumitem}
 \usepackage{mdwlist}	% the 'note' environment
 \usepackage{xspace}
 \usepackage{xcolor}
@@ -39,13 +39,10 @@
                      % particularly on Macs
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\usepackage{algorithm}
-\usepackage{listings}
-\usepackage[noend]{algpseudocode}
-% \usepackage{subfig}
-\usepackage{xcolor}
-\usepackage{subcaption}
-
+\usepackage{Includes/packages}
+\usepackage{Includes/comments}
+\usepackage{Includes/styles}
+\usepackage{Includes/terms}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -91,8 +88,6 @@ mincitenames=1,maxcitenames=2%
 % Other options are described in the 'glossaries' Beginner's Guide (https://ctan.org/pkg/glossaries)
 \makenoidxglossaries % use TeX to sort
 
-% Glossary entries will be loaded from a separate file
-\loadglsentries{\main/tex/glossary}
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 % Thesis style package %
@@ -171,28 +166,10 @@ mincitenames=1,maxcitenames=2%
 \preamblepagenumbering % lower case roman numerals for early pages
 \titlepage % adds title page. Can be commented out before submission if convenient
 
-\subfile{\main/tex/abstract.tex}
+
 
 \doublespacing
-% \truedoublespacing
-% \singlespacing
-% \onehalfspacing
 
-% A preface is not always required
-\subfile{\main/tex/preface.tex}
-
-% Below are the dedication page and the quote page. FGSR requirements are not
-% clear on if you can have one of each or just one or the other. They do say to
-% ask your supervisor if you should have them at all.
-%
-% The CS Department links to a comparison of pre- and post-Spring 2014 thesis
-% guidelines (https://www.ualberta.ca/computing-science/graduate-studies/current-students/dissertation-guidelines)
-% The comparison document lists an optional dedication page, but no quote page.
-
-\subfile{\main/tex/dedication.tex}
-\subfile{\main/tex/quote.tex}
-
-\subfile{\main/tex/acknowledgements.tex}
 
 \singlespacing % Flip to single spacing for table of contents settings
                % This has been accepted in the past and shouldn't be a problem
@@ -229,9 +206,13 @@ mincitenames=1,maxcitenames=2%
 %  like \chapter etc. End with the bibliography
 % See FGSR requirements for any additional requirements on the body
 
-\subfile{\main/tex/introduction.tex}
-\subfile{\main/tex/main chapter.tex}
-\subfile{\main/tex/conclusion.tex}
+\subfile{Sections/intro.tex}
+\subfile{Sections/background.tex}
+\subfile{Sections/approach.tex}
+\subfile{Sections/Implementation.tex}
+\subfile{Sections/evaluation.tex}
+\subfile{Sections/related-works.tex}
+\subfile{Sections/conclusion.tex}
 
 % Renaming the bibliography: See http://tex.stackexchange.com/questions/12597/renaming-the-bibliography-page-using-bibtex
 \renewcommand\bibname{References}
@@ -253,7 +234,6 @@ mincitenames=1,maxcitenames=2%
 % table of contents entries.
 % See https://tex.stackexchange.com/questions/44858/adding-the-word-appendix-to-table-of-contents-in-latex
 \begin{appendices}
-\subfile{\main/tex/background.tex}
 \end{appendices}
 
 \end{document}

@@ -11,7 +11,7 @@ for dir in os.listdir(specDir):
     print("------------------------------------------------------------")
     print("Application : " + dir)
     
-    if dir != 'MiBench':
+    if dir != 'NAB':
     	continue;
     
     for filename in os.listdir(specDir + "/" + dir):
