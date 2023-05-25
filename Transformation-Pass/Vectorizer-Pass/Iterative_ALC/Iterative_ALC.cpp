@@ -23,6 +23,9 @@ void Iterative_ALC::doTransformation_itr_singleIf_simple() {
     sharedInstructions =
             findHeaderAndPreheaderInstructionsRequiredForALC(header, preheader);
 
+    outerLoopSharedInstructions = findParentLoopInstructions(header, preheader);
+
+
     BasicBlock *preheaderForRemainingBlock =
             createPreheaderForRemainingIterations();
 
@@ -77,6 +80,8 @@ void Iterative_ALC::doTransformation_itr_singleIf_full_permutation() {
     sharedInstructions =
             findHeaderAndPreheaderInstructionsRequiredForALC(header, preheader);
 
+    outerLoopSharedInstructions = findParentLoopInstructions(header, preheader);
+
     BasicBlock *preheaderForRemainingBlock =
             createPreheaderForRemainingIterations();
 
@@ -119,6 +124,8 @@ void Iterative_ALC::doTransformation_itr_if_then_else() {
     elseBlock = findElseBlock(header);
     sharedInstructions =
             findHeaderAndPreheaderInstructionsRequiredForALC(header, preheader);
+
+    outerLoopSharedInstructions = findParentLoopInstructions(header, preheader);
 
     BasicBlock *preheaderForRemainingBlock =
             createPreheaderForRemainingIterations();
@@ -171,6 +178,9 @@ void Iterative_ALC::doTransformation_itr_if_then_else_data_Permutation() {
 
     sharedInstructions =
             findHeaderAndPreheaderInstructionsRequiredForALC(header, preheader);
+
+    outerLoopSharedInstructions = findParentLoopInstructions(header, preheader);
+
     findLoadInstructions();
 
 
@@ -238,6 +248,8 @@ void Iterative_ALC::doTransformation_itr_singleIf_data_Permutation() {
 
     sharedInstructions =
             findHeaderAndPreheaderInstructionsRequiredForALC(header, preheader);
+
+    outerLoopSharedInstructions = findParentLoopInstructions(header, preheader);
 
     findLoadInstructions();
     dataPermutation = true;
@@ -913,8 +925,8 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
     // following lines
     std::stack<Instruction *> toBeRemoved;
 
-    llvm::outs() << "--------------------------------------\n";
-    llvm::outs() << "In block " << block->getName() << "\n";
+//    llvm::outs() << "--------------------------------------\n";
+//    llvm::outs() << "In block " << block->getName() << "\n";
 
 
 
@@ -922,10 +934,10 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
     for (auto originalInstr: *instructionsOrder) {
         Instruction *instr = (*originalToClonedInstMap).at(originalInstr);
 
-        originalInstr->print(outs());
-        llvm::outs() << "   ---->    ";
-        instr->print(outs());
-        llvm::outs() << "\n";
+//        originalInstr->print(outs());
+//        llvm::outs() << "   ---->    ";
+//        instr->print(outs());
+//        llvm::outs() << "\n";
 
         if (isa<BranchInst>(instr)) {
             toBeRemoved.push(instr);
@@ -991,6 +1003,12 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
             toBeRemoved.push(instr);
         } else if (isa<LoadInst>(instr)) {
 
+            if(instr->getType()->isPtrOrPtrVectorTy()){
+                // keep the load instructions
+                vMap[instr] = instr;
+                continue;
+            }
+
             auto ptr = instr->getOperand(0);
             if (vMap.count(ptr)) {
                 ptr = vMap[ptr];
@@ -1026,12 +1044,21 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
                 }
             }
 
-            assert(isa<GEPOperator>(ptr) &&
-                   "Expected LoadInst PointerOperand to be GetElementPtr!");
+            Type *SrcTy = nullptr;
+            if(isa<GEPOperator>(ptr)){
+                SrcTy = static_cast<GEPOperator *>(ptr)->getSourceElementType();
+                if (SrcTy->isArrayTy() || SrcTy->isStructTy()) {
+                    SrcTy = static_cast<GEPOperator *>(ptr)->getResultElementType();
+                }
+            }else if(isa<LoadInst>(ptr)){
+                SrcTy = instr->getType();
+                if (SrcTy->isArrayTy() || SrcTy->isStructTy()) {
+                    SrcTy = static_cast<GEPOperator *>(ptr)->getResultElementType();
+                }
+            }else{assert(0 &&
+                   "Expected LoadInst PointerOperand to be GetElementPtr or loaded ptr!");
+            }
 
-            auto *GEP = static_cast<GEPOperator *>(ptr);
-
-            auto *SrcTy = GEP->getSourceElementType();
 
 
 //            bool isConstantMemoryLocation = findIfAccessingSameMemAddress(GEP);
@@ -1040,17 +1067,10 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
 //            }
             if (isPermuted) {
                 // need to determine source type
-                if (SrcTy->isArrayTy() || SrcTy->isStructTy()) {
-                    SrcTy = GEP->getResultElementType();
-                }
                 loadedData = intrinsicCallGenerator->createGatherLoadInstruction(
                         IRB, SrcTy, ptr, predicates, indices);
 
             } else if (isPredicated) {
-
-                if (SrcTy->isArrayTy() || SrcTy->isStructTy()) {
-                    SrcTy = GEP->getResultElementType();
-                }
 
                 loadedData = intrinsicCallGenerator->createLoadInstruction(
                         IRB, SrcTy, ptr, predicates);
@@ -1091,7 +1111,37 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
             toBeRemoved.push(instr);
 
 
+        } else if (instr->getOpcode() == Instruction::SIToFP) {
+
+            Value *result;
+
+            Value *firstOp = nullptr;
+            if (vMap.count(instr->getOperand(0))) {
+                firstOp = vMap[instr->getOperand(0)];
+            } else if (instr->getOperand(0) ==
+                       VectorIndex) {
+
+                firstOp = indices;
+            } else {
+                if (auto *ConstantValue =
+                        dyn_cast_or_null<Constant>(instr->getOperand(0))) {
+                    firstOp =
+                            createVectorOfValues(ConstantValue, IRB, "first.operand");
+                } else {
+                    instr->print(outs());
+                    llvm::outs() << "   ------ >  ";
+                    assert(0 && "first operand neither already vectorized nor Constant!");
+                }
+            }
+
+            result = IRB.CreateSIToFP(firstOp, VectorType::get(instr->getType(), vectorizationFactor, true));
+
+            vMap[instr] = result;
+            outputMap->insert({instr, result});
+            toBeRemoved.push(instr);
+
         } else if (isa<UnaryInstruction>(instr)) {
+
 
             Value *firstOp = nullptr;
             if (vMap.count(instr->getOperand(0))) {
@@ -1150,6 +1200,7 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
                     assert(0 && "first operand neither already vectorized nor Constant!");
                 }
             }
+
 
             if (vMap.count(instr->getOperand(1))) {
                 secondOp = vMap[instr->getOperand(1)];
@@ -1448,6 +1499,14 @@ std::map<Instruction *, Instruction *> *Iterative_ALC::cloneInstructions(BasicBl
         }
     }
 
+    for (auto instr: *outerLoopSharedInstructions) {
+        Instruction *clonedInstr = instr->clone();
+        clonedInstr->insertBefore(to->getTerminator());
+        result->insert({instr, clonedInstr});
+        instructionsOrder->push_back(instr);
+        vMap[instr] = clonedInstr;
+    }
+
 
     for (auto &instr: From->instructionsWithoutDebug()) {
 
@@ -1524,6 +1583,7 @@ Iterative_ALC::findHeaderAndPreheaderInstructionsRequiredForALC(BasicBlock *head
                 toCheckOperands.push_back(instruction);
             }
 
+
             for (int k = 0; k < toCheckOperands.size(); ++k) {
                 for (int j = 0; j < toCheckOperands[k]->getNumOperands(); ++j) {
                     Value *innerOp = toCheckOperands[k]->getOperand(j);
@@ -1531,9 +1591,10 @@ Iterative_ALC::findHeaderAndPreheaderInstructionsRequiredForALC(BasicBlock *head
                         continue;
                     }
                     auto opInstr = dyn_cast<Instruction>(innerOp);
-                    if ((opInstr->getParent() == header || instruction->getParent() == preheader) &&
+                    if ((opInstr->getParent() == header || opInstr->getParent() == preheader) &&
                         (std::find(output->begin(), output->end(), opInstr) ==
                          output->end())) {
+
                         output->push_back(opInstr);
                         toCheckOperands.push_back(opInstr);
                     }
@@ -1631,6 +1692,72 @@ Iterative_ALC::findHeaderAndPreheaderInstructionsRequiredForALC(BasicBlock *head
     std::reverse(output->begin(), output->end());
     return output;
 }
+
+
+std::vector<Instruction *> *Iterative_ALC::findParentLoopInstructions(BasicBlock *header, BasicBlock *preheader) {
+
+    Loop *parentLoop = L->getParentLoop();
+    BasicBlock *parentHeader = nullptr;
+    BasicBlock *parentPreHeader = nullptr;
+
+    if (parentLoop) {
+        parentHeader = parentLoop->getHeader();
+        parentPreHeader = parentLoop->getLoopPreheader();
+
+    }
+
+    auto output = new std::vector<Instruction *>();
+    for (auto &headerInstr: header->instructionsWithoutDebug()) {
+
+        if (&headerInstr == header->getTerminator()) {
+            break;
+        }
+
+        for (int i = 0; i < headerInstr.getNumOperands(); ++i) {
+
+            std::vector<Instruction *> toCheckOperands;
+            auto operand = headerInstr.getOperand(i);
+            if (operand == ScalarIV || !isa<Instruction>(operand)) {
+                continue;
+            }
+            auto *instruction = dyn_cast<Instruction>(operand);
+
+            if ((instruction->getParent() == parentPreHeader || instruction->getParent() == parentHeader) &&
+                (std::find(output->begin(), output->end(), instruction) ==
+                 output->end())) {
+                output->push_back(instruction);
+                toCheckOperands.push_back(instruction);
+            }
+
+
+            for (int k = 0; k < toCheckOperands.size(); ++k) {
+                for (int j = 0; j < toCheckOperands[k]->getNumOperands(); ++j) {
+                    Value *innerOp = toCheckOperands[k]->getOperand(j);
+                    if (innerOp == ScalarIV || !isa<Instruction>(innerOp)) {
+                        continue;
+                    }
+                    auto opInstr = dyn_cast<Instruction>(innerOp);
+                    if ((opInstr->getParent() == parentPreHeader || opInstr->getParent() == parentHeader) &&
+                        (std::find(output->begin(), output->end(), opInstr) ==
+                         output->end())) {
+
+                        output->push_back(opInstr);
+                        toCheckOperands.push_back(opInstr);
+                    }
+                }
+            }
+        }
+    }
+
+
+
+
+    // should revers the output so that each instruction comes after the
+    // instruction it depends on
+    std::reverse(output->begin(), output->end());
+    return output;
+}
+
 
 bool Iterative_ALC::usesInductionVar(Value *value, Value *inductionVar) {
     if (value == inductionVar) {
@@ -2456,6 +2583,12 @@ void Iterative_ALC::findLoadInstructions() {
             loadInstructionsToPermute.push_back(loadInstr);
         }
     }
+
+    for (auto instr: *outerLoopSharedInstructions) {
+        if (auto loadInstr = dyn_cast<LoadInst>(instr)) {
+            loadInstructionsToPermute.push_back(loadInstr);
+        }
+    }
 }
 
 bool Iterative_ALC::findIfAccessingSameMemAddress(GEPOperator *GEP) {
@@ -2491,6 +2624,8 @@ Iterative_ALC::Iterative_ALC(Loop *l, int vectorizationFactor,
             new IntrinsicCallGenerator(this->vectorizationFactor, module);
 
 }
+
+
 
 
 

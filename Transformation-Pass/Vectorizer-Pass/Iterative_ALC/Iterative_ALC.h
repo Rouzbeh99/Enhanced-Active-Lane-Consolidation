@@ -74,6 +74,7 @@ private:
     BasicBlock *thenBlock;
     BasicBlock *elseBlock;
     std::vector<Instruction *> *sharedInstructions;
+    std::vector<Instruction *> *outerLoopSharedInstructions;
     std::vector<LoadInst *> loadInstructionsToPermute;
     std::map<Instruction *, Instruction *> hoistedInstructions;
     bool dataPermutation;
@@ -183,6 +184,10 @@ private:
 private:
     std::vector<Instruction *> *
     findHeaderAndPreheaderInstructionsRequiredForALC(BasicBlock *header, BasicBlock *preheader);
+
+private:
+    std::vector<Instruction *> *
+    findParentLoopInstructions(BasicBlock *header, BasicBlock *preheader);
 
 private:
     void addBranchHint(BranchInst *branchInst);
