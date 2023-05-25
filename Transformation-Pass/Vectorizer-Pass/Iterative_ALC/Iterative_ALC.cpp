@@ -41,7 +41,7 @@ void Iterative_ALC::doTransformation_itr_singleIf_simple() {
     // fill blocks
     std::vector<Value *> *preALCBlockValues =
             fillPreALCBlock_itr(preheader);
-    fillALCHeaderBlock_itr(preALCBlockValues,header);
+    fillALCHeaderBlock_itr(preALCBlockValues, header);
 
     fillLaneGatherBlock_itr();
     std::vector<Value *> *uniformBlockOutputs = fillUniformBlock_itr(header);
@@ -898,7 +898,6 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
     std::map<Value *, Value *> vMap;
 
 
-
     Function *function = block->getParent();
 
     for (auto &arg: function->args()) {
@@ -914,8 +913,8 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
     // following lines
     std::stack<Instruction *> toBeRemoved;
 
-//    llvm::outs() << "--------------------------------------\n";
-//    llvm::outs() << "In block " << block->getName() << "\n";
+    llvm::outs() << "--------------------------------------\n";
+    llvm::outs() << "In block " << block->getName() << "\n";
 
 
 
@@ -923,10 +922,10 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
     for (auto originalInstr: *instructionsOrder) {
         Instruction *instr = (*originalToClonedInstMap).at(originalInstr);
 
-//        originalInstr->print(outs());
-//        llvm::outs() << "   ---->    ";
-//        instr->print(outs());
-//        llvm::outs() << "\n";
+        originalInstr->print(outs());
+        llvm::outs() << "   ---->    ";
+        instr->print(outs());
+        llvm::outs() << "\n";
 
         if (isa<BranchInst>(instr)) {
             toBeRemoved.push(instr);
@@ -1092,8 +1091,42 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
             toBeRemoved.push(instr);
 
 
+        } else if (isa<UnaryInstruction>(instr)) {
+
+            Value *firstOp = nullptr;
+            if (vMap.count(instr->getOperand(0))) {
+                firstOp = vMap[instr->getOperand(0)];
+            } else if (instr->getOperand(0) ==
+                       VectorIndex) {
+
+                firstOp = indices;
+            } else {
+                if (auto *ConstantValue =
+                        dyn_cast_or_null<Constant>(instr->getOperand(0))) {
+                    firstOp =
+                            createVectorOfValues(ConstantValue, IRB, "first.operand");
+                } else {
+                    instr->print(outs());
+                    llvm::outs() << "   ------ >  ";
+                    assert(0 && "first operand neither already vectorized nor Constant!");
+                }
+            }
+
+            Value *result = nullptr;
+            switch (instr->getOpcode()) {
+                case Instruction::FNeg:
+                    result = IRB.CreateFNeg(firstOp);
+                    break;
+
+            }
+
+            assert(result && "Unhandled UnaryOperator!");
+            vMap[instr] = result;
+            outputMap->insert({instr, result});
+            toBeRemoved.push(instr);
+
         } else if (isa<BinaryOperator>(instr) ||
-                   isa<ICmpInst>(instr)) {
+                   isa<ICmpInst>(instr) || isa<FCmpInst>(instr)) {
 
 
             Value *firstOp = nullptr;
@@ -1185,71 +1218,93 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
                     break;
                 case Instruction::ICmp: {
                     switch (dyn_cast<ICmpInst>(instr)->getPredicate()) {
-                        // TODO: handle other cases
+                        case CmpInst::ICMP_EQ:
+                            result = IRB.CreateICmpEQ(firstOp, secondOp);
+                            break;
+                        case CmpInst::ICMP_NE:
+                            result = IRB.CreateICmpNE(firstOp, secondOp);
+                            break;
+                        case CmpInst::ICMP_UGT:
+                            result = IRB.CreateICmpUGT(firstOp, secondOp);
+                            break;
+                        case CmpInst::ICMP_UGE:
+                            result = IRB.CreateICmpUGE(firstOp, secondOp);
+                            break;
+                        case CmpInst::ICMP_ULT:
+                            result = IRB.CreateICmpULT(firstOp, secondOp);
+                            break;
+                        case CmpInst::ICMP_ULE:
+                            result = IRB.CreateICmpULE(firstOp, secondOp);
+                            break;
+                        case CmpInst::ICMP_SGT: {
+                            result = IRB.CreateICmpSGT(firstOp, secondOp);
+                            break;
+                            case CmpInst::ICMP_SGE:
+                                result = IRB.CreateICmpSGE(firstOp, secondOp);
+                            break;
+                            case CmpInst::ICMP_SLT:
+                                result = IRB.CreateICmpSLT(firstOp, secondOp);
+                            break;
+                            case CmpInst::ICMP_SLE:
+                                result = IRB.CreateICmpSLE(firstOp, secondOp);
+                            break;
+                            case CmpInst::BAD_ICMP_PREDICATE:
+                                break;
+                        }
+                    }
+                }
+                    break;
+                case Instruction::FCmp: {
+                    switch (dyn_cast<FCmpInst>(instr)->getPredicate()) {
                         case CmpInst::FCMP_FALSE:
                             break;
                         case CmpInst::FCMP_OEQ:
+                            result = IRB.CreateFCmpOEQ(firstOp, secondOp);
                             break;
                         case CmpInst::FCMP_OGT:
+                            result = IRB.CreateFCmpOGT(firstOp, secondOp);
                             break;
                         case CmpInst::FCMP_OGE:
+                            result = IRB.CreateFCmpOGE(firstOp, secondOp);
                             break;
                         case CmpInst::FCMP_OLT:
+                            result = IRB.CreateFCmpOLT(firstOp, secondOp);
                             break;
                         case CmpInst::FCMP_OLE:
+                            result = IRB.CreateFCmpOLE(firstOp, secondOp);
                             break;
                         case CmpInst::FCMP_ONE:
+                            result = IRB.CreateFCmpONE(firstOp, secondOp);
                             break;
                         case CmpInst::FCMP_ORD:
+                            result = IRB.CreateFCmpORD(firstOp, secondOp);
                             break;
                         case CmpInst::FCMP_UNO:
+                            result = IRB.CreateFCmpUNO(firstOp, secondOp);
                             break;
                         case CmpInst::FCMP_UEQ:
+                            result = IRB.CreateFCmpUEQ(firstOp, secondOp);
                             break;
                         case CmpInst::FCMP_UGT:
+                            result = IRB.CreateFCmpUGT(firstOp, secondOp);
                             break;
                         case CmpInst::FCMP_UGE:
+                            result = IRB.CreateFCmpUGE(firstOp, secondOp);
                             break;
                         case CmpInst::FCMP_ULT:
+                            result = IRB.CreateFCmpULT(firstOp, secondOp);
                             break;
                         case CmpInst::FCMP_ULE:
                             result = IRB.CreateICmpULE(firstOp, secondOp);
                             break;
-                            break;
                         case CmpInst::FCMP_UNE:
+                            result = IRB.CreateFCmpUNE(firstOp, secondOp);
                             break;
                         case CmpInst::FCMP_TRUE:
                             break;
                         case CmpInst::BAD_FCMP_PREDICATE:
                             break;
-                        case CmpInst::ICMP_EQ: {
-                            Value *ICmpInst = IRB.CreateICmpEQ(firstOp, secondOp);
-                            result = dyn_cast<Value>(ICmpInst);
-                            break;
-                        }
-                        case CmpInst::ICMP_NE:
-                            break;
-                        case CmpInst::ICMP_UGT:
-                            break;
-                        case CmpInst::ICMP_UGE:
-                            break;
-                        case CmpInst::ICMP_ULT:
-                            break;
-                        case CmpInst::ICMP_ULE:
-                            break;
-                        case CmpInst::ICMP_SGT: {
-                            Value *ICmpInst = IRB.CreateICmpSGT(firstOp, secondOp);
-                            result = dyn_cast<Value>(ICmpInst);
-                            break;
-                        }
-                        case CmpInst::ICMP_SGE:
-                            break;
-                        case CmpInst::ICMP_SLT:
-                            break;
-                        case CmpInst::ICMP_SLE:
-                            break;
-                        case CmpInst::BAD_ICMP_PREDICATE:
-                            break;
+
                     }
                 }
             }
@@ -1257,15 +1312,90 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
             vMap[instr] = result;
             outputMap->insert({instr, result});
             toBeRemoved.push(instr);
+
+
+        } else if (isa<IntrinsicInst>(instr)) {
+            auto *intrinsicInstr = dyn_cast<IntrinsicInst>(instr);
+
+            Value *firstOp = nullptr;
+            Value *secondOp = nullptr;
+            Value *thirdOp = nullptr;
+            if (vMap.count(instr->getOperand(0))) {
+                firstOp = vMap[instr->getOperand(0)];
+            } else if (instr->getOperand(0) ==
+                       VectorIndex) {
+
+                firstOp = indices;
+            } else {
+                if (auto *ConstantValue =
+                        dyn_cast_or_null<Constant>(instr->getOperand(0))) {
+                    firstOp =
+                            createVectorOfValues(ConstantValue, IRB, "first.operand");
+                } else {
+                    instr->print(outs());
+                    llvm::outs() << "   ------ >  ";
+                    assert(0 && "first operand neither already vectorized nor Constant!");
+                }
+            }
+
+            if (vMap.count(instr->getOperand(1))) {
+                secondOp = vMap[instr->getOperand(1)];
+            } else if (instr->getOperand(1) == VectorIndex) {
+                secondOp = indices;
+            } else {
+                if (auto *ConstantValue =
+                        dyn_cast_or_null<Constant>(instr->getOperand(1))) {
+                    secondOp =
+                            createVectorOfValues(ConstantValue, IRB, "second.operand");
+                } else {
+                    instr->getOperand(1)->print(outs());
+                    llvm::outs() << "\n";
+                    assert(0 &&
+                           "second operand neither already vectorized nor Constant!");
+                }
+            }
+
+            Value *result = nullptr;
+            switch (intrinsicInstr->getIntrinsicID()) {
+                case 143: {              // fmuladd intrinsic
+
+                    if (vMap.count(instr->getOperand(2))) {
+                        thirdOp = vMap[instr->getOperand(2)];
+                    } else if (instr->getOperand(2) == VectorIndex) {
+                        thirdOp = indices;
+                    } else {
+                        if (auto *ConstantValue =
+                                dyn_cast_or_null<Constant>(instr->getOperand(2))) {
+                            thirdOp =
+                                    createVectorOfValues(ConstantValue, IRB, "second.operand");
+                        } else {
+                            instr->getOperand(2)->print(outs());
+                            llvm::outs() << "\n";
+                            assert(0 &&
+                                   "second operand neither already vectorized nor Constant!");
+                        }
+                    }
+                }
+                    Value *mul = IRB.CreateFMul(firstOp, secondOp);
+                    result = IRB.CreateFAdd(mul, thirdOp);
+                    break;
+            }
+
+            assert(result && "Unhandled BinaryOperator!");
+            vMap[instr] = result;
+            outputMap->insert({instr, result});
+            toBeRemoved.push(instr);
+
+
         }
 
     }
 
 
-//    llvm::outs()<< "\n\n";
+//    llvm::outs() << "\n\n";
     while (!toBeRemoved.empty()) {
 //        toBeRemoved.top()->print(outs());
-//        llvm::outs()<<"\n";
+//        llvm::outs() << "\n";
         toBeRemoved.top()->eraseFromParent();
         toBeRemoved.pop();
     }
@@ -1369,7 +1499,6 @@ std::map<Instruction *, Instruction *> *Iterative_ALC::cloneInstructions(BasicBl
 // TODO: how to handle in data permutation?
 std::vector<Instruction *> *
 Iterative_ALC::findHeaderAndPreheaderInstructionsRequiredForALC(BasicBlock *header, BasicBlock *preheader) {
-
 
 
     auto output = new std::vector<Instruction *>();

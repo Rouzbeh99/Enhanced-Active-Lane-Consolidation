@@ -1,0 +1,330 @@
+
+----------------------------------------------------------------------------------------------------
+In Function : s123
+Loop at line number: 428
+Loop doesn't contain function call
+Loop contains memory dependency
+Loop contains output dependency
+Number of paths: 2
+for.body5 --> if.then --> for.inc -->  total instructions in the path: 19 , Memory instructions percentage: 31%
+for.body5 --> for.inc -->  total instructions in the path: 14 , Memory instructions percentage: 35%
+ALC can NOT be applied 
+
+----------------------------------------------------------------------------------------------------
+In Function : s124
+Loop at line number: 457
+Loop doesn't contain function call
+Loop doesn't contain memory dependency
+Loop contains output dependency
+Number of paths: 2
+for.body5 --> for.inc -->  total instructions in the path: 4 , Memory instructions percentage: 25%
+for.body5 --> if.else --> for.inc -->  total instructions in the path: 6 , Memory instructions percentage: 33%
+ALC can NOT be applied 
+
+----------------------------------------------------------------------------------------------------
+In Function : s161														-------------------> check IR
+Loop at line number: 723
+Loop doesn't contain function call
+Loop contains memory dependency
+Loop contains output dependency
+Can't determine induction variable
+Number of paths: 2
+for.body5 --> L20 --> for.inc -->  total instructions in the path: 11 , Memory instructions percentage: 36%
+for.body5 --> if.end --> for.inc -->  total instructions in the path: 13 , Memory instructions percentage: 38%
+ALC can NOT be applied 
+
+----------------------------------------------------------------------------------------------------
+In Function : s1161														-------------------> check IR
+Loop at line number: 752
+Loop doesn't contain function call
+Loop contains memory dependency
+Loop contains output dependency
+Number of paths: 2
+for.body5 --> L20 --> for.inc -->  total instructions in the path: 8 , Memory instructions percentage: 37%
+for.body5 --> if.end --> for.inc -->  total instructions in the path: 8 , Memory instructions percentage: 37%
+ALC can NOT be applied 
+
+----------------------------------------------------------------------------------------------------
+In Function : s253
+Loop at line number: 1498
+Loop doesn't contain function call
+Loop doesn't contain memory dependency
+Loop doesn't contain output dependency
+Number of paths: 2
+for.body5 --> if.then --> for.inc -->  total instructions in the path: 14 , Memory instructions percentage: 42%
+for.body5 --> for.inc -->  total instructions in the path: 5 , Memory instructions percentage: 40%
+ALC can be applied 
+
+----------------------------------------------------------------------------------------------------
+In Function : s258													
+Loop at line number: 1626
+Loop doesn't contain function call
+Loop doesn't contain memory dependency
+Loop contains output dependency
+Number of paths: 2
+for.body5 --> if.then --> if.end -->  total instructions in the path: 6 , Memory instructions percentage: 33%
+for.body5 --> if.end -->  total instructions in the path: 5 , Memory instructions percentage: 40%
+ALC can NOT be applied 
+
+----------------------------------------------------------------------------------------------------
+In Function : s271
+Loop at line number: 1676
+Loop doesn't contain function call
+Loop doesn't contain memory dependency
+Loop doesn't contain output dependency
+Number of paths: 2
+for.body5 --> if.then --> for.inc -->  total instructions in the path: 9 , Memory instructions percentage: 44%
+for.body5 --> for.inc -->  total instructions in the path: 3 , Memory instructions percentage: 33%
+ALC can be applied 
+
+----------------------------------------------------------------------------------------------------
+In Function : s272
+Loop at line number: 1703
+Loop doesn't contain function call
+Loop doesn't contain memory dependency
+Loop doesn't contain output dependency
+Number of paths: 2
+for.body5 --> for.inc -->  total instructions in the path: 3 , Memory instructions percentage: 33%
+for.body5 --> if.then --> for.inc -->  total instructions in the path: 15 , Memory instructions percentage: 46%
+ALC can be applied
+ 
+-------------------------------------------------------------------------
+In Function : s273
+Loop at line number: 1728
+Loop doesn't contain function call
+Loop doesn't contain memory dependency
+Loop doesn't contain output dependency
+Number of paths: 2
+for.body5 --> if.then --> if.end -->  total instructions in the path: 13 , Memory instructions percentage: 46%
+for.body5 --> if.end -->  total instructions in the path: 9 , Memory instructions percentage: 44%
+ALC can be applied 
+Applying iterative ALC 
+-------------------------------------------------------------------------
+
+In Function : s274
+Loop at line number: 1753
+Loop doesn't contain function call
+Loop doesn't contain memory dependency
+Loop doesn't contain output dependency
+Number of paths: 2
+for.body5 --> if.then --> for.inc -->  total instructions in the path: 14 , Memory instructions percentage: 42%
+for.body5 --> if.else --> for.inc -->  total instructions in the path: 12 , Memory instructions percentage: 41%
+ALC can be applied 
+Applying iterative ALC 
+
+----------------------------------------------------------------------------------------------------
+In Function : s278														-------------------> check IR
+Loop at line number: 1886
+Loop doesn't contain function call
+Loop doesn't contain memory dependency
+Loop contains output dependency
+Number of paths: 2
+for.body5 --> L20 --> L30 -->  total instructions in the path: 14 , Memory instructions percentage: 42%
+for.body5 --> if.end --> L30 -->  total instructions in the path: 14 , Memory instructions percentage: 42%
+ALC can NOT be applied 
+
+----------------------------------------------------------------------------------------------------
+In Function : s2710
+Loop at line number: 1977
+Loop doesn't contain function call
+Loop doesn't contain memory dependency
+Loop doesn't contain output dependency
+Number of paths: 2
+for.body5 --> if.then --> for.inc -->  total instructions in the path: 13 , Memory instructions percentage: 46%
+for.body5 --> if.else --> for.inc -->  total instructions in the path: 13 , Memory instructions percentage: 46%
+ALC can be applied 
+
+----------------------------------------------------------------------------------------------------
+In Function : s2710
+Loop at line number: 1977
+Loop doesn't contain function call
+Loop doesn't contain memory dependency
+Loop doesn't contain output dependency
+Number of paths: 2
+for.body5.us.us --> if.then.us.us --> for.inc.us.us -->  total instructions in the path: 13 , Memory instructions percentage: 46%
+for.body5.us.us --> if.else.us.us --> for.inc.us.us -->  total instructions in the path: 14 , Memory instructions percentage: 42%
+ALC can be applied 
+
+----------------------------------------------------------------------------------------------------
+In Function : s2711
+Loop at line number: 2013
+Loop doesn't contain function call
+Loop doesn't contain memory dependency
+Loop doesn't contain output dependency
+Number of paths: 2
+for.body5 --> if.then --> for.inc -->  total instructions in the path: 9 , Memory instructions percentage: 44%
+for.body5 --> for.inc -->  total instructions in the path: 3 , Memory instructions percentage: 33%
+ALC can be applied 
+
+----------------------------------------------------------------------------------------------------
+In Function : s2712
+Loop at line number: 2037
+Loop doesn't contain function call
+Loop doesn't contain memory dependency
+Loop doesn't contain output dependency
+Number of paths: 2
+for.body5 --> if.then --> for.inc -->  total instructions in the path: 9 , Memory instructions percentage: 44%
+for.body5 --> for.inc -->  total instructions in the path: 5 , Memory instructions percentage: 40%
+ALC can be applied 
+Applying iterative ALC 
+
+
+----------------------------------------------------------------------------------------------------
+In Function : s314
+Loop at line number: 2370
+Loop doesn't contain function call
+Loop doesn't contain memory dependency
+Loop contains output dependency
+Number of paths: 2
+for.body5 --> if.then --> for.inc --> for.inc.for.body5_crit_edge -->  total instructions in the path: 3 , Memory instructions percentage: 0%
+for.body5 --> for.inc --> for.inc.for.body5_crit_edge -->  total instructions in the path: 3 , Memory instructions percentage: 0%
+ALC can NOT be applied 
+
+----------------------------------------------------------------------------------------------------
+In Function : s315
+Loop at line number: 2401
+Loop doesn't contain function call
+Loop doesn't contain memory dependency
+Loop contains output dependency
+Number of paths: 2
+for.body12 --> if.then --> for.inc19 --> for.inc19.for.body12_crit_edge -->  total instructions in the path: 4 , Memory instructions percentage: 0%
+for.body12 --> for.inc19 --> for.inc19.for.body12_crit_edge -->  total instructions in the path: 3 , Memory instructions percentage: 0%
+ALC can NOT be applied 
+
+----------------------------------------------------------------------------------------------------
+In Function : s316
+Loop at line number: 2429
+Loop doesn't contain function call
+Loop doesn't contain memory dependency
+Loop contains output dependency
+Can't determine induction variable
+Number of paths: 2
+for.body5 --> if.then --> for.inc -->  total instructions in the path: 3 , Memory instructions percentage: 33%
+for.body5 --> for.inc -->  total instructions in the path: 3 , Memory instructions percentage: 33%
+ALC can NOT be applied 
+
+----------------------------------------------------------------------------------------------------
+In Function : s318
+Loop at line number: 2487
+Loop doesn't contain function call
+Loop doesn't contain memory dependency
+Loop contains output dependency
+Can't determine induction variable
+Number of paths: 2
+for.body5 --> if.end --> L5 -->  total instructions in the path: 4 , Memory instructions percentage: 25%
+for.body5 --> L5 -->  total instructions in the path: 4 , Memory instructions percentage: 25%
+ALC can NOT be applied 
+
+----------------------------------------------------------------------------------------------------
+In Function : s3110
+Loop at line number: 2550
+Loop doesn't contain function call
+Loop doesn't contain memory dependency
+Loop contains output dependency
+Number of paths: 2
+for.body9 --> if.then --> for.inc -->  total instructions in the path: 4 , Memory instructions percentage: 25%
+for.body9 --> for.inc -->  total instructions in the path: 3 , Memory instructions percentage: 33%
+ALC can NOT be applied 
+
+----------------------------------------------------------------------------------------------------
+In Function : s13110
+Loop at line number: 2582
+Loop doesn't contain function call
+Loop doesn't contain memory dependency
+Loop contains output dependency
+Number of paths: 2
+for.body9 --> if.then --> for.inc -->  total instructions in the path: 4 , Memory instructions percentage: 25%
+for.body9 --> for.inc -->  total instructions in the path: 3 , Memory instructions percentage: 33%
+ALC can NOT be applied 
+
+----------------------------------------------------------------------------------------------------
+In Function : s3111
+Loop at line number: 2612
+Loop doesn't contain function call
+Loop doesn't contain memory dependency
+Loop contains output dependency
+Number of paths: 2
+for.body5 --> if.then --> for.inc -->  total instructions in the path: 4 , Memory instructions percentage: 25%
+for.body5 --> for.inc -->  total instructions in the path: 3 , Memory instructions percentage: 33%
+ALC can NOT be applied 
+
+----------------------------------------------------------------------------------------------------
+In Function : s3113
+Loop at line number: 2663
+Loop doesn't contain function call
+Loop doesn't contain memory dependency
+Loop contains output dependency
+Number of paths: 2
+for.body5 --> if.then --> for.inc --> for.inc.for.body5_crit_edge -->  total instructions in the path: 4 , Memory instructions percentage: 0%
+for.body5 --> for.inc --> for.inc.for.body5_crit_edge -->  total instructions in the path: 4 , Memory instructions percentage: 0%
+ALC can NOT be applied 
+
+----------------------------------------------------------------------------------------------------
+In Function : s331
+Loop at line number: 2757
+Loop doesn't contain function call
+Loop doesn't contain memory dependency
+Loop contains output dependency
+Number of paths: 2
+for.body5 --> if.then --> for.inc -->  total instructions in the path: 4 , Memory instructions percentage: 25%
+for.body5 --> for.inc -->  total instructions in the path: 3 , Memory instructions percentage: 33%
+ALC can NOT be applied 
+
+----------------------------------------------------------------------------------------------------
+In Function : s341
+Loop at line number: 2820
+Loop doesn't contain function call
+Loop doesn't contain memory dependency
+Loop contains output dependency
+Number of paths: 2
+for.body5 --> if.then --> for.inc -->  total instructions in the path: 7 , Memory instructions percentage: 28%
+for.body5 --> for.inc -->  total instructions in the path: 3 , Memory instructions percentage: 33%
+ALC can NOT be applied 
+
+----------------------------------------------------------------------------------------------------
+In Function : s342
+Loop at line number: 2848
+Loop doesn't contain function call
+Loop doesn't contain memory dependency
+Loop contains output dependency
+Number of paths: 2
+for.body5 --> if.then --> for.inc -->  total instructions in the path: 8 , Memory instructions percentage: 37%
+for.body5 --> for.inc -->  total instructions in the path: 3 , Memory instructions percentage: 33%
+ALC can NOT be applied 
+
+----------------------------------------------------------------------------------------------------
+In Function : s343
+Loop at line number: 2877
+Loop doesn't contain function call
+Loop doesn't contain memory dependency
+Loop contains output dependency
+Number of paths: 2
+for.body9 --> if.then --> for.inc -->  total instructions in the path: 9 , Memory instructions percentage: 33%
+for.body9 --> for.inc -->  total instructions in the path: 3 , Memory instructions percentage: 33%
+ALC can NOT be applied 
+
+----------------------------------------------------------------------------------------------------
+In Function : s443
+Loop at line number: 3237
+Loop doesn't contain function call
+Loop doesn't contain memory dependency
+Loop contains output dependency
+Number of paths: 2
+for.body5 --> for.inc -->  total instructions in the path: 5 , Memory instructions percentage: 40%
+for.body5 --> L20 --> for.inc -->  total instructions in the path: 7 , Memory instructions percentage: 42%
+ALC can NOT be applied 
+
+
+----------------------------------------------------------------------------------------------------
+In Function : vif
+Loop at line number: 3712
+Loop doesn't contain function call
+Loop doesn't contain memory dependency
+Loop doesn't contain output dependency
+Number of paths: 2
+for.body5 --> if.then --> for.inc -->  total instructions in the path: 5 , Memory instructions percentage: 40%
+for.body5 --> for.inc -->  total instructions in the path: 3 , Memory instructions percentage: 33%
+ALC can be applied 
+
+----------------------------------------------------------------------------------------------------
+

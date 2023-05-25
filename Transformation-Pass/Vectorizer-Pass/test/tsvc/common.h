@@ -1,10 +1,8 @@
 #ifndef TSVC_COMMON_HDR
 #define TSVC_COMMON_HDR
 
-//#define iterations 100000
-#define iterations 10
-//#define LEN_1D 32000
-#define LEN_1D 8192
+#define iterations 100000
+#define LEN_1D 32000
 #define LEN_2D 256
 
 #include <sys/time.h>
@@ -19,8 +17,7 @@ struct args_t {
 typedef double real_t;
 #define ABS fabs
 #else
-//typedef float real_t;
-typedef int real_t;
+typedef float real_t;
 #define ABS fabsf
 #endif
 
