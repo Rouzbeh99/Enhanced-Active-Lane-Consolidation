@@ -52,7 +52,6 @@ for (int i = 0; i < n; i++) {
 \end{minipage}
 \end{center}
 
-
 In order to understand the prohibitive overhead of gather/scatter instructions in ALC's performance, consider the simple loop in \rlst{simple-cond-copy-loop}.
 The loop conditionally copies elements from array $a$ to array $b$, both are 32-bit integers.
 An element $a[i]$ is copied to $b[i]$  if, and only if, the value in $cond[i]$ is true.

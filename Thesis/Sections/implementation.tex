@@ -1,6 +1,7 @@
 \section{ALC as a Compiler Transformation}
 \label{sec:alc-pass}
 
+
 Like most optimizations in modern compilers, the ALC transformation is designed with two components:
 \begin{inparaenum}[(i)]
     \item an analysis that identifies candidates loops to apply ALC based on loop features, such as the number of instructions on each \cpath and the CFG complexity (\rsec{alc-analysis}); and
@@ -17,7 +18,7 @@ The main goals of the analysis are two-fold:
 It is legal to apply ALC to a loop $L$ with control-flow divergence if $L$ does not have \emph{loop-carried dependencies} and only contains calls to vectorizable functions without side effects (e.g. square-root and sine \& cosine).
 Similar to other forms of vectorization such as loop vectorization and SLP vectorization, ALC cannot be applied to loops with loop-carried dependencies because instructions from different iterations that depend on each other, usually, cannot execute in parallel in a SIMD fashion.
 The ALC analysis relies on existing data-dependency analysis available on modern compilers to identify loops without loop-carried dependencies.
-A data-dependency analysis may return a {\it may depend} answer  because of unresolved alias relationships and, in that case, the compiler must conservatively not apply the transformation~\cite{Landi1991PointerAliasing, Horwitz1997MayAliasNPHard}.
+A data-dependency analysis may return a {\it may depend} answer because of unresolved alias relationships and, in that case, the compiler must conservatively not apply the transformation~\cite{Landi1991PointerAliasing, Horwitz1997MayAliasNPHard}.
 
 The cost portion of the profitability analysis for ALC uses the estimated cost of executing the new instructions required to perform index and data-vector permutations for ALC minus the instructions that are eliminated by ALC. 
 The estimated execution latency of instructions is generally available in a modern compiler because the same information is used in other transformations, such as the creation of an efficient instruction schedule.

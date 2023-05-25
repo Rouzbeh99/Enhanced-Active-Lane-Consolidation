@@ -39,10 +39,8 @@ struct St s;
 int arr2D[3][n];
 
 
-
-
-void simple_if_else(int *__restrict__ a, int *__restrict__ b, int *__restrict__ c,
-                    bool *__restrict__ cond, int n) {
+void simple_if(int *__restrict__ a, int *__restrict__ b, int *__restrict__ c,
+               bool *__restrict__ cond, int n) {
 
     int status;
 
@@ -50,35 +48,22 @@ void simple_if_else(int *__restrict__ a, int *__restrict__ b, int *__restrict__ 
     /* Start counting */
     if ((status = PAPI_start(EventSet)) != PAPI_OK) ERROR_RETURN(status);
 
-
     for (int i = 0; i < n; ++i) {
-
         if (cond[i]) {
             a[i] = (2 * a[i] - 2 * c[i]) + (b[i] - 2 * a[i]);
             a[i] += 2 * i + i * b[i];
             b[i] = 2 - 2 * b[i] + (2 * a[i] - 2 * c[i]);
             b[i] -= 3 * i + i * c[i];
-            c[i] += 2 * b[i] + 2 * a[i] - 3 * (2 * c[i] - 2 * b[i] + i * i);
-        } else {
-            a[i] *= 2 + b[i] - 3 * c[i];
-            c[i] = a[i] * b[i] - 1 + c[i];
-            b[i] = 3 * a[i] - 2 * c[i];
-            b[i] -= 2 * c[i] + 7 + a[i];
-            a[i] -= 4 + b[i] * 2;
-            c[i] += 5 * a[i] + 2 * b[i];
-
+            c[i] = 2 * b[i] + 2 * a[i] - 3 * (2 * c[i] - 2 * b[i] + i * i);
+            c[i] -= 2 * i;
         }
-
-
     }
-
 
     /* Stop counting, this reads from the counter as well as stop it. */
     if ((status = PAPI_stop(EventSet, CounterValues)) != PAPI_OK) ERROR_RETURN(status);
 
     ExecutionTime = getTimeMiliSeconds() - t;
 }
-
 
 
 int *a;

@@ -75,7 +75,8 @@ ALCAnalysisResult *ALC_Analysis::doAnalysis() {
                      << "\n";
     }
 
-    bool isLegal = vectorizable && !hasFunctionCall && !outputDependency && numberOfPaths > 1 && canGetIV ;
+//    bool isLegal = vectorizable && !hasFunctionCall && !outputDependency && numberOfPaths > 1 && canGetIV ;
+    bool isLegal = !hasFunctionCall && !outputDependency && numberOfPaths > 1 && canGetIV ;
     bool isProfitable = false;
     if (numberOfPaths == 2) {
         isProfitable = true;

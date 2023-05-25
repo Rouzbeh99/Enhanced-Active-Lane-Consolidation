@@ -846,7 +846,6 @@ Value *Iterative_ALC::formPredicate(BasicBlock *decisionBlock,
     predicates_scalar = static_cast<Instruction *>(clonedBrInstr->getCondition());
 
 
-
     // now we should vectorize clonedInstructions
     std::map<const Value *, const Value *> *instructionsMap =
             vectorizeInstructions(clonedInstructions, instructionsOrder, predicateHolderBlock, nullptr,
@@ -881,10 +880,10 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
 
     // Move types to i32 so that it's compatible with other instruction types and can be used as operands if needed
     // TODO: what if instruction operands were float??
-    if (vectorizationFactor == 2) {
-        constOne = llvm::ConstantInt::get(IRB.getInt32Ty(), 1, true);
-        mutatedVectorIndex = IRB.CreateTruncOrBitCast(VectorIndex, IRB.getInt32Ty());
-    }
+//    if (vectorizationFactor == 2) {
+//        constOne = llvm::ConstantInt::get(IRB.getInt32Ty(), 1, true);
+//        mutatedVectorIndex = IRB.CreateTruncOrBitCast(VectorIndex, IRB.getInt32Ty());
+//    }
 
     if (isPermuted) {
         ////////////////////////////////////////////// need to change uniform vector elements type to i32
@@ -899,8 +898,6 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
     std::map<Value *, Value *> vMap;
 
 
-    // create vector instructions from function arguments
-    //TODO: move it to the header
 
     Function *function = block->getParent();
 
@@ -1107,6 +1104,7 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
                 firstOp = vMap[instr->getOperand(0)];
             } else if (instr->getOperand(0) ==
                        VectorIndex) {
+
                 firstOp = indices;
             } else {
                 if (auto *ConstantValue =
@@ -1181,6 +1179,10 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
                     break;
                 case Instruction::FRem:
                     result = IRB.CreateFRem(firstOp, secondOp);
+                    break;
+                case Instruction::Or:
+                    result = IRB.CreateOr(firstOp, secondOp);
+                    break;
                 case Instruction::ICmp: {
                     switch (dyn_cast<ICmpInst>(instr)->getPredicate()) {
                         // TODO: handle other cases
@@ -1260,7 +1262,10 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
     }
 
 
+//    llvm::outs()<< "\n\n";
     while (!toBeRemoved.empty()) {
+//        toBeRemoved.top()->print(outs());
+//        llvm::outs()<<"\n";
         toBeRemoved.top()->eraseFromParent();
         toBeRemoved.pop();
     }
@@ -1736,6 +1741,7 @@ void
 Iterative_ALC::fillALCHeader_if_then_else(std::vector<Value *> *initialValues, BasicBlock *header) {
 
     IRBuilder<> builder(preALCBlock->getTerminator());
+
 
     Value *initialPredicates = formPredicate(
             header, preALCBlock, ConstZeroVectorOfTripCountTy); // initial predicates
