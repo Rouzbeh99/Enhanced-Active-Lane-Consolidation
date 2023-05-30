@@ -434,8 +434,16 @@ BasicBlock *Iterative_ALC::createPreheaderForRemainingIterations() {
 
 void Iterative_ALC::refinePreheader(BasicBlock *preHeaderForRemaining) {
 
+
     auto *Terminator = L->getLoopPreheader()->getTerminator();
     IRBuilder<> IRB(Terminator);
+
+    if (changeTripCountType) {
+        Type *int32Type = IntegerType::get(module->getContext(), 32);
+        tripCount = IRB.CreateTrunc(tripCount, int32Type);
+    }
+
+
 
     if (TripCountTy == IRB.getInt64Ty()) {
         VscaleFactor = intrinsicCallGenerator->createVscale64Intrinsic(IRB);
@@ -1003,7 +1011,7 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
             toBeRemoved.push(instr);
         } else if (isa<LoadInst>(instr)) {
 
-            if(instr->getType()->isPtrOrPtrVectorTy()){
+            if (instr->getType()->isPtrOrPtrVectorTy()) {
                 // keep the load instructions
                 vMap[instr] = instr;
                 continue;
@@ -1031,7 +1039,7 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
                         assert(0 && "permuted load instruction not found!");
                     }
                     continue;
-                } else if (block == uniformElseBlock) {
+                } else if (dataPermutation && block == uniformElseBlock) {
                     Value *&remainingLoad = RemainingLoadInstrMap[dyn_cast<Value>(originalInstr)];
                     if (remainingLoad) {
                         outputMap->insert({instr, remainingLoad});
@@ -1045,18 +1053,19 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
             }
 
             Type *SrcTy = nullptr;
-            if(isa<GEPOperator>(ptr)){
+            if (isa<GEPOperator>(ptr)) {
                 SrcTy = static_cast<GEPOperator *>(ptr)->getSourceElementType();
                 if (SrcTy->isArrayTy() || SrcTy->isStructTy()) {
                     SrcTy = static_cast<GEPOperator *>(ptr)->getResultElementType();
                 }
-            }else if(isa<LoadInst>(ptr)){
+            } else if (isa<LoadInst>(ptr)) {
                 SrcTy = instr->getType();
                 if (SrcTy->isArrayTy() || SrcTy->isStructTy()) {
                     SrcTy = static_cast<GEPOperator *>(ptr)->getResultElementType();
                 }
-            }else{assert(0 &&
-                   "Expected LoadInst PointerOperand to be GetElementPtr or loaded ptr!");
+            } else {
+                assert(0 &&
+                       "Expected LoadInst PointerOperand to be GetElementPtr or loaded ptr!");
             }
 
 
@@ -1071,9 +1080,9 @@ std::map<const Value *, const Value *> *Iterative_ALC::vectorizeInstructions(
                         IRB, SrcTy, ptr, predicates, indices);
 
             } else if (isPredicated) {
-
+                auto *IndexType = static_cast<VectorType *>(indices->getType())->getScalarType();
                 loadedData = intrinsicCallGenerator->createLoadInstruction(
-                        IRB, SrcTy, ptr, predicates);
+                        IRB, SrcTy, ptr, predicates, IndexType);
             } else {
                 loadedData = IRB.CreateLoad(
                         VectorType::get(instr->getType(), vectorizationFactor, true), ptr);
@@ -2518,8 +2527,8 @@ void Iterative_ALC::addLoadPhisToLatch_singleIf_data_Permutation() {
 Value *Iterative_ALC::createVectorOfValues(Value *value, IRBuilder<> &builder,
                                            const std::string &name) {
 
-
-    auto *vecType = VectorType::get(value->getType(), vectorizationFactor, true);
+    Type *elementType = value->getType();
+    auto *vecType = VectorType::get(elementType, vectorizationFactor, true);
 
     uint64_t indexZero = 0;
     Value *UndefVec = UndefValue::get(vecType);
@@ -2617,8 +2626,10 @@ Iterative_ALC::Iterative_ALC(Loop *l, int vectorizationFactor,
 
     TripCountTy = tripCount->getType();
     if (vectorizationFactor == 4 && TripCountTy == Type::getInt64Ty(tripCount->getContext())) {
-        errs() << "warning: Requested VF = 4 but TripCountTy is i64. Reverting VF to 2\n";
-        this->vectorizationFactor = 2;
+//        errs() << "warning: Requested VF = 4 but TripCountTy is i64. Reverting VF to 2\n";
+//        this->vectorizationFactor = 2;
+        changeTripCountType = true;
+        TripCountTy = Type::getInt32Ty(tripCount->getContext());
     }
     intrinsicCallGenerator =
             new IntrinsicCallGenerator(this->vectorizationFactor, module);

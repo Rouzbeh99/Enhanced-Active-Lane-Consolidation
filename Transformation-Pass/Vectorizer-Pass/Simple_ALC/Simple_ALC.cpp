@@ -295,8 +295,9 @@ std::map<const Value *, const Value *> *Simple_ALC::vectorizeInstructions(
                 if (SrcTy->isArrayTy()) {
                     SrcTy = SrcTy->getArrayElementType();
                 }
+                auto *IndexType = static_cast<VectorType *>(indices->getType())->getScalarType();
                 loadedData = intrinsicCallGenerator->createLoadInstruction(
-                        IRB, SrcTy, ptr, predicates);
+                        IRB, SrcTy, ptr, predicates, IndexType);
             } else {
                 loadedData = IRB.CreateLoad(
                         VectorType::get(instr->getType(), vectorizationFactor, true), ptr);

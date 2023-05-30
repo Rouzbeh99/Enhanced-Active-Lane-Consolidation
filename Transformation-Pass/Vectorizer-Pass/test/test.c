@@ -349,12 +349,13 @@ int main() {
         a[i] = 1;
         b[i] = -1;
         c[i] = 0;
-        cond[i] = (rand() % 100) <= 2;
+//        cond[i] = (rand() % 100) <= 2;
+        cond[i] = (i % 100) <= 2;
     }
 
 
-//    simple_if(a, b, c, cond, n);
-    simple_if_else(a, b, c, cond, n);
+    simple_if(a, b, c, cond, n);
+//    simple_if_else(a, b, c, cond, n);
 
 
     int sum = 0;

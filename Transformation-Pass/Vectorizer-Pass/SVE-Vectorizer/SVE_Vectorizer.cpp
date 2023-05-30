@@ -362,8 +362,9 @@ SVE_Vectorizer::vectorizeInstructions_nonePredicated(
                 SrcTy = SrcTy->getArrayElementType();
             }
             auto *VTy = VectorType::get(SrcTy, vectorizationFactor, true);
+
             auto *NewLoad = intrinsicCallGenerator->createLoadInstruction(
-                    IRB, SrcTy, PtrOp, VectorIVPredicate);
+                    IRB, SrcTy, PtrOp, VectorIVPredicate, VTy->getScalarType());
             vMap[Inst] = NewLoad;
             toBeRemoved.push(Inst);
         } else if (auto *CInst = dyn_cast_or_null<CmpInst>(Inst)) {
@@ -666,7 +667,7 @@ void SVE_Vectorizer::vectorizeInstructions_Predicated(
                 SrcTy = SrcTy->getArrayElementType();
             }
             auto *NewLoad = intrinsicCallGenerator->createLoadInstruction(
-                    IRB, SrcTy, NewPtrOp, predicates);
+                    IRB, SrcTy, NewPtrOp, predicates, Load->getType());
             vMap[Inst] = NewLoad;
             toBeRemoved.push(Inst);
         } else if (auto *CInst = dyn_cast_or_null<CmpInst>(Inst)) {

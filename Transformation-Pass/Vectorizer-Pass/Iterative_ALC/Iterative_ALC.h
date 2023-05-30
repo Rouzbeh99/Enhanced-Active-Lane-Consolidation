@@ -36,6 +36,7 @@ private:
     DominatorTree *DT;
     std::vector<DominatorTree::UpdateType> DTUpdates;
     Value *tripCount;
+    bool changeTripCountType;
 
 
 private:
@@ -78,7 +79,7 @@ private:
     std::vector<LoadInst *> loadInstructionsToPermute;
     std::map<Instruction *, Instruction *> hoistedInstructions;
     bool dataPermutation;
-    bool negatedCondition;
+    bool negatedCondition = false;
     std::map<Instruction *, PHINode *> headerLoadPhis;
     std::map<Value *, Value *> MergeLoadInstrMap;
     std::map<Value *, Value *> RemainingLoadInstrMap;

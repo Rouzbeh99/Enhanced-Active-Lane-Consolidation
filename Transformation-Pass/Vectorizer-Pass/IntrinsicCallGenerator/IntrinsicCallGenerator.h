@@ -54,7 +54,7 @@ public:
                                        Value *predicatedVector, Value *indices);
 
     Value *createLoadInstruction(IRBuilder<> &IRB, Type *SrcTy, Value *ptr,
-                                 Value *predicatedVector);
+                                 Value *predicatedVector, Type *IndexType);
 
     void createScatterStoreInstruction(IRBuilder<> &IRB, Value *elementsVector,
                                        Value *ptr, Value *predicatedVector,

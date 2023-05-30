@@ -27,9 +27,9 @@ cd ../test
 
 $LLVM_BUILD_DIR/bin/clang -g -O3 -target aarch64-unknown-linux-gnu -DSVE_INTRINSICS -fno-inline -fno-vectorize -fno-slp-vectorize -fno-unroll-loops  -S -emit-llvm -I $GEM5_PATH/include -I ${PAPI_DIR}/include -L ${PAPI_DIR}/lib $1 -o scalar_code.ll
 $LLVM_BUILD_DIR/bin/clang -g -O0 -target aarch64-unknown-linux-gnu -DSVE_INTRINSICS -fpass-plugin=$PASS_DIR/build/ALC_Vectorizer.so -S -emit-llvm -I $GEM5_PATH/include -I ${PAPI_DIR}/include -L ${PAPI_DIR}/lib  scalar_code.ll -o $2.ll
-#$LLVM_BUILD_DIR/bin/clang -g -O3 -target aarch64-unknown-linux-gnu -DSVE_INTRINSICS -fno-inline -fno-vectorize -fno-slp-vectorize -fno-unroll-loops -S -emit-llvm $2.ll -o $2_O3.ll
-# $LLVM_BUILD_DIR/bin/llc -O3 -mtriple=aarch64-linux-gnu -mattr=sve -filetype=obj $2_O3.ll -o $2_ALC.o
-# $LLVM_BUILD_DIR/bin/llc -O3 -mtriple=aarch64-linux-gnu -mattr=sve -filetype=obj scalar_code.ll -o $2_scalar.o
+$LLVM_BUILD_DIR/bin/clang -g -O3 -target aarch64-unknown-linux-gnu -DSVE_INTRINSICS -fno-inline -fno-vectorize -fno-slp-vectorize -fno-unroll-loops -S -emit-llvm $2.ll -o $2_O3.ll
+ $LLVM_BUILD_DIR/bin/llc -O3 -mtriple=aarch64-linux-gnu -mattr=sve -filetype=obj $2_O3.ll -o $2_ALC.o
+ $LLVM_BUILD_DIR/bin/llc -O3 -mtriple=aarch64-linux-gnu -mattr=sve -filetype=obj scalar_code.ll -o $2_scalar.o
 
 #rm *.ll
 

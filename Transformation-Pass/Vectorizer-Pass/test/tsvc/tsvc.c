@@ -3257,25 +3257,25 @@ L50:
 
 // %4.5
 
-real_t s451(struct args_t * func_args)
-{
-
-//    intrinsic functions
-//    intrinsics
-
-    initialise_arrays(__func__);
-    gettimeofday(&func_args->t1, NULL);
-
-    for (int nl = 0; nl < iterations/5; nl++) {
-        for (int i = 0; i < LEN_1D; i++) {
-            a[i] = sinf(b[i]) + cosf(c[i]);
-        }
-        dummy(a, b, c, d, e, aa, bb, cc, 0.);
-    }
-
-    gettimeofday(&func_args->t2, NULL);
-    return calc_checksum(__func__);
-}
+//real_t s451(struct args_t * func_args)
+//{
+//
+////    intrinsic functions
+////    intrinsics
+//
+//    initialise_arrays(__func__);
+//    gettimeofday(&func_args->t1, NULL);
+//
+//    for (int nl = 0; nl < iterations/5; nl++) {
+//        for (int i = 0; i < LEN_1D; i++) {
+//            a[i] = sinf(b[i]) + cosf(c[i]);
+//        }
+//        dummy(a, b, c, d, e, aa, bb, cc, 0.);
+//    }
+//
+//    gettimeofday(&func_args->t2, NULL);
+//    return calc_checksum(__func__);
+//}
 
 // %4.5
 
@@ -4089,7 +4089,7 @@ int main(int argc, char ** argv){
     time_function(&s441, NULL);
     time_function(&s442, NULL);
     time_function(&s443, NULL);
-    time_function(&s451, NULL);
+    //time_function(&s451, NULL);
     time_function(&s452, NULL);
     time_function(&s453, NULL);
     time_function(&s471, NULL);

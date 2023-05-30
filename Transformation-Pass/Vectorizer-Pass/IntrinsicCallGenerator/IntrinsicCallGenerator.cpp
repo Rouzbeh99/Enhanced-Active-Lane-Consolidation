@@ -75,24 +75,44 @@ Value *IntrinsicCallGenerator::createIndexInstruction(IRBuilder<> &IRB,
                                                       Value *secondOp) {
     auto *VecTy = VectorType::get(firstOp->getType(), VF, /*Scalable*/ true);
     return IRB.CreateIntrinsic(Intrinsic::aarch64_sve_index, {VecTy},
-                               {firstOp, secondOp});
+                               {firstOp,secondOp});
 }
 
 Value *IntrinsicCallGenerator::createGatherLoadInstruction(
         IRBuilder<> &IRB, Type *SrcTy, Value *ptr, Value *predicatedVector, Value *indices) {
-    auto *VecTy = VectorType::get(SrcTy, VF, /*Scalable*/ true);
+
+
     auto *IndexType = static_cast<VectorType *>(indices->getType())->getScalarType();
     assert((IRB.getInt32Ty() == IndexType || IRB.getInt64Ty() == IndexType)
            && "Index type must be either i32 or i64");
     auto IntrinsicID = Intrinsic::aarch64_sve_ld1_gather_index;
-    if (IndexType == IRB.getInt32Ty())
+    if (IndexType == IRB.getInt32Ty()) {
         IntrinsicID = Intrinsic::aarch64_sve_ld1_gather_sxtw_index;
+    }
+
+    if (IndexType == IRB.getInt64Ty()) {
+        if (SrcTy == IRB.getFloatTy()) {
+            SrcTy = IRB.getDoubleTy();
+        } else if (SrcTy == IRB.getInt32Ty()) {
+            SrcTy = IRB.getInt64Ty();
+        }
+    }
+
+    auto *VecTy = VectorType::get(SrcTy, VF, /*Scalable*/ true);
     return IRB.CreateIntrinsic(IntrinsicID, {VecTy}, {predicatedVector, ptr, indices});
 }
 
 Value *IntrinsicCallGenerator::createLoadInstruction(IRBuilder<> &IRB,
                                                      Type *SrcTy, Value *ptr,
-                                                     Value *predicatedVector) {
+                                                     Value *predicatedVector, Type *IndexType) {
+
+    if (IndexType == IRB.getInt64Ty()) {
+        if (SrcTy == IRB.getFloatTy()) {
+            SrcTy = IRB.getDoubleTy();
+        } else if (SrcTy == IRB.getInt32Ty()) {
+            SrcTy = IRB.getInt64Ty();
+        }
+    }
     auto *VTy = VectorType::get(SrcTy, VF, /*Scalable*/ true);
     // TODO: Fix alignment
     auto AlignNumBytes = 4;
@@ -105,15 +125,26 @@ void IntrinsicCallGenerator::createScatterStoreInstruction(
         IRBuilder<> &IRB, Value *elementsVector, Value *ptr,
         Value *predicatedVector, Value *indices) {
     auto *SrcTy = static_cast<VectorType *>(elementsVector->getType())->getScalarType();
-    auto *VecTy = VectorType::get(SrcTy, VF, /*Scalable*/ true);
     auto *IndexType = static_cast<VectorType *>(indices->getType())->getScalarType();
     assert((IRB.getInt32Ty() == IndexType || IRB.getInt64Ty() == IndexType)
            && "Index type must be either i32 or i64");
 
     auto IntrinsicID = Intrinsic::aarch64_sve_st1_scatter_index;
 
-    if (IndexType == IRB.getInt32Ty())
+    if (IndexType == IRB.getInt32Ty()) {
         IntrinsicID = Intrinsic::aarch64_sve_st1_scatter_sxtw_index;
+    }
+
+    if (IndexType == IRB.getInt64Ty()) {
+        if (SrcTy == IRB.getFloatTy()) {
+            SrcTy = IRB.getDoubleTy();
+        } else if (SrcTy == IRB.getInt32Ty()) {
+            SrcTy = IRB.getInt64Ty();
+        }
+    }
+
+
+    auto *VecTy = VectorType::get(SrcTy, VF, /*Scalable*/ true);
     IRB.CreateIntrinsic(IntrinsicID, {VecTy}, {elementsVector, predicatedVector, ptr, indices});
 
 }
