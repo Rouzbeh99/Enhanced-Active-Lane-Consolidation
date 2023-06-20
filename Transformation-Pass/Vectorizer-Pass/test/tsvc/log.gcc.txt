@@ -1,0 +1,2035 @@
+tsvc.c:2540:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:2541:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:2562:5: missed: statement clobbers memory: gettimeofday (_2, 0B);
+tsvc.c:2572:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:2573:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:2594:5: missed: statement clobbers memory: gettimeofday (_2, 0B);
+tsvc.c:2321:25: missed: couldn't vectorize loop
+tsvc.c:2326:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, prod_26);
+tsvc.c:2323:27: missed: couldn't vectorize loop
+tsvc.c:2311:8: missed: not vectorized: relevant phi not supported: prod_24 = PHI <prod_19(8), 1.0e+0(5)>
+tsvc.c:2317:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:2318:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:2326:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, prod_26);
+tsvc.c:2329:5: missed: statement clobbers memory: gettimeofday (_3, 0B);
+tsvc.c:2344:25: missed: couldn't vectorize loop
+tsvc.c:2349:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, dot_35);
+tsvc.c:2346:27: optimized: loop vectorized using variable length vectors
+tsvc.c:2340:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:2341:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:2349:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, dot_35);
+tsvc.c:2352:5: missed: statement clobbers memory: gettimeofday (_5, 0B);
+tsvc.c:2368:25: missed: couldn't vectorize loop
+tsvc.c:2375:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, x_27);
+tsvc.c:2370:27: missed: couldn't vectorize loop
+tsvc.c:2358:8: missed: not vectorized: unsupported use in stmt.
+tsvc.c:2364:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:2365:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:2375:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, x_40);
+tsvc.c:2378:5: missed: statement clobbers memory: gettimeofday (_3, 0B);
+tsvc.c:2398:25: missed: couldn't vectorize loop
+tsvc.c:2408:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, chksum_33);
+tsvc.c:2401:27: missed: couldn't vectorize loop
+tsvc.c:2402:16: missed: not vectorized: unsupported use in stmt.
+tsvc.c:2393:23: optimized: loop vectorized using variable length vectors
+tsvc.c:2390:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:2391:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:2408:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, chksum_62);
+tsvc.c:2411:5: missed: statement clobbers memory: gettimeofday (_7, 0B);
+tsvc.c:2427:25: missed: couldn't vectorize loop
+tsvc.c:2434:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, x_27);
+tsvc.c:2429:27: missed: couldn't vectorize loop
+tsvc.c:2417:8: missed: not vectorized: unsupported use in stmt.
+tsvc.c:2423:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:2424:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:2434:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, x_40);
+tsvc.c:2437:5: missed: statement clobbers memory: gettimeofday (_3, 0B);
+tsvc.c:2454:25: missed: couldn't vectorize loop
+tsvc.c:2459:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, q_24);
+tsvc.c:2456:27: missed: couldn't vectorize loop
+tsvc.c:2442:8: missed: not vectorized: relevant phi not supported: q_23 = PHI <q_18(8), 1.0e+0(5)>
+tsvc.c:2450:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:2451:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:2459:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, q_24);
+tsvc.c:2462:5: missed: statement clobbers memory: gettimeofday (_2, 0B);
+tsvc.c:2482:25: missed: couldn't vectorize loop
+tsvc.c:2482:25: missed: not vectorized: loop nest containing two or more consecutive inner loops cannot be vectorized
+tsvc.c:2487:27: missed: couldn't vectorize loop
+tsvc.c:2469:8: missed: not vectorized: unsupported use in stmt.
+tsvc.c:2487:27: missed: couldn't vectorize loop
+tsvc.c:2469:8: missed: not vectorized: unsupported use in stmt.
+tsvc.c:2477:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:2478:5: missed: statement clobbers memory: gettimeofday (_2, 0B);
+tsvc.c:2497:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, chksum_33);
+tsvc.c:2500:5: missed: statement clobbers memory: gettimeofday (_8, 0B);
+tsvc.c:2516:25: missed: couldn't vectorize loop
+tsvc.c:2524:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, sum_55);
+tsvc.c:2518:27: missed: couldn't vectorize loop
+tsvc.c:2506:8: missed: not vectorized: relevant phi not supported: sum_33 = PHI <sum_27(8), 0.0(5)>
+tsvc.c:2512:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:2513:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:2524:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, sum_55);
+tsvc.c:2527:5: missed: statement clobbers memory: gettimeofday (_9, 0B);
+tsvc.c:2610:25: missed: couldn't vectorize loop
+tsvc.c:2617:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, sum_27);
+tsvc.c:2612:27: optimized: loop vectorized using variable length vectors
+tsvc.c:2606:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:2607:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:2617:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, sum_37);
+tsvc.c:2620:5: missed: statement clobbers memory: gettimeofday (_4, 0B);
+tsvc.c:2636:25: missed: couldn't vectorize loop
+tsvc.c:2642:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, sum_33);
+tsvc.c:2638:27: missed: couldn't vectorize loop
+tsvc.c:2639:17: missed: not vectorized: unsupported use in stmt.
+tsvc.c:2632:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:2633:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:2642:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, sum_33);
+tsvc.c:2645:5: missed: statement clobbers memory: gettimeofday (_3, 0B);
+tsvc.c:2661:25: missed: couldn't vectorize loop
+tsvc.c:2668:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, max_29);
+tsvc.c:2663:27: missed: couldn't vectorize loop
+tsvc.c:2651:8: missed: not vectorized: unsupported use in stmt.
+tsvc.c:2657:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:2658:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:2668:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, max_44);
+tsvc.c:2671:5: missed: statement clobbers memory: gettimeofday (_6, 0B);
+tsvc.c:2755:25: missed: couldn't vectorize loop
+tsvc.c:2763:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, chksum_20);
+tsvc.c:2757:27: optimized: loop vectorized using variable length vectors
+tsvc.c:2750:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:2751:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:2763:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, chksum_42);
+tsvc.c:2766:5: missed: statement clobbers memory: gettimeofday (_3, 0B);
+tsvc.c:2786:25: missed: couldn't vectorize loop
+tsvc.c:2786:25: missed: not vectorized: control flow in loop.
+tsvc.c:2790:18: missed: couldn't vectorize loop
+tsvc.c:2790:18: missed: not vectorized: control flow in loop.
+tsvc.c:2780:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:2781:5: missed: statement clobbers memory: gettimeofday (_2, 0B);
+tsvc.c:2798:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, prephitmp_34);
+tsvc.c:2801:5: missed: statement clobbers memory: gettimeofday (_6, 0B);
+tsvc.c:2955:25: missed: couldn't vectorize loop
+tsvc.c:2961:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, dot_143);
+tsvc.c:2957:27: optimized: loop vectorized using variable length vectors
+tsvc.c:2951:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:2952:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:2961:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, dot_143);
+tsvc.c:2964:5: missed: statement clobbers memory: gettimeofday (_27, 0B);
+tsvc.c:3533:25: missed: couldn't vectorize loop
+tsvc.c:3538:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3535:27: optimized: loop vectorized using variable length vectors
+tsvc.c:3529:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:3530:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:3520:8: missed: statement clobbers memory: vect_patt_45.546_10 = .MASK_GATHER_LOAD (_11, vect__6.545_12, 4, { 0.0, ... }, loop_mask_23);
+tsvc.c:3538:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3541:5: missed: statement clobbers memory: gettimeofday (_9, 0B);
+tsvc.c:3565:25: missed: couldn't vectorize loop
+tsvc.c:3571:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3567:27: optimized: loop vectorized using variable length vectors
+tsvc.c:3560:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:3561:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:3548:8: missed: statement clobbers memory: vect_patt_54.578_63 = .MASK_GATHER_LOAD (_62, vect__7.577_12, 4, { 0.0, ... }, loop_mask_24);
+tsvc.c:3571:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3574:5: missed: statement clobbers memory: gettimeofday (_10, 0B);
+tsvc.c:3871:25: missed: couldn't vectorize loop
+tsvc.c:3876:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, sum_26);
+tsvc.c:3873:27: optimized: loop vectorized using variable length vectors
+tsvc.c:3867:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:3868:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:3876:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, sum_26);
+tsvc.c:3879:5: missed: statement clobbers memory: gettimeofday (_3, 0B);
+tsvc.c:3895:25: missed: couldn't vectorize loop
+tsvc.c:3900:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, dot_35);
+tsvc.c:3897:27: optimized: loop vectorized using variable length vectors
+tsvc.c:3891:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:3892:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:3900:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, dot_35);
+tsvc.c:3903:5: missed: statement clobbers memory: gettimeofday (_5, 0B);
+tsvc.c:56:25: missed: couldn't vectorize loop
+tsvc.c:60:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:57:27: optimized: loop vectorized using variable length vectors
+tsvc.c:53:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:54:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:60:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:63:5: missed: statement clobbers memory: gettimeofday (_4, 0B);
+tsvc.c:64:12: missed: statement clobbers memory: _15 = calc_checksum (&__func__);
+tsvc.c:77:25: missed: couldn't vectorize loop
+tsvc.c:81:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:78:27: optimized: loop vectorized using variable length vectors
+tsvc.c:74:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:75:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:79:21: missed: statement clobbers memory: vect_array.693 = .MASK_LOAD_LANES (vectp_a.691_44, 32B, loop_mask_46);
+tsvc.c:79:32: missed: statement clobbers memory: vect_array.698 = .MASK_LOAD_LANES (vectp_b.696_50, 32B, loop_mask_46);
+tsvc.c:79:18: missed: statement clobbers memory: .MASK_SCATTER_STORE (vectp_a.702_56, { 0, 2, 4, ... }, 4, vect__5.701_54, loop_mask_46);
+tsvc.c:81:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:84:5: missed: statement clobbers memory: gettimeofday (_6, 0B);
+tsvc.c:85:12: missed: statement clobbers memory: _17 = calc_checksum (&__func__);
+tsvc.c:97:25: missed: couldn't vectorize loop
+tsvc.c:101:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:98:27: optimized: loop vectorized using variable length vectors
+tsvc.c:94:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:95:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:99:20: missed: statement clobbers memory: .MASK_SCATTER_STORE (vectp_a.749_56, { 0, 2, 4, ... }, 4, vect__13.748_57, loop_mask_72);
+tsvc.c:101:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:104:5: missed: statement clobbers memory: gettimeofday (_14, 0B);
+tsvc.c:105:12: missed: statement clobbers memory: _25 = calc_checksum (&__func__);
+tsvc.c:119:25: missed: couldn't vectorize loop
+tsvc.c:123:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:120:36: optimized: loop vectorized using variable length vectors
+tsvc.c:120:36: optimized: loop vectorized using 8 byte vectors
+tsvc.c:116:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:117:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:123:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:126:5: missed: statement clobbers memory: gettimeofday (_6, 0B);
+tsvc.c:127:12: missed: statement clobbers memory: _17 = calc_checksum (&__func__);
+tsvc.c:139:25: missed: couldn't vectorize loop
+tsvc.c:143:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:140:36: optimized: loop vectorized using variable length vectors
+tsvc.c:140:36: optimized: loop vectorized using 8 byte vectors
+tsvc.c:136:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:137:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:143:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:146:5: missed: statement clobbers memory: gettimeofday (_4, 0B);
+tsvc.c:147:12: missed: statement clobbers memory: _15 = calc_checksum (&__func__);
+tsvc.c:161:25: missed: couldn't vectorize loop
+tsvc.c:165:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:162:27: optimized: loop vectorized using variable length vectors
+tsvc.c:158:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:159:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:165:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:168:5: missed: statement clobbers memory: gettimeofday (_5, 0B);
+tsvc.c:169:12: missed: statement clobbers memory: _16 = calc_checksum (&__func__);
+tsvc.c:181:25: missed: couldn't vectorize loop
+tsvc.c:185:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:182:27: missed: couldn't vectorize loop
+tsvc.c:183:18: missed: not vectorized: compilation time alias: _2 = a[1000];
+a[i_26] = _4;
+tsvc.c:178:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:179:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:185:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:188:5: missed: statement clobbers memory: gettimeofday (_5, 0B);
+tsvc.c:189:12: missed: statement clobbers memory: _16 = calc_checksum (&__func__);
+tsvc.c:201:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:202:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:213:5: missed: statement clobbers memory: gettimeofday (_2, 0B);
+tsvc.c:214:12: missed: statement clobbers memory: _9 = calc_checksum (&__func__);
+tsvc.c:225:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:226:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:237:5: missed: statement clobbers memory: gettimeofday (_2, 0B);
+tsvc.c:238:12: missed: statement clobbers memory: _9 = calc_checksum (&__func__);
+tsvc.c:247:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:248:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:259:5: missed: statement clobbers memory: gettimeofday (_2, 0B);
+tsvc.c:260:12: missed: statement clobbers memory: _9 = calc_checksum (&__func__);
+tsvc.c:273:25: missed: couldn't vectorize loop
+tsvc.c:281:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:274:27: missed: couldn't vectorize loop
+tsvc.c:275:18: missed: not vectorized, possible dependence between data-refs a[i_46] and a[_18]
+tsvc.c:270:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:271:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:281:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:284:5: missed: statement clobbers memory: gettimeofday (_22, 0B);
+tsvc.c:285:12: missed: statement clobbers memory: _33 = calc_checksum (&__func__);
+tsvc.c:275:18: missed: not vectorized: vectorization is not profitable.
+tsvc.c:275:18: missed: not vectorized: vectorization is not profitable.
+tsvc.c:275:18: missed: not vectorized: vectorization is not profitable.
+tsvc.c:275:18: missed: not vectorized: vectorization is not profitable.
+tsvc.c:296:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:297:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:308:5: missed: statement clobbers memory: gettimeofday (_2, 0B);
+tsvc.c:309:12: missed: statement clobbers memory: _9 = calc_checksum (&__func__);
+tsvc.c:320:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:321:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:332:5: missed: statement clobbers memory: gettimeofday (_2, 0B);
+tsvc.c:333:12: missed: statement clobbers memory: _9 = calc_checksum (&__func__);
+tsvc.c:342:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:343:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:354:5: missed: statement clobbers memory: gettimeofday (_2, 0B);
+tsvc.c:355:12: missed: statement clobbers memory: _9 = calc_checksum (&__func__);
+tsvc.c:370:25: missed: couldn't vectorize loop
+tsvc.c:375:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:371:27: optimized: loop vectorized using variable length vectors
+tsvc.c:366:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:367:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:375:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:378:5: missed: statement clobbers memory: gettimeofday (_5, 0B);
+tsvc.c:379:12: missed: statement clobbers memory: _16 = calc_checksum (&__func__);
+tsvc.c:399:25: missed: couldn't vectorize loop
+tsvc.c:399:25: missed: not vectorized: loop nest containing two or more consecutive inner loops cannot be vectorized
+tsvc.c:402:30: optimized: loop vectorized using variable length vectors
+tsvc.c:402:30: optimized: loop vectorized using 8 byte vectors
+tsvc.c:402:30: missed: couldn't vectorize loop
+tsvc.c:402:30: missed: not vectorized: number of iterations cannot be computed.
+tsvc.c:395:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:396:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:406:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:409:5: missed: statement clobbers memory: gettimeofday (_6, 0B);
+tsvc.c:410:12: missed: statement clobbers memory: _21 = calc_checksum (&__func__);
+tsvc.c:426:25: missed: couldn't vectorize loop
+tsvc.c:436:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:428:27: missed: couldn't vectorize loop
+tsvc.c:415:8: missed: not vectorized: unsupported use in stmt.
+tsvc.c:422:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:423:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:436:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:439:5: missed: statement clobbers memory: gettimeofday (_9, 0B);
+tsvc.c:440:12: missed: statement clobbers memory: _23 = calc_checksum (&__func__);
+tsvc.c:455:25: missed: couldn't vectorize loop
+tsvc.c:466:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:457:27: optimized: loop vectorized using variable length vectors
+tsvc.c:451:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:452:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:466:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:469:5: missed: statement clobbers memory: gettimeofday (_12, 0B);
+tsvc.c:470:12: missed: statement clobbers memory: _26 = calc_checksum (&__func__);
+tsvc.c:480:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:481:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:495:5: missed: statement clobbers memory: gettimeofday (_2, 0B);
+tsvc.c:496:12: missed: statement clobbers memory: _9 = calc_checksum (&__func__);
+tsvc.c:506:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:507:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:522:5: missed: statement clobbers memory: gettimeofday (_2, 0B);
+tsvc.c:523:12: missed: statement clobbers memory: _9 = calc_checksum (&__func__);
+tsvc.c:538:25: missed: couldn't vectorize loop
+tsvc.c:546:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:540:27: optimized: loop vectorized using variable length vectors
+tsvc.c:534:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:535:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:544:18: missed: statement clobbers memory: .MASK_STORE_LANES (vectp_a.1204_33, 32B, loop_mask_53, vect_array.1206);
+tsvc.c:546:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:549:5: missed: statement clobbers memory: gettimeofday (_10, 0B);
+tsvc.c:550:12: missed: statement clobbers memory: _22 = calc_checksum (&__func__);
+tsvc.c:566:25: missed: couldn't vectorize loop
+tsvc.c:574:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 1.0e+0);
+tsvc.c:568:27: optimized: loop vectorized using variable length vectors
+tsvc.c:562:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:563:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:570:21: missed: statement clobbers memory: vect_array.1243 = .MASK_LOAD_LANES (vectp_b.1241_55, 32B, loop_mask_57);
+tsvc.c:572:28: missed: statement clobbers memory: vect_array.1254 = .MASK_LOAD_LANES (vectp_c.1252_67, 32B, loop_mask_57);
+tsvc.c:572:18: missed: statement clobbers memory: .MASK_SCATTER_STORE (vectp_b.1258_72, { 0, 2, 4, ... }, 4, vect__6.1257_71, loop_mask_57);
+tsvc.c:574:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 1.0e+0);
+tsvc.c:577:5: missed: statement clobbers memory: gettimeofday (_7, 0B);
+tsvc.c:578:12: missed: statement clobbers memory: _19 = calc_checksum (&__func__);
+tsvc.c:592:25: missed: couldn't vectorize loop
+tsvc.c:596:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:593:27: optimized: loop vectorized using variable length vectors
+tsvc.c:588:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:589:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:596:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:599:5: missed: statement clobbers memory: gettimeofday (_6, 0B);
+tsvc.c:600:12: missed: statement clobbers memory: _17 = calc_checksum (&__func__);
+tsvc.c:616:25: missed: couldn't vectorize loop
+tsvc.c:620:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:617:26: optimized: loop vectorized using variable length vectors
+tsvc.c:610:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:611:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:620:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:623:5: missed: statement clobbers memory: gettimeofday (_8, 0B);
+tsvc.c:624:12: missed: statement clobbers memory: _19 = calc_checksum (&__func__);
+tsvc.c:636:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:637:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:651:5: missed: statement clobbers memory: gettimeofday (_2, 0B);
+tsvc.c:652:12: missed: statement clobbers memory: _9 = calc_checksum (&__func__);
+tsvc.c:722:25: missed: couldn't vectorize loop
+tsvc.c:734:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:723:27: optimized: loop vectorized using variable length vectors
+tsvc.c:719:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:720:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:734:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:737:5: missed: statement clobbers memory: gettimeofday (_13, 0B);
+tsvc.c:738:12: missed: statement clobbers memory: _25 = calc_checksum (&__func__);
+tsvc.c:751:25: missed: couldn't vectorize loop
+tsvc.c:763:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:752:27: optimized: loop vectorized using variable length vectors
+tsvc.c:748:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:749:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:763:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:766:5: missed: statement clobbers memory: gettimeofday (_11, 0B);
+tsvc.c:767:12: missed: statement clobbers memory: _23 = calc_checksum (&__func__);
+tsvc.c:783:25: missed: couldn't vectorize loop
+tsvc.c:783:25: missed: not vectorized: control flow in loop.
+tsvc.c:785:31: optimized: loop vectorized using variable length vectors
+tsvc.c:785:31: optimized:  loop versioned for vectorization because of possible aliasing
+tsvc.c:780:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:781:5: missed: statement clobbers memory: gettimeofday (_2, 0B);
+tsvc.c:789:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:789:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:792:5: missed: statement clobbers memory: gettimeofday (_9, 0B);
+tsvc.c:793:12: missed: statement clobbers memory: _22 = calc_checksum (&__func__);
+tsvc.c:810:25: missed: couldn't vectorize loop
+tsvc.c:810:25: missed: not vectorized: loop nest containing two or more consecutive inner loops cannot be vectorized
+tsvc.c:811:27: optimized: loop vectorized using variable length vectors
+tsvc.c:811:27: optimized: loop vectorized using variable length vectors
+tsvc.c:811:27: optimized:  loop versioned for vectorization because of possible aliasing
+tsvc.c:807:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:808:5: missed: statement clobbers memory: gettimeofday (_2, 0B);
+tsvc.c:812:14: missed: statement clobbers memory: vect__4.1543_79 = .MASK_GATHER_LOAD (vectp_a.1541_76, _75, 4, { 0.0, ... }, loop_mask_78);
+tsvc.c:812:24: missed: statement clobbers memory: .MASK_SCATTER_STORE (vectp_a.1548_84, _75, 4, vect__6.1547_83, loop_mask_78);
+tsvc.c:814:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:817:5: missed: statement clobbers memory: gettimeofday (_7, 0B);
+tsvc.c:818:12: missed: statement clobbers memory: _19 = calc_checksum (&__func__);
+tsvc.c:836:25: missed: couldn't vectorize loop
+tsvc.c:836:25: missed: not vectorized: loop nest containing two or more consecutive inner loops cannot be vectorized
+tsvc.c:837:30: optimized: loop vectorized using variable length vectors
+tsvc.c:837:30: missed: couldn't vectorize loop
+tsvc.c:837:30: missed: not vectorized: number of iterations cannot be computed.
+tsvc.c:833:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:834:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:840:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:843:5: missed: statement clobbers memory: gettimeofday (_5, 0B);
+tsvc.c:844:12: missed: statement clobbers memory: _19 = calc_checksum (&__func__);
+tsvc.c:858:25: missed: couldn't vectorize loop
+tsvc.c:862:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:859:27: optimized: loop vectorized using variable length vectors
+tsvc.c:854:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:855:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:862:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:865:5: missed: statement clobbers memory: gettimeofday (_6, 0B);
+tsvc.c:866:12: missed: statement clobbers memory: _17 = calc_checksum (&__func__);
+tsvc.c:883:25: missed: couldn't vectorize loop
+tsvc.c:883:25: missed: not vectorized: control flow in loop.
+tsvc.c:884:27: optimized: loop vectorized using variable length vectors
+tsvc.c:884:27: optimized:  loop versioned for vectorization because of possible aliasing
+tsvc.c:880:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:881:5: missed: statement clobbers memory: gettimeofday (_2, 0B);
+tsvc.c:887:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:887:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:890:5: missed: statement clobbers memory: gettimeofday (_7, 0B);
+tsvc.c:891:12: missed: statement clobbers memory: _19 = calc_checksum (&__func__);
+tsvc.c:908:25: missed: couldn't vectorize loop
+tsvc.c:908:25: missed: not vectorized: loop nest containing two or more consecutive inner loops cannot be vectorized
+tsvc.c:909:27: optimized: loop vectorized using variable length vectors
+tsvc.c:909:27: missed: couldn't vectorize loop
+tsvc.c:909:27: missed: not vectorized: number of iterations cannot be computed.
+tsvc.c:905:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:906:5: missed: statement clobbers memory: gettimeofday (_2, 0B);
+tsvc.c:912:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:915:5: missed: statement clobbers memory: gettimeofday (_7, 0B);
+tsvc.c:916:12: missed: statement clobbers memory: _19 = calc_checksum (&__func__);
+tsvc.c:927:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:928:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:940:5: missed: statement clobbers memory: gettimeofday (_2, 0B);
+tsvc.c:941:12: missed: statement clobbers memory: _9 = calc_checksum (&__func__);
+tsvc.c:961:25: missed: couldn't vectorize loop
+tsvc.c:966:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:962:27: missed: couldn't vectorize loop
+tsvc.c:963:21: missed: not vectorized, possible dependence between data-refs b[_2] and b[i_34]
+tsvc.c:958:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:959:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:966:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:969:5: missed: statement clobbers memory: gettimeofday (_13, 0B);
+tsvc.c:970:12: missed: statement clobbers memory: _24 = calc_checksum (&__func__);
+tsvc.c:984:25: missed: couldn't vectorize loop
+tsvc.c:989:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:985:27: missed: couldn't vectorize loop
+tsvc.c:986:18: missed: not vectorized, possible dependence between data-refs a[i_32] and a[_6]
+tsvc.c:981:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:982:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:989:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:992:5: missed: statement clobbers memory: gettimeofday (_11, 0B);
+tsvc.c:993:12: missed: statement clobbers memory: _22 = calc_checksum (&__func__);
+tsvc.c:1005:25: missed: couldn't vectorize loop
+tsvc.c:1010:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1006:27: missed: couldn't vectorize loop
+tsvc.c:1007:21: missed: not vectorized, possible dependence between data-refs b[_2] and b[i_31]
+tsvc.c:1002:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1003:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:1010:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1013:5: missed: statement clobbers memory: gettimeofday (_10, 0B);
+tsvc.c:1014:12: missed: statement clobbers memory: _21 = calc_checksum (&__func__);
+tsvc.c:1028:25: missed: couldn't vectorize loop
+tsvc.c:1033:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1029:27: missed: couldn't vectorize loop
+tsvc.c:1031:21: missed: not vectorized, possible dependence between data-refs b[_7] and b[i_33]
+tsvc.c:1025:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1026:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:1033:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1036:5: missed: statement clobbers memory: gettimeofday (_11, 0B);
+tsvc.c:1037:12: missed: statement clobbers memory: _22 = calc_checksum (&__func__);
+tsvc.c:1048:25: missed: couldn't vectorize loop
+tsvc.c:1052:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1049:27: optimized: loop vectorized using 16 byte vectors
+tsvc.c:1045:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1046:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:1052:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1055:5: missed: statement clobbers memory: gettimeofday (_6, 0B);
+tsvc.c:1056:12: missed: statement clobbers memory: _17 = calc_checksum (&__func__);
+tsvc.c:1070:25: missed: couldn't vectorize loop
+tsvc.c:1070:25: missed: not vectorized: loop nest containing two or more consecutive inner loops cannot be vectorized
+tsvc.c:1071:27: optimized: loop vectorized using variable length vectors
+tsvc.c:1071:27: missed: couldn't vectorize loop
+tsvc.c:1073:21: missed: not vectorized, possible dependence between data-refs e[_41] and e[i_49]
+tsvc.c:1067:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1068:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:1076:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1079:5: missed: statement clobbers memory: gettimeofday (_11, 0B);
+tsvc.c:1080:12: missed: statement clobbers memory: _22 = calc_checksum (&__func__);
+tsvc.c:1090:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1091:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:1102:5: missed: statement clobbers memory: gettimeofday (_2, 0B);
+tsvc.c:1103:12: missed: statement clobbers memory: _9 = calc_checksum (&__func__);
+tsvc.c:1114:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1115:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:1126:5: missed: statement clobbers memory: gettimeofday (_2, 0B);
+tsvc.c:1127:12: missed: statement clobbers memory: _9 = calc_checksum (&__func__);
+tsvc.c:1136:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1137:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:1148:5: missed: statement clobbers memory: gettimeofday (_2, 0B);
+tsvc.c:1149:12: missed: statement clobbers memory: _9 = calc_checksum (&__func__);
+tsvc.c:1160:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1161:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:1175:5: missed: statement clobbers memory: gettimeofday (_2, 0B);
+tsvc.c:1176:12: missed: statement clobbers memory: _9 = calc_checksum (&__func__);
+tsvc.c:1185:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1186:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:1200:5: missed: statement clobbers memory: gettimeofday (_2, 0B);
+tsvc.c:1201:12: missed: statement clobbers memory: _9 = calc_checksum (&__func__);
+tsvc.c:1211:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1212:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:1224:5: missed: statement clobbers memory: gettimeofday (_2, 0B);
+tsvc.c:1225:12: missed: statement clobbers memory: _9 = calc_checksum (&__func__);
+tsvc.c:1239:25: missed: couldn't vectorize loop
+tsvc.c:1244:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1240:27: missed: couldn't vectorize loop
+tsvc.c:1241:18: missed: not vectorized, possible dependence between data-refs a[i_32] and a[_7]
+tsvc.c:1236:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1237:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:1244:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1247:5: missed: statement clobbers memory: gettimeofday (_11, 0B);
+tsvc.c:1248:12: missed: statement clobbers memory: _22 = calc_checksum (&__func__);
+tsvc.c:1266:25: missed: couldn't vectorize loop
+tsvc.c:1270:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1267:27: missed: couldn't vectorize loop
+tsvc.c:1268:21: missed: not vectorized, possible dependence between data-refs a[_2] and a[i_36]
+tsvc.c:1263:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1264:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:1270:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1273:5: missed: statement clobbers memory: gettimeofday (_12, 0B);
+tsvc.c:1274:12: missed: statement clobbers memory: _26 = calc_checksum (&__func__);
+tsvc.c:1288:25: missed: couldn't vectorize loop
+tsvc.c:1294:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1289:27: optimized: loop vectorized using variable length vectors
+tsvc.c:1285:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1286:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:1294:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1297:5: missed: statement clobbers memory: gettimeofday (_14, 0B);
+tsvc.c:1298:12: missed: statement clobbers memory: _25 = calc_checksum (&__func__);
+tsvc.c:1312:25: missed: couldn't vectorize loop
+tsvc.c:1318:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1313:27: missed: couldn't vectorize loop
+tsvc.c:1314:18: missed: not vectorized, possible dependence between data-refs a[i_34] and a[_8]
+tsvc.c:1309:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1310:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:1318:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1321:5: missed: statement clobbers memory: gettimeofday (_12, 0B);
+tsvc.c:1322:12: missed: statement clobbers memory: _23 = calc_checksum (&__func__);
+tsvc.c:1314:18: missed: not vectorized: vectorization is not profitable.
+tsvc.c:1314:18: missed: not vectorized: vectorization is not profitable.
+tsvc.c:1314:18: missed: not vectorized: vectorization is not profitable.
+tsvc.c:1314:18: missed: not vectorized: vectorization is not profitable.
+tsvc.c:1334:25: missed: couldn't vectorize loop
+tsvc.c:1339:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1335:27: missed: couldn't vectorize loop
+tsvc.c:1336:18: missed: not vectorized, possible dependence between data-refs a[i_33] and a[_9]
+tsvc.c:1331:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1332:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:1339:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1342:5: missed: statement clobbers memory: gettimeofday (_12, 0B);
+tsvc.c:1343:12: missed: statement clobbers memory: _23 = calc_checksum (&__func__);
+tsvc.c:1355:25: missed: couldn't vectorize loop
+tsvc.c:1360:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1356:27: optimized: loop vectorized using variable length vectors
+tsvc.c:1352:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1353:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:1360:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1363:5: missed: statement clobbers memory: gettimeofday (_8, 0B);
+tsvc.c:1364:12: missed: statement clobbers memory: _19 = calc_checksum (&__func__);
+tsvc.c:1379:25: missed: couldn't vectorize loop
+tsvc.c:1384:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1380:27: optimized: loop vectorized using variable length vectors
+tsvc.c:1375:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1376:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:1384:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1387:5: missed: statement clobbers memory: gettimeofday (_7, 0B);
+tsvc.c:1388:12: missed: statement clobbers memory: _18 = calc_checksum (&__func__);
+tsvc.c:1401:25: missed: couldn't vectorize loop
+tsvc.c:1407:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1402:27: optimized: loop vectorized using variable length vectors
+tsvc.c:1397:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1398:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:1407:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1410:5: missed: statement clobbers memory: gettimeofday (_9, 0B);
+tsvc.c:1411:12: missed: statement clobbers memory: _20 = calc_checksum (&__func__);
+tsvc.c:1423:25: missed: couldn't vectorize loop
+tsvc.c:1430:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1425:27: missed: couldn't vectorize loop
+tsvc.c:1426:21: missed: not vectorized: unsupported use in stmt.
+tsvc.c:1420:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1421:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:1430:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1433:5: missed: statement clobbers memory: gettimeofday (_8, 0B);
+tsvc.c:1434:12: missed: statement clobbers memory: _20 = calc_checksum (&__func__);
+tsvc.c:1446:25: missed: couldn't vectorize loop
+tsvc.c:1452:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1447:27: optimized: loop vectorized using variable length vectors
+tsvc.c:1443:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1444:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:1452:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1455:5: missed: statement clobbers memory: gettimeofday (_10, 0B);
+tsvc.c:1456:12: missed: statement clobbers memory: _21 = calc_checksum (&__func__);
+tsvc.c:1471:25: missed: couldn't vectorize loop
+tsvc.c:1478:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1473:27: optimized: loop vectorized using 16 byte vectors
+tsvc.c:1467:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1468:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:1478:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1481:5: missed: statement clobbers memory: gettimeofday (_5, 0B);
+tsvc.c:1482:12: missed: statement clobbers memory: _17 = calc_checksum (&__func__);
+tsvc.c:1497:25: missed: couldn't vectorize loop
+tsvc.c:1505:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1498:27: optimized: loop vectorized using variable length vectors
+tsvc.c:1493:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1494:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:1505:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1508:5: missed: statement clobbers memory: gettimeofday (_8, 0B);
+tsvc.c:1509:12: missed: statement clobbers memory: _20 = calc_checksum (&__func__);
+tsvc.c:1524:25: missed: couldn't vectorize loop
+tsvc.c:1530:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1526:27: optimized: loop vectorized using 16 byte vectors
+tsvc.c:1520:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1521:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:1530:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1533:5: missed: statement clobbers memory: gettimeofday (_5, 0B);
+tsvc.c:1534:12: missed: statement clobbers memory: _17 = calc_checksum (&__func__);
+tsvc.c:1549:25: missed: couldn't vectorize loop
+tsvc.c:1557:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1552:27: missed: couldn't vectorize loop
+tsvc.c:1553:30: missed: not vectorized: unsupported use in stmt.
+tsvc.c:1545:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1546:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:1557:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1560:5: missed: statement clobbers memory: gettimeofday (_6, 0B);
+tsvc.c:1561:12: missed: statement clobbers memory: _19 = calc_checksum (&__func__);
+tsvc.c:1572:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1573:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:1585:5: missed: statement clobbers memory: gettimeofday (_2, 0B);
+tsvc.c:1586:12: missed: statement clobbers memory: _9 = calc_checksum (&__func__);
+tsvc.c:1597:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1598:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:1610:5: missed: statement clobbers memory: gettimeofday (_2, 0B);
+tsvc.c:1611:12: missed: statement clobbers memory: _9 = calc_checksum (&__func__);
+tsvc.c:1624:25: missed: couldn't vectorize loop
+tsvc.c:1633:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1626:27: missed: couldn't vectorize loop
+tsvc.c:1628:19: missed: not vectorized: unsupported use in stmt.
+tsvc.c:1620:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1621:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:1633:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1636:5: missed: statement clobbers memory: gettimeofday (_11, 0B);
+tsvc.c:1637:12: missed: statement clobbers memory: _24 = calc_checksum (&__func__);
+tsvc.c:1652:25: missed: couldn't vectorize loop
+tsvc.c:1659:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1653:27: missed: couldn't vectorize loop
+tsvc.c:1655:25: missed: not vectorized, possible dependence between data-refs c[_4] and c[i_33]
+tsvc.c:1648:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1649:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:1659:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1662:5: missed: statement clobbers memory: gettimeofday (_9, 0B);
+tsvc.c:1663:12: missed: statement clobbers memory: _20 = calc_checksum (&__func__);
+tsvc.c:1675:25: missed: couldn't vectorize loop
+tsvc.c:1681:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1676:27: optimized: loop vectorized using variable length vectors
+tsvc.c:1672:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1673:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:1681:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1684:5: missed: statement clobbers memory: gettimeofday (_7, 0B);
+tsvc.c:1685:12: missed: statement clobbers memory: _19 = calc_checksum (&__func__);
+tsvc.c:1702:25: missed: couldn't vectorize loop
+tsvc.c:1709:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1703:27: optimized: loop vectorized using variable length vectors
+tsvc.c:1699:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1700:5: missed: statement clobbers memory: gettimeofday (_2, 0B);
+tsvc.c:1709:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1712:5: missed: statement clobbers memory: gettimeofday (_13, 0B);
+tsvc.c:1713:12: missed: statement clobbers memory: _26 = calc_checksum (&__func__);
+tsvc.c:1727:25: missed: couldn't vectorize loop
+tsvc.c:1734:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1728:27: optimized: loop vectorized using variable length vectors
+tsvc.c:1724:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1725:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:1734:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1737:5: missed: statement clobbers memory: gettimeofday (_12, 0B);
+tsvc.c:1738:12: missed: statement clobbers memory: _24 = calc_checksum (&__func__);
+tsvc.c:1752:25: missed: couldn't vectorize loop
+tsvc.c:1761:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1753:27: optimized: loop vectorized using variable length vectors
+tsvc.c:1749:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1750:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:1761:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1764:5: missed: statement clobbers memory: gettimeofday (_9, 0B);
+tsvc.c:1765:12: missed: statement clobbers memory: _21 = calc_checksum (&__func__);
+tsvc.c:1776:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1777:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:1790:5: missed: statement clobbers memory: gettimeofday (_2, 0B);
+tsvc.c:1791:12: missed: statement clobbers memory: _9 = calc_checksum (&__func__);
+tsvc.c:1799:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1800:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:1812:5: missed: statement clobbers memory: gettimeofday (_2, 0B);
+tsvc.c:1813:12: missed: statement clobbers memory: _9 = calc_checksum (&__func__);
+tsvc.c:1828:25: missed: couldn't vectorize loop
+tsvc.c:1836:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1829:27: optimized: loop vectorized using variable length vectors
+tsvc.c:1824:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1825:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:1836:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1839:5: missed: statement clobbers memory: gettimeofday (_12, 0B);
+tsvc.c:1840:12: missed: statement clobbers memory: _24 = calc_checksum (&__func__);
+tsvc.c:1853:25: missed: couldn't vectorize loop
+tsvc.c:1867:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1854:27: missed: couldn't vectorize loop
+tsvc.c:1858:22: missed: not vectorized, possible dependence between data-refs b[i_32] and MEM[(float *)_105]
+tsvc.c:1850:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1851:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:1867:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1870:5: missed: statement clobbers memory: gettimeofday (_14, 0B);
+tsvc.c:1871:12: missed: statement clobbers memory: _27 = calc_checksum (&__func__);
+tsvc.c:1885:25: missed: couldn't vectorize loop
+tsvc.c:1897:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1886:27: optimized: loop vectorized using variable length vectors
+tsvc.c:1882:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1883:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:1897:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1900:5: missed: statement clobbers memory: gettimeofday (_18, 0B);
+tsvc.c:1901:12: missed: statement clobbers memory: _30 = calc_checksum (&__func__);
+tsvc.c:1915:25: missed: couldn't vectorize loop
+tsvc.c:1931:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1916:27: optimized: loop vectorized using variable length vectors
+tsvc.c:1912:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1913:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:1931:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1934:5: missed: statement clobbers memory: gettimeofday (_20, 0B);
+tsvc.c:1935:12: missed: statement clobbers memory: _32 = calc_checksum (&__func__);
+tsvc.c:1947:25: missed: couldn't vectorize loop
+tsvc.c:1955:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1948:27: optimized: loop vectorized using variable length vectors
+tsvc.c:1944:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1945:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:1955:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1958:5: missed: statement clobbers memory: gettimeofday (_9, 0B);
+tsvc.c:1959:12: missed: statement clobbers memory: _21 = calc_checksum (&__func__);
+tsvc.c:1976:25: missed: couldn't vectorize loop
+tsvc.c:1976:25: missed: not vectorized: control flow in loop.
+tsvc.c:1977:27: missed: couldn't vectorize loop
+tsvc.c:1977:27: missed: not vectorized: control flow in loop.
+tsvc.c:1973:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:1974:5: missed: statement clobbers memory: gettimeofday (_2, 0B);
+tsvc.c:1994:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:1997:5: missed: statement clobbers memory: gettimeofday (_24, 0B);
+tsvc.c:1998:12: missed: statement clobbers memory: _33 = calc_checksum (&__func__);
+tsvc.c:2012:25: missed: couldn't vectorize loop
+tsvc.c:2018:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:2013:27: optimized: loop vectorized using variable length vectors
+tsvc.c:2009:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:2010:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:2018:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:2021:5: missed: statement clobbers memory: gettimeofday (_7, 0B);
+tsvc.c:2022:12: missed: statement clobbers memory: _19 = calc_checksum (&__func__);
+tsvc.c:2036:25: missed: couldn't vectorize loop
+tsvc.c:2042:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:2037:27: optimized: loop vectorized using variable length vectors
+tsvc.c:2033:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:2034:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:2042:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:2045:5: missed: statement clobbers memory: gettimeofday (_7, 0B);
+tsvc.c:2046:12: missed: statement clobbers memory: _19 = calc_checksum (&__func__);
+tsvc.c:2062:25: missed: couldn't vectorize loop
+tsvc.c:2068:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:2063:27: missed: couldn't vectorize loop
+tsvc.c:2065:18: missed: not vectorized: compilation time alias: _3 = a[_2];
+a[i_31] = _7;
+tsvc.c:2058:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:2059:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:2068:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:2071:5: missed: statement clobbers memory: gettimeofday (_8, 0B);
+tsvc.c:2072:12: missed: statement clobbers memory: _19 = calc_checksum (&__func__);
+tsvc.c:2086:25: missed: couldn't vectorize loop
+tsvc.c:2092:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:2087:27: optimized: loop vectorized using variable length vectors
+tsvc.c:2082:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:2083:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:2092:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:2095:5: missed: statement clobbers memory: gettimeofday (_11, 0B);
+tsvc.c:2096:12: missed: statement clobbers memory: _22 = calc_checksum (&__func__);
+tsvc.c:2111:25: missed: couldn't vectorize loop
+tsvc.c:2117:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:2113:27: optimized: loop vectorized using 16 byte vectors
+tsvc.c:2107:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:2108:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:2117:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:2120:5: missed: statement clobbers memory: gettimeofday (_6, 0B);
+tsvc.c:2121:12: missed: statement clobbers memory: _18 = calc_checksum (&__func__);
+tsvc.c:2137:25: missed: couldn't vectorize loop
+tsvc.c:2145:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:2140:27: missed: couldn't vectorize loop
+tsvc.c:2141:35: missed: not vectorized: unsupported use in stmt.
+tsvc.c:2133:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:2134:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:2145:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:2148:5: missed: statement clobbers memory: gettimeofday (_8, 0B);
+tsvc.c:2149:12: missed: statement clobbers memory: _21 = calc_checksum (&__func__);
+tsvc.c:2163:25: missed: couldn't vectorize loop
+tsvc.c:2167:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:2164:27: missed: couldn't vectorize loop
+tsvc.c:2165:18: missed: not vectorized: compilation time alias: _2 = a[0];
+a[i_24] = _2;
+tsvc.c:2160:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:2161:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:2167:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:2170:5: missed: statement clobbers memory: gettimeofday (_3, 0B);
+tsvc.c:2171:12: missed: statement clobbers memory: _14 = calc_checksum (&__func__);
+tsvc.c:2186:25: missed: couldn't vectorize loop
+tsvc.c:2190:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:2187:27: optimized: loop vectorized using variable length vectors
+tsvc.c:2183:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:2184:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:2188:18: missed: statement clobbers memory: vect__2.3251_31 = .MASK_GATHER_LOAD (vectp_aa.3249_35, { 0, 1028, 2056, ... }, 1, { 0.0, ... }, loop_mask_33);
+tsvc.c:2188:30: missed: statement clobbers memory: vect__3.3254_25 = .MASK_GATHER_LOAD (vectp_bb.3252_30, { 0, 1028, 2056, ... }, 1, { 0.0, ... }, loop_mask_33);
+tsvc.c:2188:41: missed: statement clobbers memory: vect__4.3257_11 = .MASK_GATHER_LOAD (vectp_cc.3255_24, { 0, 1028, 2056, ... }, 1, { 0.0, ... }, loop_mask_33);
+tsvc.c:2188:22: missed: statement clobbers memory: .MASK_SCATTER_STORE (vectp_aa.3260_8, { 0, 1028, 2056, ... }, 1, vect__6.3259_9, loop_mask_33);
+tsvc.c:2190:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:2193:5: missed: statement clobbers memory: gettimeofday (_7, 0B);
+tsvc.c:2194:12: missed: statement clobbers memory: _18 = calc_checksum (&__func__);
+tsvc.c:2205:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:2206:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:2218:5: missed: statement clobbers memory: gettimeofday (_2, 0B);
+tsvc.c:2219:12: missed: statement clobbers memory: _9 = calc_checksum (&__func__);
+tsvc.c:2229:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:2230:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:2241:5: missed: statement clobbers memory: gettimeofday (_2, 0B);
+tsvc.c:2242:12: missed: statement clobbers memory: _9 = calc_checksum (&__func__);
+tsvc.c:2263:25: missed: couldn't vectorize loop
+tsvc.c:2268:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, sum_24);
+tsvc.c:2265:27: optimized: loop vectorized using variable length vectors
+tsvc.c:2259:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:2260:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:2268:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, sum_24);
+tsvc.c:2271:5: missed: statement clobbers memory: gettimeofday (_3, 0B);
+tsvc.c:2272:12: missed: statement clobbers memory: _14 = calc_checksum (&__func__);
+tsvc.c:2686:25: missed: couldn't vectorize loop
+tsvc.c:2690:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:2687:27: missed: couldn't vectorize loop
+tsvc.c:2688:22: missed: not vectorized, possible dependence between data-refs a[_3] and a[i_29]
+tsvc.c:2683:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:2684:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:2690:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:2693:5: missed: statement clobbers memory: gettimeofday (_8, 0B);
+tsvc.c:2694:12: missed: statement clobbers memory: _19 = calc_checksum (&__func__);
+tsvc.c:2708:25: missed: couldn't vectorize loop
+tsvc.c:2712:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:2709:27: missed: couldn't vectorize loop
+tsvc.c:2710:28: missed: not vectorized, possible dependence between data-refs a[_3] and a[i_34]
+tsvc.c:2705:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:2706:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:2712:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:2715:5: missed: statement clobbers memory: gettimeofday (_13, 0B);
+tsvc.c:2716:12: missed: statement clobbers memory: _24 = calc_checksum (&__func__);
+tsvc.c:2710:18: missed: not vectorized: vectorization is not profitable.
+tsvc.c:2710:18: missed: not vectorized: vectorization is not profitable.
+tsvc.c:2710:18: missed: not vectorized: vectorization is not profitable.
+tsvc.c:2710:18: missed: not vectorized: vectorization is not profitable.
+tsvc.c:2730:25: missed: couldn't vectorize loop
+tsvc.c:2735:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:2731:27: missed: couldn't vectorize loop
+tsvc.c:2732:21: missed: not vectorized, possible dependence between data-refs b[_2] and b[i_33]
+tsvc.c:2727:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:2728:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:2735:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:2738:5: missed: statement clobbers memory: gettimeofday (_11, 0B);
+tsvc.c:2739:12: missed: statement clobbers memory: _22 = calc_checksum (&__func__);
+tsvc.c:2818:25: missed: couldn't vectorize loop
+tsvc.c:2826:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:2820:27: missed: couldn't vectorize loop
+tsvc.c:2807:8: missed: not vectorized: unsupported use in stmt.
+tsvc.c:2814:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:2815:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:2826:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:2829:5: missed: statement clobbers memory: gettimeofday (_3, 0B);
+tsvc.c:2830:12: missed: statement clobbers memory: _17 = calc_checksum (&__func__);
+tsvc.c:2846:25: missed: couldn't vectorize loop
+tsvc.c:2854:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:2848:27: missed: couldn't vectorize loop
+tsvc.c:2835:8: missed: not vectorized: unsupported use in stmt.
+tsvc.c:2842:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:2843:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:2854:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:2857:5: missed: statement clobbers memory: gettimeofday (_4, 0B);
+tsvc.c:2858:12: missed: statement clobbers memory: _18 = calc_checksum (&__func__);
+tsvc.c:2870:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:2871:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:2887:5: missed: statement clobbers memory: gettimeofday (_2, 0B);
+tsvc.c:2888:12: missed: statement clobbers memory: _9 = calc_checksum (&__func__);
+tsvc.c:2903:25: missed: couldn't vectorize loop
+tsvc.c:2911:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:2904:27: optimized: loop vectorized using 16 byte vectors
+tsvc.c:2899:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:2900:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:2911:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:2914:5: missed: statement clobbers memory: gettimeofday (_26, 0B);
+tsvc.c:2915:12: missed: statement clobbers memory: _38 = calc_checksum (&__func__);
+tsvc.c:2926:25: missed: couldn't vectorize loop
+tsvc.c:2936:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:2930:27: optimized: loop vectorized using variable length vectors
+tsvc.c:2923:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:2924:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:2936:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:2939:5: missed: statement clobbers memory: gettimeofday (_5, 0B);
+tsvc.c:2940:12: missed: statement clobbers memory: _19 = calc_checksum (&__func__);
+tsvc.c:2984:25: missed: couldn't vectorize loop
+tsvc.c:2992:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:2985:27: missed: couldn't vectorize loop
+tsvc.c:2986:14: missed: not vectorized: relevant stmt not supported: _2 = a[i_73];
+tsvc.c:2980:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:2981:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:2992:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:2995:5: missed: statement clobbers memory: gettimeofday (_46, 0B);
+tsvc.c:2996:12: missed: statement clobbers memory: _59 = calc_checksum (&__func__);
+tsvc.c:2986:18: optimized: basic block part vectorized using 16 byte vectors
+tsvc.c:3019:25: missed: couldn't vectorize loop
+tsvc.c:3019:25: missed: not vectorized: latch block not empty.
+tsvc.c:3021:27: optimized: loop vectorized using variable length vectors
+tsvc.c:3014:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:3015:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:3024:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 1.0e+0);
+tsvc.c:3027:5: missed: statement clobbers memory: gettimeofday (_12, 0B);
+tsvc.c:3028:12: missed: statement clobbers memory: _24 = calc_checksum (&__func__);
+tsvc.c:3042:25: missed: couldn't vectorize loop
+tsvc.c:3042:25: missed: not vectorized: latch block not empty.
+tsvc.c:3043:27: optimized: loop vectorized using variable length vectors
+tsvc.c:3043:27: optimized:  loop versioned for vectorization because of possible aliasing
+tsvc.c:3037:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:3038:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:3046:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 1.0e+0);
+tsvc.c:3049:5: missed: statement clobbers memory: gettimeofday (_9, 0B);
+tsvc.c:3050:12: missed: statement clobbers memory: _21 = calc_checksum (&__func__);
+tsvc.c:3067:25: missed: couldn't vectorize loop
+tsvc.c:3067:25: missed: not vectorized: latch block not empty.
+tsvc.c:3068:27: optimized: loop vectorized using variable length vectors
+tsvc.c:3068:27: optimized:  loop versioned for vectorization because of possible aliasing
+tsvc.c:3062:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:3063:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:3071:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3074:5: missed: statement clobbers memory: gettimeofday (_10, 0B);
+tsvc.c:3075:12: missed: statement clobbers memory: _22 = calc_checksum (&__func__);
+tsvc.c:3093:25: missed: couldn't vectorize loop
+tsvc.c:3097:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 1.0e+0);
+tsvc.c:3094:27: optimized: loop vectorized using variable length vectors
+tsvc.c:3094:27: optimized:  loop versioned for vectorization because of possible aliasing
+tsvc.c:3090:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:3091:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:3097:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 1.0e+0);
+tsvc.c:3100:5: missed: statement clobbers memory: gettimeofday (_10, 0B);
+tsvc.c:3101:12: missed: statement clobbers memory: _22 = calc_checksum (&__func__);
+tsvc.c:3120:25: missed: couldn't vectorize loop
+tsvc.c:3124:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 1.0e+0);
+tsvc.c:3121:27: optimized: loop vectorized using variable length vectors
+tsvc.c:3121:27: optimized:  loop versioned for vectorization because of possible aliasing
+tsvc.c:3117:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:3118:5: missed: statement clobbers memory: gettimeofday (_2, 0B);
+tsvc.c:3124:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 1.0e+0);
+tsvc.c:3127:5: missed: statement clobbers memory: gettimeofday (_10, 0B);
+tsvc.c:3128:12: missed: statement clobbers memory: _22 = calc_checksum (&__func__);
+tsvc.c:3146:25: missed: couldn't vectorize loop
+tsvc.c:3150:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3147:27: optimized: loop vectorized using variable length vectors
+tsvc.c:3143:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:3144:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:3150:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3153:5: missed: statement clobbers memory: gettimeofday (_5, 0B);
+tsvc.c:3154:12: missed: statement clobbers memory: _16 = calc_checksum (&__func__);
+tsvc.c:3168:25: missed: couldn't vectorize loop
+tsvc.c:3178:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3169:27: optimized: loop vectorized using variable length vectors
+tsvc.c:3165:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:3166:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:3178:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3181:5: missed: statement clobbers memory: gettimeofday (_16, 0B);
+tsvc.c:3182:12: missed: statement clobbers memory: _28 = calc_checksum (&__func__);
+tsvc.c:3196:25: missed: couldn't vectorize loop
+tsvc.c:3196:25: missed: not vectorized: control flow in loop.
+tsvc.c:3197:27: missed: couldn't vectorize loop
+tsvc.c:3197:27: missed: not vectorized: control flow in loop.
+tsvc.c:3193:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:3194:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:3218:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3221:5: missed: statement clobbers memory: gettimeofday (_19, 0B);
+tsvc.c:3222:12: missed: statement clobbers memory: _31 = calc_checksum (&__func__);
+tsvc.c:3236:25: missed: couldn't vectorize loop
+tsvc.c:3251:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3237:27: optimized: loop vectorized using variable length vectors
+tsvc.c:3233:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:3234:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:3251:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3254:5: missed: statement clobbers memory: gettimeofday (_12, 0B);
+tsvc.c:3255:12: missed: statement clobbers memory: _24 = calc_checksum (&__func__);
+tsvc.c:3291:25: missed: couldn't vectorize loop
+tsvc.c:3295:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3292:27: optimized: loop vectorized using variable length vectors
+tsvc.c:3288:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:3289:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:3295:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3298:5: missed: statement clobbers memory: gettimeofday (_8, 0B);
+tsvc.c:3299:12: missed: statement clobbers memory: _19 = calc_checksum (&__func__);
+tsvc.c:3314:25: missed: couldn't vectorize loop
+tsvc.c:3320:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3316:27: missed: couldn't vectorize loop
+tsvc.c:3317:15: missed: not vectorized: unsupported use in stmt.
+tsvc.c:3311:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:3312:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:3320:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3323:5: missed: statement clobbers memory: gettimeofday (_4, 0B);
+tsvc.c:3324:12: missed: statement clobbers memory: _16 = calc_checksum (&__func__);
+tsvc.c:3394:25: missed: couldn't vectorize loop
+tsvc.c:3394:25: missed: not vectorized: control flow in loop.
+tsvc.c:3396:14: missed: couldn't vectorize loop
+tsvc.c:3396:14: missed: not vectorized: control flow in loop.
+tsvc.c:3391:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:3392:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:3399:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3402:5: missed: statement clobbers memory: gettimeofday (_7, 0B);
+tsvc.c:3403:12: missed: statement clobbers memory: _19 = calc_checksum (&__func__);
+tsvc.c:3421:25: missed: couldn't vectorize loop
+tsvc.c:3425:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3422:27: optimized: loop vectorized using variable length vectors
+tsvc.c:3418:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:3419:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:3409:8: missed: statement clobbers memory: .MASK_SCATTER_STORE (_57, vect__9.4029_55, 4, vect__10.4030_56, loop_mask_38);
+tsvc.c:3425:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3428:5: missed: statement clobbers memory: gettimeofday (_11, 0B);
+tsvc.c:3429:12: missed: statement clobbers memory: _23 = calc_checksum (&__func__);
+tsvc.c:3449:25: missed: couldn't vectorize loop
+tsvc.c:3453:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3450:27: optimized: loop vectorized using variable length vectors
+tsvc.c:3446:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:3447:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:3435:8: missed: statement clobbers memory: vect_patt_47.4064_55 = .MASK_GATHER_LOAD (_54, vect__6.4063_11, 4, { 0.0, ... }, loop_mask_29);
+tsvc.c:3453:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3456:5: missed: statement clobbers memory: gettimeofday (_10, 0B);
+tsvc.c:3457:12: missed: statement clobbers memory: _24 = calc_checksum (&__func__);
+tsvc.c:3475:25: missed: couldn't vectorize loop
+tsvc.c:3479:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3476:27: optimized: loop vectorized using variable length vectors
+tsvc.c:3472:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:3473:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:3463:8: missed: statement clobbers memory: vect_patt_41.4095_50 = .MASK_GATHER_LOAD (_49, vect__5.4094_48, 4, { 0.0, ... }, loop_mask_10);
+tsvc.c:3463:8: missed: statement clobbers memory: .MASK_SCATTER_STORE (_55, vect__5.4094_48, 4, vect__8.4099_54, loop_mask_10);
+tsvc.c:3479:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3482:5: missed: statement clobbers memory: gettimeofday (_9, 0B);
+tsvc.c:3483:12: missed: statement clobbers memory: _21 = calc_checksum (&__func__);
+tsvc.c:3504:25: missed: couldn't vectorize loop
+tsvc.c:3504:25: missed: not vectorized: control flow in loop.
+tsvc.c:3505:30: optimized: loop vectorized using variable length vectors
+tsvc.c:3500:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:3501:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:3489:8: missed: statement clobbers memory: vect_patt_63.4132_71 = .MASK_GATHER_LOAD (_70, vect__6.4131_69, 4, { 0.0, ... }, loop_mask_41);
+tsvc.c:3510:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3513:5: missed: statement clobbers memory: gettimeofday (_11, 0B);
+tsvc.c:3514:12: missed: statement clobbers memory: _25 = calc_checksum (&__func__);
+tsvc.c:3589:25: missed: couldn't vectorize loop
+tsvc.c:3593:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3590:27: optimized: loop vectorized using variable length vectors
+tsvc.c:3586:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:3587:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:3580:8: missed: statement clobbers memory: vect_patt_40.4172_11 = .MASK_GATHER_LOAD (_12, vect__3.4171_24, 4, { 0.0, ... }, loop_mask_26);
+tsvc.c:3593:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3596:5: missed: statement clobbers memory: gettimeofday (_8, 0B);
+tsvc.c:3597:12: missed: statement clobbers memory: _19 = calc_checksum (&__func__);
+tsvc.c:3637:25: missed: couldn't vectorize loop
+tsvc.c:3639:18: missed: not vectorized: more than one data ref in stmt: MEM <unsigned char[8000]> [(char * {ref-all})&a] = MEM <unsigned char[8000]> [(char * {ref-all})&b];
+tsvc.c:3634:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:3635:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:3639:18: missed: not vectorized: more than one data ref in stmt: MEM <unsigned char[8000]> [(char * {ref-all})&a] = MEM <unsigned char[8000]> [(char * {ref-all})&b];
+tsvc.c:3641:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3644:5: missed: statement clobbers memory: gettimeofday (_3, 0B);
+tsvc.c:3645:12: missed: statement clobbers memory: _14 = calc_checksum (&__func__);
+tsvc.c:3663:25: missed: couldn't vectorize loop
+tsvc.c:3667:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3664:27: optimized: loop vectorized using variable length vectors
+tsvc.c:3660:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:3661:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:3651:8: missed: statement clobbers memory: vect_patt_25.4218_47 = .MASK_GATHER_LOAD (_46, vect__5.4217_45, 4, { 0.0, ... }, loop_mask_44);
+tsvc.c:3667:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3670:5: missed: statement clobbers memory: gettimeofday (_7, 0B);
+tsvc.c:3671:12: missed: statement clobbers memory: _19 = calc_checksum (&__func__);
+tsvc.c:3689:25: missed: couldn't vectorize loop
+tsvc.c:3693:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3690:27: optimized: loop vectorized using variable length vectors
+tsvc.c:3686:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:3687:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:3677:8: missed: statement clobbers memory: .MASK_SCATTER_STORE (_45, vect__5.4246_41, 4, vect__6.4249_44, loop_mask_40);
+tsvc.c:3693:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3696:5: missed: statement clobbers memory: gettimeofday (_7, 0B);
+tsvc.c:3697:12: missed: statement clobbers memory: _19 = calc_checksum (&__func__);
+tsvc.c:3711:25: missed: couldn't vectorize loop
+tsvc.c:3717:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3712:27: optimized: loop vectorized using variable length vectors
+tsvc.c:3708:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:3709:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:3717:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3720:5: missed: statement clobbers memory: gettimeofday (_3, 0B);
+tsvc.c:3721:12: missed: statement clobbers memory: _15 = calc_checksum (&__func__);
+tsvc.c:3735:25: missed: couldn't vectorize loop
+tsvc.c:3739:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3736:27: optimized: loop vectorized using variable length vectors
+tsvc.c:3732:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:3733:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:3739:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3742:5: missed: statement clobbers memory: gettimeofday (_5, 0B);
+tsvc.c:3743:12: missed: statement clobbers memory: _16 = calc_checksum (&__func__);
+tsvc.c:3757:25: missed: couldn't vectorize loop
+tsvc.c:3761:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3758:27: optimized: loop vectorized using variable length vectors
+tsvc.c:3754:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:3755:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:3761:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3764:5: missed: statement clobbers memory: gettimeofday (_5, 0B);
+tsvc.c:3765:12: missed: statement clobbers memory: _16 = calc_checksum (&__func__);
+tsvc.c:3779:25: missed: couldn't vectorize loop
+tsvc.c:3783:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3780:27: optimized: loop vectorized using variable length vectors
+tsvc.c:3776:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:3777:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:3783:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3786:5: missed: statement clobbers memory: gettimeofday (_7, 0B);
+tsvc.c:3787:12: missed: statement clobbers memory: _18 = calc_checksum (&__func__);
+tsvc.c:3804:25: missed: couldn't vectorize loop
+tsvc.c:3808:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3805:27: optimized: loop vectorized using variable length vectors
+tsvc.c:3801:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:3802:5: missed: statement clobbers memory: gettimeofday (_3, 0B);
+tsvc.c:3808:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3811:5: missed: statement clobbers memory: gettimeofday (_8, 0B);
+tsvc.c:3812:12: missed: statement clobbers memory: _20 = calc_checksum (&__func__);
+tsvc.c:3826:25: missed: couldn't vectorize loop
+tsvc.c:3830:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3827:27: optimized: loop vectorized using variable length vectors
+tsvc.c:3823:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:3824:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:3830:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3833:5: missed: statement clobbers memory: gettimeofday (_7, 0B);
+tsvc.c:3834:12: missed: statement clobbers memory: _18 = calc_checksum (&__func__);
+tsvc.c:3848:25: missed: couldn't vectorize loop
+tsvc.c:3852:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3849:27: optimized: loop vectorized using variable length vectors
+tsvc.c:3845:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:3846:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:3852:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3855:5: missed: statement clobbers memory: gettimeofday (_7, 0B);
+tsvc.c:3856:12: missed: statement clobbers memory: _18 = calc_checksum (&__func__);
+tsvc.c:3920:25: missed: couldn't vectorize loop
+tsvc.c:3937:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3921:27: optimized: loop vectorized using variable length vectors
+tsvc.c:3916:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:3917:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:3937:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3940:5: missed: statement clobbers memory: gettimeofday (_47, 0B);
+tsvc.c:3941:12: missed: statement clobbers memory: _58 = calc_checksum (&__func__);
+tsvc.c:673:25: missed: couldn't vectorize loop
+tsvc.c:675:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:659:23: optimized: loop vectorized using variable length vectors
+tsvc.c:670:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:671:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:675:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:678:5: missed: statement clobbers memory: gettimeofday (_2, 0B);
+tsvc.c:679:12: missed: statement clobbers memory: _11 = calc_checksum (&__func__);
+tsvc.c:698:25: missed: couldn't vectorize loop
+tsvc.c:703:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:699:27: optimized: loop vectorized using variable length vectors
+tsvc.c:695:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:696:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:703:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:706:5: missed: statement clobbers memory: gettimeofday (_5, 0B);
+tsvc.c:707:12: missed: statement clobbers memory: _16 = calc_checksum (&__func__);
+tsvc.c:2292:25: missed: couldn't vectorize loop
+tsvc.c:2302:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, sum_30);
+tsvc.c:2288:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:2289:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:2302:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, sum_30);
+tsvc.c:2305:5: missed: statement clobbers memory: gettimeofday (_2, 0B);
+tsvc.c:2306:12: missed: statement clobbers memory: _11 = calc_checksum (&__func__);
+tsvc.c:3344:25: missed: couldn't vectorize loop
+tsvc.c:3350:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3345:27: optimized: loop vectorized using variable length vectors
+tsvc.c:3341:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:3342:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:3350:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3353:5: missed: statement clobbers memory: gettimeofday (_10, 0B);
+tsvc.c:3354:12: missed: statement clobbers memory: _21 = calc_checksum (&__func__);
+tsvc.c:3615:25: missed: couldn't vectorize loop
+tsvc.c:3619:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3616:27: optimized: loop vectorized using variable length vectors
+tsvc.c:3612:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:3613:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:3619:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3622:5: missed: statement clobbers memory: gettimeofday (_6, 0B);
+tsvc.c:3623:12: missed: statement clobbers memory: _17 = calc_checksum (&__func__);
+tsvc.c:3359:8: missed: couldn't vectorize loop
+tsvc.c:3359:8: missed: not vectorized: control flow in loop.
+tsvc.c:3370:18: missed: couldn't vectorize loop
+tsvc.c:3370:18: missed: not vectorized: control flow in loop.
+tsvc.c:3365:5: missed: statement clobbers memory: initialise_arrays (&__func__);
+tsvc.c:3366:5: missed: statement clobbers memory: gettimeofday (_1, 0B);
+tsvc.c:3375:9: missed: statement clobbers memory: dummy (&a, &b, &c, &d, &e, &aa, &bb, &cc, 0.0);
+tsvc.c:3378:5: missed: statement clobbers memory: gettimeofday (_23, 0B);
+tsvc.c:3379:12: missed: statement clobbers memory: _24 = calc_checksum (&__func__);
+tsvc.c:3371:17: missed: statement clobbers memory: exit (0);
+tsvc.c:659:23: optimized: loop vectorized using variable length vectors
+tsvc.c:659:23: optimized:  loop versioned for vectorization because of possible aliasing
+tsvc.c:2277:21: missed: couldn't vectorize loop
+tsvc.c:2277:21: missed: Loop costings may not be worthwhile.
+tsvc.c:3950:21: missed: statement clobbers memory: _1 = vector_func_16(D) (&func_args);
+tsvc.c:3957:5: missed: statement clobbers memory: printf ("%10.3f\t%f\n", taken_21, result_18);
+tsvc.c:3965:5: missed: statement clobbers memory: init (&ip, &s1, &s2);
+tsvc.c:3966:5: missed: statement clobbers memory: __builtin_puts (&"Loop \tTime(sec) \tChecksum"[0]);
+tsvc.c:3968:5: missed: statement clobbers memory: time_function (s000, 0B);
+tsvc.c:3969:5: missed: statement clobbers memory: time_function (s111, 0B);
+tsvc.c:3970:5: missed: statement clobbers memory: time_function (s1111, 0B);
+tsvc.c:3971:5: missed: statement clobbers memory: time_function (s112, 0B);
+tsvc.c:3972:5: missed: statement clobbers memory: time_function (s1112, 0B);
+tsvc.c:3973:5: missed: statement clobbers memory: time_function (s113, 0B);
+tsvc.c:3974:5: missed: statement clobbers memory: time_function (s1113, 0B);
+tsvc.c:3975:5: missed: statement clobbers memory: time_function (s114, 0B);
+tsvc.c:3976:5: missed: statement clobbers memory: time_function (s115, 0B);
+tsvc.c:3977:5: missed: statement clobbers memory: time_function (s1115, 0B);
+tsvc.c:3978:5: missed: statement clobbers memory: time_function (s116, 0B);
+tsvc.c:3979:5: missed: statement clobbers memory: time_function (s118, 0B);
+tsvc.c:3980:5: missed: statement clobbers memory: time_function (s119, 0B);
+tsvc.c:3981:5: missed: statement clobbers memory: time_function (s1119, 0B);
+tsvc.c:3982:5: missed: statement clobbers memory: time_function (s121, 0B);
+tsvc.c:3983:5: missed: statement clobbers memory: time_function (s122, &D.9061);
+tsvc.c:3984:5: missed: statement clobbers memory: time_function (s123, 0B);
+tsvc.c:3985:5: missed: statement clobbers memory: time_function (s124, 0B);
+tsvc.c:3986:5: missed: statement clobbers memory: time_function (s125, 0B);
+tsvc.c:3987:5: missed: statement clobbers memory: time_function (s126, 0B);
+tsvc.c:3988:5: missed: statement clobbers memory: time_function (s127, 0B);
+tsvc.c:3989:5: missed: statement clobbers memory: time_function (s128, 0B);
+tsvc.c:3990:5: missed: statement clobbers memory: time_function (s131, 0B);
+tsvc.c:3991:5: missed: statement clobbers memory: time_function (s132, 0B);
+tsvc.c:3992:5: missed: statement clobbers memory: time_function (s141, 0B);
+tsvc.c:3993:5: missed: statement clobbers memory: time_function (s151, 0B);
+tsvc.c:3994:5: missed: statement clobbers memory: time_function (s152, 0B);
+tsvc.c:3995:5: missed: statement clobbers memory: time_function (s161, 0B);
+tsvc.c:3996:5: missed: statement clobbers memory: time_function (s1161, 0B);
+tsvc.c:3997:5: missed: statement clobbers memory: time_function (s162, &n1);
+tsvc.c:3998:5: missed: statement clobbers memory: time_function (s171, &n1);
+tsvc.c:3999:5: missed: statement clobbers memory: time_function (s172, &D.9065);
+tsvc.c:4000:5: missed: statement clobbers memory: time_function (s173, 0B);
+tsvc.c:4001:5: missed: statement clobbers memory: time_function (s174, &D.9068);
+tsvc.c:4002:5: missed: statement clobbers memory: time_function (s175, &n1);
+tsvc.c:4003:5: missed: statement clobbers memory: time_function (s176, 0B);
+tsvc.c:4004:5: missed: statement clobbers memory: time_function (s211, 0B);
+tsvc.c:4005:5: missed: statement clobbers memory: time_function (s212, 0B);
+tsvc.c:4006:5: missed: statement clobbers memory: time_function (s1213, 0B);
+tsvc.c:4007:5: missed: statement clobbers memory: time_function (s221, 0B);
+tsvc.c:4008:5: missed: statement clobbers memory: time_function (s1221, 0B);
+tsvc.c:4009:5: missed: statement clobbers memory: time_function (s222, 0B);
+tsvc.c:4010:5: missed: statement clobbers memory: time_function (s231, 0B);
+tsvc.c:4011:5: missed: statement clobbers memory: time_function (s232, 0B);
+tsvc.c:4012:5: missed: statement clobbers memory: time_function (s1232, 0B);
+tsvc.c:4013:5: missed: statement clobbers memory: time_function (s233, 0B);
+tsvc.c:4014:5: missed: statement clobbers memory: time_function (s2233, 0B);
+tsvc.c:4015:5: missed: statement clobbers memory: time_function (s235, 0B);
+tsvc.c:4016:5: missed: statement clobbers memory: time_function (s241, 0B);
+tsvc.c:4017:5: missed: statement clobbers memory: time_function (s242, &D.9072);
+tsvc.c:4018:5: missed: statement clobbers memory: time_function (s243, 0B);
+tsvc.c:4019:5: missed: statement clobbers memory: time_function (s244, 0B);
+tsvc.c:4020:5: missed: statement clobbers memory: time_function (s1244, 0B);
+tsvc.c:4021:5: missed: statement clobbers memory: time_function (s2244, 0B);
+tsvc.c:4022:5: missed: statement clobbers memory: time_function (s251, 0B);
+tsvc.c:4023:5: missed: statement clobbers memory: time_function (s1251, 0B);
+tsvc.c:4024:5: missed: statement clobbers memory: time_function (s2251, 0B);
+tsvc.c:4025:5: missed: statement clobbers memory: time_function (s3251, 0B);
+tsvc.c:4026:5: missed: statement clobbers memory: time_function (s252, 0B);
+tsvc.c:4027:5: missed: statement clobbers memory: time_function (s253, 0B);
+tsvc.c:4028:5: missed: statement clobbers memory: time_function (s254, 0B);
+tsvc.c:4029:5: missed: statement clobbers memory: time_function (s255, 0B);
+tsvc.c:4030:5: missed: statement clobbers memory: time_function (s256, 0B);
+tsvc.c:4031:5: missed: statement clobbers memory: time_function (s257, 0B);
+tsvc.c:4032:5: missed: statement clobbers memory: time_function (s258, 0B);
+tsvc.c:4033:5: missed: statement clobbers memory: time_function (s261, 0B);
+tsvc.c:4034:5: missed: statement clobbers memory: time_function (s271, 0B);
+tsvc.c:4035:5: missed: statement clobbers memory: time_function (s272, &s1);
+tsvc.c:4036:5: missed: statement clobbers memory: time_function (s273, 0B);
+tsvc.c:4037:5: missed: statement clobbers memory: time_function (s274, 0B);
+tsvc.c:4038:5: missed: statement clobbers memory: time_function (s275, 0B);
+tsvc.c:4039:5: missed: statement clobbers memory: time_function (s2275, 0B);
+tsvc.c:4040:5: missed: statement clobbers memory: time_function (s276, 0B);
+tsvc.c:4041:5: missed: statement clobbers memory: time_function (s277, 0B);
+tsvc.c:4042:5: missed: statement clobbers memory: time_function (s278, 0B);
+tsvc.c:4043:5: missed: statement clobbers memory: time_function (s279, 0B);
+tsvc.c:4044:5: missed: statement clobbers memory: time_function (s1279, 0B);
+tsvc.c:4045:5: missed: statement clobbers memory: time_function (s2710, &s1);
+tsvc.c:4046:5: missed: statement clobbers memory: time_function (s2711, 0B);
+tsvc.c:4047:5: missed: statement clobbers memory: time_function (s2712, 0B);
+tsvc.c:4048:5: missed: statement clobbers memory: time_function (s281, 0B);
+tsvc.c:4049:5: missed: statement clobbers memory: time_function (s1281, 0B);
+tsvc.c:4050:5: missed: statement clobbers memory: time_function (s291, 0B);
+tsvc.c:4051:5: missed: statement clobbers memory: time_function (s292, 0B);
+tsvc.c:4052:5: missed: statement clobbers memory: time_function (s293, 0B);
+tsvc.c:4053:5: missed: statement clobbers memory: time_function (s2101, 0B);
+tsvc.c:4054:5: missed: statement clobbers memory: time_function (s2102, 0B);
+tsvc.c:4055:5: missed: statement clobbers memory: time_function (s2111, 0B);
+tsvc.c:4056:5: missed: statement clobbers memory: time_function (s311, 0B);
+tsvc.c:4057:5: missed: statement clobbers memory: time_function (s31111, 0B);
+tsvc.c:4058:5: missed: statement clobbers memory: time_function (s312, 0B);
+tsvc.c:4059:5: missed: statement clobbers memory: time_function (s313, 0B);
+tsvc.c:4060:5: missed: statement clobbers memory: time_function (s314, 0B);
+tsvc.c:4061:5: missed: statement clobbers memory: time_function (s315, 0B);
+tsvc.c:4062:5: missed: statement clobbers memory: time_function (s316, 0B);
+tsvc.c:4063:5: missed: statement clobbers memory: time_function (s317, 0B);
+tsvc.c:4064:5: missed: statement clobbers memory: time_function (s318, &n1);
+tsvc.c:4065:5: missed: statement clobbers memory: time_function (s319, 0B);
+tsvc.c:4066:5: missed: statement clobbers memory: time_function (s3110, 0B);
+tsvc.c:4067:5: missed: statement clobbers memory: time_function (s13110, 0B);
+tsvc.c:4068:5: missed: statement clobbers memory: time_function (s3111, 0B);
+tsvc.c:4069:5: missed: statement clobbers memory: time_function (s3112, 0B);
+tsvc.c:4070:5: missed: statement clobbers memory: time_function (s3113, 0B);
+tsvc.c:4071:5: missed: statement clobbers memory: time_function (s321, 0B);
+tsvc.c:4072:5: missed: statement clobbers memory: time_function (s322, 0B);
+tsvc.c:4073:5: missed: statement clobbers memory: time_function (s323, 0B);
+tsvc.c:4074:5: missed: statement clobbers memory: time_function (s331, 0B);
+tsvc.c:4075:5: missed: statement clobbers memory: time_function (s332, &s1);
+tsvc.c:4076:5: missed: statement clobbers memory: time_function (s341, 0B);
+tsvc.c:4077:5: missed: statement clobbers memory: time_function (s342, 0B);
+tsvc.c:4078:5: missed: statement clobbers memory: time_function (s343, 0B);
+tsvc.c:4079:5: missed: statement clobbers memory: time_function (s351, 0B);
+tsvc.c:4080:5: missed: statement clobbers memory: time_function (s1351, 0B);
+tsvc.c:4081:5: missed: statement clobbers memory: time_function (s352, 0B);
+tsvc.c:4082:5: missed: statement clobbers memory: time_function (s353, ip.11_5);
+tsvc.c:4083:5: missed: statement clobbers memory: time_function (s421, 0B);
+tsvc.c:4084:5: missed: statement clobbers memory: time_function (s1421, 0B);
+tsvc.c:4085:5: missed: statement clobbers memory: time_function (s422, 0B);
+tsvc.c:4086:5: missed: statement clobbers memory: time_function (s423, 0B);
+tsvc.c:4087:5: missed: statement clobbers memory: time_function (s424, 0B);
+tsvc.c:4088:5: missed: statement clobbers memory: time_function (s431, 0B);
+tsvc.c:4089:5: missed: statement clobbers memory: time_function (s441, 0B);
+tsvc.c:4090:5: missed: statement clobbers memory: time_function (s442, 0B);
+tsvc.c:4091:5: missed: statement clobbers memory: time_function (s443, 0B);
+tsvc.c:4093:5: missed: statement clobbers memory: time_function (s452, 0B);
+tsvc.c:4094:5: missed: statement clobbers memory: time_function (s453, 0B);
+tsvc.c:4095:5: missed: statement clobbers memory: time_function (s471, 0B);
+tsvc.c:4096:5: missed: statement clobbers memory: time_function (s481, 0B);
+tsvc.c:4097:5: missed: statement clobbers memory: time_function (s482, 0B);
+tsvc.c:4098:5: missed: statement clobbers memory: time_function (s491, ip.12_6);
+tsvc.c:4099:5: missed: statement clobbers memory: time_function (s4112, &D.9076);
+tsvc.c:4100:5: missed: statement clobbers memory: time_function (s4113, ip.15_9);
+tsvc.c:4101:5: missed: statement clobbers memory: time_function (s4114, &D.9080);
+tsvc.c:4102:5: missed: statement clobbers memory: time_function (s4115, ip.18_12);
+tsvc.c:4103:5: missed: statement clobbers memory: time_function (s4116, &D.9085);
+tsvc.c:4104:5: missed: statement clobbers memory: time_function (s4117, 0B);
+tsvc.c:4105:5: missed: statement clobbers memory: time_function (s4121, 0B);
+tsvc.c:4106:5: missed: statement clobbers memory: time_function (va, 0B);
+tsvc.c:4107:5: missed: statement clobbers memory: time_function (vag, ip.21_15);
+tsvc.c:4108:5: missed: statement clobbers memory: time_function (vas, ip.22_16);
+tsvc.c:4109:5: missed: statement clobbers memory: time_function (vif, 0B);
+tsvc.c:4110:5: missed: statement clobbers memory: time_function (vpv, 0B);
+tsvc.c:4111:5: missed: statement clobbers memory: time_function (vtv, 0B);
+tsvc.c:4112:5: missed: statement clobbers memory: time_function (vpvtv, 0B);
+tsvc.c:4113:5: missed: statement clobbers memory: time_function (vpvts, &s1);
+tsvc.c:4114:5: missed: statement clobbers memory: time_function (vpvpv, 0B);
+tsvc.c:4115:5: missed: statement clobbers memory: time_function (vtvtv, 0B);
+tsvc.c:4116:5: missed: statement clobbers memory: time_function (vsumr, 0B);
+tsvc.c:4117:5: missed: statement clobbers memory: time_function (vdotr, 0B);
+tsvc.c:4118:5: missed: statement clobbers memory: time_function (vbor, 0B);
+tsvc.c:4017:55: missed: not vectorized: vectorization is not profitable.
+tsvc.c:4017:55: missed: not vectorized: vectorization is not profitable.
+tsvc.c:4017:55: missed: not vectorized: vectorization is not profitable.
+tsvc.c:4017:55: missed: not vectorized: vectorization is not profitable.
+common.c:140:27: optimized: loop vectorized using variable length vectors
+common.c:140:27: optimized: loop vectorized using variable length vectors
+common.c:144:27: optimized: loop vectorized using variable length vectors
+common.c:136:27: optimized: loop vectorized using variable length vectors
+common.c:140:27: optimized: loop vectorized using variable length vectors
+common.c:144:27: missed: couldn't vectorize loop
+common.c:144:27: missed: not vectorized: number of iterations cannot be computed.
+common.c:144:27: optimized: loop vectorized using variable length vectors
+common.c:136:27: optimized: loop vectorized using variable length vectors
+common.c:140:27: optimized: loop vectorized using variable length vectors
+common.c:144:27: missed: couldn't vectorize loop
+common.c:144:27: missed: not vectorized: number of iterations cannot be computed.
+common.c:39:23: optimized: loop vectorized using variable length vectors
+common.c:46:23: missed: couldn't vectorize loop
+common.c:48:26: missed: not vectorized: complicated access pattern.
+common.c:47:27: optimized: loop vectorized using variable length vectors
+common.c:39:23: optimized: loop vectorized using variable length vectors
+common.c:39:23: optimized: loop vectorized using variable length vectors
+common.c:39:23: optimized: loop vectorized using variable length vectors
+common.c:39:23: optimized: loop vectorized using variable length vectors
+common.c:46:23: missed: couldn't vectorize loop
+common.c:48:26: missed: not vectorized: complicated access pattern.
+common.c:47:27: optimized: loop vectorized using variable length vectors
+common.c:39:23: optimized: loop vectorized using variable length vectors
+common.c:39:23: optimized: loop vectorized using variable length vectors
+common.c:39:23: optimized: loop vectorized using variable length vectors
+common.c:46:23: missed: couldn't vectorize loop
+common.c:48:26: missed: not vectorized: complicated access pattern.
+common.c:47:27: optimized: loop vectorized using variable length vectors
+common.c:46:23: missed: couldn't vectorize loop
+common.c:48:26: missed: not vectorized: complicated access pattern.
+common.c:47:27: optimized: loop vectorized using variable length vectors
+common.c:46:23: missed: couldn't vectorize loop
+common.c:48:26: missed: not vectorized: complicated access pattern.
+common.c:47:27: optimized: loop vectorized using variable length vectors
+common.c:46:23: missed: couldn't vectorize loop
+common.c:48:26: missed: not vectorized: complicated access pattern.
+common.c:47:27: optimized: loop vectorized using variable length vectors
+common.c:46:23: missed: couldn't vectorize loop
+common.c:48:26: missed: not vectorized: complicated access pattern.
+common.c:47:27: optimized: loop vectorized using variable length vectors
+common.c:114:23: optimized: loop vectorized using variable length vectors
+common.c:125:23: optimized: loop vectorized using variable length vectors
+common.c:144:27: optimized: loop vectorized using variable length vectors
+common.c:136:27: optimized: loop vectorized using variable length vectors
+common.c:140:27: optimized: loop vectorized using variable length vectors
+common.c:144:27: missed: couldn't vectorize loop
+common.c:144:27: missed: not vectorized: number of iterations cannot be computed.
+common.c:152:23: missed: couldn't vectorize loop
+common.c:145:20: missed: not vectorized: complicated access pattern.
+common.c:144:27: optimized: loop vectorized using variable length vectors
+common.c:152:23: missed: couldn't vectorize loop
+common.c:152:23: missed: not vectorized: loop nest containing two or more consecutive inner loops cannot be vectorized
+common.c:136:27: optimized: loop vectorized using variable length vectors
+common.c:140:27: optimized: loop vectorized using variable length vectors
+common.c:144:27: missed: couldn't vectorize loop
+common.c:144:27: missed: not vectorized: number of iterations cannot be computed.
+common.c:179:23: optimized: loop vectorized using variable length vectors
+common.c:152:23: missed: couldn't vectorize loop
+common.c:137:20: missed: not vectorized: complicated access pattern.
+common.c:136:27: optimized: loop vectorized using variable length vectors
+common.c:152:23: missed: couldn't vectorize loop
+common.c:137:20: missed: not vectorized: complicated access pattern.
+common.c:136:27: optimized: loop vectorized using variable length vectors
+common.c:152:23: missed: couldn't vectorize loop
+common.c:137:20: missed: not vectorized: complicated access pattern.
+common.c:136:27: optimized: loop vectorized using variable length vectors
+common.c:144:27: optimized: loop vectorized using variable length vectors
+common.c:144:27: optimized: loop vectorized using variable length vectors
+common.c:144:27: optimized: loop vectorized using variable length vectors
+common.c:144:27: optimized: loop vectorized using variable length vectors
+common.c:144:27: optimized: loop vectorized using variable length vectors
+common.c:144:27: optimized: loop vectorized using variable length vectors
+common.c:161:23: missed: couldn't vectorize loop
+common.c:161:23: missed: Loop costings may not be worthwhile.
+common.c:158:20: missed: statement clobbers memory: _1 = memalign (64, 8000);
+common.c:159:19: missed: statement clobbers memory: _2 = memalign (64, 8000);
+common.c:162:20: missed: not vectorized: vectorization is not profitable.
+common.c:162:20: missed: not vectorized: vectorization is not profitable.
+common.c:162:20: missed: not vectorized: vectorization is not profitable.
+common.c:162:20: missed: not vectorized: vectorization is not profitable.
+common.c:164:20: missed: not vectorized: vectorization is not profitable.
+common.c:202:25: optimized: loop vectorized using variable length vectors
+common.c:140:27: optimized: loop vectorized using variable length vectors
+common.c:140:27: optimized: loop vectorized using variable length vectors
+common.c:140:27: optimized: loop vectorized using variable length vectors
+common.c:140:27: optimized: loop vectorized using variable length vectors
+common.c:144:27: optimized: loop vectorized using variable length vectors
+common.c:140:27: optimized: loop vectorized using variable length vectors
+common.c:144:27: optimized: loop vectorized using variable length vectors
+common.c:140:27: optimized: loop vectorized using variable length vectors
+common.c:144:27: optimized: loop vectorized using variable length vectors
+common.c:152:23: missed: couldn't vectorize loop
+common.c:141:20: missed: not vectorized: complicated access pattern.
+common.c:140:27: optimized: loop vectorized using variable length vectors
+common.c:152:23: missed: couldn't vectorize loop
+common.c:137:20: missed: not vectorized: complicated access pattern.
+common.c:136:27: optimized: loop vectorized using variable length vectors
+common.c:152:23: missed: couldn't vectorize loop
+common.c:145:20: missed: not vectorized: complicated access pattern.
+common.c:144:27: optimized: loop vectorized using variable length vectors
+common.c:152:23: missed: couldn't vectorize loop
+common.c:145:20: missed: not vectorized: complicated access pattern.
+common.c:144:27: optimized: loop vectorized using variable length vectors
+common.c:152:23: missed: couldn't vectorize loop
+common.c:145:20: missed: not vectorized: complicated access pattern.
+common.c:144:27: optimized: loop vectorized using variable length vectors
+common.c:144:27: optimized: loop vectorized using variable length vectors
+common.c:144:27: optimized: loop vectorized using variable length vectors
+common.c:152:23: missed: couldn't vectorize loop
+common.c:145:20: missed: not vectorized: complicated access pattern.
+common.c:144:27: optimized: loop vectorized using variable length vectors
+common.c:144:27: optimized: loop vectorized using variable length vectors
+common.c:152:23: missed: couldn't vectorize loop
+common.c:141:20: missed: not vectorized: complicated access pattern.
+common.c:140:27: optimized: loop vectorized using variable length vectors
+common.c:152:23: missed: couldn't vectorize loop
+common.c:145:20: missed: not vectorized: complicated access pattern.
+common.c:144:27: optimized: loop vectorized using variable length vectors
+common.c:144:27: optimized: loop vectorized using variable length vectors
+common.c:144:27: optimized: loop vectorized using variable length vectors
+common.c:136:27: optimized: loop vectorized using variable length vectors
+common.c:136:27: optimized: loop vectorized using variable length vectors
+common.c:144:27: optimized: loop vectorized using variable length vectors
+common.c:144:27: optimized: loop vectorized using variable length vectors
+common.c:136:27: optimized: loop vectorized using variable length vectors
+common.c:136:27: optimized: loop vectorized using variable length vectors
+common.c:144:27: optimized: loop vectorized using variable length vectors
+common.c:144:27: optimized: loop vectorized using variable length vectors
+common.c:152:23: missed: couldn't vectorize loop
+common.c:145:20: missed: not vectorized: complicated access pattern.
+common.c:144:27: optimized: loop vectorized using variable length vectors
+common.c:152:23: missed: couldn't vectorize loop
+common.c:145:20: missed: not vectorized: complicated access pattern.
+common.c:144:27: optimized: loop vectorized using variable length vectors
+common.c:152:23: missed: couldn't vectorize loop
+common.c:145:20: missed: not vectorized: complicated access pattern.
+common.c:144:27: optimized: loop vectorized using variable length vectors
+common.c:152:23: missed: couldn't vectorize loop
+common.c:137:20: missed: not vectorized: complicated access pattern.
+common.c:136:27: optimized: loop vectorized using variable length vectors
+common.c:152:23: missed: couldn't vectorize loop
+common.c:145:20: missed: not vectorized: complicated access pattern.
+common.c:144:27: optimized: loop vectorized using variable length vectors
+common.c:152:23: missed: couldn't vectorize loop
+common.c:145:20: missed: not vectorized: complicated access pattern.
+common.c:144:27: optimized: loop vectorized using variable length vectors
+common.c:152:23: missed: couldn't vectorize loop
+common.c:187:5: missed: statement clobbers memory: set_1d_array.part.0.constprop (_595);
+common.c:199:5: missed: statement clobbers memory: printf ("%5s\t", name_153(D));
+common.c:201:13: missed: statement clobbers memory: _1 = strcmp (name_153(D), "s000");
+common.c:209:17: missed: statement clobbers memory: _12 = strcmp (name_153(D), "s111");
+common.c:215:17: missed: statement clobbers memory: _13 = strcmp (name_153(D), "s112");
+common.c:218:17: missed: statement clobbers memory: _14 = strcmp (name_153(D), "s113");
+common.c:221:17: missed: statement clobbers memory: _15 = strcmp (name_153(D), "s114");
+common.c:224:17: missed: statement clobbers memory: _16 = strcmp (name_153(D), "s115");
+common.c:229:17: missed: statement clobbers memory: _17 = strcmp (name_153(D), "s116");
+common.c:231:17: missed: statement clobbers memory: _18 = strcmp (name_153(D), "s118");
+common.c:234:17: missed: statement clobbers memory: _19 = strcmp (name_153(D), "s119");
+common.c:237:17: missed: statement clobbers memory: _20 = strcmp (name_153(D), "s121");
+common.c:240:17: missed: statement clobbers memory: _21 = strcmp (name_153(D), "s122");
+common.c:243:17: missed: statement clobbers memory: _22 = strcmp (name_153(D), "s123");
+common.c:249:17: missed: statement clobbers memory: _23 = strcmp (name_153(D), "s124");
+common.c:255:17: missed: statement clobbers memory: _24 = strcmp (name_153(D), "s125");
+common.c:260:17: missed: statement clobbers memory: _25 = strcmp (name_153(D), "s126");
+common.c:264:17: missed: statement clobbers memory: _26 = strcmp (name_153(D), "s127");
+common.c:270:17: missed: statement clobbers memory: _27 = strcmp (name_153(D), "s128");
+common.c:275:17: missed: statement clobbers memory: _28 = strcmp (name_153(D), "s131");
+common.c:278:17: missed: statement clobbers memory: _29 = strcmp (name_153(D), "s132");
+common.c:282:17: missed: statement clobbers memory: _30 = strcmp (name_153(D), "s141");
+common.c:285:17: missed: statement clobbers memory: _31 = strcmp (name_153(D), "s151");
+common.c:288:17: missed: statement clobbers memory: _32 = strcmp (name_153(D), "s152");
+common.c:294:17: missed: statement clobbers memory: _33 = strcmp (name_153(D), "s161");
+common.c:301:17: missed: statement clobbers memory: _34 = strcmp (name_153(D), "s162");
+common.c:305:17: missed: statement clobbers memory: _35 = strcmp (name_153(D), "s171");
+common.c:308:17: missed: statement clobbers memory: _36 = strcmp (name_153(D), "s172");
+common.c:311:17: missed: statement clobbers memory: _37 = strcmp (name_153(D), "s173");
+common.c:314:17: missed: statement clobbers memory: _38 = strcmp (name_153(D), "s174");
+common.c:317:17: missed: statement clobbers memory: _39 = strcmp (name_153(D), "s175");
+common.c:320:17: missed: statement clobbers memory: _40 = strcmp (name_153(D), "s176");
+common.c:324:17: missed: statement clobbers memory: _41 = strcmp (name_153(D), "s211");
+common.c:330:17: missed: statement clobbers memory: _42 = strcmp (name_153(D), "s212");
+common.c:335:17: missed: statement clobbers memory: _43 = strcmp (name_153(D), "s221");
+common.c:340:17: missed: statement clobbers memory: _44 = strcmp (name_153(D), "s222");
+common.c:344:17: missed: statement clobbers memory: _45 = strcmp (name_153(D), "s231");
+common.c:347:17: missed: statement clobbers memory: _46 = strcmp (name_153(D), "s232");
+common.c:350:17: missed: statement clobbers memory: _47 = strcmp (name_153(D), "s233");
+common.c:354:17: missed: statement clobbers memory: _48 = strcmp (name_153(D), "s234");
+common.c:358:17: missed: statement clobbers memory: _49 = strcmp (name_153(D), "s235");
+common.c:364:17: missed: statement clobbers memory: _50 = strcmp (name_153(D), "s241");
+common.c:369:17: missed: statement clobbers memory: _51 = strcmp (name_153(D), "s242");
+common.c:374:17: missed: statement clobbers memory: _52 = strcmp (name_153(D), "s243");
+common.c:380:17: missed: statement clobbers memory: _53 = strcmp (name_153(D), "s244");
+common.c:385:17: missed: statement clobbers memory: _54 = strcmp (name_153(D), "s251");
+common.c:391:17: missed: statement clobbers memory: _55 = strcmp (name_153(D), "s252");
+common.c:395:17: missed: statement clobbers memory: _56 = strcmp (name_153(D), "s253");
+common.c:400:17: missed: statement clobbers memory: _57 = strcmp (name_153(D), "s254");
+common.c:403:17: missed: statement clobbers memory: _58 = strcmp (name_153(D), "s255");
+common.c:406:17: missed: statement clobbers memory: _59 = strcmp (name_153(D), "s256");
+common.c:410:17: missed: statement clobbers memory: _60 = strcmp (name_153(D), "s257");
+common.c:414:17: missed: statement clobbers memory: _61 = strcmp (name_153(D), "s258");
+common.c:421:17: missed: statement clobbers memory: _62 = strcmp (name_153(D), "s261");
+common.c:426:17: missed: statement clobbers memory: _63 = strcmp (name_153(D), "s271");
+common.c:430:17: missed: statement clobbers memory: _64 = strcmp (name_153(D), "s272");
+common.c:436:17: missed: statement clobbers memory: _65 = strcmp (name_153(D), "s273");
+common.c:442:17: missed: statement clobbers memory: _66 = strcmp (name_153(D), "s274");
+common.c:448:17: missed: statement clobbers memory: _67 = strcmp (name_153(D), "s275");
+common.c:452:17: missed: statement clobbers memory: _68 = strcmp (name_153(D), "s276");
+common.c:457:17: missed: statement clobbers memory: _69 = strcmp (name_153(D), "s277");
+common.c:464:17: missed: statement clobbers memory: _70 = strcmp (name_153(D), "s278");
+common.c:471:17: missed: statement clobbers memory: _71 = strcmp (name_153(D), "s279");
+common.c:479:17: missed: statement clobbers memory: _72 = strcmp (name_153(D), "s2710");
+common.c:485:17: missed: statement clobbers memory: _73 = strcmp (name_153(D), "s2711");
+common.c:489:17: missed: statement clobbers memory: _74 = strcmp (name_153(D), "s2712");
+common.c:493:17: missed: statement clobbers memory: _75 = strcmp (name_153(D), "s281");
+common.c:497:17: missed: statement clobbers memory: _76 = strcmp (name_153(D), "1s281");
+common.c:504:17: missed: statement clobbers memory: _77 = strcmp (name_153(D), "s291");
+common.c:507:17: missed: statement clobbers memory: _78 = strcmp (name_153(D), "s292");
+common.c:510:17: missed: statement clobbers memory: _79 = strcmp (name_153(D), "s293");
+common.c:512:17: missed: statement clobbers memory: _80 = strcmp (name_153(D), "s2101");
+common.c:516:17: missed: statement clobbers memory: _81 = strcmp (name_153(D), "s2102");
+common.c:518:17: missed: statement clobbers memory: _82 = strcmp (name_153(D), "s2111");
+common.c:520:17: missed: statement clobbers memory: _83 = strcmp (name_153(D), "s311");
+common.c:522:17: missed: statement clobbers memory: _84 = strcmp (name_153(D), "s312");
+common.c:524:17: missed: statement clobbers memory: _85 = strcmp (name_153(D), "s313");
+common.c:527:17: missed: statement clobbers memory: _86 = strcmp (name_153(D), "s314");
+common.c:529:17: missed: statement clobbers memory: _87 = strcmp (name_153(D), "s315");
+common.c:531:17: missed: statement clobbers memory: _88 = strcmp (name_153(D), "s316");
+common.c:533:17: missed: statement clobbers memory: _89 = strcmp (name_153(D), "s317");
+common.c:534:17: missed: statement clobbers memory: _90 = strcmp (name_153(D), "s318");
+common.c:537:17: missed: statement clobbers memory: _91 = strcmp (name_153(D), "s319");
+common.c:543:17: missed: statement clobbers memory: _92 = strcmp (name_153(D), "s3110");
+common.c:546:17: missed: statement clobbers memory: _93 = strcmp (name_153(D), "s3111");
+common.c:548:17: missed: statement clobbers memory: _94 = strcmp (name_153(D), "s3112");
+common.c:551:17: missed: statement clobbers memory: _95 = strcmp (name_153(D), "s3113");
+common.c:554:17: missed: statement clobbers memory: _96 = strcmp (name_153(D), "s321");
+common.c:557:17: missed: statement clobbers memory: _97 = strcmp (name_153(D), "s322");
+common.c:561:17: missed: statement clobbers memory: _98 = strcmp (name_153(D), "s323");
+common.c:567:17: missed: statement clobbers memory: _99 = strcmp (name_153(D), "s331");
+common.c:570:17: missed: statement clobbers memory: _100 = strcmp (name_153(D), "s332");
+common.c:573:17: missed: statement clobbers memory: _101 = strcmp (name_153(D), "s341");
+common.c:576:17: missed: statement clobbers memory: _102 = strcmp (name_153(D), "s342");
+common.c:579:17: missed: statement clobbers memory: _103 = strcmp (name_153(D), "s343");
+common.c:582:17: missed: statement clobbers memory: _104 = strcmp (name_153(D), "s351");
+common.c:586:17: missed: statement clobbers memory: _105 = strcmp (name_153(D), "s352");
+common.c:589:17: missed: statement clobbers memory: _106 = strcmp (name_153(D), "s353");
+common.c:593:17: missed: statement clobbers memory: _107 = strcmp (name_153(D), "s411");
+common.c:597:17: missed: statement clobbers memory: _108 = strcmp (name_153(D), "s412");
+common.c:601:17: missed: statement clobbers memory: _109 = strcmp (name_153(D), "s413");
+common.c:607:17: missed: statement clobbers memory: _110 = strcmp (name_153(D), "s414");
+common.c:611:17: missed: statement clobbers memory: _111 = strcmp (name_153(D), "s415");
+common.c:616:17: missed: statement clobbers memory: _112 = strcmp (name_153(D), "s421");
+common.c:619:17: missed: statement clobbers memory: _113 = strcmp (name_153(D), "s422");
+common.c:623:17: missed: statement clobbers memory: _114 = strcmp (name_153(D), "s1421");
+common.c:625:17: missed: statement clobbers memory: _115 = strcmp (name_153(D), "s423");
+common.c:629:17: missed: statement clobbers memory: _116 = strcmp (name_153(D), "s424");
+common.c:633:17: missed: statement clobbers memory: _117 = strcmp (name_153(D), "s431");
+common.c:636:17: missed: statement clobbers memory: _118 = strcmp (name_153(D), "s432");
+common.c:639:17: missed: statement clobbers memory: _119 = strcmp (name_153(D), "s441");
+common.c:646:17: missed: statement clobbers memory: _120 = strcmp (name_153(D), "s442");
+common.c:652:17: missed: statement clobbers memory: _121 = strcmp (name_153(D), "s443");
+common.c:656:17: missed: statement clobbers memory: _122 = strcmp (name_153(D), "s451");
+common.c:659:17: missed: statement clobbers memory: _123 = strcmp (name_153(D), "s452");
+common.c:663:17: missed: statement clobbers memory: _124 = strcmp (name_153(D), "s453");
+common.c:666:17: missed: statement clobbers memory: _125 = strcmp (name_153(D), "s471");
+common.c:673:17: missed: statement clobbers memory: _126 = strcmp (name_153(D), "s481");
+common.c:678:17: missed: statement clobbers memory: _127 = strcmp (name_153(D), "s482");
+common.c:682:17: missed: statement clobbers memory: _128 = strcmp (name_153(D), "s491");
+common.c:687:17: missed: statement clobbers memory: _129 = strcmp (name_153(D), "s4112");
+common.c:690:17: missed: statement clobbers memory: _130 = strcmp (name_153(D), "s4113");
+common.c:694:17: missed: statement clobbers memory: _131 = strcmp (name_153(D), "s4114");
+common.c:699:17: missed: statement clobbers memory: _132 = strcmp (name_153(D), "s4115");
+common.c:702:17: missed: statement clobbers memory: _133 = strcmp (name_153(D), "s4116");
+common.c:705:17: missed: statement clobbers memory: _134 = strcmp (name_153(D), "s4117");
+common.c:710:17: missed: statement clobbers memory: _135 = strcmp (name_153(D), "s4121");
+common.c:714:17: missed: statement clobbers memory: _136 = strcmp (name_153(D), "va");
+common.c:717:17: missed: statement clobbers memory: _137 = strcmp (name_153(D), "vag");
+common.c:720:17: missed: statement clobbers memory: _138 = strcmp (name_153(D), "vas");
+common.c:723:17: missed: statement clobbers memory: _139 = strcmp (name_153(D), "vif");
+common.c:726:17: missed: statement clobbers memory: _140 = strcmp (name_153(D), "vpv");
+common.c:729:17: missed: statement clobbers memory: _141 = strcmp (name_153(D), "vtv");
+common.c:732:17: missed: statement clobbers memory: _142 = strcmp (name_153(D), "vpvtv");
+common.c:736:17: missed: statement clobbers memory: _143 = strcmp (name_153(D), "vpvts");
+common.c:739:17: missed: statement clobbers memory: _144 = strcmp (name_153(D), "vpvpv");
+common.c:743:17: missed: statement clobbers memory: _145 = strcmp (name_153(D), "vtvtv");
+common.c:747:17: missed: statement clobbers memory: _146 = strcmp (name_153(D), "vsumr");
+common.c:749:17: missed: statement clobbers memory: _147 = strcmp (name_153(D), "vdotr");
+common.c:752:17: missed: statement clobbers memory: _148 = strcmp (name_153(D), "vbor");
+common.c:753:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 0.0, -1);
+common.c:754:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 0.0, -1);
+common.c:755:9: missed: statement clobbers memory: set_1d_array.constprop (&c, 1.0e+0, -1);
+common.c:756:9: missed: statement clobbers memory: set_1d_array.constprop (&d, 2.0e+0, -1);
+common.c:757:9: missed: statement clobbers memory: set_1d_array.constprop (&e, 5.0e-1, -1);
+common.c:153:9: missed: statement clobbers memory: set_1d_array.constprop (_770, 0.0, -1);
+common.c:744:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 1.0e+0, 1);
+common.c:745:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 2.0e+0, 1);
+common.c:746:9: missed: statement clobbers memory: set_1d_array.constprop (&c, 5.0e-1, 1);
+common.c:187:5: missed: statement clobbers memory: set_1d_array.part.0.constprop (&a);
+common.c:741:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 1.0e+0, 1);
+common.c:742:9: missed: statement clobbers memory: set_1d_array.constprop (&c, -1.0e+0, 1);
+common.c:730:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 1.0e+0, 1);
+common.c:731:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 1.0e+0, 1);
+common.c:703:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 0.0, -1);
+common.c:153:9: missed: statement clobbers memory: set_1d_array.constprop (_765, 0.0, -1);
+common.c:691:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 0.0, 1);
+common.c:692:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 1.0e+0, 1);
+common.c:187:5: missed: statement clobbers memory: set_1d_array.part.0.constprop (&c);
+common.c:688:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 1.0e+0, 1);
+common.c:689:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 0.0, -1);
+common.c:683:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 0.0, 1);
+common.c:684:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 1.0e+0, 1);
+common.c:685:9: missed: statement clobbers memory: set_1d_array.constprop (&c, 0.0, -1);
+common.c:686:9: missed: statement clobbers memory: set_1d_array.constprop (&d, 0.0, -1);
+common.c:667:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 1.0e+0, 1);
+common.c:668:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 1.0e+0, 1);
+common.c:669:9: missed: statement clobbers memory: set_1d_array.constprop (&c, 1.0e+0, 1);
+common.c:670:9: missed: statement clobbers memory: set_1d_array.constprop (&d, 0.0, -1);
+common.c:671:9: missed: statement clobbers memory: set_1d_array.constprop (&e, 0.0, -1);
+common.c:672:9: missed: statement clobbers memory: set_1d_array.constprop (&x, 0.0, 1);
+common.c:664:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 0.0, 1);
+common.c:187:5: missed: statement clobbers memory: set_1d_array.part.0.constprop (&b);
+common.c:660:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 0.0, 1);
+common.c:661:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 1.0e+0, 1);
+common.c:662:9: missed: statement clobbers memory: set_1d_array.constprop (&c, 9.999999974752427078783512115478515625e-7, 1);
+common.c:647:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 1.0e+0, 1);
+common.c:648:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 0.0, -1);
+common.c:649:9: missed: statement clobbers memory: set_1d_array.constprop (&c, 0.0, -1);
+common.c:650:9: missed: statement clobbers memory: set_1d_array.constprop (&d, 0.0, -1);
+common.c:651:9: missed: statement clobbers memory: set_1d_array.constprop (&e, 0.0, -1);
+common.c:640:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 1.0e+0, 1);
+common.c:641:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 0.0, -1);
+common.c:642:9: missed: statement clobbers memory: set_1d_array.constprop (&c, 0.0, -1);
+common.c:643:9: missed: statement clobbers memory: set_1d_array (&d[0], 666, -1.0e+0, 1);
+common.c:644:9: missed: statement clobbers memory: set_1d_array (&d[666], 666, 0.0, 1);
+common.c:645:9: missed: statement clobbers memory: set_1d_array (&d[1333], 667, 1.0e+0, 1);
+common.c:626:9: missed: statement clobbers memory: set_1d_array.constprop (&flat_2d_array, 0.0, 1);
+common.c:187:5: missed: statement clobbers memory: set_1d_array.part.0.constprop (&a);
+common.c:628:9: missed: statement clobbers memory: set_1d_array.constprop (&flat_2d_array, 1.0e+0, 1);
+common.c:624:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 1.0e+0, 1);
+common.c:620:9: missed: statement clobbers memory: set_1d_array.constprop (&flat_2d_array, 1.0e+0, 1);
+common.c:187:5: missed: statement clobbers memory: set_1d_array.part.0.constprop (&a);
+common.c:622:9: missed: statement clobbers memory: set_1d_array.constprop (&flat_2d_array, 0.0, 1);
+common.c:187:5: missed: statement clobbers memory: set_1d_array.part.0.constprop (&a);
+common.c:618:9: missed: statement clobbers memory: set_1d_array.constprop (&flat_2d_array, 1.0e+0, 1);
+common.c:612:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 1.0e+0, 1);
+common.c:613:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 0.0, -1);
+common.c:614:9: missed: statement clobbers memory: set_1d_array.constprop (&c, 0.0, -1);
+common.c:153:9: missed: statement clobbers memory: set_1d_array.constprop (_760, 1.0e+0, 1);
+common.c:153:9: missed: statement clobbers memory: set_1d_array.constprop (_755, 0.0, -1);
+common.c:153:9: missed: statement clobbers memory: set_1d_array.constprop (_750, 0.0, -1);
+common.c:583:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 1.0e+0, 1);
+common.c:584:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 1.0e+0, 1);
+common.c:153:9: missed: statement clobbers memory: set_1d_array.constprop (_745, 0.0, -1);
+common.c:153:9: missed: statement clobbers memory: set_1d_array.constprop (_740, 1.0e+0, 1);
+common.c:574:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 0.0, 1);
+common.c:575:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 0.0, -1);
+common.c:187:5: missed: statement clobbers memory: set_1d_array.part.0.constprop (&a);
+common.c:568:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 0.0, -1);
+common.c:558:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 1.0e+0, 1);
+common.c:559:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 0.0, 1);
+common.c:560:9: missed: statement clobbers memory: set_1d_array.constprop (&c, 0.0, 1);
+common.c:555:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 1.0e+0, 1);
+common.c:556:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 0.0, 1);
+common.c:187:5: missed: statement clobbers memory: set_1d_array.part.0.constprop (&a);
+common.c:550:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 0.0, 1);
+common.c:153:9: missed: statement clobbers memory: set_1d_array.constprop (_735, 0.0, -1);
+common.c:538:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 0.0, 1);
+common.c:539:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 0.0, 1);
+common.c:540:9: missed: statement clobbers memory: set_1d_array.constprop (&c, 0.0, -1);
+common.c:541:9: missed: statement clobbers memory: set_1d_array.constprop (&d, 0.0, -1);
+common.c:542:9: missed: statement clobbers memory: set_1d_array.constprop (&e, 0.0, -1);
+common.c:535:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 0.0, -1);
+common.c:525:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 0.0, -1);
+common.c:526:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 0.0, -1);
+common.c:523:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 1.00000095367431640625e+0, 1);
+common.c:153:9: missed: statement clobbers memory: set_1d_array.constprop (_730, 9.999999974752427078783512115478515625e-7, 1);
+common.c:153:9: missed: statement clobbers memory: set_1d_array.constprop (_725, 0.0, 1);
+common.c:153:9: missed: statement clobbers memory: set_1d_array.constprop (_720, 1.0e+0, 1);
+common.c:153:9: missed: statement clobbers memory: set_1d_array.constprop (_715, 0.0, -1);
+common.c:153:9: missed: statement clobbers memory: set_1d_array.constprop (_710, 0.0, -1);
+common.c:511:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 0.0, -1);
+common.c:498:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 0.0, 1);
+common.c:499:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 1.0e+0, 1);
+common.c:500:9: missed: statement clobbers memory: set_1d_array.constprop (&c, 1.0e+0, 1);
+common.c:501:9: missed: statement clobbers memory: set_1d_array.constprop (&d, 1.0e+0, 1);
+common.c:502:9: missed: statement clobbers memory: set_1d_array.constprop (&e, 1.0e+0, 1);
+common.c:503:9: missed: statement clobbers memory: set_1d_array.constprop (&x, 1.0e+0, 1);
+common.c:480:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 1.0e+0, 1);
+common.c:481:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 1.0e+0, 1);
+common.c:482:9: missed: statement clobbers memory: set_1d_array.constprop (&c, 0.0, -1);
+common.c:483:9: missed: statement clobbers memory: set_1d_array.constprop (&d, 0.0, -1);
+common.c:484:9: missed: statement clobbers memory: set_1d_array.constprop (&e, 0.0, -1);
+common.c:465:9: missed: statement clobbers memory: set_1d_array (&a, 1000, -1.0e+0, 1);
+common.c:466:9: missed: statement clobbers memory: set_1d_array (&a[1000], 1000, 1.0e+0, 1);
+common.c:467:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 1.0e+0, 1);
+common.c:468:9: missed: statement clobbers memory: set_1d_array.constprop (&c, 0.0, -1);
+common.c:469:9: missed: statement clobbers memory: set_1d_array.constprop (&d, 0.0, -1);
+common.c:470:9: missed: statement clobbers memory: set_1d_array.constprop (&e, 0.0, -1);
+common.c:458:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 1.0e+0, 1);
+common.c:459:9: missed: statement clobbers memory: set_1d_array (&b, 1000, 1.0e+0, 1);
+common.c:460:9: missed: statement clobbers memory: set_1d_array (&b[1000], 1000, -1.0e+0, 1);
+common.c:461:9: missed: statement clobbers memory: set_1d_array.constprop (&c, 0.0, -1);
+common.c:462:9: missed: statement clobbers memory: set_1d_array.constprop (&d, 0.0, -1);
+common.c:463:9: missed: statement clobbers memory: set_1d_array.constprop (&e, 0.0, -1);
+common.c:153:9: missed: statement clobbers memory: set_1d_array.constprop (_705, 1.0e+0, 1);
+common.c:153:9: missed: statement clobbers memory: set_1d_array.constprop (_700, 9.999999974752427078783512115478515625e-7, 1);
+common.c:153:9: missed: statement clobbers memory: set_1d_array.constprop (_695, 9.999999974752427078783512115478515625e-7, 1);
+common.c:443:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 0.0, 1);
+common.c:444:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 1.0e+0, 1);
+common.c:445:9: missed: statement clobbers memory: set_1d_array.constprop (&c, 1.0e+0, 1);
+common.c:446:9: missed: statement clobbers memory: set_1d_array.constprop (&d, 0.0, -1);
+common.c:447:9: missed: statement clobbers memory: set_1d_array.constprop (&e, 0.0, -1);
+common.c:437:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 1.0e+0, 1);
+common.c:438:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 1.0e+0, 1);
+common.c:439:9: missed: statement clobbers memory: set_1d_array.constprop (&c, 1.0e+0, 1);
+common.c:440:9: missed: statement clobbers memory: set_1d_array.constprop (&d, 9.999999974752427078783512115478515625e-7, 1);
+common.c:441:9: missed: statement clobbers memory: set_1d_array.constprop (&e, 0.0, -1);
+common.c:431:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 1.0e+0, 1);
+common.c:432:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 1.0e+0, 1);
+common.c:433:9: missed: statement clobbers memory: set_1d_array.constprop (&c, 0.0, -1);
+common.c:434:9: missed: statement clobbers memory: set_1d_array.constprop (&d, 0.0, -1);
+common.c:435:9: missed: statement clobbers memory: set_1d_array.constprop (&e, 2.0e+0, 1);
+common.c:422:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 1.0e+0, 1);
+common.c:187:5: missed: statement clobbers memory: set_1d_array.part.0.constprop (&b);
+common.c:187:5: missed: statement clobbers memory: set_1d_array.part.0.constprop (&c);
+common.c:425:9: missed: statement clobbers memory: set_1d_array.constprop (&d, 1.0e+0, 1);
+common.c:415:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 0.0, -1);
+common.c:416:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 0.0, 1);
+common.c:417:9: missed: statement clobbers memory: set_1d_array.constprop (&c, 0.0, -1);
+common.c:418:9: missed: statement clobbers memory: set_1d_array.constprop (&d, 0.0, -1);
+common.c:419:9: missed: statement clobbers memory: set_1d_array.constprop (&e, 0.0, 1);
+common.c:153:9: missed: statement clobbers memory: set_1d_array.constprop (_690, 0.0, -1);
+common.c:411:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 1.0e+0, 1);
+common.c:153:9: missed: statement clobbers memory: set_1d_array.constprop (_685, 2.0e+0, 1);
+common.c:153:9: missed: statement clobbers memory: set_1d_array.constprop (_680, 1.0e+0, 1);
+common.c:407:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 1.0e+0, 1);
+common.c:153:9: missed: statement clobbers memory: set_1d_array.constprop (_675, 2.0e+0, 1);
+common.c:153:9: missed: statement clobbers memory: set_1d_array.constprop (_670, 1.0e+0, 1);
+common.c:401:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 0.0, 1);
+common.c:402:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 1.0e+0, 1);
+common.c:396:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 1.0e+0, 1);
+common.c:397:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 9.999999974752427078783512115478515625e-7, 1);
+common.c:398:9: missed: statement clobbers memory: set_1d_array.constprop (&c, 1.0e+0, 1);
+common.c:399:9: missed: statement clobbers memory: set_1d_array.constprop (&d, 0.0, -1);
+common.c:381:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 0.0, 1);
+common.c:382:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 1.0e+0, 1);
+common.c:383:9: missed: statement clobbers memory: set_1d_array.constprop (&c, 9.999999974752427078783512115478515625e-7, 1);
+common.c:384:9: missed: statement clobbers memory: set_1d_array.constprop (&d, 9.999999974752427078783512115478515625e-7, 1);
+common.c:370:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 9.999999974752427078783512115478515625e-7, 1);
+common.c:371:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 9.999999974752427078783512115478515625e-7, 1);
+common.c:372:9: missed: statement clobbers memory: set_1d_array.constprop (&c, 9.999999974752427078783512115478515625e-7, 1);
+common.c:373:9: missed: statement clobbers memory: set_1d_array.constprop (&d, 9.999999974752427078783512115478515625e-7, 1);
+common.c:365:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 1.0e+0, 1);
+common.c:366:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 1.0e+0, 1);
+common.c:367:9: missed: statement clobbers memory: set_1d_array.constprop (&c, 1.0e+0, 1);
+common.c:368:9: missed: statement clobbers memory: set_1d_array.constprop (&d, 1.0e+0, 1);
+common.c:359:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 1.0e+0, 1);
+common.c:360:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 0.0, -1);
+common.c:361:9: missed: statement clobbers memory: set_1d_array.constprop (&c, 0.0, -1);
+common.c:153:9: missed: statement clobbers memory: set_1d_array.constprop (_665, 1.0e+0, 1);
+common.c:187:5: missed: statement clobbers memory: set_1d_array.part.0.constprop (_660);
+common.c:153:9: missed: statement clobbers memory: set_1d_array.constprop (_655, 1.0e+0, 1);
+common.c:153:9: missed: statement clobbers memory: set_1d_array.constprop (_650, 0.0, -1);
+common.c:153:9: missed: statement clobbers memory: set_1d_array.constprop (_645, 0.0, -1);
+common.c:153:9: missed: statement clobbers memory: set_1d_array.constprop (_640, 0.0, -1);
+common.c:153:9: missed: statement clobbers memory: set_1d_array.constprop (_635, 0.0, -1);
+common.c:153:9: missed: statement clobbers memory: set_1d_array.constprop (_630, 0.0, -1);
+common.c:153:9: missed: statement clobbers memory: set_1d_array.constprop (_625, 1.0e+0, 1);
+common.c:153:9: missed: statement clobbers memory: set_1d_array.constprop (_620, 0.0, 1);
+common.c:153:9: missed: statement clobbers memory: set_1d_array.constprop (_615, 1.0e+0, 1);
+common.c:187:5: missed: statement clobbers memory: set_1d_array.part.0.constprop (_610);
+common.c:341:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 0.0, 1);
+common.c:342:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 1.0e+0, 1);
+common.c:343:9: missed: statement clobbers memory: set_1d_array.constprop (&c, 1.0e+0, 1);
+common.c:336:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 1.0e+0, 1);
+common.c:337:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 0.0, -1);
+common.c:338:9: missed: statement clobbers memory: set_1d_array.constprop (&c, 0.0, -1);
+common.c:339:9: missed: statement clobbers memory: set_1d_array.constprop (&d, 0.0, -1);
+common.c:331:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 0.0, -1);
+common.c:332:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 1.0e+0, 1);
+common.c:333:9: missed: statement clobbers memory: set_1d_array.constprop (&c, 1.0e+0, 1);
+common.c:334:9: missed: statement clobbers memory: set_1d_array.constprop (&d, 0.0, -1);
+common.c:302:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 1.0e+0, 1);
+common.c:303:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 0.0, -1);
+common.c:304:9: missed: statement clobbers memory: set_1d_array.constprop (&c, 0.0, -1);
+common.c:295:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 1.0e+0, 1);
+common.c:298:9: missed: statement clobbers memory: set_1d_array.constprop (&c, 1.0e+0, 1);
+common.c:299:9: missed: statement clobbers memory: set_1d_array.constprop (&d, 0.0, -1);
+common.c:300:9: missed: statement clobbers memory: set_1d_array.constprop (&e, 0.0, -1);
+common.c:289:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 1.0e+0, 1);
+common.c:290:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 0.0, 1);
+common.c:291:9: missed: statement clobbers memory: set_1d_array.constprop (&c, 0.0, -1);
+common.c:292:9: missed: statement clobbers memory: set_1d_array.constprop (&d, 0.0, -1);
+common.c:293:9: missed: statement clobbers memory: set_1d_array.constprop (&e, 0.0, -1);
+common.c:283:9: missed: statement clobbers memory: set_1d_array (&flat_2d_array, 65536, 1.0e+0, 1);
+common.c:187:5: missed: statement clobbers memory: set_1d_array.part.0.constprop (_595);
+common.c:280:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 0.0, -1);
+common.c:281:9: missed: statement clobbers memory: set_1d_array.constprop (&c, 0.0, -1);
+common.c:276:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 1.0e+0, 1);
+common.c:187:5: missed: statement clobbers memory: set_1d_array.part.0.constprop (&b);
+common.c:271:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 0.0, 1);
+common.c:272:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 2.0e+0, 1);
+common.c:273:9: missed: statement clobbers memory: set_1d_array.constprop (&c, 1.0e+0, 1);
+common.c:274:9: missed: statement clobbers memory: set_1d_array.constprop (&d, 1.0e+0, 1);
+common.c:265:9: missed: statement clobbers memory: set_1d_array.constprop (&a, 0.0, 1);
+common.c:266:9: missed: statement clobbers memory: set_1d_array.constprop (&b, 1.0e+0, 1);
+common.c:267:9: missed: statement clobbers memory: set_1d_array.constprop (&c, 0.0, -1);
+common.c:268:9: missed: statement clobbers memory: set_1d_array.constprop (&d, 0.0, -1);
+common.c:269:9: missed: statement clobbers memory: set_1d_array.constprop (&e, 0.0, -1);
+common.c:262:9: missed: statement clobbers memory: set_1d_array (&flat_2d_array, 65536, 0.0, -1);
+common.c:256:9: missed: statement clobbers memory: set_1d_array (&flat_2d_array, 65536, 0.0, 1);
+common.c:145:20: missed: statement clobbers memory: __builtin_memset (&a, 0, 8000);
+common.c:145:20: missed: statement clobbers memory: __builtin_memset (&a, 0, 8000);
+common.c:187:5: missed: statement clobbers memory: set_1d_array.part.0.constprop (&b);
+common.c:39:23: optimized: loop vectorized using variable length vectors
+common.c:39:23: optimized: loop vectorized using variable length vectors
+common.c:39:23: optimized: loop vectorized using variable length vectors
+common.c:39:23: optimized: loop vectorized using variable length vectors
+common.c:39:23: optimized: loop vectorized using variable length vectors
+common.c:39:23: optimized: loop vectorized using variable length vectors
+common.c:39:23: optimized: loop vectorized using variable length vectors
+common.c:46:23: missed: couldn't vectorize loop
+common.c:48:26: missed: not vectorized: complicated access pattern.
+common.c:47:27: optimized: loop vectorized using variable length vectors
+common.c:39:23: optimized: loop vectorized using variable length vectors
+common.c:46:23: missed: couldn't vectorize loop
+common.c:48:26: missed: not vectorized: complicated access pattern.
+common.c:47:27: optimized: loop vectorized using variable length vectors
+common.c:39:23: optimized: loop vectorized using variable length vectors
+common.c:39:23: optimized: loop vectorized using variable length vectors
+common.c:46:23: missed: couldn't vectorize loop
+common.c:48:26: missed: not vectorized: complicated access pattern.
+common.c:47:27: optimized: loop vectorized using variable length vectors
+common.c:46:23: missed: couldn't vectorize loop
+common.c:48:26: missed: not vectorized: complicated access pattern.
+common.c:47:27: optimized: loop vectorized using variable length vectors
+common.c:39:23: optimized: loop vectorized using variable length vectors
+common.c:39:23: optimized: loop vectorized using variable length vectors
+common.c:39:23: optimized: loop vectorized using variable length vectors
+common.c:39:23: optimized: loop vectorized using variable length vectors
+common.c:125:23: optimized: loop vectorized using variable length vectors
+common.c:46:23: missed: couldn't vectorize loop
+common.c:48:26: missed: not vectorized: complicated access pattern.
+common.c:47:27: optimized: loop vectorized using variable length vectors
+common.c:39:23: optimized: loop vectorized using variable length vectors
+common.c:39:23: optimized: loop vectorized using variable length vectors
+common.c:39:23: optimized: loop vectorized using variable length vectors
+common.c:39:23: optimized: loop vectorized using variable length vectors
+common.c:46:23: missed: couldn't vectorize loop
+common.c:48:26: missed: not vectorized: complicated access pattern.
+common.c:47:27: optimized: loop vectorized using variable length vectors
+common.c:125:23: optimized: loop vectorized using variable length vectors
+common.c:39:23: optimized: loop vectorized using variable length vectors
+common.c:767:10: missed: statement clobbers memory: _1 = strcmp (name_149(D), "s000");
+common.c:769:17: missed: statement clobbers memory: _2 = strcmp (name_149(D), "s111");
+common.c:771:17: missed: statement clobbers memory: _3 = strcmp (name_149(D), "s1111");
+common.c:773:17: missed: statement clobbers memory: _4 = strcmp (name_149(D), "s112");
+common.c:775:17: missed: statement clobbers memory: _5 = strcmp (name_149(D), "s1112");
+common.c:777:17: missed: statement clobbers memory: _6 = strcmp (name_149(D), "s113");
+common.c:779:17: missed: statement clobbers memory: _7 = strcmp (name_149(D), "s1113");
+common.c:781:17: missed: statement clobbers memory: _8 = strcmp (name_149(D), "s114");
+common.c:783:17: missed: statement clobbers memory: _9 = strcmp (name_149(D), "s115");
+common.c:785:17: missed: statement clobbers memory: _10 = strcmp (name_149(D), "s1115");
+common.c:787:17: missed: statement clobbers memory: _11 = strcmp (name_149(D), "s116");
+common.c:789:17: missed: statement clobbers memory: _12 = strcmp (name_149(D), "s118");
+common.c:791:17: missed: statement clobbers memory: _13 = strcmp (name_149(D), "s119");
+common.c:793:17: missed: statement clobbers memory: _14 = strcmp (name_149(D), "s1119");
+common.c:795:17: missed: statement clobbers memory: _15 = strcmp (name_149(D), "s121");
+common.c:797:17: missed: statement clobbers memory: _16 = strcmp (name_149(D), "s122");
+common.c:799:17: missed: statement clobbers memory: _17 = strcmp (name_149(D), "s123");
+common.c:801:17: missed: statement clobbers memory: _18 = strcmp (name_149(D), "s124");
+common.c:803:17: missed: statement clobbers memory: _19 = strcmp (name_149(D), "s125");
+common.c:805:17: missed: statement clobbers memory: _20 = strcmp (name_149(D), "s126");
+common.c:807:17: missed: statement clobbers memory: _21 = strcmp (name_149(D), "s127");
+common.c:809:17: missed: statement clobbers memory: _22 = strcmp (name_149(D), "s128");
+common.c:811:17: missed: statement clobbers memory: _23 = strcmp (name_149(D), "s131");
+common.c:813:17: missed: statement clobbers memory: _24 = strcmp (name_149(D), "s132");
+common.c:815:17: missed: statement clobbers memory: _25 = strcmp (name_149(D), "s141");
+common.c:817:17: missed: statement clobbers memory: _26 = strcmp (name_149(D), "s151");
+common.c:819:17: missed: statement clobbers memory: _27 = strcmp (name_149(D), "s152");
+common.c:821:17: missed: statement clobbers memory: _28 = strcmp (name_149(D), "s161");
+common.c:823:17: missed: statement clobbers memory: _29 = strcmp (name_149(D), "s1161");
+common.c:825:17: missed: statement clobbers memory: _30 = strcmp (name_149(D), "s162");
+common.c:827:17: missed: statement clobbers memory: _31 = strcmp (name_149(D), "s171");
+common.c:829:17: missed: statement clobbers memory: _32 = strcmp (name_149(D), "s172");
+common.c:831:17: missed: statement clobbers memory: _33 = strcmp (name_149(D), "s173");
+common.c:833:17: missed: statement clobbers memory: _34 = strcmp (name_149(D), "s174");
+common.c:835:17: missed: statement clobbers memory: _35 = strcmp (name_149(D), "s175");
+common.c:837:17: missed: statement clobbers memory: _36 = strcmp (name_149(D), "s176");
+common.c:839:17: missed: statement clobbers memory: _37 = strcmp (name_149(D), "s211");
+common.c:841:17: missed: statement clobbers memory: _38 = strcmp (name_149(D), "s212");
+common.c:843:17: missed: statement clobbers memory: _39 = strcmp (name_149(D), "s1213");
+common.c:845:17: missed: statement clobbers memory: _40 = strcmp (name_149(D), "s221");
+common.c:847:17: missed: statement clobbers memory: _41 = strcmp (name_149(D), "s1221");
+common.c:849:17: missed: statement clobbers memory: _42 = strcmp (name_149(D), "s222");
+common.c:851:17: missed: statement clobbers memory: _43 = strcmp (name_149(D), "s231");
+common.c:853:17: missed: statement clobbers memory: _44 = strcmp (name_149(D), "s232");
+common.c:855:17: missed: statement clobbers memory: _45 = strcmp (name_149(D), "s1232");
+common.c:857:17: missed: statement clobbers memory: _46 = strcmp (name_149(D), "s233");
+common.c:859:17: missed: statement clobbers memory: _47 = strcmp (name_149(D), "s2233");
+common.c:861:17: missed: statement clobbers memory: _48 = strcmp (name_149(D), "s235");
+common.c:863:17: missed: statement clobbers memory: _49 = strcmp (name_149(D), "s241");
+common.c:865:17: missed: statement clobbers memory: _50 = strcmp (name_149(D), "s242");
+common.c:867:17: missed: statement clobbers memory: _51 = strcmp (name_149(D), "s243");
+common.c:869:17: missed: statement clobbers memory: _52 = strcmp (name_149(D), "s244");
+common.c:871:17: missed: statement clobbers memory: _53 = strcmp (name_149(D), "s1244");
+common.c:873:17: missed: statement clobbers memory: _54 = strcmp (name_149(D), "s2244");
+common.c:875:17: missed: statement clobbers memory: _55 = strcmp (name_149(D), "s251");
+common.c:877:17: missed: statement clobbers memory: _56 = strcmp (name_149(D), "s1251");
+common.c:879:17: missed: statement clobbers memory: _57 = strcmp (name_149(D), "s2251");
+common.c:881:17: missed: statement clobbers memory: _58 = strcmp (name_149(D), "s3251");
+common.c:883:17: missed: statement clobbers memory: _59 = strcmp (name_149(D), "s252");
+common.c:885:17: missed: statement clobbers memory: _60 = strcmp (name_149(D), "s253");
+common.c:887:17: missed: statement clobbers memory: _61 = strcmp (name_149(D), "s254");
+common.c:889:17: missed: statement clobbers memory: _62 = strcmp (name_149(D), "s255");
+common.c:891:17: missed: statement clobbers memory: _63 = strcmp (name_149(D), "s256");
+common.c:893:17: missed: statement clobbers memory: _64 = strcmp (name_149(D), "s257");
+common.c:895:17: missed: statement clobbers memory: _65 = strcmp (name_149(D), "s258");
+common.c:897:17: missed: statement clobbers memory: _66 = strcmp (name_149(D), "s261");
+common.c:899:17: missed: statement clobbers memory: _67 = strcmp (name_149(D), "s271");
+common.c:901:17: missed: statement clobbers memory: _68 = strcmp (name_149(D), "s272");
+common.c:903:17: missed: statement clobbers memory: _69 = strcmp (name_149(D), "s273");
+common.c:905:17: missed: statement clobbers memory: _71 = strcmp (name_149(D), "s274");
+common.c:907:17: missed: statement clobbers memory: _72 = strcmp (name_149(D), "s275");
+common.c:909:17: missed: statement clobbers memory: _73 = strcmp (name_149(D), "s2275");
+common.c:911:17: missed: statement clobbers memory: _74 = strcmp (name_149(D), "s276");
+common.c:913:17: missed: statement clobbers memory: _75 = strcmp (name_149(D), "s277");
+common.c:915:17: missed: statement clobbers memory: _76 = strcmp (name_149(D), "s278");
+common.c:917:17: missed: statement clobbers memory: _78 = strcmp (name_149(D), "s279");
+common.c:919:17: missed: statement clobbers memory: _80 = strcmp (name_149(D), "s1279");
+common.c:921:17: missed: statement clobbers memory: _82 = strcmp (name_149(D), "s2710");
+common.c:923:17: missed: statement clobbers memory: _84 = strcmp (name_149(D), "s2711");
+common.c:925:17: missed: statement clobbers memory: _85 = strcmp (name_149(D), "s2712");
+common.c:927:17: missed: statement clobbers memory: _86 = strcmp (name_149(D), "s281");
+common.c:929:17: missed: statement clobbers memory: _89 = strcmp (name_149(D), "s1281");
+common.c:931:17: missed: statement clobbers memory: _92 = strcmp (name_149(D), "s291");
+common.c:933:17: missed: statement clobbers memory: _93 = strcmp (name_149(D), "s292");
+common.c:935:17: missed: statement clobbers memory: _94 = strcmp (name_149(D), "s293");
+common.c:937:17: missed: statement clobbers memory: _95 = strcmp (name_149(D), "s2101");
+common.c:939:17: missed: statement clobbers memory: _96 = strcmp (name_149(D), "s2102");
+common.c:941:17: missed: statement clobbers memory: _97 = strcmp (name_149(D), "s2111");
+common.c:943:17: missed: statement clobbers memory: _98 = strcmp (name_149(D), "s311");
+common.c:945:17: missed: statement clobbers memory: _99 = strcmp (name_149(D), "s31111");
+common.c:947:17: missed: statement clobbers memory: _100 = strcmp (name_149(D), "s321");
+common.c:949:17: missed: statement clobbers memory: _101 = strcmp (name_149(D), "s322");
+common.c:951:17: missed: statement clobbers memory: _102 = strcmp (name_149(D), "s323");
+common.c:953:17: missed: statement clobbers memory: _105 = strcmp (name_149(D), "s341");
+common.c:955:17: missed: statement clobbers memory: _106 = strcmp (name_149(D), "s342");
+common.c:957:17: missed: statement clobbers memory: _107 = strcmp (name_149(D), "s343");
+common.c:959:17: missed: statement clobbers memory: _108 = strcmp (name_149(D), "s351");
+common.c:961:17: missed: statement clobbers memory: _109 = strcmp (name_149(D), "s1351");
+common.c:963:17: missed: statement clobbers memory: _110 = strcmp (name_149(D), "s353");
+common.c:965:17: missed: statement clobbers memory: _111 = strcmp (name_149(D), "s421");
+common.c:967:17: missed: statement clobbers memory: _112 = strcmp (name_149(D), "s1421");
+common.c:969:17: missed: statement clobbers memory: _113 = strcmp (name_149(D), "s422");
+common.c:971:17: missed: statement clobbers memory: _114 = strcmp (name_149(D), "s423");
+common.c:973:17: missed: statement clobbers memory: _115 = strcmp (name_149(D), "s424");
+common.c:975:17: missed: statement clobbers memory: _116 = strcmp (name_149(D), "s431");
+common.c:977:17: missed: statement clobbers memory: _117 = strcmp (name_149(D), "s441");
+common.c:979:17: missed: statement clobbers memory: _118 = strcmp (name_149(D), "s442");
+common.c:981:17: missed: statement clobbers memory: _119 = strcmp (name_149(D), "s443");
+common.c:983:17: missed: statement clobbers memory: _120 = strcmp (name_149(D), "s451");
+common.c:985:17: missed: statement clobbers memory: _121 = strcmp (name_149(D), "s452");
+common.c:987:17: missed: statement clobbers memory: _122 = strcmp (name_149(D), "s453");
+common.c:989:17: missed: statement clobbers memory: _123 = strcmp (name_149(D), "s471");
+common.c:991:17: missed: statement clobbers memory: _126 = strcmp (name_149(D), "s481");
+common.c:993:17: missed: statement clobbers memory: _127 = strcmp (name_149(D), "s482");
+common.c:995:17: missed: statement clobbers memory: _128 = strcmp (name_149(D), "s491");
+common.c:997:17: missed: statement clobbers memory: _129 = strcmp (name_149(D), "s4112");
+common.c:999:17: missed: statement clobbers memory: _130 = strcmp (name_149(D), "s4113");
+common.c:1001:17: missed: statement clobbers memory: _131 = strcmp (name_149(D), "s4114");
+common.c:1003:17: missed: statement clobbers memory: _132 = strcmp (name_149(D), "s4117");
+common.c:1005:17: missed: statement clobbers memory: _133 = strcmp (name_149(D), "s4121");
+common.c:1007:17: missed: statement clobbers memory: _134 = strcmp (name_149(D), "va");
+common.c:1009:17: missed: statement clobbers memory: _135 = strcmp (name_149(D), "vag");
+common.c:1011:17: missed: statement clobbers memory: _136 = strcmp (name_149(D), "vas");
+common.c:1013:17: missed: statement clobbers memory: _137 = strcmp (name_149(D), "vif");
+common.c:1015:17: missed: statement clobbers memory: _138 = strcmp (name_149(D), "vpv");
+common.c:1017:17: missed: statement clobbers memory: _139 = strcmp (name_149(D), "vtv");
+common.c:1019:17: missed: statement clobbers memory: _140 = strcmp (name_149(D), "vpvtv");
+common.c:1021:17: missed: statement clobbers memory: _141 = strcmp (name_149(D), "vpvts");
+common.c:1023:17: missed: statement clobbers memory: _142 = strcmp (name_149(D), "vpvpv");
+common.c:1025:17: missed: statement clobbers memory: _143 = strcmp (name_149(D), "vtvtv");
+common.c:1027:17: missed: statement clobbers memory: _144 = strcmp (name_149(D), "vsumr");
+common.c:1029:17: missed: statement clobbers memory: _145 = strcmp (name_149(D), "vbor");
+common.c:1032:9: missed: statement clobbers memory: fprintf (stderr.2_146, "Unknown function name passed to calc_checksum: %s\n", name_149(D));
+common.c:1033:9: missed: statement clobbers memory: exit (1);
+common.c:892:16: missed: statement clobbers memory: _296 = sum_a_aa ();
+common.c:858:16: missed: statement clobbers memory: _326 = sum_aa_bb ();
