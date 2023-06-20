@@ -58,28 +58,30 @@ ALCAnalysisResult *ALC_Analysis::doAnalysis() {
 
     }
     llvm::outs() << "Number of paths: " << numberOfPaths << "\n";
+    bool isMemoryBound = false;
+    int totalInstructions = 0;
     for (auto P: *allPaths) {
         for (auto BB: P) {
             llvm::outs() << BB->getName() << " --> ";
         }
         int memoryInstructions = countMemoryInstructions(&P);
-        int allInstructions = countInstructions(&P);
+        int blockInstructions = countInstructions(&P);
+        totalInstructions += blockInstructions;
 
-        if (allInstructions < 1) {
-            allInstructions = 1;
+        if (blockInstructions < 1) {
+            blockInstructions = 1;
         }
 
-        llvm::outs() << " total instructions in the path: " << allInstructions
+        llvm::outs() << " total instructions in the path: " << blockInstructions
                      << " , Memory instructions percentage: "
-                     << (memoryInstructions * 100) / allInstructions << "%"
+                     << (memoryInstructions * 100) / blockInstructions << "%"
                      << "\n";
+        isMemoryBound |= ((memoryInstructions * 100) / blockInstructions > 40 && blockInstructions > 10);
     }
 
     bool isLegal = vectorizable && !hasFunctionCall && !outputDependency && numberOfPaths > 1 && canGetIV ;
-    bool isProfitable = false;
-    if (numberOfPaths == 2) {
-        isProfitable = true;
-    }
+    bool isProfitable = (totalInstructions > 15) && !isMemoryBound && (numberOfPaths == 2) ;
+
     ALCAnalysisResult::DIVERGENCE_TYPE type = isSingleIfCase() ? ALCAnalysisResult::DIVERGENCE_TYPE::SINGLE_IF
                                                                : ALCAnalysisResult::DIVERGENCE_TYPE::IF_THEN_ELSE;
 
