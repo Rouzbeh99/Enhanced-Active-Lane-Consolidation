@@ -5,6 +5,8 @@
   publisher = {Addison-Wesley}
 }
 
+
+
 @article{praharenka_vectorizing_2022,
 	title = {Vectorizing divergent control flow with active-lane consolidation on long-vector architectures},
 	volume = {78},
@@ -12,7 +14,6 @@
 	url = {https://doi.org/10.1007/s11227-022-04359-w},
 	doi = {10.1007/s11227-022-04359-w},
 	abstract = {Control-flow divergence limits the applicability of loop vectorization, an important code-transformation that accelerates data-parallel loops. Control-flow divergence is commonly handled using an IF-conversion transformation combined with vector predication. However, the resulting vector instructions execute inefficiently with many inactive lanes. Branch-on-superword-condition-code (BOSCC) instructions are used to skip over some vector instructions, but their effectiveness decreases as vector length increases. This paper presents a novel vector permutation, Active-lane consolidation (ALC), that enables efficient execution of control-divergent loops by consolidating the active lanes of two vectors. This paper demonstrates the use of ALC with two loop transformations and applies them to kernels extracted from the SPEC CPU 2017 benchmark suite leading to up to a 30.9\% reduction in dynamic instruction count compared to optimization using only BOSCCs. Motivated by ALC, this paper also proposes design changes to the ARM scalable vector extension (SVE) to improve vectorization of control-divergent loops.},
-	language = {en},
 	number = {10},
 	urldate = {2023-04-17},
 	journal = {The Journal of Supercomputing},
@@ -74,7 +75,6 @@
 	url = {https://dl.acm.org/doi/10.1145/3207719.3207721},
 	doi = {10.1145/3207719.3207721},
 	abstract = {Single Instruction Multiple Data (SIMD) extensions in processors enable in-core parallelism for operations on vectors of data. From the compiler perspective, SIMD instructions require automatic techniques to determine how and when it is possible to express computations in terms of vector operations. When this is not possible automatically, a user may still write code in a manner that allows the compiler to deduce that vectorization is possible, or by explicitly de ne how to vectorize by using intrinsics.},
-	language = {en},
 	urldate = {2023-04-14},
 	booktitle = {Proceedings of the 21st {International} {Workshop} on {Software} and {Compilers} for {Embedded} {Systems}},
 	publisher = {ACM},
@@ -92,7 +92,6 @@
 	url = {https://dl.acm.org/doi/10.1145/3192366.3192413},
 	doi = {10.1145/3192366.3192413},
 	abstract = {If-conversion is a fundamental technique for vectorization. It accounts for the fact that in a SIMD program, several targets of a branch might be executed because of divergence. Especially for irregular data-parallel workloads, it is crucial to avoid if-converting non-divergent branches to increase SIMD utilization. In this paper, we present partial linearization, a simple and efficient if-conversion algorithm that overcomes several limitations of existing if-conversion techniques. In contrast to prior work, it has provable guarantees on which non-divergent branches are retained and will never duplicate code or insert additional branches. We show how our algorithm can be used in a classic loop vectorizer as well as to implement data-parallel languages such as ISPC or OpenCL. Furthermore, we implement prior vectorizer optimizations on top of partial linearization in a more general way. We evaluate the implementation of our algorithm in LLVM on a range of irregular data analytics kernels, a neutronics simulation benchmark and NAB, a molecular dynamics benchmark from SPEC2017 on AVX2, AVX512, and ARM Advanced SIMD machines and report speedups of up to 146\% over ICC, GCC and Clang O3.},
-	language = {en},
 	urldate = {2023-04-14},
 	booktitle = {Proceedings of the 39th {ACM} {SIGPLAN} {Conference} on {Programming} {Language} {Design} and {Implementation}},
 	publisher = {ACM},
@@ -110,7 +109,6 @@
 	url = {http://ieeexplore.ieee.org/document/1402086/},
 	doi = {10.1109/CGO.2005.33},
 	abstract = {In this paper, we describe how to extend the concept of superword-level parallelization (SLP), used for multimedia extension architectures, so that it can be applied in the presence of control ﬂow constructs. Superword-level parallelization involves identifying scalar instructions in a large basic block that perform the same operation, and, if dependences do not prevent it, combining them into a superword operation on a multi-word object. A key insight is that we can use techniques related to optimizations for architectures supporting predicated execution, even for multimedia ISAs that do not provide hardware predication. We derive large basic blocks with predicated instructions to which SLP can be applied. We describe how to minimize overheads for superword predicates and re-introduce control ﬂow for scalar operations. We discuss other extensions to SLP to address common features of real multimedia codes. We present automatically-generated performance results on 8 multimedia codes to demonstrate the power of this approach. We observe speedups ranging from 1.97X to 15.07X as compared to both sequential execution and SLP alone.},
-	language = {en},
 	urldate = {2023-04-14},
 	booktitle = {International {Symposium} on {Code} {Generation} and {Optimization}},
 	publisher = {IEEE},
@@ -126,7 +124,6 @@
 	url = {https://dl.acm.org/doi/10.1145/3559009.3569663},
 	doi = {10.1145/3559009.3569663},
 	abstract = {SIMD (Single Instruction Multiple Data) instructions apply the same operation to multiple elements simultaneously. Compilers transform codes to exploit SIMD instructions through auto-vectorization. Control flow can lead to challenges for auto-vectorization tools because compilers conservatively assume branches are divergent. However, it is common that all SIMD lanes follow the same controlpath at run-time, a property we call dynamic uniformity. In this paper, we present VecRC (an auto-vectorizer with run-time checks), a novel compile-time technique that uses run-time checks to test for dynamically uniform control flows. Under the assumption of dynamic uniformity, we perform several compile-time analyses that improve control flow auto-vectorization vs state-of-the-art approaches. VecRC leverages dynamic uniformity to vectorize loops with control-dependent loop-carried dependences. Existing strategies use speculation to optimistically execute vector code, and must correct any incorrect computation due to violated run-time assumptions. VecRC performs compile-time analysis based on uniformity to support such dependences without the overhead of speculation. We propose a probability-based cost model to predict the profitability of run-time checks to avoid the specialized profiling or expensive auto-tuning required in existing methods. VecRC is evaluated in LLVM on a diverse range of benchmarks including SPEC2017, NPB, Parboil, TSVC, and Rodinia on Intel Skylake and IBM Power 9 architectures. On the Skylake architecture, geometric mean speedups of 1.31x, 1.20x, 1.19x, and 1.06x over Region Vectorizer, GCC, Clang, and ICC are obtained with VecRC on real benchmark code.},
-	language = {en},
 	urldate = {2023-04-14},
 	booktitle = {Proceedings of the {International} {Conference} on {Parallel} {Architectures} and {Compilation} {Techniques}},
 	publisher = {ACM},
@@ -221,14 +218,14 @@ title = {{A64FX}: {M}icroarchitecture {M}anual},
 year = {2020},
 month = {10},
 language = {English},
-version = {Version 1.3},
+Version = {1.3},
 organization = {Fujitsu Limited},
 pagetotal = {136},
 }
 
 @article{Horwitz1997MayAliasNPHard,
 author = {Horwitz, Susan},
-title = {Precise Flow-Insensitive May-Alias Analysis is NP-Hard},
+title = {{Precise Flow-Insensitive May-Alias Analysis is NP-Hard}},
 year = {1997},
 issue_date = {Jan. 1997},
 publisher = {Association for Computing Machinery},
@@ -247,7 +244,7 @@ keywords = {pointer analysis, static analysis, dataflow analysis, alias analysis
 
 @inproceedings{Landi1991PointerAliasing,
 author = {Landi, William and Ryder, Barbara G.},
-title = {Pointer-Induced Aliasing: A Problem Classification},
+title = {{Pointer-Induced Aliasing: A Problem Classification}},
 year = {1991},
 isbn = {0897914198},
 publisher = {Association for Computing Machinery},
@@ -262,7 +259,7 @@ series = {POPL '91}
 }
 
 @article{scarborough1986vectorizing,
-  title={A vectorizing Fortran compiler},
+  title={A vectorizing {Fortran} compiler},
   author={Scarborough, Randolph G and Kolsky, Harwood G},
   journal={IBM Journal of Research and Development},
   volume={30},
@@ -310,6 +307,15 @@ version = {1.1.0},
 date={2019-09-21}
 }
 
+@misc{tsvc2,
+  % author = {Author(s)},
+  title = {{TSVC}-2},
+  howpublished = {\url{https://github.com/UoB-HPC/TSVC_2/tree/master}},
+  year = {2015},
+}
+
+
+
 @software{papi,
   author = {{Innovative Computing Laboratory (ICL)}},
   title = {{PAPI: The Performance Application Programming Interface}},
@@ -337,4 +343,52 @@ date={2019-09-21}
   number={1},
   pages={49-50},
   doi={10.1109/MC.1998.9730815}
+}
+
+
+@InProceedings{refactoring-loops,
+author="Sun, Huihui
+and Gorlatch, Sergei
+and Zhao, Rongcai",
+editor="Mencagli, Gabriele
+and B. Heras, Dora
+and Cardellini, Valeria
+and Casalicchio, Emiliano
+and Jeannot, Emmanuel
+and Wolf, Felix
+and Salis, Antonio
+and Schifanella, Claudio
+and Manumachu, Ravi Reddy
+and Ricci, Laura
+and Beccuti, Marco
+and Antonelli, Laura
+and Garcia Sanchez, Jos{\'e} Daniel
+and Scott, Stephen L.",
+title="{Refactoring Loops with Nested IFs for SIMD Extensions Without Masked Instructions}",
+booktitle="Euro-Par 2018: Parallel Processing Workshops",
+year="2019",
+publisher="Springer International Publishing",
+address="Cham",
+pages="769--781",
+abstract="Most CPUs in heterogeneous systems are now equipped with SIMD (Single Instruction Multiple Data) extensions that operate on short vectors in parallel to enable high performance. Refactoring programs for such systems relies on vectorization, i.e., transforming into a form with SIMD-instructions. We improve the state of the art in refactoring loops with nested IF-statements that are notoriously difficult to vectorize. For IF-statements whose conditions are independent of the loop variable, we improve the classical loop unswitching method, such that it can tackle nested IFs. For IF-statements whose conditions change with loop iterations, we develop a novel IF-select transformation method: (1) it can work with arbitrarily nested IFs, and (2) while previous methods rely on either masked instructions or hardware support for predicated execution, our method works for SIMD extensions without such operations (as found, e.g., in IBM Power8 and ARM Cortex-A8). Our experimental evaluation for the SPEC CPU2006 benchmark suite is conducted on an SW26010 processor used in the Sunway TaihuLight supercomputer ({\#}2 in the TOP500 list); it demonstrates the performance advantages of our implemented approach over the vectorizer of the Open64 compiler.",
+isbn="978-3-030-10549-5"
+}
+
+
+@inproceedings{gather-use-or-not,
+author = {Habich, Dirk and Pietrzyk, Johannes and Krause, Alexander and Hildebrandt, Juliana and Lehner, Wolfgang},
+title = {{To Use or Not to Use the SIMD Gather Instruction?}},
+year = {2022},
+isbn = {9781450393782},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3533737.3535089},
+doi = {10.1145/3533737.3535089},
+abstract = {The Single Instruction Multiple Data (SIMD) paradigm became a core principle for optimizing query operators. Until now, only the LOAD/STORE instructions are considered to be efficient enough to achieve the expected speedups, while avoiding GATHER/SCATTER is considered almost imperative. However, the GATHER instruction offers a very flexible way to populate SIMD registers with data elements coming from non-consecutive memory locations. As we will show within the paper, the GATHER instruction can achieve the same performance as the LOAD instruction, if applied properly. To enable the proper usage, we outline a novel access pattern which then allows fine-grained, partition-based SIMD implementations using the GATHER instruction.},
+booktitle = {Data Management on New Hardware},
+articleno = {9},
+numpages = {5},
+keywords = {Access Pattern, Experiments, Gather, SIMD},
+location = {Philadelphia, PA, USA},
+series = {DaMoN'22}
 }

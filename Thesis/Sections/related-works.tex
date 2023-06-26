@@ -1,16 +1,25 @@
-\section{Related Work}
+\chapter{Related Work}
 \label{sec:related-works}
+
+Vectorization is widely employed by compilers to generate optimized code by leveraging SIMD instructions. Although the idea of utilizing SIMD instructions can be applied to a wide range of applications and workloads, compilers face various challenges when it comes to implementing vectorization. Maleki \etal investigated the ability of compilers to vectorize different code patterns \cite{maleki2011evaluation}. Their work demonstrates that there are many cases where compilers fail to apply vectorization only due to the lack of appropriate techniques. They manually transform those cases,
+illustrating that the vectorization technique itself is broadly applicable However, further developments in compilers are still required to exploit the full capabilities of vectorization.
+
+Pohl \etal investigated these challenges, focusing on ARM NEON vector extension and conducting a comparison with Intel AVX2 \cite{pohl_control_2018}. Their findings indicated that a significant barrier for compilers in vectorizing a code is the presence of Control-Flow-Divergence inside the loop. They also indicate that ISAs have significant impacts on the effectiveness of vectorization. Additionally, they suggested several techniques to address the challenges that compilers encounter while vectorizing for an ARM-NEON target however, ARM'S SVE, the new vector extension for ARM targets, eliminates the need for such techniques as it offers various new vector instructions that can be effectively used by compilers to tackle with the challenges they encounter while doing vectorization.
+
+
+
 
 % If-conversion paragraph
 % - Idea of convertion control-flow dependencies into data dependencies.
 % - Increases the oportunities for vectorization
 % - Leads to waste of resources as it keep units busy with computations on vectors with inactive lanes.
 The seminal work by Allen \etal introduced the idea of converting control-flow dependencies into data dependencies \cite{allen_conversion_1983}.
-Allen \etal's technique, commonly know as control-flow linearization or \ifconversion \cite{park1991ifconversion}, was introduced in the context of parallelizing FORTRAN compilers.
+Allen \etal's technique, commonly known as control-flow linearization or \ifconversion \cite{park1991ifconversion}, was introduced in the context of parallelizing FORTRAN compilers.
 Such compilers excelled in exploiting data-parallel loops by identifying data dependencies.
-Although \ifconversion can increase the opportunities for vectorization \cite{jaewook_shin_superword-level_2005}, it can significantly waste computational resources.
-\ifconverted code keeps units busy with computations on vectors with inactive lanes, which correspond to non-taken paths in the original program's CFG.
-As the results in this work show, ALC outperforms \ifconverted code because it maximizes SIMD utilization by constructing uniform vector and avoiding the execution of linearized code.
+Although \ifconversion can increase the opportunities for vectorization \cite{jaewook_shin_superword-level_2005}, it can significantly waste computational resources. \ifconverted code keeps units busy with computations on vectors with inactive lanes, which correspond to non-taken paths in the original program's CFG.
+As the results in this work show, ALC outperforms \ifconverted code because it maximizes SIMD utilization by constructing uniform vectors and avoiding the execution of linearized code.
+
+Due to the significant computation overhead associated with \ifconversion, many attempts have been made to minimize the need for predication. To address this, Sun \etal proposed IF-Select transformation \cite{refactoring-loops} to reshape the loop control flow in such a way that minimum if-statements remains in the loop and \ifconversion is only applied to those cases. Although they successfully move loop-independent if statements outside the loop body, they still require applying \ifconversion to loop-dependent conditional statement. In contrast, ALC can effectively handle loop-dependent control flow divergence by rearranging vector elements and forming uniform vectors, eliminating the need for predication.
 
 % BOSCC paragraph
 % - Idea is based on guard conditions to execute uniform blocks when predicates are uniform
@@ -21,10 +30,10 @@ Branch-on-superword-condition-codes (BOSCCs) is a common approach that avoids ex
 Originally introduced for multimedia extensions, BOSCCs are instructions, or sequences of instructions, that guard the execution of uniform paths.
 Such paths only contain instructions that would be executed when all lanes are active (or inactive) with respect to the guard condition.
 BOSCCs can improve on \ifconverted code \cite{shin_evaluating_2009}, however, BOSCCs degenerate into \ifconverted code when uniform vectors are infrequent \cite{praharenka_vectorizing_2022}.
-ALC overcomes this by actively merging non-uniform vector until a unform vector is formed, thus effectively avoiding \ifconverted code. 
+ALC overcomes this by actively merging non-uniform vectors until a uniform vector is formed, thus effectively avoiding \ifconverted code. 
 Moreover, BOSCCs can lead to code explosion on loops with many \cpaths.
 Moll \etal's work addresses code explosion by selectively using BOSCCs and \ifconversion \cite{moll_partial_2018}.
-Nevertheless, Moll \etal's solution still degenerate into \ifconverted code when uniformity is infrequent or not contiguous (w.r.t. loop iterations).
+Nevertheless, Moll \etal's solution still degenerates into \ifconverted code when uniformity is infrequent or not contiguous (w.r.t. loop iterations).
 
 % ALC paragraph
 % - Discuss the novelty of Wyatt's approach
@@ -32,15 +41,17 @@ Nevertheless, Moll \etal's solution still degenerate into \ifconverted code when
 %   - Results from Simulation
 %   - Measured only dynamic instruction
 % - This work evaluates ALC in real HW
-% - Shows that decreasing the number of dynamic instructions does not necessary lead to better performance
-% - Re-designs ALC as a compiler-enabled transformation with heuristics to decice on cost/benefit of applying ALC.
-Wyatt \etal made a step forward by actively constructing uniform vectors instead of expecting dynamic uniformity \cite{praharenka_vectorizing_2022}.
+% - Shows that decreasing the number of dynamic instructions does not necessarily lead to better performance
+% - Re-designs ALC as a compiler-enabled transformation with heuristics to decide on cost/benefit of applying ALC.
+Praharenka \etal made a step forward by actively constructing uniform vectors instead of expecting dynamic uniformity \cite{praharenka_vectorizing_2022}.
 ALC makes use of SVE instructions to merge active lanes and execute uniform paths.
-However, in Wyatt \etal's seminal work, there was no in-silicon implementation of SVE, thus all the evaluation was conducted on Arm's instruction emulator (ArmIE).
-As a result, only decrease in number of dynamic instructions was reported on Wyatt \etal's paper.
+However, in Praharenka \etal's seminal work, there was no in-silicon implementation of SVE, thus all the evaluation was conducted on Arm's instruction emulator (ArmIE).
+As a result, only a decrease in the number of dynamic instructions was reported in Praharenka \etal's paper.
 In contrast, this work evaluates ALC on real hardware with SVE.
 Besides identifying a major problem in its original design (\rsec{gathers-scatters-are-bad}), this work re-designs ALC as a compiler-enabled transformation.
-Moreover, experimental results show that avoiding gather instructions via data permutation improves on ALC prior design up to $4\times$ (\rsec{data-permutation-evaluation}).
+
+ALC as proposed by Praharenka \etal can not avoid using gather and scatter instructions. The challenges associated with these instructions have been studied in recent works. Habich \etal analyzed the performance of gather instructions on AVX512 architecture \cite{gather-use-or-not}, revealing that employing these instructions requires special considerations, as they can lead to significant performance degradation. ALC uses gather instructions to load from non-consecutive addresses without a known pattern. Such access pattern significantly amplifies the latency of gather load operation. Our experimental results show that avoiding gather instructions via data permutation improves on ALC prior design up to $4\times$ (\rsec{data-permutation-evaluation}).
 Results also indicate that factors used in the proposed cost/benefit analysis (\rsec{alc-analysis}) directly impact ALC's performance.
 Finally, the new ALC design outperforms \ifconverted code produced by state-of-the-art compilers.
 Despite these significant advancements, there are still challenges that can limit ALC effectiveness as a compiler pass (\rsec{eval-limitations}).
+

@@ -2,10 +2,11 @@
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
 \definecolor{codepurple}{rgb}{0.58,0,0.82}
 \definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\definecolor{code-snippet-background}{RGB}{246,245,245}
 
 \lstdefinestyle{code_snippet_style}{
-    backgroundcolor=\color{gray!10},
-    basicstyle=\footnotesize\ttfamily,
+    backgroundcolor=\color{code-snippet-background},
+    basicstyle=\linespread{1.75}\ttfamily,
     commentstyle=\color{codegreen},
     keywordstyle=\color{magenta},
     breakatwhitespace=false,
@@ -21,10 +22,13 @@
     tabsize=2,
 }
 
+
+
+
 \lstset{
     style=code_snippet_style,
     columns=fullflexible,
-    basicstyle=\ttfamily,
+    basicstyle=\linespread{1.3}\ttfamily,
     frame=tlbr,
     postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
     keywordstyle=[1]\color{blue!80!black},   % instructions are blue
@@ -34,11 +38,11 @@
     identifierstyle=\color{teal},                 % user declared addresses are teal
     breaklines=false,
     framerule=0pt,
-    framexleftmargin=0pt,
-    framexrightmargin=0pt,
-    framexbottommargin=1pt,
-    aboveskip=2pt,
-    belowskip=1pt,
+    framexleftmargin=15pt,
+    framexrightmargin=15pt,
+    framexbottommargin=10pt,
+    aboveskip=20pt,
+    belowskip=5pt,
     xleftmargin=0.5cm,
     xrightmargin=0.2cm,
     literate=%

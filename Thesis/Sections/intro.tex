@@ -1,31 +1,45 @@
-\section{Introduction}
+\chapter{Introduction}
 
-Compilers have been successful in performing auto-vectorization for exploiting data-parallelism using Single-Instruction Multiple-Data (SIMD) instructions for decades~\cite{scarborough1986vectorizing,levine1991comparative,sreraman2000vectorizing,maleki2011evaluation}.
+Compilers have been successful in performing auto-vectorization for exploiting data-parallelism using Single-Instruction Multiple-Data (\acrshort{simd}) instructions for decades~\cite{scarborough1986vectorizing,levine1991comparative,sreraman2000vectorizing,maleki2011evaluation}.
 However, control-flow divergence in loops, found in scientific and high-performance applications, can hinder or stop compilers from generating SIMD instructions~\cite{allen_conversion_1983,park1991ifconversion}.
+
+
 Compilers address this issue by using predicated instructions that have an extra operand, a predicate register or predicate, that holds the value of the condition that needs to be true for the instruction to commit \cite{allen_conversion_1983,park1991ifconversion,jaewook_shin_superword-level_2005,shin_introducing_2007,shin_evaluating_2009}.
 When a predicate is false, the corresponding data element is inactive with respect to predicate instructions.
-Vector predicates are bit vectors where each lane of the predicate vectors indicates if the corresponding lane in the associated data vector registers is active.
+Vector predicates are bit vectors, where each lane of the predicate vectors indicates if the corresponding lane in the associated data vector registers is active.
 An entire basic block may be guarded by the same predicate register.
-Although control-flow linearization (CFL) enables vectorization, the linearized code executes computations on vector registers with inactive lanes, wasting computational resources.
+Although control-flow linearization (\acrshort{cfl}) enables vectorization, the linearized code executes computations on vector registers with inactive lanes, wasting computational resources.
+
+
 Some techniques that address CFL limitations in vectorized code require the predicate vector to be dynamically uniform: all lanes for a given vector operation must be either active or inactive~\cite{moll_partial_2018,liu_combining_2022}.
-Dynamic uniformity is less likely to occur in programs executed in processors with modern vector extensions, such as Intel's AVX512 and Arm's SVE that have longer vectors.
-Wyatt \etal propose Active-lane Consolidation (ALC) to address these issues~\cite{praharenka_vectorizing_2022}.
+With the emergence of modern vector extensions that provide longer vector registers such as  Intel's AVX512 and Arm's SVE, the great interest in utilizing SIMD instructions and leveraging its full capabilities has returned to both industry and academia. These architectures expand the processor's vector units to perform parallel operations on a much larger set of data, resulting in higher degrees of parallelism. Although it will allow the processor to process more data simultaneously, dynamic uniformity becomes less likely to occur. Thus, a naive use of control-flow linearization and other proposed techniques that rely on the uniformity of the vectors will face considerable performance degradation.
+
+
+Praharenka \etal proposed Active-lane Consolidation (\acrshort{alc}) to address these issues~\cite{praharenka_vectorizing_2022}.
 The idea of ALC is to form uniform vectors dynamically by merging active lanes from different iterations. 
-However, the seminal presentation of ALC only evaluated it in a simulation environment using hand-modified programs.
-This work presents the first evaluation of ALC on hardware --- this evaluation is performed in the Fujitsu A64FX processor, the first processor to implement ARMv8.2-A SVE instruction --- and the first automated code generation for ALC in the LLVM open-source compiler.
-This evaluation reveals a mismatch between the original ALC design's assumptions about the latency of gather instructions and the actual latency of these instructions in the A64FX.
-Thus, the paper also presents a re-design of ALC that leads to performance improvements over LLVM's existing vectorization technique for some cases.
-As such, the main contributions are:
+Arm's SVE offers a set of specific predicated vector instructions that efficiently move data between vector and predicate registers. Wyatt \etal utilized these instructions in their proposed approach to effectively form uniform vectors by moving data between vector lanes. 
+However, the seminal presentation of ALC only evaluated it in a simulation environment using hand-modified programs, as no commercial hardware supporting SVE was available at the time.
+
+This work presents the first evaluation of ALC on hardware --- this evaluation is performed in the Fujitsu A64FX processor, the first processor to implement ARMv8.2-A SVE instruction --- and the first automated code generation for ALC in the  \acrshort{llvm} open-source compiler.
+
+Our evaluations reveal that the assumptions made in the original ALC design about the latency of gather and scatter instructions are far from the actual latency that happens in real hardware. In practice, these instructions introduce a significant overhead that outweighs the benefits that come from  executing non-predicated uniform code.
+Thus, the work also presents a re-design of ALC that leads to performance improvements over LLVM's existing vectorization technique for some cases.
+
+Moreover, we show that when ALC is applied to the loops that contain only a single control-flow-divergent path (e.g. single if statement) there are fewer opportunities for improvements and the original design of ALC would fail to generate efficient code. As a result, we propose a specialized version of ALC to benefit from both ALC and if-conversion techniques.
 
 
+As such, the main contributions of this thesis are:
 
 \begin{itemize}
 
-\item The first in-depth performance analysis of different implementations of ALC executing in a processor that implements SVE (Section~) that reveals limitations in the original ALC design (Section~\ref{sec:gathers-scatters-are-bad});
-\item A design improvement to ALC that uses data-permutation instructions instead of gather instructions and leads to the generation of code that is up to $4\times$ faster than the original design (Section~\ref{sec:alc-data-permutation});
-\item The first automated generation of ALC code via a  compiler transformation that generates code that is up to $79\%$ faster than \ifconverted code produced by Arm's Clang, a production-ready compiler (Section~\ref{sec:alc-pass});
+\item The first in-depth performance analysis of different implementations of ALC executing in a processor that implements \acrshort{sve}  that reveals limitations in the original ALC design (Chapter \ref{chap:approach});
+\item A design improvement to ALC that uses data-permutation instructions instead of gather instructions and leads to the generation of code that is up to $4\times$ faster than the original design ( Section~\ref{sec:alc-data-permutation});
+\item The first automated generation of ALC code via a  compiler transformation that generates code that is up to $79\%$ faster than \ifconverted code produced by Arm's Clang, a production-ready compiler (Chapter~\ref{chap:alc-pass});
 \item An ALC code-generation algorithm, specialized for the case where there is only a single control-flow-divergent path in the target loop, that combines the best of ALC and if-conversion (Section~\ref{sec:single-if-statement-approach} ); and 
-\item A discussion of remaining challenges in the path toward applying ALC to broader loop patterns (Section\rsec{eval-limitations}).
-
+\item A discussion of remaining challenges in the path toward applying ALC to broader loop patterns (\rsec{eval-limitations}).
 \end{itemize}
+
+
+
+The rest of the thesis is organized as follows: Chapter \ref{chap:background} provides backgrounds on vectorization and predication mechanism, Chapter \ref{chap:approach} explains Active-Lane-Consolidation as proposed by Praharenka \etal, demonstrates the overhead of gather/scatter operations and presents Data Permutation as a technique to eliminate gather instructions. The chapter also presents a novel approach to combine ALC and if-conversion for a specific case. Chapter \ref{chap:alc-pass} explains in detail how ALC and Data Permutation are implemented and finally Chapter \ref{chap:evaluation} assesses Data Permutation performance and applicability on a set of micro-benchmarks and \acrshort{tsvc}  benchmark suit.
 

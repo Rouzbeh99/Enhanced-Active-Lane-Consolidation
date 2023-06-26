@@ -7,7 +7,7 @@ Alternative approaches optimistically avoid predicated instructions when all con
 However, dynamic uniformity is less frequent in long vectors.
 Active-Lane-Consolidation (ALC) was proposed to form uniform vectors dynamically by merging active elements from different iterations.
 In its seminal presentation, ALC was only evaluated in a simulated environment through hand-modified programs.
-This paper presents the first performance evaluation of ALC on real hardware which reveals that the original design of ALC indeed reduces the number of executed instructions, but it fails to provide speedup over auto-vectorized code.
+This thesis presents the first performance evaluation of ALC on real hardware which reveals that the original design of ALC indeed reduces the number of executed instructions, but it fails to provide speedup over auto-vectorized code.
 It then presents a change to the design of ALC that results in it outperforming auto-vectorized code and describes the first compiler-enabled transformation that applies ALC as a compiler optimization pass.
 The experimental results show that compiler-generated ALC code outperforms auto-vectorized code, produced by state-of-the-art compilers, by up to $79\%$.
 \end{abstract}

@@ -1,5 +1,7 @@
-\section{ALC as a Compiler Transformation}
-\label{sec:alc-pass}
+
+\newpage
+\chapter{ALC as a Compiler Transformation}
+\label{chap:alc-pass}
 
 
 Like most optimizations in modern compilers, the ALC transformation is designed with two components:
@@ -8,7 +10,7 @@ Like most optimizations in modern compilers, the ALC transformation is designed 
     \item a transformation that applies active-lane consolidation to candidate loops that have enough instructions in each \cpath and low memory-to-compute instruction ratio to amortize vector-permutation costs  (\rsec{alc-transformation}).
 \end{inparaenum}
 
-\subsection{ALC Analysis}
+\section{ALC Analysis}
 \label{sec:alc-analysis}
 
 The main goals of the analysis are two-fold:
@@ -18,7 +20,7 @@ The main goals of the analysis are two-fold:
 It is legal to apply ALC to a loop $L$ with control-flow divergence if $L$ does not have \emph{loop-carried dependencies} and only contains calls to vectorizable functions without side effects (e.g. square-root and sine \& cosine).
 Similar to other forms of vectorization such as loop vectorization and SLP vectorization, ALC cannot be applied to loops with loop-carried dependencies because instructions from different iterations that depend on each other, usually, cannot execute in parallel in a SIMD fashion.
 The ALC analysis relies on existing data-dependency analysis available on modern compilers to identify loops without loop-carried dependencies.
-A data-dependency analysis may return a {\it may depend} answer because of unresolved alias relationships and, in that case, the compiler must conservatively not apply the transformation~\cite{Landi1991PointerAliasing, Horwitz1997MayAliasNPHard}.
+A data-dependency analysis may return a {\it may depend} answer  because of unresolved alias relationships and, in that case, the compiler must conservatively not apply the transformation~\cite{Landi1991PointerAliasing, Horwitz1997MayAliasNPHard}.
 
 The cost portion of the profitability analysis for ALC uses the estimated cost of executing the new instructions required to perform index and data-vector permutations for ALC minus the instructions that are eliminated by ALC. 
 The estimated execution latency of instructions is generally available in a modern compiler because the same information is used in other transformations, such as the creation of an efficient instruction schedule.
@@ -40,7 +42,7 @@ For the purpose of the ALC transformation, significant number of instructions me
 }
 \fi
 
-Empirically, and as the results in \rsec{evaluation} support, the following factors are key when making the decision of whether or not to apply ALC:
+Empirically, and as the results in Chapter \ref{chap:evaluation} support, the following factors are key when making the decision of whether or not to apply ALC:
 \begin{inparaenum}
     \item Number of instructions on each \cpath;
     \item Number of store operations in the loop (See \rsec{eval-scatters-costs});
@@ -56,12 +58,12 @@ If the compiler does not know which path is more likely to be taken, then active
 Such unbounded application of ALC is not likely to achieve better performance than \ifconverted code because of the permutation costs for all paths. 
 Except for the branch probabilities, all other information can be obtained statically by a compiler, avoiding any need for profiling, in contrast to Wyatt \etal's work \cite{praharenka_vectorizing_2022}.
 
-In some loops with more than two \cpaths, it may be legal to apply loop fission to generate multiple loops in such a way that at least some of the resulting loops have less than two \cpaths.
+In some loops with more than two \cpaths, it may be legal to apply loop fission to generate multiple loops in such a way that at least some of the resulting loops have two or fewer \cpaths.
 The condition to apply loop fission to a loop is that no loop-independent dependency may cross the point where the loop is split.
 Profitability analysis for loop fission has to take into account that after fission some loops may exhibit worse cache locality, for instance when different paths use/load the same data.
-The study of combining loop fission with ALC is left for future work.
+The study of combining loop fission with ALC is not investigated in this thesis.
 
-\subsection{ALC Transformation}
+\section{ALC Transformation}
 \label{sec:alc-transformation}
 
 The actual loop transformation to perform ALC is quite straightforward.
@@ -73,62 +75,12 @@ After that, and only if the loop has a single \cpath, the transformation generat
 For loops with a number of iterations that is not a multiple of VF, the transformation generates a remainder scalar loop to process the remaining elements.
 Loops with fewer than VF elements are left untouched by the ALC transformation.
 
-\subsection{Implementation in LLVM}
+\section{Implementation in LLVM}
 
 A prototype implementation developed in LLVM is used to  evaluate both ALC analysis \& transformation passes in this work.
 LLVM is a \emph{de-facto} standard compiler framework widely used by both industry and academia.
 The ALC analysis reuses the memory dependency and alias analysis used by LLVM's loop vectorized pass to determine if loops are loop-carried dependency free.
-Both analysis \& transformation are passes in LLVM's intermediate representation (IR) level.
+Both analysis \& transformation are passes in LLVM's intermediate representation (\acrshort{ir}) level.
 For now, the transformation pass only generates code for Arm's SVE architecture, and it accomplishes this by using SVE intrinsics available at IR level in LLVM.
 However, all architecture-specific intrinsic calls are generated through an interface that, with minimum effort, can be extended to generate code for other architectures that also support SVE.
 
-\iffalse
-% ######  ATTENTION #############
-% The text bellow was left as a reference and is not going to be used for the paper.
-% ######  ATTENTION #############
-As explained in prior sections, Wytte suggested the idea of forming uniform vectors during execution time, but he did not propose an automatic transformation to do that. In this work, we implement a compiler pass to automatically identify potential candidates for ALC, check all requirements, estimate its costs and benefits and do the transformation.
-
-To Apply ALC, input code is first compiled with clang compiler enabling \emph{O3} optimization pipeline. The output IR (Intermediate Representation) is then passed to the analysis pass. The analysis pass first checks legality of transformation, making sure that transformed code will be valid. After doing so, it will evaluate the costs and benefits gained from ALC. It will use heuristics we provided in the previous section to estimate how beneficial it is to apply the transformation. 
-
-Once ALC is proven to be both legal and profitable, the transformation pass is invoked. As discussed before, we have two different approaches to apply ALC on the loops with if-then-else statement and loops with single if statement. It is the analysis pass that detects the control flow structure and reports it to the transformation pass. The transformation pass then completely changes the CFG structure. The final CFG of loop will look like figure 3 for if-then-else cases and figure 4 for single if cases. 
-
-We implemented our modified versions of ALC as an independent compiler pass in LLVM compiler infrastructure. The transformation is done fully at LLVM intermediate representation level. For now, our pass only generates code for Arm SVE architecture, and it accomplishes this by using SVE intrinsics provided by LLVM at IR level.
-
-After doing the transformation, the resulting IR is again compiled by Clang O3 optimization level to make sure that the code is in its most optimized format.
-
-\subsection{Analysis Phase}
-In order to be allowed to apply ALC, we need to first make sure that the generated code will be correct and the result of the execution will be exactly the same as the result for executing scalar code.
-
-There are three general requirements that need to be met:
-
-\begin{itemize}
-
-\item Loop should not contain \emph{Loop Carried Dependency}: Having loop carried dependency disables the compiler to apply any form of vectorization as iterations of the loop depend on each other and by executing them in parallel through SIMD instructions, it will result in producing invalid code.
-
-\item Loop should not contain function calls: This is also another requirement for any form of vectorization.
-
-\item There should be divergence inside the loop.
-
-\end{itemize}
-
-After making sure that we are allowed to apply ALC, we need to make the decision of whether it's beneficial to do the transformation or not. This is one of the most challenging parts, since the improvement that comes from the ALC depends on several different factors, which some of them could be detected only at run time.
-
-There are overheads added to the code by ALC including Permutation, runtime checks etc. The benefits it brings is executing expensive instructions less than the if-converted code and fully utilize vector operations. This is the trade-off made while executing transformed code and in order to get improvements, the analysis phase should conclude that the trade-off is in favor of the benefits we are gaining.
-
-The experiments we did while implementing the transformation, led us to following factors as key heuristics to make the decision of applying ALC:
-
-\begin{itemize}
-\item Number of instructions inside then and else block: The main source of improvement in ALC is utilizing execution of instructions that exist inside the then and else block. As a result, it is important to make sure that these blocks have enough instructions to overcome the overheads introduced by permutation.
-
-\item Number of store operations: As discussed in details in previous sections, load and store operations cause significant problems by adding 
-considerable latency when converted to gather load and scatter store instructions. Although we solved the gather load issue by data permutation, we still need to use scatter stores. As a result, we can expect that having too many store operations will result in performance degradation one code is transformed by ALC.
-
-\item Having more complicated control flow: As control flow gets more complicated inside the loop, the performance improvement gained by ALC decreases. We will discuss this problem in next sections in more detail.
-\end{itemize}
-
-The factors mention above can all be evaluated statically. This enables us to investigate them in our analysis pass without needing any profiling information. Once the analysis evaluated these factors, it decides whether it is beneficial to apply ALC or not.
-
-% ######  ATTENTION #############
-% The content above was left as a reference and is not going to be used for the paper.
-% ######  ATTENTION #############
-\fi

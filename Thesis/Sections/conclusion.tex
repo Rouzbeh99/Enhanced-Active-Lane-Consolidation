@@ -1,10 +1,10 @@
-\section{Conclusion}
-\label{sec:conclusion}
+\chapter{Conclusion}
+\label{chap:conclusion}
 
-This work presents \ALCdp, a redesign of ALC as a compiler-enabled transformation.
+This thesis presents \ALCdp, a redesign of ALC as a compiler-enabled transformation.
 An in-depth experimental evaluation of ALC on SVE hardware reveals a key design issue of the original ALC design: a high number of memory and resource-busy stalls is caused by gather instructions.
 \ALCdp is a redesign of \ALC that eliminates gather instructions through the combination of regular vector loads and data permutation.
-This work contributes an implementation of ALC in the production-ready LLVM compiler framework that includes a cost/benefit analysis to decide \emph{when} and \emph{how} to apply ALC.
+The thesis contributes an implementation of ALC in the production-ready LLVM compiler framework that includes a cost/benefit analysis to decide \emph{when} and \emph{how} to apply ALC.
 This analysis considers the number of instructions on each control-divergent path, the ratio of compute and memory operations, and the complexity of the loops CFG, which are key factors that have been shown to impact ALC's effectiveness and efficiency.
 Experimental results indicate that \ALCdp outperforms ALC's previous design by up to $3x$.
 \ALCdp also outperforms \ifconverted code produced by state-of-the-art compilers such as Arm's Clang by up to $79\%$.

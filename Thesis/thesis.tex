@@ -15,7 +15,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%
 % Package dependencies  %
 %%%%%%%%%%%%%%%%%%%%%%%%%
-\usepackage[utf8]{inputenc}
+% \usepackage[utf8]{inputenc}
 \usepackage{subfiles}
 \usepackage[titletoc]{appendix}
 \usepackage{amssymb,amsmath}
@@ -23,17 +23,11 @@
 % For cross-references between files
 % https://tex.stackexchange.com/questions/77774/undefined-control-sequence-when-cross-referencing-with-xr-hyper
 \usepackage{nameref,zref-xr}
-\zxrsetup{toltxlabel}
+% \zxrsetup{toltxlabel}
 \usepackage[breaklinks=true,hidelinks]{hyperref} % See https://en.wikibooks.org/wiki/LaTeX/Hyperlinks#Customization
 \usepackage{tabulary} % Better text wrapping in tables. See https://en.wikibooks.org/wiki/LaTeX/Tables
-\usepackage{rotating} % For the 'sidewaystable' environment. See https://en.wikibooks.org/wiki/LaTeX/Rotations
-\usepackage{multirow} % For multirow/multicolumn cells in a table. See https://en.wikibooks.org/wiki/LaTeX/Tables#Columns_spanning_multiple_rows
-\usepackage{graphicx}
-%\usepackage{subcaption} % A package that can be used to create sub-figures
-% \usepackage{enumitem}
+% \usepackage{rotating} % For the 'sidewaystable' environment. See https://en.wikibooks.org/wiki/LaTeX/Rotations
 \usepackage{mdwlist}	% the 'note' environment
-\usepackage{xspace}
-\usepackage{xcolor}
 \usepackage{csquotes} % Also used with biblatex
 \usepackage{xmpincl} % Seems to be needed when converting to PDF/A, 
                      % particularly on Macs
@@ -79,16 +73,29 @@ mincitenames=1,maxcitenames=2%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Glossary and acronyms (optional) %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\usepackage[nogroupskip,nonumberlist,nopostdot]{glossaries}
+\usepackage[nogroupskip,nonumberlist,nopostdot,acronym]{glossaries}
 
-\setacronymstyle{long-short-desc}
-\setglossarystyle{altlist}
+\setacronymstyle{short-long}
 
-% A simple, but limited way to produce a sorted glossary
-% Other options are described in the 'glossaries' Beginner's Guide (https://ctan.org/pkg/glossaries)
-\makenoidxglossaries % use TeX to sort
+% \makenoidxglossaries % use TeX to sort
+\makeglossaries
 
-
+\newacronym{simd}{SIMD}{Single Instruction Multiple Data}
+\newacronym{alc}{ALC}{Active Lane Consolidation}
+\newacronym{cfl}{CFL}{Control Flow Linearization}
+\newacronym{cfg}{CFG}{Control Flow Graph}
+\newacronym{llvm}{LLVM}{Low Level Virtual Machine}
+\newacronym{sve}{SVE}{Scalable Vector Extension}
+\newacronym{tsvc}{TSVC}{Test Suite for Vectorizing Compilers}
+\newacronym{gcc}{GCC}{GNU Compiler Collection}
+\newacronym{vf}{VF}{Vector Factor}
+\newacronym{vl}{VL}{Vector Length}
+\newacronym{isa}{ISA}{Instruction-Set Architecture}
+\newacronym{boscc}{BOSCC}{Branch On Superword Condition Codes}
+\newacronym{armIE}{ArmIE}{Arm’s Instruction Emulator}
+\newacronym{cfdp}{CFDP}{Control Flow Divergent Path}
+\newacronym{ir}{IR}{Intermediate Representation}
+\newacronym{papi}{PAPI}{Performance Application Programming Interface}
 %%%%%%%%%%%%%%%%%%%%%%%%
 % Thesis style package %
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -123,7 +130,7 @@ mincitenames=1,maxcitenames=2%
 \renewcommand{\contentsname}{Table of Contents}
 
 % Fill in the following
-\title{Thesis Title} % Title can't use formulae, symbols, superscripts, subscripts, greek letters, etc. all of which should be replaced with word substitutes
+\title{Efficient Auto-Vectorization for Control-flow Dependent Loops through Data Permutation} % Title can't use formulae, symbols, superscripts, subscripts, greek letters, etc. all of which should be replaced with word substitutes
 \author{Rouzbeh Paktinatkeleshteri}
 
 \degree{\MSc}
@@ -155,6 +162,8 @@ mincitenames=1,maxcitenames=2%
 % There is no need to make them reference the bibliography database
 % 'refs.bib', as they inherit the reference from this file.
 
+
+
 \newcommand{\onlyinsubfile}[1]{#1}
 \newcommand{\notinsubfile}[1]{}
 
@@ -167,28 +176,24 @@ mincitenames=1,maxcitenames=2%
 \titlepage % adds title page. Can be commented out before submission if convenient
 
 
-
 \doublespacing
 
 
 \singlespacing % Flip to single spacing for table of contents settings
                % This has been accepted in the past and shouldn't be a problem
                % Now the table of contents etc.
-               
+
+\subfile{Sections/abstract.tex}
+\subfile{Sections/preface.tex}
+
+\subfile{Sections/acknowledgements.tex}
+
 \tableofcontents
 \listoftables  % only if you have any
 \listoffigures % only if you have any
 
-% minimal support for list of plates and symbols (Optional)
-%\begin{listofplates}
-%...            % you are responsible for formatting this page.
-%\end{listofplates}
-%\begin{listofsymbols}
-%...            % You are responsible for formatting this page
-%\end{listofsymbols}
-               
-% A glossary of terms is also optional
-\printnoidxglossaries
+
+% \printnoidxglossaries
                
 % The rest of the document has to be at least one-half-spaced.
 % Double-spacing is most common, but uncomment whichever you want, or 
@@ -199,12 +204,18 @@ mincitenames=1,maxcitenames=2%
 % \singlespacing
 % \onehalfspacing
 
-\setforbodyoftext % settings for the body including roman numeral numbering starting at 1
 
+
+\clearpage
+\printglossary[type=\acronymtype]
+
+ % settings for the body including roman numeral numbering starting at 1
+\setforbodyoftext
 %  ... The bulk of your magnificient thesis  goes here ... 
 %  hopefully more than two lines! Use standard Latex sectioning commands
 %  like \chapter etc. End with the bibliography
 % See FGSR requirements for any additional requirements on the body
+
 
 \subfile{Sections/intro.tex}
 \subfile{Sections/background.tex}
@@ -224,7 +235,7 @@ mincitenames=1,maxcitenames=2%
                %            Don't use \singlespacing if your thesis
                %            is already in single spacing
 %
-\printbibliography
+\printbibliography[heading=bibintoc]
 
 \doublespacing
 
