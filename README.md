@@ -16,8 +16,8 @@ You need to have followings installed on your system:
 This tutorial supposes you do cross-sompilation on a none-ARM machine for an ARM-SVE target. 
 
 ### Applying the pass to micro-bechmarks
-- go to `Transformation-Pass/Vectorizer-Pass/test directory`
-- open run_pass.sh and chage following variables to point to their installation dirctory on your machine:
+- Go to `Transformation-Pass/Vectorizer-Pass/test directory`
+- Open run_pass.sh and chage following variables to point to their installation dirctory on your machine:
   - `LLVM_BUILD_DIR` should point to LLVM installations directory
   - `GCC_TOOLCHAIN` should point to Arm GNU Toolchain directory
   - `PAPI_DIR` should point to Arm PAPI installation Toolchain directory
@@ -46,13 +46,13 @@ Note: If you use a machine with an ARM-SVE processor other than Fujitsu A64FX, u
 
 ### Compiling TSVC benchmark
 - To apply ALC+DataPermutation:
-   - execute `./run_pass tsvc/tsvc.c &> ALC.log.txt`
+   - Execute `./run_pass tsvc/tsvc.c &> ALC.log.txt`
    -  A complete report of cases where ALC has been applied will be stored in ALC.log.txt
-- TO compile with armclang:
+- To compile with armclang:
    - Move following files to ARM machine: `tsvc/tsvc.c`, `tsvc/dummy.c`, `tsvc/common.c`
    - Compile using follwing command: `armclang -O3 -mcpu=a64fx -armpl -Rpass=loop-vectorize -Rpass-analysis=loop-vectorize -Rpass-analysis=loop-vectorize tsvc.c common.c dummy.c -o armclang.x &> armclang.log.txt`
    - A complete report of cases where vectorization has been applied will be stored in armclang.log.txt
-- TO compile with gcc:
+- To compile with gcc:
    - Move following files to ARM machine: `tsvc/tsvc.c`, `tsvc/dummy.c`, `tsvc/common.c`
    - Compile using follwing command: `gcc -O3 -mcpu=a64fx -fopt-info-vec -fopt-info-vec-missed  dummy.c common.c tsvc.c -o gcc.x &> gcc.log.txt`
    - A complete report of cases where vectorization has been applied will be stored in gcc.log.txt 
