@@ -1,6 +1,6 @@
 # Enhanced-Active-Lane-Consolidation
 
-Enhanced-Active-Lane-Consolidation is an LLVM pass that improves vectorization by reordering active lanes and doing data-permutation. Current implementation targets ARM-SVE architecture.
+Enhanced-Active-Lane-Consolidation is an LLVM pass that implements an imporoved version vectorization by reordering active lanes and doing data-permutation. Current implementation targets ARM-SVE architecture.
 
 ## Step by step guide to reproduce results:
 
