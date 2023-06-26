@@ -29,7 +29,7 @@ This tutorial supposes you do cross-sompilation on a none-ARM machine for an ARM
 - Create a directory named results by executing `mkdir results`
 - Use `Transformation-Pass/Vectorizer-Pass/test/ookami_results/Scripts/compile_all.sh` to compile object files into executables
 - Use `Transformation-Pass/Vectorizer-Pass/test/ookami_results/Scripts/run_with_papi.sh` to run the executables
-- Running the script will be give you results of 100 runs stored in the results directory
+- Running the script will give you results of 100 runs saved in the results directory
 - Execute `Transformation-Pass/Vectorizer-Pass/test/ookami_results/Scripts/Script.py` to generate summerized csv files in the results directory
 
 Note: you need to have Clang and PAPI installed on the ARM machine as well and specify installation directory in `compile_all.sh` and `run_with_papi.sh`
@@ -47,12 +47,12 @@ Note: If you use a machine with an ARM-SVE processor other than Fujitsu A64FX, u
 ### Compiling TSVC benchmark
 - To apply ALC+DataPermutation:
    - Execute `./run_pass tsvc/tsvc.c &> ALC.log.txt`
-   -  A complete report of cases where ALC has been applied will be stored in ALC.log.txt
+   -  A complete report of cases where ALC has been applied will be saved in ALC.log.txt
 - To compile with armclang:
    - Move following files to ARM machine: `tsvc/tsvc.c`, `tsvc/dummy.c`, `tsvc/common.c`
    - Compile using follwing command: `armclang -O3 -mcpu=a64fx -armpl -Rpass=loop-vectorize -Rpass-analysis=loop-vectorize -Rpass-analysis=loop-vectorize tsvc.c common.c dummy.c -o armclang.x &> armclang.log.txt`
-   - A complete report of cases where vectorization has been applied will be stored in armclang.log.txt
+   - A complete report of cases where vectorization has been applied will be saved in armclang.log.txt
 - To compile with gcc:
    - Move following files to ARM machine: `tsvc/tsvc.c`, `tsvc/dummy.c`, `tsvc/common.c`
    - Compile using follwing command: `gcc -O3 -mcpu=a64fx -fopt-info-vec -fopt-info-vec-missed  dummy.c common.c tsvc.c -o gcc.x &> gcc.log.txt`
-   - A complete report of cases where vectorization has been applied will be stored in gcc.log.txt 
+   - A complete report of cases where vectorization has been applied will be saved in gcc.log.txt 
